@@ -101,7 +101,44 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 | D-51 | 테이블 소유 에이전트 | quests·npcs·dialogue → narrative-writer / weather·region_hazards·spawns·maps → level-designer / mount·economy·enhance·items·affixes·drop_tables·monsters·bosses·skills·stats·exp_curve·combat → game-designer | 요청⑩ | data_tables.md |
 | D-52 | LUK 드랍 가중치 공식 위치 | **`drop_tables.json`** 상단 `_luck_formula` 필드가 단일 소스 (드랍 로직 소유) | 요청⑪ | data_tables.md |
 
+## J. 캐릭터 서사 반영 (2026-09-08, `docs/story/characters.md` 바이블 추가 제안 채택)
+
+| ID | 결정 사항 | 확정 내용 | 출처 | 반영 |
+|---|---|---|---|---|
+| D-53 | 유물 조사단 정의 | 대륙에서 파견된 성물·유물 조사 기관. 단장 테오. 4인은 모두 그 견습 단원 | characters.md 8장 | 바이블 1장 |
+| D-54 | 브람의 출신 | 이그니스 출신 드워프. 한 차례 고향을 떠났다가 조사단원으로 귀향(그루드 미니스토리 "브람이 떠난 날"과 연결) | characters.md 8장 | 바이블 5장 |
+| D-55 | 플레이어블 4인 출신 | 전원 대륙 출신 전제(브람은 이그니스 태생이나 대륙에서 성장). 첫 배치지 = 개인 서사와 맞물림(핀→하틀랜드, 리라→엘드우드, 모리→프로스트헤임, 브람→이그니스) | characters.md 8장 | 바이블 1장, 3장 |
+
+## K. 스토리 정합성 검수 반영 (2026-09-08, `docs/qa/story-consistency-review.md` 판단 필요 항목 확정)
+
+| ID | 결정 사항 | 확정 내용 | 출처 | 반영 |
+|---|---|---|---|---|
+| D-56 | '마녀의 기억' 놓침 안전장치 게이팅 | **3막 진입 시 오델의 구술 요약본을 호감도와 무관하게 자동 제공**. 단짝 대사는 추가 정보일 뿐 진엔딩 조건(D-19)을 막지 않는다 | QA Blocker | characters.md, main-storyline.md |
+| D-57 | GDD 2.1 "마녀가 성물을 흩뜨렸다" 서술 | 왕국의 **공식 기록(전승)** 임을 문구로 드러낸다 — "…흩어졌다고 전해진다". 진실은 2.2/바이블 4장 | QA Major | GDD 2.1 |
+| D-58 | 지방 방위 정본 | **세계관 바이블 1.1이 정본**. GDD 7.1 ASCII 지도는 바이블 방위에 맞춰 개정(레벨 설계 착수 전) | QA Major | GDD 7.1 |
+| D-59 | 로컬라이징 key 지방 코드 | 약어(htl/eld…) 폐기, **전체 표기**(heartland/eldwood/frostheim/samar/ignis/bridgeport)로 통일. `main_a<막>_s<씬>_<지방>_...`도 동일 | QA Major | 전 스토리 문서 |
+| D-60 | 호감도 비종속 잡담 대사 key | `npc_<지방>_<이름>_chat_<번호>` 슬롯 신설(단계 무관 랜덤 잡담) | QA Major | characters.md |
+
+## L. 전투 수치 부록 (2026-09-08, `docs/specs/combat-tuning-m1-addendum.md` 결정 요청 채택)
+
+| ID | 결정 사항 | 확정 내용 | 출처 | 반영 |
+|---|---|---|---|---|
+| D-61 | 장판 지속피해와 무적 | 버섯돌이 포자 장판 등 **지속피해는 피격 무적(0.5s) 중에도 적용**(장판에서 나가는 것이 해답) | 요청1 | monsters 스펙, 코드 |
+| D-62 | GDD 4.2 셰이크 문구 | "강공격·크리티컬·**피격** 시 카메라 셰이크"로 확장 | 요청2 | GDD 4.2 |
+| D-63 | 카메라 셰이크 4단계표 | 일반 0 / 강공격 6px·0.18s / 크리 9px·0.22s / 피격 4px·0.12s **임시 반영 + `_balance_todo`**(D-46 패턴) | 요청3 | combat.json `camera_shake` |
+| D-64 | settings.json 소유 | **ui-ux-designer** (접근성 배율표 [0, 0.5, 1.0, 1.5] 포함) | 요청4 | data_tables.md |
+| D-65 | 몬스터 AI 공통 필드 스키마 | `aggro_range_px`·`melee_range_px`·`attack_recovery_sec`·`patrol_radius_px`·`leash_range_px` + 종별 확장(`dash_*`, `atk_tick_per_sec`, `aoe_radius_px`) 승인, 값은 부록 §4 | 요청5 | monsters.json, data.gd 스키마 |
+| D-66 | 공격 프레임 표 | 선딜 4f / 활성 20f / 후딜 6f(1·2타 30f), 3타 45f(캔슬 34f) **임시 반영**, 공격 프레임 아트 확보 시 재조정 | 요청6 | tuning.gd |
+| D-67 | `drop_table_id` 자리표시자 | **현행 문자열 유지**, `drop_tables.json` 생성(F3) 시 null/실존 검증 규칙 활성화 | 요청7 | data_tables.md |
+| D-68 | 가드 이동·회복 배율 | `guard.move_speed_multiplier` 0.5, `stamina.guard_regen_multiplier` 0.5 **확정**(`_balance_todo` 해제), BRD S2-1c에 문구 반영 | 요청8 | combat.json, BRD 02-전투 |
+| D-69 | M1 사망 페널티 범위 | **HP 전량 회복 + 비석 부활만** 구현, 골드 5%·상한(D-25)은 M2 경제 스펙에서 재확정 | 요청9 | F8-2 |
+| D-70 | 가드 중 스태미나 부족 | 가드 유지 중 피격 시 `guard_hit` 비용(10)을 지불할 수 없으면 **그 타격은 가드 실패 → 전량 피해 + Hurt 상태**("스태미나 부족 시 액션 미발동" 규칙의 타격 단위 확장) | M1-2 엔지니어 가정 승인 | combat 스펙, S2-1c |
+
 ## 변경 이력
 - 2026-09-08: 37건 최초 확정 (추천안 일괄 채택). GDD v1.0 → v1.1 개정.
 - 2026-09-08: 세계관 바이블 제안 4건(D-38~D-41) 채택. GDD v1.1.1.
 - 2026-09-08: M1 전투 수치·데이터 테이블 결정 11건(D-42~D-52) 채택.
+- 2026-09-08: 캐릭터 서사 바이블 추가 제안 3건(D-53~D-55) 채택.
+- 2026-09-08: 스토리 정합성 검수 판단 항목 5건(D-56~D-60) 확정.
+- 2026-09-08: 전투 수치 부록 결정 9건(D-61~D-69) 확정.
+- 2026-09-08: 가드 스태미나 부족 규칙(D-70) 확정.
