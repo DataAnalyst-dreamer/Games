@@ -1,5 +1,5 @@
 {
-  "_comment": "파밍 소스 리스폰·보상 테이블(F3-5, F6-3). 스키마: docs/specs/data_tables.md §11 (여기서는 상위호환 확장 필드 repeat_reward_table_ids/first_clear_reward_table_ids — 복수형 배열 — 를 사용한다. 사유·검증 로직 전문은 docs/specs/elite-and-farming-m2.md §2 참고, data_tables.md §11 자체 갱신은 이번 세션 범위 밖이라 문서 §4에 엔지니어/스키마 갱신 요청으로 남긴다). GDD 6.5 7종 카테고리(type) 그대로이나, 정예(elite)는 개체별 리스폰 타이머가 독립적이라(F6-3 '표시: 정예는 이름표+등급 테두리 전용 HP바', 월드맵 아이콘도 개체별) source_id를 2개로 분리했다 - 그래서 이 파일은 8행이지만 GDD/BRD가 말하는 '7종'은 카테고리 수를 뜻한다(elite-and-farming-m2.md §2-1 표 참고). 모든 respawn_seconds는 실제 플레이 시간 기준(D-15, 오프라인 시간 미포함). reward_table_ids가 가리키는 값은 drop_tables.json의 실존 source_id여야 하며(단 field_hartland의 goblin_scout 몫은 아직 없음 - 해당 몬스터 자체의 drop_table_id가 monsters.json에 null로 남아있는 것과 동일한 사유), 비어있는 배열/필드는 M2 시점에 정의 불가능한 항목(주로 epic+ 없음)임을 뜻한다(_balance_todo로 표시).",
+  "_comment": "파밍 소스 리스폰·보상 테이블(F3-5, F6-3). 스키마: docs/specs/data_tables.md §11 (여기서는 상위호환 확장 필드 repeat_reward_table_ids/first_clear_reward_table_ids — 복수형 배열 — 를 사용한다. 사유·검증 로직 전문은 docs/specs/elite-and-farming-m2.md §2 참고, data_tables.md §11 자체 갱신은 이번 세션 범위 밖이라 문서 §4에 엔지니어/스키마 갱신 요청으로 남긴다). GDD 6.5 7종 카테고리(type) 그대로이나, 정예(elite)는 개체별 리스폰 타이머가 독립적이라(F6-3 '표시: 정예는 이름표+등급 테두리 전용 HP바', 월드맵 아이콘도 개체별) source_id를 2개로 분리했다 - 그래서 이 파일은 8행이지만 GDD/BRD가 말하는 '7종'은 카테고리 수를 뜻한다(elite-and-farming-m2.md §2-1 표 참고). 모든 respawn_seconds는 실제 플레이 시간 기준(D-15, 오프라인 시간 미포함). reward_table_ids가 가리키는 값은 drop_tables.json의 실존 source_id여야 하며(field_hartland의 goblin_scout 몫은 D-80으로 goblin_scout_common이 신설되어 이제 채워짐), 비어있는 배열/필드는 M2 시점에 정의 불가능한 항목(주로 epic+ 없음)임을 뜻한다(_balance_todo로 표시).",
 
   "field_hartland": {
     "source_id": "field_hartland",
@@ -8,9 +8,9 @@
     "respawn_seconds": 0,
     "respawn_trigger": "always",
     "first_clear_reward_table_ids": [],
-    "repeat_reward_table_ids": ["slime_common", "horn_rabbit_common", "mushroom_common"],
+    "repeat_reward_table_ids": ["slime_common", "horn_rabbit_common", "mushroom_common", "goblin_scout_common"],
     "show_respawn_icon_on_map": false,
-    "_comment": "GDD 6.5 '필드 사냥터 | 상시'. 하틀랜드 필드 3종(방울슬라임/뿔토끼/버섯돌이) 개별 drop_tables 참조를 배열로 묶었다. 고블린 정찰병(goblin_scout)은 drop_tables.json에 아직 전용 테이블이 없어(엔지니어 요청, elite-and-farming-m2.md §1-1) 목록에서 제외 - monsters.json 반영 시 drop_table_id=null로 두고 이 배열도 그때 갱신."
+    "_comment": "GDD 6.5 '필드 사냥터 | 상시'. 하틀랜드 필드 4종(방울슬라임/뿔토끼/버섯돌이/고블린 정찰병) 개별 drop_tables 참조를 배열로 묶었다. goblin_scout_common은 D-80으로 drop_tables.json에 신설되어 monsters.json.goblin_scout.drop_table_id 갱신과 함께 이 배열에도 반영했다(이전 '전용 테이블 없어 제외' 상태 해소)."
   },
 
   "elite_goblin_captain": {

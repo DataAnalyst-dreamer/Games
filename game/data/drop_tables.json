@@ -1,5 +1,5 @@
 {
-  "_comment": "드랍 테이블(F3-1/F3-5). 근거: docs/specs/items-and-drops-m2.md §4. source_id 6종: 하틀랜드 필드 일반 3종(monsters.json.drop_table_id가 가리킴, D-67) + 정예 2종(elite_goblin_captain/elite_bunchi_spawn - docs/levels/hartland.md ⑤, 몬스터 본체는 아직 monsters.json에 없음, 엔지니어 요청 참고) + 필드 보물상자 1종. M2는 common/uncommon/rare 등급 아이템만 존재하므로 모든 소스의 grade_base_weight에서 epic/legendary/relic은 0으로 명시 잠금(items.json에 해당 등급 아이템이 생기기 전까지 참조 무결성을 지키기 위함 - M3에서 epic+ 아이템 추가 시 재조정 필요, 결정 요청 참고). gold_drop은 data_tables.md §9 미정의 신규 필드(엔지니어 요청 참고).",
+  "_comment": "드랍 테이블(F3-1/F3-5). 근거: docs/specs/items-and-drops-m2.md §4. source_id 7종: 하틀랜드 필드 일반 4종(slime_common/horn_rabbit_common/mushroom_common/goblin_scout_common, monsters.json.drop_table_id가 가리킴, D-67·D-80) + 정예 2종(elite_goblin_captain/elite_bunchi_spawn - docs/levels/hartland.md ⑤, 몬스터 본체는 아직 monsters.json에 없음, 엔지니어 요청 참고) + 필드 보물상자 1종. M2는 common/uncommon/rare 등급 아이템만 존재하므로 모든 소스의 grade_base_weight에서 epic/legendary/relic은 0으로 명시 잠금(items.json에 해당 등급 아이템이 생기기 전까지 참조 무결성을 지키기 위함 - M3에서 epic+ 아이템 추가 시 재조정 필요, 결정 요청 참고). gold_drop은 data_tables.md §9 미정의 신규 필드(엔지니어 요청 참고). D-80: goblin_scout_common은 elite-and-farming-m2.md §1-1이 확정한 goblin_scout(TTK 목표 3타, 뿔토끼와 동급)에 맞춰 horn_rabbit_common과 동일한 grade_base_weight 체계를 적용해 신설 — monsters.json.goblin_scout.drop_table_id를 null에서 이 키로 갱신, farming_sources.json.field_hartland.repeat_reward_table_ids에도 반영.",
 
   "_luck_formula": {
     "_comment": "D-52: LUK 곱연산 공식의 단일 소스. stats.json.luk.drop_weight_formula는 이 블록을 문자열로 참조만 하고 별도 정의하지 않는다(결정 요청 11 해소).",
@@ -75,6 +75,22 @@
       { "item_id": "armor_uncommon_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
       { "item_id": "sub_uncommon_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
       { "item_id": "iron_ore", "weight": 15, "qty_min": 1, "qty_max": 1 }
+    ]
+  },
+
+  "goblin_scout_common": {
+    "source_id": "goblin_scout_common",
+    "_comment": "몬스터: 고블린 정찰병(monster_id=goblin_scout, hartland.md ⑤/elite-and-farming-m2.md §1-1). TTK 목표 3타 — 뿔토끼(horn_rabbit)와 동급이라 grade_base_weight를 horn_rabbit_common과 동일하게 맞춰 '같은 TTK면 같은 등급 접근성' 원칙(§5-1 표)을 지킨다. gold_drop은 원거리형이라 접근(다트 회피+거리 좁히기)에 시간이 더 들어 필드 4종 중 사이클이 가장 김(추정 14s, items-and-drops-m2.md §5-3 산식 확장)에도 시간당 기대 골드를 slime/horn_rabbit/mushroom과 같은 대역(~1,800/hr)에 맞추기 위해 min/max를 소폭 상향했다(§5-3 갱신 표 참고). 전용 재료 goblin_ear(D-80, items.json 신규)를 주력 드랍으로 편입.",
+    "grade_base_weight": { "common": 0.70, "uncommon": 0.30, "rare": 0.0, "epic": 0.0, "legendary": 0.0, "relic": 0.0 },
+    "gold_drop": { "min": 5, "max": 9 },
+    "entries": [
+      { "item_id": "goblin_ear", "weight": 42, "qty_min": 1, "qty_max": 2 },
+      { "item_id": "salvage_scrap", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "weapon_common_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "sub_common_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "weapon_uncommon_1", "weight": 12, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "sub_uncommon_1", "weight": 12, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "iron_ore", "weight": 18, "qty_min": 1, "qty_max": 1 }
     ]
   },
 

@@ -9,8 +9,12 @@
 > epic/legendary/relic 등급 아이템은 M3 이후 지역이 늘어날 때 이 문서의 공식을 그대로 연장해 채운다(공식은 이미 6등급·전
 > 레벨 범위에 대해 정의돼 있어 확장 시 새 공식이 필요 없다 - §2, §5 참고).
 >
-> 산출물: `game/data/items.json`(57개) · `game/data/affixes.json`(20종) · `game/data/drop_tables.json`(6개 소스) ·
+> 산출물: `game/data/items.json`(58개) · `game/data/affixes.json`(20종) · `game/data/drop_tables.json`(7개 소스) ·
 > `game/data/enhance.json` · `tools/qa/validate_tables.py`. 검증 결과는 §6.
+>
+> **갱신(D-80)**: 필드 4번째 몬스터 `goblin_scout`(고블린 정찰병, elite-and-drops-m2.md 자매 문서 `elite-and-farming-m2.md`
+> §1-1에서 스탯 확정) 전용 드랍 테이블 `goblin_scout_common`을 신설하고, 전용 재료 `goblin_ear`를 `items.json`에
+> 추가했다 — §1 수량표·§5-2/§5-3 표를 함께 갱신했다(기존 6개 소스·57개 아이템 서술은 D-80 이전 스냅샷).
 
 ---
 
@@ -20,11 +24,11 @@
 |---|---|---|
 | 장비 아이템 | 42개 | 7카테고리(weapon/sub/head/armor/boots/ring/amulet) × 3등급(common/uncommon/rare) × 2레벨티어 |
 | 소모품 | 4개 | 포션 2(HP) + 음식 2(버프) |
-| 재료 | 8개 | enhance_stone·slime_jelly·rabbit_horn·mushroom_cap·iron_ore·goblin_fang·marsh_moss·salvage_scrap |
+| 재료 | 9개 | enhance_stone·slime_jelly·rabbit_horn·mushroom_cap·iron_ore·goblin_ear·goblin_fang·marsh_moss·salvage_scrap (D-80: goblin_ear 추가) |
 | 백팩(치장, D-11) | 3개 | common/uncommon/rare 각 1 (+10/+25/+40칸) |
-| **items.json 합계** | **57개** | |
+| **items.json 합계** | **58개** | |
 | 옵션 풀(affixes.json) | 20종 | GDD 6.3 "20종" |
-| 드랍 테이블(drop_tables.json) | 6개 소스 | 필드 일반 3종 + 정예 2종 + 보물상자 1종 |
+| 드랍 테이블(drop_tables.json) | 7개 소스 | 필드 일반 4종 + 정예 2종 + 보물상자 1종 (D-80: goblin_scout_common 추가) |
 
 - 반지는 물리적으로 2슬롯(GDD 6.2 "동일 반지 2개 중복 장착 허용", D-12)이지만 아이템 카테고리는 `ring` 하나로 공유한다 —
   "8슬롯"은 장비 슬롯 수(무기/보조/투구/갑옷/신발/반지×2/부적)이지 아이템 카테고리 수(7)가 아니다.
@@ -156,9 +160,9 @@ GDD 6.1 "등급별 획득처" 표를 소스별 `grade_base_weight`에 그대로 
 
 | 등급 | GDD 6.1 공식 획득처 | M2 반영 |
 |---|---|---|
-| 일반(common) | 필드 몬스터 | 필드 3종만 0이 아닌 값 |
-| 고급(uncommon) | 필드·미니던전 | 필드 3종 + 정예 2종 + 보물상자(미니던전 대역) 모두 0 아님 |
-| 희귀(rare) | 던전·정예 몬스터 | 정예 2종·보물상자만 0 아님, **필드 3종은 0** (GDD가 필드 몬스터를 rare 출처로 명시하지 않음) |
+| 일반(common) | 필드 몬스터 | 필드 4종만 0이 아닌 값 (D-80: goblin_scout_common 포함) |
+| 고급(uncommon) | 필드·미니던전 | 필드 4종 + 정예 2종 + 보물상자(미니던전 대역) 모두 0 아님 |
+| 희귀(rare) | 던전·정예 몬스터 | 정예 2종·보물상자만 0 아님, **필드 4종은 0** (GDD가 필드 몬스터를 rare 출처로 명시하지 않음) |
 | 영웅(epic) 이상 | 보스·비밀상자 | **M2는 전부 0** - epic/legendary/relic 아이템이 아직 `items.json`에 없어 항목을 채우면 참조가 빈다(§7 결정 요청) |
 
 정예 2종은 F6-3("정예: 희귀~영웅 + 도면 확률")에 따라 uncommon/rare에 걸쳐 두텁게, common은 15%만 남겨 전용 소재
@@ -172,6 +176,7 @@ GDD 6.1 "등급별 획득처" 표를 소스별 `grade_base_weight`에 그대로 
 | slime_common | 방울 슬라임(TTK 2타, 최약체) | 0.75 / 0.25 / 0 | 2~5 | |
 | horn_rabbit_common | 뿔토끼(TTK 3타) | 0.70 / 0.30 / 0 | 4~8 | |
 | mushroom_common | 버섯돌이(TTK 4타, 최탱키) | 0.65 / 0.35 / 0 | 5~10 | TTK가 길수록 uncommon 비중↑ - "더 오래 싸운 만큼 더 준다" |
+| goblin_scout_common | 고블린 정찰병(TTK 3타, 뿔토끼와 동급) | 0.70 / 0.30 / 0 | 5~9 | D-80 신설. TTK가 horn_rabbit과 같아 grade_base_weight를 그대로 재사용 - 소재=goblin_ear |
 | elite_goblin_captain | 정예(리스폰 1800s) | 0.15 / 0.45 / 0.40 | 25~45 | 소재=goblin_fang |
 | elite_bunchi_spawn | 정예(리스폰 1800s) | 0.15 / 0.45 / 0.40 | 25~45 | 소재=marsh_moss, 골고루 동급으로 설계(어느 쪽을 잡아도 손해 없음) |
 | field_treasure_chest | 미니던전 보물상자(범용) | 0 / 0.40 / 0.60 | 15~30 | common 없음 - "상자는 최소 고급 보장" |
@@ -180,18 +185,24 @@ GDD 6.1 "등급별 획득처" 표를 소스별 `grade_base_weight`에 그대로 
 
 **가정(추정, M1-4 플레이테스트 계측 로그로 추후 검증 필요)**: 처치+접근+포지셔닝을 포함한 몬스터 1마리당
 평균 사이클 시간 — 슬라임 8초(TTK 2타로 가장 짧음), 뿔토끼 12초(돌진 회피 판단 포함), 버섯돌이 15초(장판 회피 이동
-포함), 정예 45초(2배 이상 긴 교전 + 스폰 지점 이동, `attack_recovery_sec` 등 정예 강화 패턴 반영 예정).
+포함), 고블린 정찰병 14초(D-80 신설 — TTK는 뿔토끼와 동급 3타지만 원거리형이라 다트 회피 + 사거리 좁히기 접근에
+시간이 더 든다, `elite-and-farming-m2.md` §1-1 "다트 자체는 안 아프고 진짜 위협은 증원 호출"과 정합), 정예 45초
+(2배 이상 긴 교전 + 스폰 지점 이동, `attack_recovery_sec` 등 정예 강화 패턴 반영 예정).
 
 | source_id | 시간당 처치 수 | 시간당 기대 골드 | 시간당 uncommon+ 개수 | 시간당 rare 개수 |
 |---|---|---|---|---|
 | slime_common | 450 | 1,575 | 112.5 | 0 |
 | horn_rabbit_common | 300 | 1,800 | 90.0 | 0 |
 | mushroom_common | 240 | 1,800 | 84.0 | 0 |
+| goblin_scout_common | 257 | 1,800 | 77.1 | 0 |
 | elite_goblin_captain | 80 | 2,800 | 36.0 | 32.0 |
 | elite_bunchi_spawn | 80 | 2,800 | 36.0 | 32.0 |
 
 **해석**:
-- 필드 몬스터 3종은 시간당 기대 골드가 1,575~1,800으로 거의 균일 — TTK가 길수록(마릿수↓) 마리당 골드를 올려
+- goblin_scout_common의 gold_drop(5~9, 평균 7)은 "필드 4종 모두 시간당 기대 골드 ≈1,800으로 균일"이라는 기존
+  설계 목표를 유지하기 위해 역산한 값이다 — 사이클이 3종보다 길어(14초) 처치 수가 257회로 줄어드는 만큼 마리당
+  골드를 slime(2~5)·horn_rabbit(4~8)보다 소폭 높여 시간당 수입을 맞췄다(257×7=1,799 ≈ 1,800).
+- 필드 몬스터 4종은 시간당 기대 골드가 1,575~1,800으로 거의 균일 — TTK가 길수록(마릿수↓) 마리당 골드를 올려
   "어느 필드를 돌아도 시간당 수입은 비슷하다"는 파밍 공평성을 의도했다.
 - 정예(30분 리스폰)는 필드보다 시간당 rare 획득 기댓값이 압도적으로 높다(필드 rare=0 vs 정예 32/hr) - 이것이 정예를
   "오늘 할 것" 목록의 최우선 항목으로 만드는 F3-5 리텐션 설계(GDD 6.5)의 수치적 근거다. 단, 정예는 30분 쿨다운이 있어
@@ -288,10 +299,19 @@ GDD 6.1 "등급별 획득처" 표를 소스별 `grade_base_weight`에 그대로 
 ```
 $ python3 tools/qa/validate_tables.py
 [validate_tables] data dir = <repo>/game/data
-[validate_tables] items=57 affixes=20 drop_tables=6 monsters=3
+[validate_tables] items=58 affixes=20 drop_tables=7 monsters=6 farming_sources=8
+
+경고 2건:
+  - stats.luk: 만렙 몰빵(147포인트) crit_chance=0.1970 가 상한(0.7500)에 못 미침 — 상한이 사실상 의미 없음
+  - stats.int: 만렙 몰빵 cooldown_reduction=0.2940 가 상한(0.3000)에 못 미침 — 상한이 사실상 의미 없음
 
 PASS - 모든 검증 규칙 통과
 ```
+
+> 위 출력은 D-80(`goblin_scout_common` 신설) 반영 후 재실행한 최신 값이다(`monsters`/`farming_sources`/경고 2건은
+> 이후 세션인 `elite-and-farming-m2.md`가 추가한 정예·파밍소스·스탯 검증 범위 — 이 문서 최초 작성 시점의
+> "items=57 affixes=20 drop_tables=6 monsters=3"은 M2-0 단독 스냅샷이었다). 경고 2건은 이 패스와 무관한 기존
+> `stats.json` 설계 메모(만렙 몰빵 시 상한 미도달)이며 오류가 아니다.
 
 검사 항목: items.json(등급별 affix_slot_count 규칙·unique_skill_id/set_id 등급 제약·sell_price 범위), affixes.json
 (stat_type ≥20종·value_min≤max·applicable_categories 유효성), drop_tables.json(grade_base_weight 합계 1.0·entries
