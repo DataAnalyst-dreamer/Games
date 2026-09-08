@@ -119,9 +119,24 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 | D-59 | 로컬라이징 key 지방 코드 | 약어(htl/eld…) 폐기, **전체 표기**(heartland/eldwood/frostheim/samar/ignis/bridgeport)로 통일. `main_a<막>_s<씬>_<지방>_...`도 동일 | QA Major | 전 스토리 문서 |
 | D-60 | 호감도 비종속 잡담 대사 key | `npc_<지방>_<이름>_chat_<번호>` 슬롯 신설(단계 무관 랜덤 잡담) | QA Major | characters.md |
 
+## L. 전투 수치 부록 (2026-09-08, `docs/specs/combat-tuning-m1-addendum.md` 결정 요청 채택)
+
+| ID | 결정 사항 | 확정 내용 | 출처 | 반영 |
+|---|---|---|---|---|
+| D-61 | 장판 지속피해와 무적 | 버섯돌이 포자 장판 등 **지속피해는 피격 무적(0.5s) 중에도 적용**(장판에서 나가는 것이 해답) | 요청1 | monsters 스펙, 코드 |
+| D-62 | GDD 4.2 셰이크 문구 | "강공격·크리티컬·**피격** 시 카메라 셰이크"로 확장 | 요청2 | GDD 4.2 |
+| D-63 | 카메라 셰이크 4단계표 | 일반 0 / 강공격 6px·0.18s / 크리 9px·0.22s / 피격 4px·0.12s **임시 반영 + `_balance_todo`**(D-46 패턴) | 요청3 | combat.json `camera_shake` |
+| D-64 | settings.json 소유 | **ui-ux-designer** (접근성 배율표 [0, 0.5, 1.0, 1.5] 포함) | 요청4 | data_tables.md |
+| D-65 | 몬스터 AI 공통 필드 스키마 | `aggro_range_px`·`melee_range_px`·`attack_recovery_sec`·`patrol_radius_px`·`leash_range_px` + 종별 확장(`dash_*`, `atk_tick_per_sec`, `aoe_radius_px`) 승인, 값은 부록 §4 | 요청5 | monsters.json, data.gd 스키마 |
+| D-66 | 공격 프레임 표 | 선딜 4f / 활성 20f / 후딜 6f(1·2타 30f), 3타 45f(캔슬 34f) **임시 반영**, 공격 프레임 아트 확보 시 재조정 | 요청6 | tuning.gd |
+| D-67 | `drop_table_id` 자리표시자 | **현행 문자열 유지**, `drop_tables.json` 생성(F3) 시 null/실존 검증 규칙 활성화 | 요청7 | data_tables.md |
+| D-68 | 가드 이동·회복 배율 | `guard.move_speed_multiplier` 0.5, `stamina.guard_regen_multiplier` 0.5 **확정**(`_balance_todo` 해제), BRD S2-1c에 문구 반영 | 요청8 | combat.json, BRD 02-전투 |
+| D-69 | M1 사망 페널티 범위 | **HP 전량 회복 + 비석 부활만** 구현, 골드 5%·상한(D-25)은 M2 경제 스펙에서 재확정 | 요청9 | F8-2 |
+
 ## 변경 이력
 - 2026-09-08: 37건 최초 확정 (추천안 일괄 채택). GDD v1.0 → v1.1 개정.
 - 2026-09-08: 세계관 바이블 제안 4건(D-38~D-41) 채택. GDD v1.1.1.
 - 2026-09-08: M1 전투 수치·데이터 테이블 결정 11건(D-42~D-52) 채택.
 - 2026-09-08: 캐릭터 서사 바이블 추가 제안 3건(D-53~D-55) 채택.
 - 2026-09-08: 스토리 정합성 검수 판단 항목 5건(D-56~D-60) 확정.
+- 2026-09-08: 전투 수치 부록 결정 9건(D-61~D-69) 확정.
