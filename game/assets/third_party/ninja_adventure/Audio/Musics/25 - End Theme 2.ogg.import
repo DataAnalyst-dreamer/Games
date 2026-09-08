@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cb3agtdg7dh0o"
+path="res://.godot/imported/25 - End Theme 2.ogg-8f67f13d2da1d2755d7eae99ea547913.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/third_party/ninja_adventure/Audio/Musics/25 - End Theme 2.ogg"
+dest_files=["res://.godot/imported/25 - End Theme 2.ogg-8f67f13d2da1d2755d7eae99ea547913.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

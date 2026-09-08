@@ -1,0 +1,14 @@
+[remap]
+
+importer="aseprite_wizard.plugin.noop"
+type="PackedDataContainer"
+uid="uid://bonkua36xix1u"
+path="res://.godot/imported/Lancer.aseprite-779b9dc8809812d2b8df80c0f283e61d.res"
+
+[deps]
+
+source_file="res://assets/third_party/tiny_swords/Units/Units (aseprite in Blue only)/Lancer.aseprite"
+dest_files=["res://.godot/imported/Lancer.aseprite-779b9dc8809812d2b8df80c0f283e61d.res"]
+
+[params]
+

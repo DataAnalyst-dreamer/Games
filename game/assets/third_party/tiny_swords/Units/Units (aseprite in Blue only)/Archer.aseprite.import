@@ -1,0 +1,14 @@
+[remap]
+
+importer="aseprite_wizard.plugin.noop"
+type="PackedDataContainer"
+uid="uid://cupblfqv8otwq"
+path="res://.godot/imported/Archer.aseprite-5c6e2d5707195a3f229cfd243c82f445.res"
+
+[deps]
+
+source_file="res://assets/third_party/tiny_swords/Units/Units (aseprite in Blue only)/Archer.aseprite"
+dest_files=["res://.godot/imported/Archer.aseprite-5c6e2d5707195a3f229cfd243c82f445.res"]
+
+[params]
+

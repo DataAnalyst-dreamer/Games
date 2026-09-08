@@ -1,0 +1,14 @@
+[remap]
+
+importer="aseprite_wizard.plugin.noop"
+type="PackedDataContainer"
+uid="uid://rynnj37c2np7"
+path="res://.godot/imported/Particle FX.aseprite-b0c8a3c9398a122234dd281a4a44d519.res"
+
+[deps]
+
+source_file="res://assets/third_party/tiny_swords/Particle FX/Particle FX.aseprite"
+dest_files=["res://.godot/imported/Particle FX.aseprite-b0c8a3c9398a122234dd281a4a44d519.res"]
+
+[params]
+

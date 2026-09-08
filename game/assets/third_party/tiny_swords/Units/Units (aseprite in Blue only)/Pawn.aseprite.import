@@ -1,0 +1,14 @@
+[remap]
+
+importer="aseprite_wizard.plugin.noop"
+type="PackedDataContainer"
+uid="uid://bh4iw2jkmeuqh"
+path="res://.godot/imported/Pawn.aseprite-83cef0ccf1e581b69063aad68ce91404.res"
+
+[deps]
+
+source_file="res://assets/third_party/tiny_swords/Units/Units (aseprite in Blue only)/Pawn.aseprite"
+dest_files=["res://.godot/imported/Pawn.aseprite-83cef0ccf1e581b69063aad68ce91404.res"]
+
+[params]
+
