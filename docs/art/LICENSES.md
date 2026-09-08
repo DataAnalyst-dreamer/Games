@@ -36,5 +36,18 @@
 | 필요 시 | Cainos Village 마을 타일 | Cainos | B | https://cainos.itch.io/pixel-art-top-down-village | `assets_local/cainos/village/` | |
 | 필요 시 | Neo둥근모 폰트 | Dalgona | A (OFL) | https://github.com/Dalgona/neodgm/releases | `fonts/neodgm/` | Galmuri 대체안 |
 
+## 코드 리소스 (Godot 애드온 · `game/addons/`)
+
+| 반입일 | 애드온 | 버전 | 제작자 | 라이선스 | 출처 | Godot 호환 |
+|---|---|---|---|---|---|---|
+| 2026-09-08 | GUT | 9.4.0 | bitwes | MIT (LICENSE.md 동봉) | https://github.com/bitwes/Gut | 4.3–4.4 |
+| 2026-09-08 | Phantom Camera | 0.11.0.3 | ramokz | MIT | https://github.com/ramokz/phantom-camera | 4.4+ |
+| 2026-09-08 | Aseprite Wizard | 9.8.0 (godot_4) | viniciusgerevini | MIT | https://github.com/viniciusgerevini/godot-aseprite-wizard | 4.x |
+| 2026-09-08 | Dialogue Manager | 3.10.5 | nathanhoad | MIT | https://github.com/nathanhoad/godot_dialogue_manager | 4.4–4.5 |
+| 2026-09-08 | LDtk Importer | 2.0.1 | heygleeson | MIT | https://github.com/heygleeson/godot-ldtk-importer | 4.1+ |
+
+- 엔진: **Godot 4.4.1-stable** (MIT). 애드온 버전은 4.4.1 호환 기준으로 고정했으며, 엔진 업그레이드 시 위 표의 호환 범위를 먼저 확인한다.
+- LimboAI(행동 트리)는 GDExtension 바이너리 배포판이 필요해 M2에서 검토.
+
 ## 사용 금지 확인
 - The Spriters Resource 등 립 스프라이트: 사용하지 않음 (레퍼런스 링크만 아트 바이블에 기재).
