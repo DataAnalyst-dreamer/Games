@@ -69,6 +69,21 @@ GDD 아트 스펙은 32×32 타일 / 32×48 캐릭터(640×360 내부 렌더)다
 3. pixel-artist 에이전트가 `tools/art/`에 규격 변환 스크립트(2× 확대, 시트 슬라이스, 네이밍 규칙 적용)를 두고 `game/assets/sprites/`로 가공본을 생성한다. 가공본도 원본 라이선스를 따른다.
 4. 출시 전 체크: `third_party/`·`assets_local/`에 남은 외부 애셋 목록 → 원작 교체 여부 결정 → 크레딧 화면 생성.
 
-## 5. 확인 필요 항목
+## 5. 코드·툴 리소스 (애셋 외)
+
+| 종류 | 리소스 | 라이선스 | 용도 | 확보 시점 |
+|---|---|---|---|---|
+| Godot 애드온 | GUT (Godot Unit Test) https://github.com/bitwes/Gut | MIT | qa-tester 자동 테스트 | 프로젝트 골격 생성 시 |
+| Godot 애드온 | Dialogue Manager https://github.com/nathanhoad/godot_dialogue_manager | MIT | 말풍선 대화·분기·로컬라이징 key | M2 |
+| Godot 애드온 | Phantom Camera https://github.com/ramokz/phantom-camera | MIT | 카메라 추적·셰이크·존 전환 | M1 |
+| Godot 애드온 | LimboAI https://github.com/limbonaut/limboai | MIT | 몬스터 행동 트리/상태머신 | M2 |
+| Godot 애드온 | Aseprite Wizard https://github.com/viniciusgerevini/godot-aseprite-wizard | MIT | .aseprite → SpriteFrames 자동 임포트 | M1 |
+| Godot 애드온 | LDtk Importer https://github.com/heygleeson/godot-ldtk-importer | MIT | LDtk 맵 → TileMap | M2 (LDtk 채택 시) |
+| 툴 | Aseprite (유료 약 $20, 소스 빌드 시 무료) | 상용 | 도트 제작 표준 | M1 전 |
+| 툴 | LDtk https://ldtk.io / Tiled https://mapeditor.org | 무료 | 맵 제작 | M2 |
+| 툴 | jsfxr https://sfxr.me / Bfxr | 무료 | "뽁뽁" 계열 SFX 생성(출력물 자체 저작) | M1 |
+| 툴 | Godot 4.3+ | MIT | 엔진 | M1 전 |
+
+## 6. 확인 필요 항목
 - Anokolisa Pixel Crawler, Parchment GUI, Cute Fantasy RPG 무료판: 개별 페이지에서 라이선스 원문 재확인 (이 문서는 검색 결과·2차 출처 기준).
 - 네트워크 정책상 itch.io·kenney.nl·opengameart.org는 이 개발 환경에서 직접 접근이 차단됨 → 로컬에서 다운로드 후 반입.
