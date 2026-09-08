@@ -118,7 +118,13 @@ static func _apply_knockback(body: Node2D, direction: Vector2, distance_px: floa
 
 ## public: 가드 칩데미지 등 HitFeel.apply() 전체 파이프라인을 타지 않는 경로(플레이어
 ## Guard 상태의 부분 피해 표시 등)에서도 같은 데미지 숫자 연출을 재사용하기 위해 공개.
+##
+## D-07(기본 켜짐, 옵션에서 끌 수 있음): Settings.damage_numbers_enabled가 false면
+## 스폰 자체를 생략한다 — 호출부(HitFeel.apply(), player.gd)를 개별적으로 고칠 필요 없이
+## 이 단일 지점에서 토글된다.
 static func spawn_damage_number(at_body: Node2D, damage: int, is_advantage: bool) -> void:
+	if not Settings.damage_numbers_enabled:
+		return
 	if at_body == null or not is_instance_valid(at_body):
 		return
 	var tree := at_body.get_tree()
