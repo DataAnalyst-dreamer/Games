@@ -26,6 +26,7 @@ func enter(_prev: StringName, _data: Dictionary = {}) -> void:
 		Events.player_stamina_insufficient.emit(&"roll")
 		finished.emit(&"Idle", {})
 		return
+	Events.player_roll_started.emit(player) # M1-4 계측(Metrics.gd): 구르기 시도/성공률 분자용.
 	Events.player_stamina_changed.emit(player.resources.stamina, player.resources.max_stamina)
 	AudioManager.play_sfx(&"player_roll", player.global_position)
 

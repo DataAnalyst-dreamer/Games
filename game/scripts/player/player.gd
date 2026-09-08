@@ -126,6 +126,9 @@ func _apply_full_hit(source_hitbox: Hitbox) -> void:
 ## 가드 중 피격 처리(S2-1c). 저스트 가드 판정창 안이면 무피해·무소모 경로로, 아니면
 ## 칩데미지 경로로 분기한다.
 func _handle_guarded_hit(source_hitbox: Hitbox, guard_state: GuardState) -> void:
+	# M1-4 계측(Metrics.gd): 저스트 가드 성공률의 분모 — 저스트 성공/일반 가드/가드 붕괴
+	# (스태미나 고갈로 무가드 전환) 모두를 포함해 "가드 상태였던 피격 시도 총횟수"를 센다.
+	Events.guard_hit_attempted.emit(self, source_hitbox.source)
 	if guard_state.is_just_guard_window():
 		_handle_just_guard(source_hitbox)
 		return
