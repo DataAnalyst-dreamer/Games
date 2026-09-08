@@ -206,23 +206,34 @@
 
 **용도**: F3-1, F3-2.
 **소유**: game-designer.
+**밸런스 근거**: `docs/specs/items-and-drops-m2.md` §1~2 (M2 실장, 57개: 장비42+소모품4+재료8+백팩3).
 
 | 키 | 타입 | 범위/단위 | 필수 | 설명 |
 |---|---|---|---|---|
-| `item_id` | string | 고유 | ● | 식별자 |
+| `item_id` | string | 고유(= JSON 키와 동일) | ● | 식별자 |
 | `category` | string enum | `weapon`/`sub`/`head`/`armor`/`boots`/`ring`/`amulet`/`costume_hat`/`costume_outfit`/`costume_backpack`/`consumable`/`material` | ● | 슬롯 분류 (GDD 6.2: 8슬롯+치장3) |
-| `grade` | string enum | `common`/`uncommon`/`rare`/`epic`/`legendary`/`relic` | ● | 6등급(GDD 6.1) |
-| `affix_slot_count` | int | 등급별 고정값 | ● | common=0, uncommon=1, rare=2, epic=3, legendary=3(+고유스킬), relic=3(+세트) |
-| `unique_skill_id` | string, optional | `skills.json` 참조 | ○ | 전설 등급만 |
-| `set_id` | string, optional | | ○ | 유물 등급 세트 효과 |
-| `str_requirement` | int | ≥0 | ○ | 무거운 무기 STR 요구치 |
-| `sell_price` | int | ≥0 | ● | 상점 판매가(구매가의 25% 산정 기준, F8-3) |
-| `stack_max` | int | ≥1 | ○ | 소모품/재료 최대 중첩 |
+| `grade` | string enum | `common`/`uncommon`/`rare`/`epic`/`legendary`/`relic` | ● | 6등급(GDD 6.1). M2는 common~rare만 실존 |
+| `name_key` / `desc_key` | string | `item_<id>_name` / `item_<id>_desc` | ● | 로컬라이징 key (플레이버 텍스트는 텍스트 하드코딩 금지) |
+| `affix_slot_count` | int | 등급별 고정값 | ● (장비 7종만) | common=0, uncommon=1, rare=2, epic=3, legendary=3(+고유스킬), relic=3(+세트). 소모품/재료/치장엔 없음 |
+| `level_min` | int | 1~15(M2 범위) | ● (장비만, **신규**) | 착용 최소 레벨. `items-and-drops-m2.md` §2 레벨 스케일 공식의 입력값 |
+| `base_stats` | object | 카테고리별 하위 키 상이(아래) | ● (장비만, **신규**) | weapon={atk_min,atk_max} / sub·head·armor·boots={defense_min,defense_max} / ring={ (str｜dex｜int｜vit): int } / amulet={elemental_damage_pct: number} |
+| `element` | string｜null | 5속성(`elements.json.cycle`+holy) 중 하나 또는 null | ○ (amulet 전용, **신규**) | GDD 6.2 "부적(속성 결정)" — 장착한 부적이 캐릭터의 속성을 정한다 |
+| `unique_skill_id` | string｜null | `skills.json` 참조 | ○ | 전설 등급만. M2엔 legendary 아이템이 없어 항상 null |
+| `set_id` | string｜null | | ○ | 유물 등급 세트 효과. M2엔 relic 아이템이 없어 항상 null |
+| `str_requirement` | int | ≥0 | ○ | 무거운 무기 STR 요구치(M2는 rare 무기 2종만) |
+| `sell_price` | int | ≥0 | ● | 상점 판매가(구매가의 25%, F8-3) — 구매가 = `sell_price / economy.json.shop_sell_ratio`(=×4, economy.json 미생성 시엔 0.25 하드값 사용) |
+| `stack_max` | int | ≥1 | ○ (consumable/material만) | 최대 중첩 |
+| `inventory_slot_bonus` | int | >0 | ● (costume_backpack 전용, **신규**) | D-11. 기본 40칸에 가산되는 인벤토리 칸 수(최대 80칸 = 40+backpack_large의 40) |
+| `effect_type` | string enum | `heal_hp`/`heal_stamina`/`buff_atk_pct`/`buff_max_hp_flat`/... | ● (consumable 전용, **신규**) | 소모 효과 종류. 즉발 회복은 `duration_sec=0` |
+| `effect_value` | number | | ● (consumable 전용, **신규**) | 효과 크기(회복량 또는 %) |
+| `duration_sec` | number | ≥0 | ● (consumable 전용, **신규**) | 버프 지속시간, 즉발 효과는 0. GDD 5.3 "서로 다른 효과 2개까지 동시 적용" 규칙은 버프 시스템(코드) 소관 |
 
 ### 검증 규칙
 - `affix_slot_count`가 등급별 규칙과 일치하는지 (common=0 / uncommon=1 / rare=2 / epic·legendary·relic=3)
 - `unique_skill_id`가 있으면 `grade == legendary`
 - `set_id`가 있으면 `grade == relic`
+- `base_stats`의 `*_min` ≤ `*_max`
+- 같은 (category, grade) 안에서 `level_min`이 레벨 티어마다 달라야 함(중복 레벨 금지는 아니지만 `items-and-drops-m2.md` §2 설계 원칙상 티어별로 다른 값을 쓴다)
 
 ---
 
@@ -230,17 +241,22 @@
 
 **용도**: F3-1.
 **소유**: game-designer.
+**밸런스 근거**: `docs/specs/items-and-drops-m2.md` §3. 실제 20종: `atk_pct`·`crit_chance`·`crit_damage_pct`·
+`move_speed_pct`·`gold_find_pct`·`cooldown_reduction_pct`·`life_steal_pct`·
+`elemental_dmg_{fire,wind,thunder,water,holy}_pct`(5종)·`max_hp_flat`·`max_stamina_flat`·
+`stamina_cost_reduction_pct`·`defense_flat`·`item_find_pct`·`exp_gain_pct`·`attack_speed_pct`·`damage_reduction_pct`.
 
 | 키 | 타입 | 범위/단위 | 필수 | 설명 |
 |---|---|---|---|---|
-| `affix_id` | string | 고유 | ● | 옵션 식별자 |
-| `stat_type` | string enum | 20종(공격력%, 속성별 데미지×5, 크리확률, 이동속도, 골드획득량, 쿨감, 흡혈 등) | ● | GDD 6.3 |
-| `value_min` / `value_max` | number | value_min ≤ value_max | ● | 롤 범위 |
-| `applicable_categories` | array[string] | `items.json.category` 참조 | ● | 적용 가능 슬롯 |
-| `weight` | number | >0 | ● | 풀 내 추첨 가중치 |
+| `affix_id` | string | 고유(= JSON 키와 동일) | ● | 옵션 식별자 |
+| `stat_type` | string enum | 20종(위 목록) | ● | GDD 6.3. **등급 무관 단일 stat_type** — 등급은 옵션 "개수"만 늘리고 값 범위엔 영향 없음(F3-1) |
+| `value_min` / `value_max` | number | value_min ≤ value_max, pct 계열은 비율(0.05=5%) | ● | 롤 범위(등급 무관 단일 범위) |
+| `applicable_categories` | array[string] | `items.json.category` 중 장비 7종(weapon/sub/head/armor/boots/ring/amulet)만 | ● | 적용 가능 슬롯 — 소모품/재료/치장엔 옵션이 붙지 않음 |
+| `weight` | number | >0 | ● | 풀 내 추첨 가중치(합계 제약 없음) |
 
 ### 검증 규칙
 - `stat_type` 종류 ≥ 20개 (GDD 6.3 "20종")
+- `value_min ≤ value_max`, `weight > 0`
 - `applicable_categories`의 각 값이 `items.json.category` enum에 존재
 
 ---
@@ -249,29 +265,48 @@
 
 **용도**: F3-1, F3-5.
 **소유**: game-designer.
-**규칙(GDD 12장 필수 반영)**: "LUK 스탯은 희귀 등급 가중치에 곱연산" — 아래 공식으로 표준화한다.
+**밸런스 근거**: `docs/specs/items-and-drops-m2.md` §4~5. M2 실제 소스 6개: `slime_common`/`horn_rabbit_common`/
+`mushroom_common`(필드 일반 3종, `monsters.json.drop_table_id`가 그대로 가리킴 — D-67 활성화) +
+`elite_goblin_captain`/`elite_bunchi_spawn`(정예 2종, `docs/levels/hartland.md` ⑤ — 몬스터 본체는 아직
+`monsters.json`에 없음) + `field_treasure_chest`(미니던전 보물상자, 지역 무관 범용).
+**규칙(GDD 12장 필수 반영)**: "LUK 스탯은 희귀 등급 가중치에 곱연산" — 최상단 `_luck_formula` 필드(D-52 단일 소스)로
+표준화한다. **`luk_coefficient`는 `_luck_formula` 안에만 존재하는 전역 값**이며 소스별 `grade_base_weight`와는 별도
+키다(과거 버전의 표는 이 둘을 소스별로 함께 나열해 오해를 유발했음 — 이번 갱신으로 분리 명시).
 
 ```
-raw_weight[grade] = base_weight[grade] × luk_multiplier[grade]
+raw_weight[grade] = grade_base_weight[grade] × luk_multiplier[grade]
 luk_multiplier[grade] = 1.0                         (grade == common)
 luk_multiplier[grade] = 1.0 + LUK × luk_coefficient[grade]   (grade != common)
 final_probability[grade] = raw_weight[grade] / Σ raw_weight[all grades]
 ```
 
+### `_luck_formula` (최상단, 소스 아님)
+
 | 키 | 타입 | 범위/단위 | 필수 | 설명 |
 |---|---|---|---|---|
-| `source_id` | string | `monsters.json`/`bosses.json`/맵 상자 id 참조 | ● | 드랍 소스 |
-| `grade_base_weight.{common..relic}` | number | 합계 = 1.0 (LUK=0 기준) | ● | 등급별 기본 가중치 |
-| `luk_coefficient.{uncommon..relic}` | number | >0, 등급 높을수록 큰 값 | ● | LUK 1당 가중치 증가율 |
-| `entries[].item_id` | string | `items.json` 참조 | ● | 등급 확정 후 세부 아이템 추첨 |
+| `_luck_formula.formula` | string | 위 공식 문자열 | ● | 사람이 읽는 문서화용(코드가 파싱하지 않음, 실제 계산은 로더 구현) |
+| `_luck_formula.luk_coefficient.{uncommon..relic}` | number | >0, 등급 높을수록 큰 값(단조증가) | ● | LUK 1당 가중치 증가율. **전 소스 공통 단일 값**(D-52) |
+
+### 소스별 엔트리 (`slime_common` 등, 위 6개 키)
+
+| 키 | 타입 | 범위/단위 | 필수 | 설명 |
+|---|---|---|---|---|
+| `source_id` | string | `monsters.json`/`bosses.json`/맵 상자 id 참조(= JSON 키와 동일) | ● | 드랍 소스 |
+| `grade_base_weight.{common..relic}` | number | 6개 키 모두 존재, 합계 = 1.0 (LUK=0 기준) | ● | 등급별 기본 가중치. 아직 없는 등급(M2의 epic 이상)은 값 0으로 명시 — 키 자체를 생략하지 않는다 |
+| `gold_drop.min` / `gold_drop.max` | int | min ≤ max, ≥0 | ● (**신규**, §7 미정의였던 필드) | 처치 1회당 골드 지급 범위(균등분포 가정) |
+| `entries[].item_id` | string | `items.json` 참조 | ● | 등급 확정 후, 같은 등급 아이템들 중에서 세부 추첨 |
 | `entries[].weight` | number | >0 | ● | 동일 등급 내 아이템 가중치 |
 | `entries[].qty_min` / `qty_max` | int | qty_min ≤ qty_max | ● | 수량 범위 |
-| `guaranteed_first_clear` | array[item_id], optional | | ○ | 보스 첫 클리어 확정 보상(GDD 6.5) |
+| `guaranteed_first_clear` | array[item_id], optional | | ○ | 보스 첫 클리어 확정 보상(GDD 6.5). M2 6개 소스엔 미사용(보스가 아님) |
 
 ### 검증 규칙 (F8-4 명시 항목: "드랍 확률 합계")
 1. `Σ grade_base_weight == 1.0` (LUK=0 기준 원본 테이블에서 검증. 런타임 `final_probability`는 정규화로 항상 1이 되므로 별도 검증 불필요)
 2. `entries[].item_id`는 `items.json`에 존재
-3. `luk_coefficient`는 `common`에 대해서는 정의하지 않음(등급 상승 없음)
+3. `_luck_formula.luk_coefficient`는 `common`에 대해서는 정의하지 않음(등급 상승 없음), uncommon→relic 순으로 단조증가
+4. **`grade_base_weight[g] > 0`인데 `entries`에 해당 등급 아이템이 하나도 없으면 오류** — 드랍 시 빈 풀이 되는 실전
+   버그를 잡기 위해 M2에서 신설한 규칙(`items-and-drops-m2.md` §5-1, `tools/qa/validate_tables.py` 구현)
+5. `monsters.json.drop_table_id`(null이 아닌 값)는 이 파일의 키로 존재해야 함(D-67, `_validate_monsters`에 아직
+   미구현 — §12 "엔지니어 요청" 참고)
 
 ---
 
@@ -279,23 +314,28 @@ final_probability[grade] = raw_weight[grade] / Σ raw_weight[all grades]
 
 **용도**: F3-3.
 **소유**: game-designer.
+**밸런스 근거**: `docs/specs/items-and-drops-m2.md` §6~8 (+0~+10 기대 비용 ≈3,713골드/74강화석 계산 포함).
 
 | 키 | 타입 | 범위/단위 | 필수 | 설명 |
 |---|---|---|---|---|
-| `enhance_levels[+1..+10].success_rate` | number | 0~1 | ● | +1~+6=1.0, +7~+10=[0.70,0.55,0.40,0.25] (D-14) |
-| `enhance_levels[].cost_gold` | int | ≥0 | ● | 강화 비용 |
-| `enhance_levels[].cost_stone_qty` | int | ≥0 | ● | 강화석 필요 개수 |
-| `enhance_levels[].stat_multiplier` | number | >1.0, 단조증가 | ● | 단계별 스탯 배율 |
-| `refine.max_attempts` | int | =3 | ● | 재련 횟수 상한(D-13) |
-| `refine.cost_by_grade_and_attempt` | table | grade × attempt → gold | ● | 재련 비용 증가표 |
-| `disassemble.yield_by_grade.{grade}.stone_qty` | int | ≥0 | ● | 분해 산출 강화석 |
-| `disassemble.yield_by_grade.{grade}.material_qty` | int | ≥0 | ● | 분해 산출 재료 |
+| `enhance_levels["+1".."+10"].success_rate` | number | 0~1 | ● | +1~+6=1.0, +7~+10=[0.70,0.55,0.40,0.25] (D-14). 키는 문자열 `"+1"`~`"+10"` |
+| `enhance_levels[].cost_gold` | int | ≥0 | ● | 강화 비용(성공/실패 무관 매 시행 소모) |
+| `enhance_levels[].cost_stone_qty` | int | ≥0 | ● | 강화석 필요 개수(매 시행 소모, D-32 "실패 시 강화석만 소실") |
+| `enhance_levels[].stat_multiplier` | number | >1.0, 단조증가 | ● | 단계별 스탯 배율. M2 공식: `1 + 0.08×N` |
+| `refine.max_attempts` | int | =3 | ● | 재련 횟수 상한(D-13), 장비 인스턴스당 카운터(정의 테이블이 아니라 세이브 상태로 관리 — 엔지니어 요청) |
+| `refine.cost_material_id` | string | `items.json` 참조 | ● (**신규**) | 재련 소모 재료 id. M2 값: `"enhance_stone"`(강화석 재사용) |
+| `refine.cost_by_grade_and_attempt.{grade}.attempt_{1,2,3}.cost_gold` | int | ≥0, attempt 순으로 단조증가 | ● | 재련 비용(골드). `grade`는 `uncommon`~`relic`만(common은 옵션 슬롯이 없어 대상 아님) |
+| `refine.cost_by_grade_and_attempt.{grade}.attempt_{1,2,3}.cost_material_qty` | int | ≥0 (**신규**) | ● | 재련 비용(재료 개수) |
+| `disassemble.yield_by_grade.{grade}.stone_qty` | int | ≥0 | ● | 분해 산출 강화석(`enhance_stone`) |
+| `disassemble.yield_by_grade.{grade}.material_qty` | int | ≥0 | ● | 분해 산출 범용 재료(`salvage_scrap`) — 몬스터 전용 재료(iron_ore 등)는 분해로 나오지 않음 |
 
 ### 검증 규칙
 - `enhance_levels["+7"].success_rate == 0.70`, `+8 == 0.55`, `+9 == 0.40`, `+10 == 0.25` (D-14, 하드 고정값 — "밸런싱 단계 조정 전제"이므로 이 문서 갱신 없이 임의 변경 금지)
 - `+1~+6`은 모두 `success_rate == 1.0`
+- `enhance_levels[].stat_multiplier`가 `+1`→`+10` 순으로 단조증가
 - `refine.max_attempts == 3` (D-13)
-- 등급이 높을수록 `disassemble.yield_by_grade`가 단조증가
+- `refine.cost_by_grade_and_attempt`에 `common` 키가 없어야 함(옵션 슬롯 0인 등급은 재련 대상이 아님)
+- 등급이 높을수록 `disassemble.yield_by_grade.{grade}.stone_qty`/`material_qty` 각각 단조증가
 
 ---
 
@@ -350,7 +390,7 @@ final_probability[grade] = raw_weight[grade] / Σ raw_weight[all grades]
 
 ### 검증 규칙 (F8-4 명시 항목: "참조 ID 존재")
 1. `telegraph_sec ≥ 0.5` 위반 시 빌드 에러 (GDD 4.2 강제 규칙)
-2. `drop_table_id` 참조 무결성: **`drop_tables.json` 파일 자체가 아직 로더에 존재하지 않는 동안(M1, M2 F3 착수 전)에는 이 규칙을 적용하지 않는다** — `drop_table_id`가 `null`이든 임의 문자열이든 빌드를 막지 않는다. `drop_tables.json`이 생성된 이후(M2 F3 착수)부터: `drop_table_id == null`은 "확정된 드랍 없음"으로 유효, `null`이 아니면 반드시 `drop_tables.json`에 실제로 존재해야 한다(위반 시 빌드 에러). 현재 `monsters.json`에 남아있는 `"slime_common"` 등 문자열은 이 시점까지 기능적으로 아무것도 참조하지 않는 예정 ID 메모이며, M2 F3 착수 시 game-designer가 실제 테이블 항목으로 채우거나 `null`로 정리한다.
+2. `drop_table_id` 참조 무결성: **M2 F3-1(`game/data/drop_tables.json` 생성)로 이 규칙이 활성화됐다(D-67).** `drop_table_id == null`은 "확정된 드랍 없음"으로 유효, `null`이 아니면 반드시 `drop_tables.json`에 실제로 존재해야 한다(위반 시 빌드 에러). `monsters.json`의 `"slime_common"`/`"horn_rabbit_common"`/`"mushroom_common"`은 이제 `drop_tables.json`의 실존 키를 가리키는 정식 참조다(값 자체는 변경하지 않았고 "자리표시자" 딱지만 뗐다). **코드 구현(`Data._validate()`에 이 교차 검증 추가)은 아직 안 됐다** — `tools/qa/validate_tables.py`가 오프라인으로 이를 검증하며, `data.gd` 반영은 godot-engineer 몫(`docs/specs/items-and-drops-m2.md` §10 엔지니어 요청 5).
 3. `tags`에 사용된 각 값이 `elements.json.holy_bonus_vs_tags`와 일관(신규 태그 추가 시 두 파일 동시 갱신)
 4. `leash_range_px > aggro_range_px > melee_range_px` (AI 상태 전이가 논리적으로 겹치지 않도록 강제)
 5. `aoe_radius_px`가 존재하면 `aoe_radius_px ≥ melee_range_px`
@@ -571,4 +611,8 @@ final_probability[grade] = raw_weight[grade] / Σ raw_weight[all grades]
 |---|---|---|
 | 결정 요청 9 | `combat.json.elements`(기존)와 신설 `elements.json`(§6) 중복 — `elements.json` 신설 승인 및 `combat.json.elements` 제거 시점(godot-engineer 작업) 결정 필요 | §6 |
 | 결정 요청 10 | 표 §14~§22(퀘스트/NPC/날씨/기믹/탈것/스폰)의 소유를 "콘텐츠·월드" 담당으로 잠정 표기함 — 실제 담당 에이전트/역할을 메인 세션이 배정해야 함(현재 조직에 해당 역할이 없다면 game-designer가 임시로 겸임할지 결정 필요) | §14, §15, §19, §20, §22 |
-| 결정 요청 11 | `luk.drop_weight_formula`(stats.json)와 `drop_tables.json`의 LUK 곱연산 공식이 이중 정의되지 않도록 단일 소스를 어느 파일로 할지 결정(§3, §9) | §3, §9 |
+| 결정 요청 11 | `luk.drop_weight_formula`(stats.json)와 `drop_tables.json`의 LUK 곱연산 공식이 이중 정의되지 않도록 단일 소스를 어느 파일로 할지 결정(§3, §9). **해소(D-52)**: `drop_tables.json._luck_formula`가 단일 소스 — `stats.json` 생성 시 문자열을 새로 쓰지 않고 이 블록을 참조만 할 것(stats.json 자체가 아직 없어 최종 확인은 결정 요청 E로 재이관) | §3, §9 |
+| 결정 요청 12 (M2-0, `items-and-drops-m2.md` §11-A) | 플레이어 방어력(defense) 소비 공식 미정 — items.json이 defense 스탯을 배분했지만(§7) 피해 감소 환산 공식이 없음. 제안: `damage_taken = incoming_atk × 100 / (100 + defense)` | §7 |
+| 결정 요청 13 (M2-0, §11-B) | 정예 2종(`elite_goblin_captain`/`elite_bunchi_spawn`)이 `monsters.json`에 몬스터 엔트리로 아직 없음(`docs/levels/hartland.md`에만 존재) — hp/atk/AI 필드 확정 담당 배정 필요 | §9, §12 |
+| 결정 요청 14 (M2-0, §11-C) | epic 이상 아이템이 M2 범위 밖이라 정예·보물상자의 `grade_base_weight.epic`을 0으로 잠갔음(F6-3 "정예=희귀~영웅"과 완전 부합 아님) — M3 epic 아이템 추가 시 함께 갱신 합의 필요 | §9 |
+| 결정 요청 15 (M2-0, §11-D) | `farming_sources.json`(F3-5, §11 표)이 아직 없어 정예 리스폰(1800s) 대비 시간당 드랍 기댓값 근사가 실제 파밍 동선과 맞는지 검증 불가 — 작성 시 `items-and-drops-m2.md` §5-3 재계산 필요 | §11 |
