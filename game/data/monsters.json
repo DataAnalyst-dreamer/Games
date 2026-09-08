@@ -1,0 +1,54 @@
+{
+  "_comment": "일반 몬스터 테이블(F6-1). 스탯 출처: docs/specs/combat-tuning-m1.md §8(M1 초원 3종, player_base_attack=10 단순 모델 기반). D-49: 방어력 필드는 M2에서 도입 — M1은 hp/atk/속도/예고 시간만. M1-1 씬 구현 범위는 slime뿐이며 horn_rabbit/mushroom은 데이터만 선반영(씬은 이후 태스크). drop_table_id는 drop_tables.json이 아직 없어 자리표시자 — 실제 드랍 테이블 구축은 game-designer 몫(TODO, 질문 목록 참고).",
+
+  "slime": {
+    "monster_id": "slime",
+    "name_ko": "방울 슬라임",
+    "region_id": "greenfield_prototype",
+    "tier": "normal",
+    "hp": 18,
+    "atk": 8,
+    "move_speed_px": 40,
+    "telegraph_sec": 0.5,
+    "attack_pattern_id": "melee_contact",
+    "drop_table_id": "slime_common",
+    "codex_entry_id": "slime",
+    "tags": [],
+    "_comment": "TTK 목표 2타(combat-tuning-m1.md §8-1). 분열(D-?)은 M2 범위."
+  },
+
+  "horn_rabbit": {
+    "monster_id": "horn_rabbit",
+    "name_ko": "뿔토끼",
+    "region_id": "greenfield_prototype",
+    "tier": "normal",
+    "hp": 27,
+    "atk": 15,
+    "move_speed_px": 50,
+    "dash_speed_px": 200,
+    "dash_duration_sec": 0.3,
+    "telegraph_sec": 0.6,
+    "attack_pattern_id": "charge",
+    "drop_table_id": "horn_rabbit_common",
+    "codex_entry_id": "horn_rabbit",
+    "tags": [],
+    "_comment": "TTK 목표 3타(풀 콤보 1회). 돌진 예고(웅크림) 0.6s. M1-1 범위 밖 — 씬 미구현, 데이터만."
+  },
+
+  "mushroom": {
+    "monster_id": "mushroom",
+    "name_ko": "버섯돌이",
+    "region_id": "greenfield_prototype",
+    "tier": "normal",
+    "hp": 45,
+    "atk": 12,
+    "atk_tick_per_sec": 4.0,
+    "move_speed_px": 20,
+    "telegraph_sec": 0.7,
+    "attack_pattern_id": "spore_patch",
+    "drop_table_id": "mushroom_common",
+    "codex_entry_id": "mushroom",
+    "tags": [],
+    "_comment": "TTK 목표 4타. 접촉 즉시 12 + 장판 내 지속 4/초(atk_tick_per_sec, 확장 필드). M1-1 범위 밖 — 씬 미구현, 데이터만."
+  }
+}

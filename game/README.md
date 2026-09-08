@@ -107,10 +107,31 @@ $GODOT --headless --path game --quit-after 120
 
 `scenes/player/Player.tscn` → `StateMachine`(`scripts/player/state_machine.gd`) 아래 자식 노드 하나가 상태 하나.
 각 상태는 `scripts/player/states/state.gd`(`PlayerState`)를 상속한 별도 스크립트이며 노드 이름이 상태 이름이다.
-전환은 상태 안에서 `finished.emit(&"Move", {})`. 현재 `Idle`, `Move` 두 개. `Attack`/`Roll`/`Hurt`/`Dead` 는
-같은 방식으로 스크립트 추가 + 노드 추가만 하면 된다.
+전환은 상태 안에서 `finished.emit(&"Move", {})`. 현재 `Idle`/`Move`/`Attack`(3타 콤보)/`Hurt`/`Dead` 다섯 개.
+`Roll`/`Guard`는 M1-2에서 같은 방식(스크립트 추가 + 노드 추가)으로 붙인다.
 
-## 남은 작업 (다음 태스크)
-- 전투: 공격/구르기/가드/피격 상태, 히트스톱·넉백·카메라 셰이크(접근성 배율), 스태미나.
+## 전투 기초 (M1-1)
+
+- **3타 콤보**: `scripts/player/states/attack.gd` + `scripts/systems/combo_state.gd`(입력 버퍼/유예/피니셔
+  후딜 타이밍을 담당하는 순수 로직, GUT 테스트 대상). 공격 프레임이 없는 Knight 시트 대신 무기 스프라이트
+  (`WeaponPivot`)를 회전시켜 휘두름을 표현한다 — pixel-artist에게 전용 공격 프레임 요청 필요(완료 보고 참고).
+- **히트박스/허트박스**: `scripts/systems/hitbox.gd`·`hurtbox.gd`(Area2D 재사용 컴포넌트, 팀 구분, 중복 타격
+  방지). `monitoring` 토글은 반드시 `set_deferred`로 한다 — 물리 신호 콜백 도중 즉시 바꾸면 다음 충돌이
+  통째로 씹히는 버그가 난다(직접 겪은 문제, 재발 방지용 메모).
+- **타격감 패키지**: `scripts/systems/hit_feel.gd`가 히트스톱(`hitstop.gd`, 개별 노드 `process_mode` 일시
+  정지 — `Engine.time_scale` 미사용)·넉백(Tween 기반 위치 보간)·흰 플래시(`hit_flash.gd`)·데미지 숫자
+  (`scenes/effects/DamageNumber.tscn`)·카메라 셰이크(`camera_shake.gd`, Phantom Camera Noise Emitter, 강공격/
+  크리티컬 한정)를 한 번에 적용한다.
+- **몬스터**: `scripts/entities/monster_base.gd`(idle/patrol/chase/telegraph/attack/hurt/dead 상태머신, 데이터
+  주도 — `monster_id`로 `monsters.json` 조회). 신규 몬스터는 이 스크립트를 그대로 쓰는 새 씬 + `monsters.json`
+  항목 추가만으로 만든다. 현재 씬이 있는 몬스터는 `scenes/entities/monsters/Slime.tscn` 하나뿐(뿔토끼·버섯돌이는
+  데이터만 존재, 씬은 이후 태스크).
+- **속성 상성**: `data/elements.json`(D-50: 단일 소스) + `scripts/systems/element_calc.gd`(순수 함수, GUT 테스트).
+- **HP/스태미나**: `scripts/player/resources.gd`(순수 로직). 스태미나는 값만 준비돼 있고 소모하는 액션
+  (구르기/강공격/가드)은 아직 없다 — M1-2 범위.
+
+## 남은 작업 (다음 태스크, M1-2)
+- 전투: 구르기(무적 0.3초, 스태미나 소모, 공격 프레임10 이후 캔슬 — `ComboState.can_roll_cancel()` 이미 존재),
+  가드/저스트 가드, 스태미나 소모 연결, 플레이어 사망 후 부활.
 - 월드: LDtk 맵 임포트 → 64×64 청크 3×3 활성화 스트리밍 (`Tuning.CHUNK_TILES`, `ACTIVE_CHUNK_RADIUS`).
-- HUD (`scenes/ui/`) — `ui/theme.tres` 적용.
+- HUD (`scenes/ui/`) — `ui/theme.tres` 적용(현재 `DebugHud`는 텍스트만).

@@ -1,0 +1,38 @@
+{
+  "_comment": "속성 상성·상태이상 테이블(F2-4, D-08, D-50). combat.json.elements의 후신 단일 소스 — D-50에 따라 combat.json에는 더 이상 elements 서브 객체가 없다. status_effects의 수치는 GDD/결정문서에 확정치가 없는 game-designer 밸런싱 대상 제안값이라 '_balance_todo'로 표시한다.",
+
+  "cycle": ["fire", "wind", "thunder", "water"],
+  "advantage_multiplier": 1.5,
+  "holy_element": "holy",
+  "holy_bonus_vs_tags": ["demon"],
+
+  "status_effects": {
+    "_comment": "화상/빙결/감전 파라미터. GDD 4.2는 존재만 확정하고 수치는 미확정 — 제안값(game-designer 밸런싱 필요).",
+    "burn": {
+      "dps": 4.0,
+      "duration_sec": 3.0,
+      "buildup_threshold": 100.0
+    },
+    "freeze": {
+      "duration_sec": 1.5,
+      "buildup_threshold": 100.0
+    },
+    "shock": {
+      "stun_duration_sec": 1.0,
+      "buildup_threshold": 100.0
+    }
+  },
+
+  "boss_resistance_multiplier": 0.5,
+
+  "_balance_todo": [
+    "status_effects.burn.dps",
+    "status_effects.burn.duration_sec",
+    "status_effects.burn.buildup_threshold",
+    "status_effects.freeze.duration_sec",
+    "status_effects.freeze.buildup_threshold",
+    "status_effects.shock.stun_duration_sec",
+    "status_effects.shock.buildup_threshold",
+    "boss_resistance_multiplier"
+  ]
+}

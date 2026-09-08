@@ -1,0 +1,94 @@
+## 기본 공격 3타 콤보 상태(F2-1 S2-1a). 타이밍(입력 버퍼/리셋/피니셔 후딜)은
+## scripts/systems/combo_state.gd(순수 로직, GUT 테스트 대상)에 위임하고, 이 상태는
+## 그 결과를 받아 이동(짧은 전진)·애니메이션(무기 스프라이트 휘두름)·히트박스만 다룬다.
+## 콤보 중 피격 시 Hurt 상태가 exit()에서 콤보를 리셋한다(S2-1a 예외).
+extends PlayerState
+
+var combo: ComboState
+
+var _lunge_dir: Vector2 = Vector2.DOWN
+
+
+func enter(_prev: StringName, _data: Dictionary = {}) -> void:
+	if combo == null:
+		combo = _make_combo_state()
+	else:
+		combo.reset()
+	_lunge_dir = player.facing
+	combo.on_attack_input()
+	_start_current_hit()
+
+
+func exit() -> void:
+	if player.hitbox != null:
+		player.hitbox.deactivate()
+	combo.reset()
+
+
+func handle_input(event: InputEvent) -> void:
+	if event.is_action_pressed("attack"):
+		var new_dir := player.get_move_input()
+		if combo.on_attack_input():
+			if new_dir != Vector2.ZERO:
+				_lunge_dir = new_dir
+				player.set_facing(new_dir)
+			_start_current_hit()
+
+
+func physics_update(delta: float) -> void:
+	var result: Dictionary = combo.update(delta)
+	if result.reset:
+		finished.emit(&"Idle", {})
+		return
+	if result.entered_finisher_recovery and player.hitbox != null:
+		player.hitbox.deactivate()
+	if result.advanced:
+		_start_current_hit()
+	# 타별 짧은 전진의 잔여 속도를 감쇠시키며 소화(S2-1a: "짧은 전진 이동 포함").
+	player.velocity = player.velocity.move_toward(Vector2.ZERO, 900.0 * delta)
+	player.move_and_slide()
+
+
+## 구르기 캔슬 가능 여부(S2-1b: "공격 애니메이션 특정 프레임 이후 구르기로 캔슬 가능").
+## 구르기 자체는 M1-2 구현 대상이라 이 플래그만 미리 노출해 둔다.
+func can_roll_cancel() -> bool:
+	var after_sec: float = float(Data.get_value("combat", "combo.finisher_roll_cancel_after_sec", 0.167))
+	return combo.can_roll_cancel(after_sec)
+
+
+func _start_current_hit() -> void:
+	var hit_index: int = combo.hit_index
+	player.play_anim("idle")
+	player.play_attack_swing(hit_index, combo.hit_duration_sec)
+	var lunge_speed: float = Tuning.ATTACK_LUNGE_PX / maxf(combo.hit_duration_sec, 0.01)
+	player.velocity = _lunge_dir * lunge_speed
+	_fire_hitbox(hit_index)
+
+
+func _fire_hitbox(hit_index: int) -> void:
+	var hitbox := player.hitbox
+	if hitbox == null:
+		return
+	var mults: Array = Data.get_value("combat", "combo.damage_multipliers", [1.0, 1.0, 1.5])
+	var mult: float = float(mults[clampi(hit_index - 1, 0, mults.size() - 1)])
+	var is_finisher: bool = hit_index >= combo.max_hits
+	hitbox.damage = int(round(Tuning.PLAYER_BASE_ATTACK * mult))
+	hitbox.knockback_px = float(Data.get_value(
+		"combat", "knockback.heavy_px" if is_finisher else "knockback.normal_px", 8.0))
+	hitbox.hitstop_sec = float(Data.get_value(
+		"combat", "hitstop.heavy_crit_sec" if is_finisher else "hitstop.normal_sec", 0.05))
+	hitbox.is_heavy = is_finisher
+	hitbox.element = &""
+	hitbox.source = player
+	hitbox.position = _lunge_dir * 10.0
+	hitbox.activate(combo.hit_duration_sec)
+
+
+func _make_combo_state() -> ComboState:
+	return ComboState.new(
+		int(Data.get_value("combat", "combo.hits", 3)),
+		float(Data.get_value("combat", "combo.input_buffer_sec", 0.2)),
+		float(Data.get_value("combat", "combo.reset_after_sec", 0.6)),
+		Tuning.ATTACK_HIT_DURATION_SEC,
+		float(Data.get_value("combat", "combo.finisher_recovery_sec", 0.35)),
+	)
