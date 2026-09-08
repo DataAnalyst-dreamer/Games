@@ -65,9 +65,22 @@ func _start_current_hit() -> void:
 	var hit_index: int = combo.hit_index
 	player.play_anim("idle")
 	player.play_attack_swing(hit_index, combo.hit_duration_sec)
+	_play_swing_sfx(hit_index)
 	var lunge_speed: float = Tuning.ATTACK_LUNGE_PX / maxf(combo.hit_duration_sec, 0.01)
 	player.velocity = _lunge_dir * lunge_speed
 	_fire_hitbox(hit_index)
+
+
+## 콤보 1·2타는 가볍게, 3타(피니셔)는 무겁게(sound-map-m1.md §1). 피니셔는 고정 사운드
+## 위에 저음 레이어를 얹는다(변주 축소 — 항상 같은 무게감).
+func _play_swing_sfx(hit_index: int) -> void:
+	if hit_index >= combo.max_hits:
+		AudioManager.play_sfx(&"atk_swing_finisher", player.global_position, 0.03)
+		AudioManager.play_sfx(&"atk_swing_finisher_layer", player.global_position, 0.0)
+	elif hit_index == 2:
+		AudioManager.play_sfx(&"atk_swing_2", player.global_position)
+	else:
+		AudioManager.play_sfx(&"atk_swing_1", player.global_position)
 
 
 func _fire_hitbox(hit_index: int) -> void:
@@ -78,10 +91,16 @@ func _fire_hitbox(hit_index: int) -> void:
 	var mult: float = float(mults[clampi(hit_index - 1, 0, mults.size() - 1)])
 	var is_finisher: bool = hit_index >= combo.max_hits
 	hitbox.damage = int(round(Tuning.PLAYER_BASE_ATTACK * mult))
+	# QA 리뷰 Minor-2(docs/qa/review-m1-1-m1-2.md): fallback도 is_finisher 분기를 따라야
+	# 한다 — 예전엔 세 번째 인자(기본값)가 분기와 무관하게 일반값(8.0/0.05)으로 고정돼
+	# 있어서, Minor-1과 겹쳐 heavy 키가 사라지면 피니셔 타격이 조용히 일반 타격 수치로
+	# 강등됐다.
 	hitbox.knockback_px = float(Data.get_value(
-		"combat", "knockback.heavy_px" if is_finisher else "knockback.normal_px", 8.0))
+		"combat", "knockback.heavy_px" if is_finisher else "knockback.normal_px",
+		20.0 if is_finisher else 8.0))
 	hitbox.hitstop_sec = float(Data.get_value(
-		"combat", "hitstop.heavy_crit_sec" if is_finisher else "hitstop.normal_sec", 0.05))
+		"combat", "hitstop.heavy_crit_sec" if is_finisher else "hitstop.normal_sec",
+		0.1 if is_finisher else 0.05))
 	hitbox.is_heavy = is_finisher
 	hitbox.element = &""
 	hitbox.source = player

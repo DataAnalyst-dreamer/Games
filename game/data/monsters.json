@@ -1,5 +1,5 @@
 {
-  "_comment": "일반 몬스터 테이블(F6-1). 스탯 출처: docs/specs/combat-tuning-m1.md §8(M1 초원 3종, player_base_attack=10 단순 모델 기반). D-49: 방어력 필드는 M2에서 도입 — M1은 hp/atk/속도/예고 시간만. M1-1 씬 구현 범위는 slime뿐이며 horn_rabbit/mushroom은 데이터만 선반영(씬은 이후 태스크). drop_table_id는 drop_tables.json이 아직 없어 자리표시자 — 실제 드랍 테이블 구축은 game-designer 몫(TODO, 질문 목록 참고).",
+  "_comment": "일반 몬스터 테이블(F6-1). 스탯 출처: docs/specs/combat-tuning-m1.md §8(M1 초원 3종, player_base_attack=10 단순 모델 기반). D-49: 방어력 필드는 M2에서 도입 — M1은 hp/atk/속도/예고 시간만. AI 공통 5필드(aggro_range_px/melee_range_px/attack_recovery_sec/patrol_radius_px/leash_range_px)는 docs/specs/combat-tuning-m1-addendum.md §4 확정값(D-65 예정) — tuning.gd의 MONSTER_DETECTION_RADIUS_PX 등 공통 임시 상수를 대체한다(불변식: leash_range_px > aggro_range_px > melee_range_px, data.gd에서 검증). M1-1에서는 slime만 씬이 있었으나 M1-3에서 horn_rabbit(Racoon 대역)·mushroom(Mushroom 대역) 씬을 추가했다(scripts/entities/monster_base.gd가 attack_pattern_id로 분기: melee_contact/charge/spore_patch). drop_table_id는 drop_tables.json이 아직 없어 자리표시자(addendum §6, D-67 예정: 참조 무결성 검증은 drop_tables.json 생성 이후부터 적용) — 실제 드랍 테이블 구축은 game-designer 몫(M2 F3).",
 
   "slime": {
     "monster_id": "slime",
@@ -11,10 +11,15 @@
     "move_speed_px": 40,
     "telegraph_sec": 0.5,
     "attack_pattern_id": "melee_contact",
+    "aggro_range_px": 64,
+    "melee_range_px": 14,
+    "attack_recovery_sec": 0.4,
+    "patrol_radius_px": 32,
+    "leash_range_px": 140,
     "drop_table_id": "slime_common",
     "codex_entry_id": "slime",
     "tags": [],
-    "_comment": "TTK 목표 2타(combat-tuning-m1.md §8-1). 분열(D-?)은 M2 범위."
+    "_comment": "TTK 목표 2타(combat-tuning-m1.md §8-1). 분열(D-?)은 M2 범위. AI 5필드는 addendum §4-3 '슬라임=기존 공통값 유지(튜토리얼 기준선)'."
   },
 
   "horn_rabbit": {
@@ -29,10 +34,15 @@
     "dash_duration_sec": 0.3,
     "telegraph_sec": 0.6,
     "attack_pattern_id": "charge",
+    "aggro_range_px": 80,
+    "melee_range_px": 16,
+    "attack_recovery_sec": 0.7,
+    "patrol_radius_px": 96,
+    "leash_range_px": 180,
     "drop_table_id": "horn_rabbit_common",
     "codex_entry_id": "horn_rabbit",
     "tags": [],
-    "_comment": "TTK 목표 3타(풀 콤보 1회). 돌진 예고(웅크림) 0.6s. M1-1 범위 밖 — 씬 미구현, 데이터만."
+    "_comment": "TTK 목표 3타(풀 콤보 1회). 돌진 예고(웅크림) 0.6s. M1-3: Racoon 대역 씬(scenes/entities/monsters/HornRabbit.tscn) 추가 — 예고 후 dash_speed_px/dash_duration_sec으로 돌진, 벽 충돌 시 기절(Tuning.DASH_WALL_STUN_SEC, _balance_todo). AI 5필드는 addendum §4-3: 조기 감지(넓은 aggro)·큰 후딜(반격 기회 보장)·활발한 순찰·먼 추적 거리."
   },
 
   "mushroom": {
@@ -43,12 +53,18 @@
     "hp": 45,
     "atk": 12,
     "atk_tick_per_sec": 4.0,
+    "aoe_radius_px": 32,
     "move_speed_px": 20,
     "telegraph_sec": 0.7,
     "attack_pattern_id": "spore_patch",
+    "aggro_range_px": 96,
+    "melee_range_px": 20,
+    "attack_recovery_sec": 1.0,
+    "patrol_radius_px": 0,
+    "leash_range_px": 120,
     "drop_table_id": "mushroom_common",
     "codex_entry_id": "mushroom",
     "tags": [],
-    "_comment": "TTK 목표 4타. 접촉 즉시 12 + 장판 내 지속 4/초(atk_tick_per_sec, 확장 필드). M1-1 범위 밖 — 씬 미구현, 데이터만."
+    "_comment": "TTK 목표 4타. 접촉 즉시 atk(12) + 장판 내 지속 atk_tick_per_sec(4/초, 무적 프레임 중에도 적용 — D-61 예정, Hitbox.ignores_iframes 경로). M1-3: Mushroom 대역 씬(scenes/entities/monsters/Mushroom.tscn) 추가. patrol_radius_px=0=고정형(순찰 없음, addendum §4-3). aoe_radius_px(32) >= melee_range_px(20, 트리거 거리) — 장판이 트리거 지점보다 넓게 퍼짐(data.gd 검증)."
   }
 }

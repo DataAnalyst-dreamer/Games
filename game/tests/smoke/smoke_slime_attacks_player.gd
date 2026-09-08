@@ -2,7 +2,7 @@
 ##
 ## 실행: godot --headless --path game res://tests/smoke/SmokeSlimeAttacksPlayer.tscn --quit-after 400
 ##
-## Slime1을 플레이어의 인지 범위 안(Tuning.MONSTER_DETECTION_RADIUS_PX=64) 겸 근접
+## Slime1을 플레이어의 인지 범위 안(monsters.json.slime.aggro_range_px=64) 겸 근접
 ## 사거리 밖에 두어 AI가 스스로 idle→patrol/chase→telegraph→attack까지 진행하게 둔다
 ## (수동으로 상태를 강제하지 않고 실제 상태머신 전이를 그대로 관찰).
 extends Node

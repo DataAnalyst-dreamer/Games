@@ -46,6 +46,7 @@ func _on_body_exited(body: Node) -> void:
 
 
 func _play_activation_feedback() -> void:
+	AudioManager.play_sfx(&"waystone_activate", global_position)
 	if _visual == null:
 		return
 	var tween := create_tween()

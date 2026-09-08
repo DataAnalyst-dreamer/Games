@@ -104,7 +104,7 @@
 
 | 이벤트 | 트리거 | 파일 | 볼륨(dB) | 피치 변주 | 재생 규칙 |
 |---|---|---|---|---|---|
-| 플레이어 사망 | `Events.player_died` (전역 구독 가능 — 페이로드 불필요, `player.gd:_die()`가 emit) | `NA/Jingles/GameOver1.wav` | -2 | 1.0±0% | 단일 보이스. **BGM 즉시 -12dB 덕킹**(사망 연출 1.0초, `DEATH_RESPAWN_DELAY_SEC`) 후 부활 시 원복 |
+| 플레이어 사망 | `Events.player_died` (전역 구독 가능 — 페이로드 불필요, `player.gd:_die()`가 emit) | `NA/Jingles/GameOver.wav` | -2 | 1.0±0% | 단일 보이스. **BGM 즉시 -12dB 덕킹**(사망 연출 1.0초, `DEATH_RESPAWN_DELAY_SEC`) 후 부활 시 원복 |
 | 플레이어 부활 | `Events.player_respawned` (전역 구독, `player.gd:respawn()`이 emit) | `NA/Jingles/Success2.wav` | -4 | 1.0±0% | 단일 보이스, BGM 덕킹 해제와 동시 |
 
 ---
@@ -126,7 +126,7 @@ GDD 11장 UI(인벤토리·메뉴 커서 이동)는 M1 로드맵 범위 밖이�
 | 이벤트 | 파일 | 볼륨(dB) | 피치 변주 | 재생 규칙 |
 |---|---|---|---|---|
 | UI 커서 이동 | `NA/Sounds/Menu/Move1.wav` | -12 | 1.0±0% | 디바운스 0.05초(연타/연속 포커스 변경 시) |
-| UI 확인 | `NA/Sounds/Menu/Accept1.wav` | -10 | 1.0±0% | 단일 보이스 |
+| UI 확인 | `NA/Sounds/Menu/Accept.wav` | -10 | 1.0±0% | 단일 보이스 |
 | UI 취소 | `NA/Sounds/Menu/Cancel.wav` | -10 | 1.0±0% | 단일 보이스 |
 
 ---

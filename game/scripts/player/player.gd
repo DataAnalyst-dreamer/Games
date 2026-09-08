@@ -37,7 +37,10 @@ var _iframe_remaining: float = 0.0
 
 
 func _ready() -> void:
-	walk_speed = float(Data.get_value("combat", "movement.walk_speed_px", 0.0))
+	# QA 리뷰 Minor-2(docs/qa/review-m1-1-m1-2.md): fallback을 80.0(RELEASE_FALLBACKS와
+	# 동일한 확정값)으로 맞춘다 — 예전엔 0.0이라 키가 사라지면 플레이어가 완전히
+	# 움직이지 못하는 최악의 실패 모드가 조용히 발생했다.
+	walk_speed = float(Data.get_value("combat", "movement.walk_speed_px", 80.0))
 	for dir_name: String in DIR_NAMES.values():
 		sprite.sprite_frames.set_animation_speed("walk_" + dir_name, Tuning.ANIM_WALK_FPS)
 		sprite.sprite_frames.set_animation_speed("idle_" + dir_name, Tuning.ANIM_IDLE_FPS)
@@ -113,6 +116,7 @@ func _apply_full_hit(source_hitbox: Hitbox) -> void:
 	var died: bool = resources.take_damage(damage)
 	Events.player_damaged.emit(damage, source_hitbox.source)
 	Events.player_hp_changed.emit(resources.hp, resources.max_hp)
+	AudioManager.play_sfx(&"player_hurt", global_position)
 	if died:
 		_die()
 	else:
@@ -141,6 +145,8 @@ func _handle_guarded_hit(source_hitbox: Hitbox, guard_state: GuardState) -> void
 	var died: bool = resources.take_damage(damage)
 	Events.player_damaged.emit(damage, source_hitbox.source)
 	Events.player_hp_changed.emit(resources.hp, resources.max_hp)
+	Events.player_guarded.emit(source_hitbox.damage - damage, false)
+	AudioManager.play_sfx(&"player_guard_chip", global_position)
 	HitFlash.flash(sprite)
 	HitFeel.spawn_damage_number(self, damage, false)
 	if died:
@@ -153,6 +159,7 @@ func _handle_guarded_hit(source_hitbox: Hitbox, guard_state: GuardState) -> void
 ## TODO — 완료 보고 질문 목록 참고).
 func _handle_just_guard(source_hitbox: Hitbox) -> void:
 	Events.just_guard_succeeded.emit(self, source_hitbox.source)
+	Events.player_guarded.emit(source_hitbox.damage, true)
 	var stagger_sec: float = float(Data.get_value("combat", "guard.just_guard_enemy_stagger_sec", 0.4))
 	source_hitbox.stagger_requested.emit(stagger_sec)
 	HitFlash.flash(sprite)

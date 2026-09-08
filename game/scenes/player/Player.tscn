@@ -19,46 +19,46 @@ atlas = ExtResource("1_knight")
 region = Rect2(0, 0, 16, 16)
 [sub_resource type="AtlasTexture" id="at_down_1"]
 atlas = ExtResource("1_knight")
-region = Rect2(0, 16, 16, 16)
+region = Rect2(16, 0, 16, 16)
 [sub_resource type="AtlasTexture" id="at_down_2"]
 atlas = ExtResource("1_knight")
-region = Rect2(0, 32, 16, 16)
+region = Rect2(32, 0, 16, 16)
 [sub_resource type="AtlasTexture" id="at_down_3"]
 atlas = ExtResource("1_knight")
-region = Rect2(0, 48, 16, 16)
-[sub_resource type="AtlasTexture" id="at_up_0"]
-atlas = ExtResource("1_knight")
-region = Rect2(16, 0, 16, 16)
-[sub_resource type="AtlasTexture" id="at_up_1"]
-atlas = ExtResource("1_knight")
-region = Rect2(16, 16, 16, 16)
-[sub_resource type="AtlasTexture" id="at_up_2"]
-atlas = ExtResource("1_knight")
-region = Rect2(16, 32, 16, 16)
-[sub_resource type="AtlasTexture" id="at_up_3"]
-atlas = ExtResource("1_knight")
-region = Rect2(16, 48, 16, 16)
+region = Rect2(48, 0, 16, 16)
 [sub_resource type="AtlasTexture" id="at_left_0"]
 atlas = ExtResource("1_knight")
-region = Rect2(32, 0, 16, 16)
+region = Rect2(0, 16, 16, 16)
 [sub_resource type="AtlasTexture" id="at_left_1"]
 atlas = ExtResource("1_knight")
-region = Rect2(32, 16, 16, 16)
+region = Rect2(16, 16, 16, 16)
 [sub_resource type="AtlasTexture" id="at_left_2"]
 atlas = ExtResource("1_knight")
-region = Rect2(32, 32, 16, 16)
+region = Rect2(32, 16, 16, 16)
 [sub_resource type="AtlasTexture" id="at_left_3"]
 atlas = ExtResource("1_knight")
-region = Rect2(32, 48, 16, 16)
-[sub_resource type="AtlasTexture" id="at_right_0"]
-atlas = ExtResource("1_knight")
-region = Rect2(48, 0, 16, 16)
-[sub_resource type="AtlasTexture" id="at_right_1"]
-atlas = ExtResource("1_knight")
 region = Rect2(48, 16, 16, 16)
-[sub_resource type="AtlasTexture" id="at_right_2"]
+[sub_resource type="AtlasTexture" id="at_up_0"]
+atlas = ExtResource("1_knight")
+region = Rect2(0, 32, 16, 16)
+[sub_resource type="AtlasTexture" id="at_up_1"]
+atlas = ExtResource("1_knight")
+region = Rect2(16, 32, 16, 16)
+[sub_resource type="AtlasTexture" id="at_up_2"]
+atlas = ExtResource("1_knight")
+region = Rect2(32, 32, 16, 16)
+[sub_resource type="AtlasTexture" id="at_up_3"]
 atlas = ExtResource("1_knight")
 region = Rect2(48, 32, 16, 16)
+[sub_resource type="AtlasTexture" id="at_right_0"]
+atlas = ExtResource("1_knight")
+region = Rect2(0, 48, 16, 16)
+[sub_resource type="AtlasTexture" id="at_right_1"]
+atlas = ExtResource("1_knight")
+region = Rect2(16, 48, 16, 16)
+[sub_resource type="AtlasTexture" id="at_right_2"]
+atlas = ExtResource("1_knight")
+region = Rect2(32, 48, 16, 16)
 [sub_resource type="AtlasTexture" id="at_right_3"]
 atlas = ExtResource("1_knight")
 region = Rect2(48, 48, 16, 16)

@@ -1,0 +1,149 @@
+{
+  "_comment": "SFX 이벤트 → 파일 매핑(F8-4 데이터 테이블 원칙 — AudioManager 코드에 경로/dB/피치를 하드코딩하지 않는다). 출처: docs/audio/sound-map-m1.md(§1~§8) + docs/audio/audio-spec.md §6-2 스키마. sfxr 필요 3건 중 2건(just_guard_success/stamina_exhausted)은 기존 CC0 팩 임시 대체 파일로 즉시 재생 가능(§10) — legendary_drop_sparkle은 드랍 시스템(M2) 자체가 없어 이번 테이블에서 제외. priority는 audio-spec.md §3-2 티어(0=최우선~3=최하), max_voices/cooldown_sec은 sound-map의 '재생 규칙' 열을 그대로 옮긴다. files가 2개 이상이면 재생마다 무작위 하나를 고른다(풀).",
+
+  "atk_swing_1": {
+    "files": [
+      "res://assets/third_party/ninja_adventure/Audio/Sounds/Whoosh & Slash/Slash.wav",
+      "res://assets/third_party/ninja_adventure/Audio/Sounds/Whoosh & Slash/Slash4.wav"
+    ],
+    "bus": "SFX", "volume_db": -8.0, "pitch_min": 0.95, "pitch_max": 1.05,
+    "max_voices": 2, "cooldown_sec": 0.0, "priority": 1
+  },
+  "atk_swing_2": {
+    "files": [
+      "res://assets/third_party/ninja_adventure/Audio/Sounds/Whoosh & Slash/Slash2.wav",
+      "res://assets/third_party/ninja_adventure/Audio/Sounds/Whoosh & Slash/Slash5.wav"
+    ],
+    "bus": "SFX", "volume_db": -7.0, "pitch_min": 0.95, "pitch_max": 1.05,
+    "max_voices": 2, "cooldown_sec": 0.0, "priority": 1
+  },
+  "atk_swing_finisher": {
+    "files": ["res://assets/third_party/ninja_adventure/Audio/Sounds/Whoosh & Slash/Slash3.wav"],
+    "bus": "SFX", "volume_db": -4.0, "pitch_min": 0.97, "pitch_max": 1.03,
+    "max_voices": 1, "cooldown_sec": 0.0, "priority": 1
+  },
+  "atk_swing_finisher_layer": {
+    "files": ["res://assets/third_party/ninja_adventure/Audio/Sounds/Whoosh & Slash/Whoosh.wav"],
+    "bus": "SFX", "volume_db": -14.0, "pitch_min": 1.0, "pitch_max": 1.0,
+    "max_voices": 1, "cooldown_sec": 0.0, "priority": 1
+  },
+
+  "hit_normal": {
+    "files": [
+      "res://assets/third_party/ninja_adventure/Audio/Sounds/Hit & Impact/Hit1.wav",
+      "res://assets/third_party/ninja_adventure/Audio/Sounds/Hit & Impact/Hit2.wav",
+      "res://assets/third_party/ninja_adventure/Audio/Sounds/Hit & Impact/Hit3.wav"
+    ],
+    "bus": "SFX", "volume_db": -4.0, "pitch_min": 0.92, "pitch_max": 1.08,
+    "max_voices": 4, "cooldown_sec": 0.0, "priority": 1
+  },
+  "hit_heavy": {
+    "files": [
+      "res://assets/third_party/ninja_adventure/Audio/Sounds/Hit & Impact/Hit6.wav",
+      "res://assets/third_party/ninja_adventure/Audio/Sounds/Hit & Impact/Hit7.wav"
+    ],
+    "bus": "SFX", "volume_db": 0.0, "pitch_min": 0.95, "pitch_max": 1.05,
+    "max_voices": 2, "cooldown_sec": 0.0, "priority": 1
+  },
+  "hit_critical_layer": {
+    "files": ["res://assets/third_party/ninja_adventure/Audio/Sounds/Bonus/PowerUp1.wav"],
+    "bus": "SFX", "volume_db": -6.0, "pitch_min": 1.0, "pitch_max": 1.0,
+    "max_voices": 2, "cooldown_sec": 0.0, "priority": 1
+  },
+
+  "player_hurt": {
+    "files": [
+      "res://assets/third_party/ninja_adventure/Audio/Sounds/Hit & Impact/Impact.wav",
+      "res://assets/third_party/ninja_adventure/Audio/Sounds/Hit & Impact/Impact2.wav",
+      "res://assets/third_party/ninja_adventure/Audio/Sounds/Hit & Impact/Impact3.wav"
+    ],
+    "bus": "SFX", "volume_db": -3.0, "pitch_min": 0.9, "pitch_max": 1.1,
+    "max_voices": 2, "cooldown_sec": 0.0, "priority": 0
+  },
+  "player_guard_chip": {
+    "files": [
+      "res://assets/third_party/ninja_adventure/Audio/Sounds/Hit & Impact/Impact4.wav",
+      "res://assets/third_party/ninja_adventure/Audio/Sounds/Hit & Impact/Impact5.wav"
+    ],
+    "bus": "SFX", "volume_db": -6.0, "pitch_min": 0.95, "pitch_max": 1.05,
+    "max_voices": 1, "cooldown_sec": 0.0, "priority": 0
+  },
+  "just_guard_success": {
+    "_comment": "sfxr 필요(§10-2 just_guard_parry_ting) — 임시 대체 파일.",
+    "files": ["res://assets/third_party/ninja_adventure/Audio/Sounds/Bonus/Bonus2.wav"],
+    "bus": "SFX", "volume_db": -2.0, "pitch_min": 1.0, "pitch_max": 1.0,
+    "max_voices": 1, "cooldown_sec": 0.0, "priority": 0
+  },
+  "stamina_exhausted": {
+    "_comment": "sfxr 필요(§10-1 stamina_exhausted_deny) — 임시 대체 파일.",
+    "files": ["res://assets/third_party/ninja_adventure/Audio/Sounds/Alert/Alert4.wav"],
+    "bus": "SFX", "volume_db": -6.0, "pitch_min": 1.0, "pitch_max": 1.0,
+    "max_voices": 1, "cooldown_sec": 0.3, "priority": 0
+  },
+
+  "player_roll": {
+    "files": ["res://assets/third_party/ninja_adventure/Audio/Sounds/Whoosh & Slash/Whoosh2.wav"],
+    "bus": "SFX", "volume_db": -10.0, "pitch_min": 0.95, "pitch_max": 1.05,
+    "max_voices": 1, "cooldown_sec": 0.0, "priority": 1
+  },
+
+  "slime_telegraph": {
+    "files": ["res://assets/third_party/ninja_adventure/Audio/Sounds/Alert/Alert.wav"],
+    "bus": "SFX", "volume_db": -8.0, "pitch_min": 1.0, "pitch_max": 1.0,
+    "max_voices": 4, "cooldown_sec": 0.0, "priority": 2
+  },
+  "slime_attack": {
+    "files": ["res://assets/third_party/ninja_adventure/Audio/Sounds/Elemental/Bubble2.wav"],
+    "bus": "SFX", "volume_db": -6.0, "pitch_min": 0.9, "pitch_max": 1.1,
+    "max_voices": 4, "cooldown_sec": 0.0, "priority": 2
+  },
+  "slime_hurt": {
+    "files": [
+      "res://assets/third_party/ninja_adventure/Audio/Sounds/Jump & Bounce/Bounce2.wav",
+      "res://assets/third_party/ninja_adventure/Audio/Sounds/Jump & Bounce/Bounce3.wav"
+    ],
+    "bus": "SFX", "volume_db": -5.0, "pitch_min": 0.9, "pitch_max": 1.15,
+    "max_voices": 6, "cooldown_sec": 0.0, "priority": 2
+  },
+  "slime_death": {
+    "files": ["res://assets/third_party/ninja_adventure/Audio/Sounds/Elemental/Bubble.wav"],
+    "bus": "SFX", "volume_db": -3.0, "pitch_min": 0.85, "pitch_max": 0.95,
+    "max_voices": 4, "cooldown_sec": 0.0, "priority": 2
+  },
+
+  "player_death_jingle": {
+    "_comment": "sound-map-m1.md은 'GameOver1.wav'를 지정했으나 실제 팩 파일명은 'GameOver.wav'(1 접미사 없음) — 문서-애셋 파일명 불일치, game-designer 확인 필요(완료 보고 질문 목록 참고).",
+    "files": ["res://assets/third_party/ninja_adventure/Audio/Jingles/GameOver.wav"],
+    "bus": "SFX", "volume_db": -2.0, "pitch_min": 1.0, "pitch_max": 1.0,
+    "max_voices": 1, "cooldown_sec": 0.0, "priority": 0
+  },
+  "player_respawn_jingle": {
+    "files": ["res://assets/third_party/ninja_adventure/Audio/Jingles/Success2.wav"],
+    "bus": "SFX", "volume_db": -4.0, "pitch_min": 1.0, "pitch_max": 1.0,
+    "max_voices": 1, "cooldown_sec": 0.0, "priority": 0
+  },
+
+  "waystone_activate": {
+    "files": ["res://assets/third_party/ninja_adventure/Audio/Sounds/Magic & Skill/Fx.wav"],
+    "bus": "SFX", "volume_db": -5.0, "pitch_min": 1.0, "pitch_max": 1.0,
+    "max_voices": 1, "cooldown_sec": 0.0, "priority": 3
+  },
+
+  "ui_cursor_move": {
+    "_comment": "M1 시점 메뉴 시스템 미구현 — 자산만 선반영(sound-map §8). 실제 배선은 UI 착수 시.",
+    "files": ["res://assets/third_party/ninja_adventure/Audio/Sounds/Menu/Move1.wav"],
+    "bus": "UI", "volume_db": -12.0, "pitch_min": 1.0, "pitch_max": 1.0,
+    "max_voices": 1, "cooldown_sec": 0.05, "priority": 3
+  },
+  "ui_confirm": {
+    "_comment": "sound-map-m1.md은 'Accept1.wav'를 지정했으나 실제 팩 파일명은 'Accept.wav' — 문서-애셋 파일명 불일치, game-designer 확인 필요.",
+    "files": ["res://assets/third_party/ninja_adventure/Audio/Sounds/Menu/Accept.wav"],
+    "bus": "UI", "volume_db": -10.0, "pitch_min": 1.0, "pitch_max": 1.0,
+    "max_voices": 1, "cooldown_sec": 0.0, "priority": 3
+  },
+  "ui_cancel": {
+    "files": ["res://assets/third_party/ninja_adventure/Audio/Sounds/Menu/Cancel.wav"],
+    "bus": "UI", "volume_db": -10.0, "pitch_min": 1.0, "pitch_max": 1.0,
+    "max_voices": 1, "cooldown_sec": 0.0, "priority": 3
+  }
+}

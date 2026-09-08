@@ -27,6 +27,7 @@ func enter(_prev: StringName, _data: Dictionary = {}) -> void:
 		finished.emit(&"Idle", {})
 		return
 	Events.player_stamina_changed.emit(player.resources.stamina, player.resources.max_stamina)
+	AudioManager.play_sfx(&"player_roll", player.global_position)
 
 	# S2-1b: "회피 입력 시 현재 방향(미입력 시 바라보는 방향)으로 즉시 발동".
 	var input_dir := player.get_move_input()

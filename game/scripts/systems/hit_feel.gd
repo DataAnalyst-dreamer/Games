@@ -19,10 +19,26 @@ static func apply(defender_body: Node2D, flash_target: CanvasItem, hitbox: Hitbo
 	var damage: int = int(round(hitbox.damage * multiplier))
 	var is_advantage: bool = multiplier > 1.0
 
+	# 타격 임팩트 SFX(sound-map-m1.md §2/§12): Events 구독만으로는 hitbox.is_heavy가
+	# 페이로드에 없어 강공격/일반을 구분할 수 없으므로 여기서 직접 호출한다. Hitstop.
+	# apply_to() 호출과 같은 프레임에, 가능한 한 그 직전에 재생해야 화면이 얼어붙기
+	# 전에 이미 소리가 나고 있다("즉시 느껴짐", GDD 4.2 원칙 1).
+	AudioManager.play_sfx(&"hit_heavy" if hitbox.is_heavy else &"hit_normal", defender_body.global_position)
+	if is_advantage:
+		AudioManager.play_sfx(&"hit_critical_layer", defender_body.global_position)
+
 	# 히트스톱: 공격자·피격자 양측(F2-2 "양측 0.05~0.1초 히트스톱").
-	var nodes_to_freeze: Array = [defender_body]
-	if hitbox.source != null and is_instance_valid(hitbox.source):
-		nodes_to_freeze.append(hitbox.source)
+	#
+	# QA 리뷰 Major-2 수정(docs/qa/review-m1-1-m1-2.md): Player 전체 노드를 얼리면
+	# process_mode=DISABLED가 자식까지 강제 전파되어 Player._unhandled_input()도 함께
+	# 차단된다 — 콤보 입력 버퍼(0.2s)와 히트스톱 창이 겹치는 프레임(적이 사거리 경계에
+	# 있거나 이동형 적 상대)에서 재입력이 소실된다. Player는 노드 전체 대신 "보이는
+	# 부분"(스프라이트+무기 스프라이트)만 얼려 시각적 정지감은 유지하되
+	# _unhandled_input/물리 처리는 계속 흐르게 한다. 몬스터 등 입력이 없는 노드는 기존대로
+	# 노드 전체를 얼린다.
+	var nodes_to_freeze: Array = []
+	_collect_freeze_targets(defender_body, nodes_to_freeze)
+	_collect_freeze_targets(hitbox.source, nodes_to_freeze)
 	Hitstop.apply_to(nodes_to_freeze, hitbox.hitstop_sec)
 
 	if hitbox.knockback_px > 0.0:
@@ -33,13 +49,53 @@ static func apply(defender_body: Node2D, flash_target: CanvasItem, hitbox: Hitbo
 
 	spawn_damage_number(defender_body, damage, is_advantage)
 
-	Events.hit_landed.emit(hitbox.source, defender_body, damage, is_advantage)
+	# M1에는 LUK 기반 진짜 크리티컬이 없다(is_critical은 항상 false) — is_advantage(원소
+	# 상성 적중)와 이름이 뒤바뀌어 있던 문제를 바로잡았다(events.gd 주석 참고).
+	Events.hit_landed.emit(hitbox.source, defender_body, damage, is_advantage, false)
 
-	# 카메라 셰이크는 강공격/크리티컬(3타 피니셔 포함)에만 적용한다(F2-2).
-	if hitbox.is_heavy:
-		Events.screen_shake_requested.emit(Tuning.SHAKE_AMPLITUDE_HEAVY, Tuning.SHAKE_DURATION_HEAVY)
+	# 카메라 셰이크 4단계(addendum §3-2, D-63 예정): 피격자가 플레이어면 "hit" 티어
+	# (몬스터 공격력·종 무관 일괄), 그 외(플레이어가 몬스터를 때린 경우)는 원소 상성
+	# 적중이면 "crit", 강공격/피니셔면 "heavy", 그 외는 "normal"(진폭 0, GDD 4.2 그대로
+	# 셰이크 없음). 히트스톱이 화면을 프리즈하는 동안은 안 보이므로 해제 직후 시작한다.
+	var shake_tier: String = "normal"
+	if defender_body is Player:
+		shake_tier = "hit"
+	elif is_advantage:
+		shake_tier = "crit"
+	elif hitbox.is_heavy:
+		shake_tier = "heavy"
+	_request_shake_after_hitstop(defender_body, shake_tier, hitbox.hitstop_sec)
 
 	return damage
+
+
+## Hitstop.apply_to()에 넘길 실제 대상을 고른다. Player는 노드 전체 대신 시각 요소만
+## (입력 차단 방지, 위 apply() 주석 참고) — 그 외(몬스터 등)는 노드 그대로.
+static func _collect_freeze_targets(body: Node, out: Array) -> void:
+	if body == null or not is_instance_valid(body):
+		return
+	if body is Player:
+		var p := body as Player
+		if p.sprite != null:
+			out.append(p.sprite)
+		if p.weapon_pivot != null:
+			out.append(p.weapon_pivot)
+	else:
+		out.append(body)
+
+
+static func _request_shake_after_hitstop(defender_body: Node2D, tier: String, hitstop_sec: float) -> void:
+	var amplitude_px: float = float(Data.get_value("combat", "camera_shake.%s.amplitude_px" % tier, 0.0))
+	var duration_sec: float = float(Data.get_value("combat", "camera_shake.%s.duration_sec" % tier, 0.0))
+	if amplitude_px <= 0.0:
+		return
+	var tree: SceneTree = defender_body.get_tree() if defender_body != null and is_instance_valid(defender_body) else null
+	if hitstop_sec <= 0.0 or tree == null:
+		Events.screen_shake_requested.emit(amplitude_px, duration_sec)
+		return
+	tree.create_timer(hitstop_sec).timeout.connect(func() -> void:
+		Events.screen_shake_requested.emit(amplitude_px, duration_sec)
+	)
 
 
 static func _knockback_direction(defender_body: Node2D, hitbox: Hitbox) -> Vector2:
@@ -53,7 +109,7 @@ static func _knockback_direction(defender_body: Node2D, hitbox: Hitbox) -> Vecto
 static func _apply_knockback(body: Node2D, direction: Vector2, distance_px: float) -> void:
 	if body == null or not is_instance_valid(body):
 		return
-	var duration: float = Tuning.KNOCKBACK_DURATION_SEC
+	var duration: float = float(Data.get_value("combat", "knockback.duration_sec", 0.12))
 	var target: Vector2 = body.global_position + direction * distance_px
 	var tween := body.create_tween()
 	tween.tween_property(body, "global_position", target, duration) \

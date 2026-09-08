@@ -25,6 +25,29 @@ const REQUIRED_SCHEMA := {
 		"stamina.max",
 		"stamina.regen_per_sec",
 		"stamina.costs.roll",
+		"hurt.stun_sec",
+		"hurt.iframes_sec",
+		"knockback.duration_sec",
+		# QA 리뷰 Minor-1(docs/qa/review-m1-1-m1-2.md): D-46/D-48·M1-2에서 combat.json에
+		# 추가된 뒤 REQUIRED_SCHEMA 보호를 받지 못하던 16개 키. 이 키들이 실수로
+		# 삭제/오타나도 개발 빌드가 push_error+assert로 즉시 잡아내도록 등록한다.
+		"roll.duration_sec",
+		"roll.distance_px",
+		"guard.chip_damage_ratio",
+		"guard.just_guard_enemy_stagger_sec",
+		"guard.move_speed_multiplier",
+		"hitstop.normal_sec",
+		"hitstop.heavy_crit_sec",
+		"combo.reset_after_sec",
+		"combo.finisher_recovery_sec",
+		"combo.finisher_roll_cancel_after_sec",
+		"stamina.regen_delay_sec",
+		"stamina.exhausted_penalty_sec",
+		"stamina.guard_regen_multiplier",
+		"stamina.costs.guard_hit",
+		"stamina.costs.heavy_attack",
+		"knockback.normal_px",
+		"knockback.heavy_px",
 	],
 	"elements": [
 		"cycle",
@@ -47,6 +70,8 @@ const REQUIRED_SCHEMA := {
 const MONSTER_REQUIRED_FIELDS := [
 	"region_id", "tier", "hp", "atk", "move_speed_px",
 	"telegraph_sec", "attack_pattern_id", "drop_table_id", "codex_entry_id",
+	"aggro_range_px", "melee_range_px", "attack_recovery_sec",
+	"patrol_radius_px", "leash_range_px",
 ]
 
 ## 릴리즈 빌드에서 키가 없을 때 대체할 기본값. 개발 빌드는 여기까지 오지 않는다.
@@ -63,6 +88,26 @@ const RELEASE_FALLBACKS := {
 		"stamina.max": 100.0,
 		"stamina.regen_per_sec": 25.0,
 		"stamina.costs.roll": 20.0,
+		"hurt.stun_sec": 0.25,
+		"hurt.iframes_sec": 0.5,
+		"knockback.duration_sec": 0.12,
+		"roll.duration_sec": 0.45,
+		"roll.distance_px": 48,
+		"guard.chip_damage_ratio": 0.2,
+		"guard.just_guard_enemy_stagger_sec": 0.4,
+		"guard.move_speed_multiplier": 0.5,
+		"hitstop.normal_sec": 0.05,
+		"hitstop.heavy_crit_sec": 0.1,
+		"combo.reset_after_sec": 0.6,
+		"combo.finisher_recovery_sec": 0.35,
+		"combo.finisher_roll_cancel_after_sec": 0.167,
+		"stamina.regen_delay_sec": 0.5,
+		"stamina.exhausted_penalty_sec": 1.0,
+		"stamina.guard_regen_multiplier": 0.5,
+		"stamina.costs.guard_hit": 10.0,
+		"stamina.costs.heavy_attack": 25.0,
+		"knockback.normal_px": 8,
+		"knockback.heavy_px": 20,
 	},
 	"elements": {
 		"cycle": ["fire", "wind", "thunder", "water"],
@@ -168,6 +213,21 @@ func _validate_monsters() -> void:
 			var telegraph: float = float(entry["telegraph_sec"])
 			if telegraph < 0.5:
 				_report("GDD 4.2 위반: monsters.%s.telegraph_sec(%s) < 0.5" % [monster_id, telegraph])
+		# addendum §4-2 확정(D-65 예정): AI 상태 전이가 논리적으로 겹치지 않도록 강제
+		# (data_tables.md §12 검증 규칙 4~5).
+		var dict_entry: Dictionary = entry as Dictionary
+		if dict_entry.has("leash_range_px") and dict_entry.has("aggro_range_px") and dict_entry.has("melee_range_px"):
+			var leash: float = float(dict_entry["leash_range_px"])
+			var aggro: float = float(dict_entry["aggro_range_px"])
+			var melee: float = float(dict_entry["melee_range_px"])
+			if not (leash > aggro and aggro > melee):
+				_report("monsters.%s: leash_range_px(%s) > aggro_range_px(%s) > melee_range_px(%s) 위반" \
+					% [monster_id, leash, aggro, melee])
+		if dict_entry.has("aoe_radius_px") and dict_entry.has("melee_range_px"):
+			var aoe: float = float(dict_entry["aoe_radius_px"])
+			var melee2: float = float(dict_entry["melee_range_px"])
+			if not (aoe >= melee2):
+				_report("monsters.%s: aoe_radius_px(%s) >= melee_range_px(%s) 위반" % [monster_id, aoe, melee2])
 
 
 ## 값 간 정합성 규칙(data_tables.md §1 검증 규칙, 단순 존재 확인이 아닌 관계식).
@@ -210,6 +270,12 @@ func _validate_value_rules() -> void:
 			var guard_regen_mult: float = float(get_value("combat", "stamina.guard_regen_multiplier"))
 			if not (guard_regen_mult >= 0.0 and guard_regen_mult <= 1.0):
 				_report("stamina.guard_regen_multiplier(%s) 범위(0~1) 위반" % guard_regen_mult)
+		# addendum §2-1 확정(D-61 예정): 피격 경직은 무적시간보다 길 수 없다(스턴락 방지).
+		if has_value("combat", "hurt.stun_sec") and has_value("combat", "hurt.iframes_sec"):
+			var stun_sec: float = float(get_value("combat", "hurt.stun_sec"))
+			var iframes_sec: float = float(get_value("combat", "hurt.iframes_sec"))
+			if not (stun_sec <= iframes_sec):
+				_report("hurt.stun_sec(%s) <= hurt.iframes_sec(%s) 위반" % [stun_sec, iframes_sec])
 	if tables.has("elements") and has_value("elements", "cycle"):
 		var cycle: Array = get_value("elements", "cycle")
 		if cycle.size() != 4:

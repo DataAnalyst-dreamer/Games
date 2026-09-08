@@ -161,8 +161,39 @@ $GODOT --headless --path game --quit-after 120
   빨갛게 깜박임), 상태 줄에 `GUARD`/`JUST-GUARD!`/`ROLL`/`IFRAME` 플래그와 사망 횟수(`GameState.death_count`)를
   표시한다.
 
-## 남은 작업 (다음 태스크, M1-3)
+## 몬스터 3종·사운드 (M1-3)
+
+- **뿔토끼(horn_rabbit)**: Racoon 대역(`scenes/entities/monsters/HornRabbit.tscn`). 예고(0.6s) 후
+  `dash_speed_px`(200)로 `dash_duration_sec`(0.3s) 동안 직진 돌진 — 이동 중 정적 콜라이더와 충돌하면
+  `STUNNED` 상태로 전이해 `Tuning.DASH_WALL_STUN_SEC`(0.5s, 제안값) 동안 기절한다. HP27/ATK15.
+- **버섯돌이(mushroom)**: Mushroom 대역(`scenes/entities/monsters/Mushroom.tscn`). 고정형(`patrol_radius_px`
+  =0), 예고(0.7s) 후 접촉 즉시 12 데미지 + `aoe_radius_px`(32) 반경 포자 장판을
+  `Tuning.SPORE_PATCH_DURATION_SEC`(2.0s, 제안값) 동안 전개, 1초마다 `atk_tick_per_sec`(4)만큼 지속
+  피해 — 이 지속 피해는 `Hitbox.ignores_iframes`로 플레이어 무적(구르기/피격 직후)에도 적용된다(D-61 예정).
+  HP45/ATK12.
+- 몬스터 AI 공통 5필드(`aggro_range_px`/`melee_range_px`/`attack_recovery_sec`/`patrol_radius_px`/
+  `leash_range_px`)가 `monsters.json` 정식 필드로 승격됐다(addendum §4). `monster_base.gd`는 공격 종료 후
+  항상 `RECOVER` 상태를 거쳐 `attack_recovery_sec`을 적용한 뒤에야 `CHASE`/`IDLE`로 돌아간다.
+- **AudioManager**(`scripts/core/audio_manager.gd`, 오토로드): `play_sfx(id, position, pitch_var)`/
+  `play_bgm(id, fade)`. 데이터는 `data/audio_sfx.json`·`data/audio_bgm.json`(sound-map-m1.md 매핑),
+  버스 5종은 `default_bus_layout.tres`(Master/BGM/SFX/UI/Ambient). 헤드리스(`--headless`)에서는 실제
+  재생 대신 `print()` 로그만 남긴다. 초원 BGM은 부팅 시 자동 재생, 몬스터가 CHASE/TELEGRAPH/ATTACK
+  상태이면 0.25초 폴링으로 전투 BGM으로 크로스페이드한다(전투 이탈 후 3.0s 유예).
+
+## 남은 작업 (다음 태스크, M2)
 - 전투: 강공격/차지, 스킬 슬롯, 무기별 가드 가능 여부(현재는 항상 가드 가능 — S2-1c 전제 "방패/가드 가능
   무기 장착"은 장비 시스템 없어 미적용).
 - 월드: LDtk 맵 임포트 → 64×64 청크 3×3 활성화 스트리밍 (`Tuning.CHUNK_TILES`, `ACTIVE_CHUNK_RADIUS`).
 - HUD (`scenes/ui/`) — `ui/theme.tres` 적용 및 정식 게이지 비주얼(현재 `DebugHud`는 텍스트/색상만).
+
+## M1 게이트 플레이테스트 — 실행 방법·조작 요약
+
+`godot --path game`로 실행(또는 에디터에서 F5) — `scenes/main/Main.tscn`이 자동으로 뜬다. 초원 배경음
+(`31 - Sunny.ogg`)이 곧바로 흘러나오고, 슬라임 3·뿔토끼 2·버섯돌이 1·비석 1이 겹치지 않게 배치돼 있다.
+조작은 **WASD/화살표**로 이동, **마우스 좌클릭**(`attack`)으로 3타 콤보, **Space**(`roll`)로 구르기,
+**Shift**(`guard`)를 누르고 있으면 가드(적중 직전 0.1초 안에 누르면 저스트 가드), **F**(`interact`)로
+비석 활성화(부활 지점 등록)다. 확인 포인트: 뿔토끼는 근접하면 잠깐 웅크렸다가 빠르게 돌진하니 정면에서
+가드/구르기로 받아보고, 버섯돌이는 근접 접촉 후 자리를 벗어나지 않으면 바닥 장판에서 계속 지속 피해를
+받는지(무적 중에도 깎이는지) 확인한다. 화면 하단 `DebugHud`가 HP/스태미나·상태 플래그(`GUARD`/
+`JUST-GUARD!`/`ROLL`/`IFRAME`)·사망 횟수를 실시간으로 보여준다. 몬스터를 3종 다 만나려면 맵 중앙에서
+사방으로 조금씩 이동하며 탐색하면 된다(슬라임은 근처, 뿔토끼는 좌우로 더 멀리, 버섯돌이는 아래쪽).

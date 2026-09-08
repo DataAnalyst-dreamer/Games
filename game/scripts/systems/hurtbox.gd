@@ -26,6 +26,8 @@ func _ready() -> void:
 
 
 func receive_hit(hitbox: Hitbox) -> void:
-	if invulnerable:
+	# 무적(구르기/피격 직후 iframes)은 기본적으로 모든 히트를 막는다 — 단, 히트박스가
+	# ignores_iframes(장판형 지속 피해 전용, D-61 예정)면 예외적으로 통과시킨다.
+	if invulnerable and not hitbox.ignores_iframes:
 		return
 	hurt.emit(hitbox)
