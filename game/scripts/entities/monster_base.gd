@@ -46,6 +46,7 @@ func _ready() -> void:
 	hurtbox.team = &"enemy"
 	hitbox.team = &"enemy"
 	hurtbox.hurt.connect(_on_hurtbox_hurt)
+	hitbox.stagger_requested.connect(_on_stagger_requested)
 	detection_area.body_entered.connect(_on_detection_body_entered)
 	if detection_shape.shape is CircleShape2D:
 		(detection_shape.shape as CircleShape2D).radius = Tuning.MONSTER_DETECTION_RADIUS_PX
@@ -214,6 +215,18 @@ func _fire_hitbox() -> void:
 	hitbox.source = self
 	hitbox.position = _attack_dir * Tuning.MONSTER_MELEE_RANGE_PX * 0.6
 	hitbox.activate(Tuning.MONSTER_ATTACK_ACTIVE_SEC)
+
+
+## 저스트 가드 성공 시 자신의 Hitbox가 쏘는 경직 요청(S2-1c: "저스트 성공 시 적 경직").
+## 데미지 없이 HURT 상태로 강제 전이하되 경직시간은 이 신호가 넘긴 값(guard.
+## just_guard_enemy_stagger_sec)을 쓴다 — 일반 피격 경직(Tuning.MONSTER_HURT_STUN_SEC)과
+## 구분해야 하므로 _enter_state 이후 _state_timer를 덮어쓴다.
+func _on_stagger_requested(duration_sec: float) -> void:
+	if state == State.DEAD:
+		return
+	hitbox.deactivate()
+	_enter_state(State.HURT)
+	_state_timer = duration_sec
 
 
 func _on_hurtbox_hurt(source_hitbox: Hitbox) -> void:

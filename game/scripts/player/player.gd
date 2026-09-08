@@ -60,15 +60,22 @@ func _unhandled_input(event: InputEvent) -> void:
 	state_machine.handle_input(event)
 
 
+## 사망 중에는 자원(HP/스태미나) 갱신·무적 타이머를 멈추되, Dead 상태의 대기 타이머
+## (update(delta))만은 계속 흘려야 사망 연출 뒤 자동 부활이 진행된다(F8-2) — 그래서
+## state_machine.update()만 예외적으로 호출하고 나머지는 건너뛴다.
 func _process(delta: float) -> void:
-	resources.tick(delta)
+	if is_dead:
+		state_machine.update(delta)
+		return
+	var regen_multiplier: float = 1.0
+	if state_machine.current_state != null:
+		regen_multiplier = state_machine.current_state.get_stamina_regen_multiplier()
+	resources.tick(delta, regen_multiplier)
 	Events.player_stamina_changed.emit(resources.stamina, resources.max_stamina)
 	if _iframe_remaining > 0.0:
 		_iframe_remaining = maxf(_iframe_remaining - delta, 0.0)
 		if _iframe_remaining <= 0.0:
 			hurtbox.invulnerable = false
-	if is_dead:
-		return
 	state_machine.update(delta)
 
 
@@ -85,11 +92,23 @@ func _physics_process(delta: float) -> void:
 	state_machine.physics_update(delta)
 
 
-## Hurtbox.hurt 신호 핸들러: 공용 타격감 연출을 적용하고 HP를 깎는다(F2-2).
+## Hurtbox.hurt 신호 핸들러: 가드 중이면 가드/저스트 가드 파이프라인(S2-1c)으로,
+## 그 외에는 공용 타격감 연출(F2-2)을 적용하고 HP를 깎는 일반 피격 파이프라인으로 간다.
 ## 무적 상태(구르기 무적, 피격 직후 무적 등)는 Hurtbox.invulnerable이 이미 걸러낸다.
 func _on_hurtbox_hurt(source_hitbox: Hitbox) -> void:
 	if is_dead:
 		return
+	var guard_state := state_machine.states.get(&"Guard") as GuardState
+	var is_guarding: bool = guard_state != null and state_machine.current_state == guard_state
+	if is_guarding and not source_hitbox.unguardable:
+		_handle_guarded_hit(source_hitbox, guard_state)
+		return
+	_apply_full_hit(source_hitbox)
+
+
+## 가드 불가(unguardable) 공격이거나 가드 중이 아닐 때의 일반 피격 파이프라인. 사망 시
+## _die(), 생존 시 Hurt 상태로 전이한다.
+func _apply_full_hit(source_hitbox: Hitbox) -> void:
 	var damage: int = HitFeel.apply(self, sprite, source_hitbox)
 	var died: bool = resources.take_damage(damage)
 	Events.player_damaged.emit(damage, source_hitbox.source)
@@ -100,10 +119,83 @@ func _on_hurtbox_hurt(source_hitbox: Hitbox) -> void:
 		state_machine.transition_to(&"Hurt", {})
 
 
+## 가드 중 피격 처리(S2-1c). 저스트 가드 판정창 안이면 무피해·무소모 경로로, 아니면
+## 칩데미지 경로로 분기한다.
+func _handle_guarded_hit(source_hitbox: Hitbox, guard_state: GuardState) -> void:
+	if guard_state.is_just_guard_window():
+		_handle_just_guard(source_hitbox)
+		return
+	var cost: float = float(Data.get_value("combat", "stamina.costs.guard_hit", 10.0))
+	if not resources.try_spend(cost):
+		# 가드 붕괴(제안, game-designer 확인 필요 — 완료 보고 질문 목록 참고): 가드
+		# 유지 자체는 스태미나를 요구하지 않지만, 막아내는 매 히트마다 스태미나가
+		# 필요하다는 F2-3 트리거 규칙을 그대로 적용하면 고갈 시 이번 타격은 무가드로
+		# 처리하는 편이 "가드는 생존은 보장하되 무피해는 아니다"라는 설계 의도와도
+		# 일관된다.
+		Events.player_stamina_insufficient.emit(&"guard_hit")
+		_apply_full_hit(source_hitbox)
+		return
+	Events.player_stamina_changed.emit(resources.stamina, resources.max_stamina)
+	var chip_ratio: float = float(Data.get_value("combat", "guard.chip_damage_ratio", 0.2))
+	var damage: int = GuardCalc.chip_damage(source_hitbox.damage, chip_ratio)
+	var died: bool = resources.take_damage(damage)
+	Events.player_damaged.emit(damage, source_hitbox.source)
+	Events.player_hp_changed.emit(resources.hp, resources.max_hp)
+	HitFlash.flash(sprite)
+	HitFeel.spawn_damage_number(self, damage, false)
+	if died:
+		_die()
+	# 생존 시 Guard 상태를 유지한다 — 가드는 경직 없이 계속 버틸 수 있어야 한다.
+
+
+## 저스트 가드 성공(S2-1c): 피해 0, 스태미나 소모 없음, 공격자에게 경직 요청 신호를
+## 보낸다. 전용 이펙트/사운드는 에셋이 없어 흰 플래시로 대체(pixel-artist/audio-designer
+## TODO — 완료 보고 질문 목록 참고).
+func _handle_just_guard(source_hitbox: Hitbox) -> void:
+	Events.just_guard_succeeded.emit(self, source_hitbox.source)
+	var stagger_sec: float = float(Data.get_value("combat", "guard.just_guard_enemy_stagger_sec", 0.4))
+	source_hitbox.stagger_requested.emit(stagger_sec)
+	HitFlash.flash(sprite)
+
+
 func _die() -> void:
 	is_dead = true
 	state_machine.transition_to(&"Dead", {})
 	Events.player_died.emit()
+
+
+## Dead 상태가 사망 연출(짧은 페이드+대기) 뒤 호출한다(F8-2). 마지막 상호작용 비석
+## (GameState.last_waystone, D-28) 위치에서 HP·스태미나 전량으로 부활시킨다.
+## 골드 페널티(D-25, 5%·상한 레벨×50)는 골드 시스템이 아직 없어 적용하지 않는다 —
+## 골드 시스템 구현 시 Events.player_respawned를 구독해 이 자리에서 차감하면 된다.
+## 보스전 예외(D-23: 골드 손실 없음, 보스방 앞 비석 즉시 재도전)는 보스 시스템이 아직
+## 없어 GameState.in_boss_encounter 플래그만 자리를 잡아 두었다(M2 TODO).
+func respawn() -> void:
+	is_dead = false
+	resources.hp = resources.max_hp
+	resources.stamina = resources.max_stamina
+	global_position = GameState.get_respawn_position()
+	hurtbox.invulnerable = false
+	_iframe_remaining = 0.0
+	if sprite != null:
+		sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)
+	Events.player_hp_changed.emit(resources.hp, resources.max_hp)
+	Events.player_stamina_changed.emit(resources.stamina, resources.max_stamina)
+	state_machine.transition_to(&"Idle", {})
+	Events.player_respawned.emit(GameState.last_waystone)
+
+
+## 구르기 스태미나 비용(DEX 경감 훅 포함, S2-1b 규칙 §3-3). stats 시스템이 아직 없어
+## DEX=0으로 고정한다 — characters.json/stats.json 확정 후 실제 DEX 값을 전달하도록
+## 이 함수만 고치면 된다(godot-engineer TODO).
+func get_roll_cost() -> float:
+	var base_cost: float = float(Data.get_value("combat", "stamina.costs.roll", 20.0))
+	var dex: float = 0.0
+	return PlayerResources.roll_cost_with_dex(base_cost, dex)
+
+
+func has_stamina_for_roll() -> bool:
+	return resources.stamina >= get_roll_cost()
 
 
 ## 공격 프레임이 없는 Knight 시트 대신 무기 스프라이트를 회전시켜 휘두름을 표현한다

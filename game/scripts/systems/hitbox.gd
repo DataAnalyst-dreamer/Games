@@ -16,6 +16,11 @@ var knockback_px: float = 0.0
 var hitstop_sec: float = 0.0
 var element: StringName = &""
 var is_heavy: bool = false
+## 가드 불가 공격(잡기 등, S2-1c 예외). true면 가드/저스트 가드 로직을 건너뛰고 항상
+## 정상 피해가 들어간다. 몬스터 쪽에서 이 값을 true로 세팅한 공격은 예고 연출도 구분해야
+## 한다(붉은 예고 이펙트 — 현재 M1 몬스터 3종엔 해당 패턴이 없어 실제 연출 훅은 미구현,
+## pixel-artist/asset-wrangler TODO).
+@export var unguardable: bool = false
 ## 이 히트박스를 발동시킨 주체(넉백 방향·데미지 숫자 위치 계산에 사용).
 var source: Node2D = null
 
@@ -23,6 +28,10 @@ var source: Node2D = null
 var _already_hit: Array[Node] = []
 
 signal hit_confirmed(hurtbox: Hurtbox)
+## 저스트 가드 성공 시 이 히트박스의 소유자(공격자)에게 경직을 요청한다(S2-1c: "저스트
+## 성공 시 적 경직"). 방어자(Player)가 emit하고, 공격자(MonsterBase 등)가 자신의 Hitbox에
+## 이 신호를 구독해 스스로 경직 상태로 전이해야 한다.
+signal stagger_requested(duration_sec: float)
 
 
 func _ready() -> void:

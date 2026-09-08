@@ -13,6 +13,9 @@ signal player_healed(amount: int)
 signal player_died()
 signal player_respawned(at_gravestone: Node)
 signal player_stamina_changed(current: float, max_value: float)
+## 스태미나 부족으로 액션(구르기 등)이 발동되지 않았을 때(F2-3 예외 규칙). HUD가 스태미나
+## 바를 빨간색으로 깜박이는 트리거로 쓴다.
+signal player_stamina_insufficient(action: StringName)
 signal player_hp_changed(current: int, max_value: int)
 signal player_level_up(new_level: int)
 
