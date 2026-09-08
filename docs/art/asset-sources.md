@@ -32,7 +32,6 @@ GDD 아트 스펙은 32×32 타일 / 32×48 캐릭터(640×360 내부 렌더)다
 | **Tiny Swords** | Pixel Frog | 64×64 중세 | 기사·궁수·병사 유닛, 성·집 건물, 지형, 애니메이션(Aseprite 원본) | 중세 건물·소품 참고, 마을 프로토타입 | 픽셀 밀도가 달라 캐릭터 혼용 불가, 건물 레퍼런스 중심 |
 | **Kenney Tiny Dungeon / Tiny Town / Tiny Creatures(확장) / Roguelike RPG pack** | Kenney (Tiny Creatures: Clint Bellanger) | 16×16 | 던전 타일 130+, 마을 타일, 소형 몬스터, 무기·아이템 아이콘 | 던전 회색박스 대체, 아이템 아이콘 임시 | kenney.nl 전 팩 CC0 |
 | **Kenney 오디오 팩** (RPG Audio, UI Audio, Impact Sounds 등) | Kenney | — | UI 클릭·타격·획득 SFX | 프로토타입 SFX | CC0 |
-| **Pixel Crawler (Free)** | Anokolisa | 16×16 탑다운 | 500+ 스프라이트, 영웅 3, 적 8, 무기 50, 던전·실내·농장 | 무기 아이콘, 던전 소품 | CC0로 알려짐 — 다운로드 페이지에서 재확인 |
 | **Parchment GUI / Pixel Parchment UI Kit** | OpenGameArt 기여자 | 16px 계열 | 양피지 패널·버튼·슬롯·라벨 | HUD·메뉴 프레임 프로토타입 (GDD 11장 양피지·나무 모티프와 일치) | CC0/OGA-BY — 개별 페이지 확인 |
 
 ### B등급 · 상용 허용, 재배포 금지
@@ -40,6 +39,7 @@ GDD 아트 스펙은 32×32 타일 / 32×48 캐릭터(640×360 내부 렌더)다
 | 팩 | 제작자 | 규격 | 내용 | 용도 | 라이선스 요지 |
 |---|---|---|---|---|---|
 | **Pixel Art Top Down – Basic / Village** | Cainos | **32×32** | 풀·돌·벽 타일셋, 소품 48종, 나무, 마을(Village) | **규격이 정확히 일치** — 초원 지역 타일 프로토타입 1순위 | 상용 OK, 수정 OK, 크레딧 불필요(권장), 재배포·재판매 금지 → 저장소 커밋 금지 |
+| **Pixel Crawler (Free)** | Anokolisa | 16×16 탑다운 | 500+ 스프라이트, 영웅 3, 적 8, 무기 50, 던전·실내 | 무기 아이콘, 던전 소품 | 동봉 Terms.txt: 상용 OK, 수정 OK, **애셋 판매·재배포 금지** → CC0 아님, `assets_local/` |
 | **Cute Fantasy RPG (Free)** | Kenmi | 16×16 | 아기자기한 캐릭터·동물·타일 — 톤이 이 게임과 가장 가까움 | SD 캐릭터 톤 레퍼런스, NPC 임시 | 크레딧 요청. **무료판 상용 가능 여부는 페이지에서 직접 확인** 후 사용 |
 
 ### C등급 · 조건부
