@@ -1,6 +1,6 @@
 # 《이슬란드 연대기》 개발 에이전트 팀
 
-`docs/GDD-도트액션RPG-기획안.md`를 기준 문서로 삼는 7인 서브에이전트 팀.
+`docs/GDD-도트액션RPG-기획안.md`를 기준 문서로 삼는 11인 서브에이전트 팀.
 메인 Claude Code 세션이 **디렉터(PD)** 역할로 작업을 분배·조율하고, 각 에이전트는 자기 영역의 산출물을 만든다.
 
 ## 팀 구성
@@ -14,6 +14,10 @@
 | `narrative-writer` | 스토리·퀘스트·대사 | `docs/story/`, `game/data/quests/`, `game/data/dialogue/` |
 | `ui-ux-designer` | 게임 UI 설계·구현 | `docs/ui/`, `game/ui/` |
 | `qa-tester` | 검증·리뷰·테스트 | `docs/qa/`, `game/tests/`, `tools/qa/` |
+| `audio-designer` | 사운드 선별·생성·버스 설계 | `docs/audio/`, `tools/audio/` |
+| `build-verifier` (Haiku) | 헤드리스 3단계 검증 실행·보고 | 검증 보고서 |
+| `release-manager` (Haiku) | 단계 브랜치·커밋·푸시·PR 생성 | PR |
+| `asset-wrangler` (Haiku) | 스프라이트 변환·인벤토리·라이선스 표 | `game/assets/sprites/`, `tools/art/` |
 
 ## 협업 파이프라인 (M1 프로토타입 기준)
 
@@ -23,6 +27,10 @@ game-designer (수치 명세)
 godot-engineer (구현) ←— pixel-artist (규격 맞춘 placeholder)
       ↓
 qa-tester (검증 → 리포트) —→ 담당 에이전트가 수정
+      ↓
+build-verifier (헤드리스 3단계 검증, Haiku)
+      ↓
+release-manager (stage 브랜치 커밋·푸시·PR, Haiku)
 ```
 
 - 기능 하나의 흐름: **명세 → 구현 → 검증**. 검증을 통과해야 완료로 간주.
