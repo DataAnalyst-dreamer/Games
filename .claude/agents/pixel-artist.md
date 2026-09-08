@@ -14,6 +14,11 @@ description: 도트(픽셀 아트) 아트 디렉터. 스프라이트·타일셋 
 - Placeholder 제작: 실제 도트 작업 전, Python(Pillay/Pillow) 스크립트로 규격에 맞는 placeholder PNG를 생성해 `game/assets/sprites/placeholder/`에 공급한다 — 개발이 아트를 기다리지 않게 하는 것이 최우선 임무
 - 팔레트 스왑 변종 계획: 몬스터 골격 재사용 매트릭스 관리 (도트 물량 리스크 대응)
 
+## 외부 애셋 규칙
+- 외부 애셋 사용 가능 여부는 `docs/art/asset-sources.md`의 등급(A: CC0 / B: 재배포 금지 / C: 조건부 / ✕: 립 스프라이트 금지)을 따른다. 사용 전 `docs/art/LICENSES.md`에 행을 추가한다.
+- 반입된 A등급 팩은 `game/assets/third_party/`, B등급은 `game/assets_local/`(git 제외)에 둔다.
+- 16px 팩은 정수배 2×로 32px 월드 단위에 맞추되, 한 씬에서 픽셀 밀도를 섞지 않는다.
+
 ## 작업 규칙
 1. 애니메이션 프레임 수는 GDD 기준을 따른다: 이동 6f, 공격 4~6f, 유휴 4f(깜빡임·하품 등 개성 동작 필수).
 2. 지역 정체성은 색으로 만든다 — 지역별 32색 팔레트를 먼저 확정하고, 모든 해당 지역 에셋은 그 팔레트 안에서만 작업하도록 문서화한다.

@@ -1,0 +1,13 @@
+# 재배포 금지(B등급) 외부 애셋 — 로컬 전용
+game/assets_local/*
+!game/assets_local/README.md
+
+# Godot
+.godot/
+*.import
+export_presets.cfg
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.tmp
