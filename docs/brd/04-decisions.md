@@ -116,7 +116,7 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 | D-56 | '마녀의 기억' 놓침 안전장치 게이팅 | **3막 진입 시 오델의 구술 요약본을 호감도와 무관하게 자동 제공**. 단짝 대사는 추가 정보일 뿐 진엔딩 조건(D-19)을 막지 않는다 | QA Blocker | characters.md, main-storyline.md |
 | D-57 | GDD 2.1 "마녀가 성물을 흩뜨렸다" 서술 | 왕국의 **공식 기록(전승)** 임을 문구로 드러낸다 — "…흩어졌다고 전해진다". 진실은 2.2/바이블 4장 | QA Major | GDD 2.1 |
 | D-58 | 지방 방위 정본 | **세계관 바이블 1.1이 정본**. GDD 7.1 ASCII 지도는 바이블 방위에 맞춰 개정(레벨 설계 착수 전) | QA Major | GDD 7.1 |
-| D-59 | 로컬라이징 key 지방 코드 | 약어(htl/eld…) 폐기, **전체 표기**(hartland/eldwood/frostheim/samar/ignis/bridgeport)로 통일. `main_a<막>_s<씬>_<지방>_...`도 동일 | QA Major | 전 스토리 문서 |
+| D-59 | 로컬라이징 key 지방 코드 | 약어(htl/eld…) 폐기, **전체 표기**(heartland/eldwood/frostheim/samar/ignis/bridgeport)로 통일. `main_a<막>_s<씬>_<지방>_...`도 동일 | QA Major | 전 스토리 문서 |
 | D-60 | 호감도 비종속 잡담 대사 key | `npc_<지방>_<이름>_chat_<번호>` 슬롯 신설(단계 무관 랜덤 잡담) | QA Major | characters.md |
 
 ## 변경 이력
