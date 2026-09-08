@@ -35,3 +35,13 @@ static func color_of(grade: Grade, theme: Theme) -> Color:
 
 static func icon_of(grade: Grade) -> String:
 	return ICONS[grade]
+
+
+## items.json/drop_tables.json의 문자열 등급("common".."relic")을 Grade enum으로 변환한다
+## (M2-1, LootSystem/ItemDrop이 데이터에서 읽은 문자열 등급을 색상 조회에 바로 쓰기 위함).
+## 알 수 없는 문자열은 COMMON으로 안전 처리(placeholder 표시가 없는 것보다 낫다).
+static func from_string(grade: String) -> Grade:
+	for g: Grade in KEYS:
+		if String(KEYS[g]) == grade:
+			return g
+	return Grade.COMMON

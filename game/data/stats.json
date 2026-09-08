@@ -1,0 +1,67 @@
+{
+  "_comment": "스탯 효과 계수 테이블(F1-2). 스키마: docs/specs/data_tables.md §3. 근거·계산 전 과정은 docs/specs/elite-and-farming-m2.md §3(D-45·D-78 예정)에 있다. dex.stamina_cost_reduction_formula 문자열은 combat-tuning-m1.md §3-3 / combat.json._comment와 반드시 동일해야 한다(data_tables.md §3 검증 규칙). luk 하위 _luck_formula_ref는 D-52/D-78(예정)에 따라 drop_tables.json._luck_formula를 참조만 하고 공식을 여기 다시 쓰지 않는다 — data_tables.md §3이 원래 요구하던 luk.drop_weight_formula(문자열 복제) 필드는 의도적으로 만들지 않았다(엔지니어 요청 3, elite-and-farming-m2.md §4-3).",
+
+  "max_level": 50,
+  "stat_points_per_levelup": 3,
+  "skill_points_per_levelup": 1,
+
+  "str": {
+    "_comment": "GDD 5.2: 물리 공격력 + 무거운 무기 요구치(요구치 게이팅은 characters.json/items.json 소관, 여기는 데미지 계수만). effective_base_attack = combat.json 기준 player_base_attack(10, M1) + STR*physical_damage_per_point + weapon.atk. 계수 산정: 만렙 스탯 총량(3*49=147, 한 스탯 몰빵 가정) 중 STR 몰빵 시 +29.4 데미지로, GDD 5.3 '전투력 60%는 장비' 목표를 해치지 않는 수준(레벨15 rare급 무기 atk 중간값 16.9 대비 약 87% - 만렙까지 가면 무기도 더 좋아지므로 상대 비중은 계속 하락).",
+    "physical_damage_per_point": 0.2,
+    "formula_note": "effective_base_attack = 10 + STR * 0.2 + weapon.atk",
+    "_balance_todo": ["physical_damage_per_point"]
+  },
+
+  "dex": {
+    "_comment": "GDD 5.2: 공격속도/회피 스태미나 효율/원거리 데미지 3효과. stamina_cost_reduction_formula는 D-45 확정 문자열(구르기 전용, combat-tuning-m1.md §3-3과 완전 동일 - 절대 재작성 금지, 수정 시 두 문서 동시 갱신). attack_speed_per_point/ranged_damage_per_point는 M1 미구현 계수라 GDD 5.2 3효과 중 코드 반영이 안 된 2개를 메우는 M2 제안값(엔지니어 훅 없음, _balance_todo).",
+    "stamina_cost_reduction_formula": "cost * (1 - min(0.5, DEX/300))",
+    "stamina_cost_reduction_scope": "roll_only",
+    "attack_speed_per_point": 0.0015,
+    "ranged_damage_per_point": 0.15,
+    "_balance_todo": ["attack_speed_per_point", "ranged_damage_per_point"],
+    "worked_examples": {
+      "DEX_50": "roll_cost = 20 * (1 - min(0.5, 50/300)) = 20 * 0.8333 = 16.7 (16.7% 경감)",
+      "DEX_100": "20 * (1 - min(0.5, 100/300)) = 20 * 0.6667 = 13.3 (33.3% 경감)",
+      "DEX_150_이상": "20 * (1 - 0.5) = 10.0 (상한 50% 경감 고정)"
+    }
+  },
+
+  "int": {
+    "_comment": "GDD 5.2: 마법 데미지 + 스킬 쿨타임 감소 2효과를 STR과 동일 예산(만렙 몰빵 기준)에서 나눠 가짐 - 데미지 계수를 STR보다 낮게(0.15) 잡고 남는 예산을 쿨감에 배정. cooldown_reduction_cap_pct는 스탯만으로 쿨타임을 0에 수렴시키는 것을 막는 상한(affixes.json의 cooldown_reduction_pct 2~6%/슬롯과 합산 후 이 상한에서 clamp).",
+    "magic_damage_per_point": 0.15,
+    "formula_note": "effective_base_magic_attack = 10 + INT * 0.15 + weapon.atk(지팡이류)",
+    "cooldown_reduction_per_point": 0.002,
+    "cooldown_reduction_cap_pct": 0.30,
+    "_balance_todo": ["magic_damage_per_point", "cooldown_reduction_per_point", "cooldown_reduction_cap_pct"]
+  },
+
+  "vit": {
+    "_comment": "GDD 5.2: 최대 HP + 방어력. hp_per_point는 레벨업 자동 HP 증가(exp_curve.csv/characters.json 소관, 이 파일 범위 밖)와 별개로 스탯 포인트 투자분만 계산. defense_formula는 D-74(예정) 임시값 - items-and-drops-m2.md 결정 요청 A / data_tables.md 결정 요청 12의 제안식을 그대로 채택했으나 아직 상위 결정 미확정이라 _balance_todo로 유지(엔지니어: 이 공식이 확정되기 전까지 defense는 UI/드랍 스탯으로만 존재하고 실제 피해 계산에 연결하지 말 것).",
+    "hp_per_point": 5.0,
+    "defense_per_point": 1.0,
+    "defense_formula": "damage_taken = incoming_atk * 100 / (100 + defense)",
+    "defense_formula_status": "provisional_pending_D-74",
+    "_balance_todo": ["hp_per_point", "defense_per_point", "defense_formula"],
+    "defense_formula_examples": {
+      "defense_0": "reduction 0%",
+      "defense_50": "reduction 33.3%",
+      "defense_100": "reduction 50.0%",
+      "defense_150": "reduction 60.0%"
+    }
+  },
+
+  "luk": {
+    "_comment": "GDD 5.2: 아이템 드랍률 + 크리티컬 확률. 드랍률 공식은 절대 여기서 재정의하지 않는다 - _luck_formula_ref만 남기고 실제 계수(luk_coefficient 등)는 drop_tables.json._luck_formula가 유일한 소스다(D-52, D-78 예정). crit_chance_per_point/crit_damage_multiplier는 이 파일이 처음 도입하는 M2 신규 값(combat.json.camera_shake 주석이 '진짜 크리티컬은 M2 LUK 도입 후'라고 예고했던 부분).",
+    "_luck_formula_ref": "drop_tables.json",
+    "base_crit_chance": 0.05,
+    "crit_chance_per_point": 0.001,
+    "crit_chance_cap": 0.75,
+    "crit_damage_multiplier": 1.5,
+    "_balance_todo": ["base_crit_chance", "crit_chance_per_point", "crit_chance_cap", "crit_damage_multiplier"],
+    "worked_examples": {
+      "LUK_0": "crit_chance = 5.0%",
+      "LUK_20": "crit_chance = 5.0 + 20*0.1 = 7.0%",
+      "LUK_45_풀분배(레벨15)": "crit_chance = 5.0 + 45*0.1 = 9.5%"
+    }
+  }
+}

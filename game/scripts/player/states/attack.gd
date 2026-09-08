@@ -94,7 +94,9 @@ func _fire_hitbox(hit_index: int) -> void:
 	var mults: Array = Data.get_value("combat", "combo.damage_multipliers", [1.0, 1.0, 1.5])
 	var mult: float = float(mults[clampi(hit_index - 1, 0, mults.size() - 1)])
 	var is_finisher: bool = hit_index >= combo.max_hits
-	hitbox.damage = int(round(Tuning.PLAYER_BASE_ATTACK * mult))
+	# M2-1(F3-2): 장비 공격력 합산이 반영된 값 — 미장착 시 get_attack_power()는
+	# Tuning.PLAYER_BASE_ATTACK과 동일해 기존 동작을 그대로 보존한다.
+	hitbox.damage = int(round(player.get_attack_power() * mult))
 	# QA 리뷰 Minor-2(docs/qa/review-m1-1-m1-2.md): fallback도 is_finisher 분기를 따라야
 	# 한다 — 예전엔 세 번째 인자(기본값)가 분기와 무관하게 일반값(8.0/0.05)으로 고정돼
 	# 있어서, Minor-1과 겹쳐 heavy 키가 사라지면 피니셔 타격이 조용히 일반 타격 수치로

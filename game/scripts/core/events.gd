@@ -57,6 +57,9 @@ signal boss_defeated(boss_id: StringName)
 # --- 아이템 / 파밍 ---
 signal item_dropped(item_id: StringName, world_position: Vector2, rarity: StringName)
 signal item_picked_up(item_id: StringName, quantity: int)
+## 인벤토리가 가득 차 마을 우편함으로 자동 전송됐을 때(D-10, M2-1). GameState.mailbox에
+## 쌓인 뒤 발신 — 우편함 UI/수령 처리는 M2-2 이후.
+signal item_mailed(item_id: StringName, quantity: int)
 signal inventory_changed()
 signal gold_changed(new_amount: int, delta: int)
 
