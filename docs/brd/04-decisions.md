@@ -101,7 +101,16 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 | D-51 | 테이블 소유 에이전트 | quests·npcs·dialogue → narrative-writer / weather·region_hazards·spawns·maps → level-designer / mount·economy·enhance·items·affixes·drop_tables·monsters·bosses·skills·stats·exp_curve·combat → game-designer | 요청⑩ | data_tables.md |
 | D-52 | LUK 드랍 가중치 공식 위치 | **`drop_tables.json`** 상단 `_luck_formula` 필드가 단일 소스 (드랍 로직 소유) | 요청⑪ | data_tables.md |
 
+## J. 캐릭터 서사 반영 (2026-09-08, `docs/story/characters.md` 바이블 추가 제안 채택)
+
+| ID | 결정 사항 | 확정 내용 | 출처 | 반영 |
+|---|---|---|---|---|
+| D-53 | 유물 조사단 정의 | 대륙에서 파견된 성물·유물 조사 기관. 단장 테오. 4인은 모두 그 견습 단원 | characters.md 8장 | 바이블 1장 |
+| D-54 | 브람의 출신 | 이그니스 출신 드워프. 한 차례 고향을 떠났다가 조사단원으로 귀향(그루드 미니스토리 "브람이 떠난 날"과 연결) | characters.md 8장 | 바이블 5장 |
+| D-55 | 플레이어블 4인 출신 | 전원 대륙 출신 전제(브람은 이그니스 태생이나 대륙에서 성장). 첫 배치지 = 개인 서사와 맞물림(핀→하틀랜드, 리라→엘드우드, 모리→프로스트헤임, 브람→이그니스) | characters.md 8장 | 바이블 1장, 3장 |
+
 ## 변경 이력
 - 2026-09-08: 37건 최초 확정 (추천안 일괄 채택). GDD v1.0 → v1.1 개정.
 - 2026-09-08: 세계관 바이블 제안 4건(D-38~D-41) 채택. GDD v1.1.1.
 - 2026-09-08: M1 전투 수치·데이터 테이블 결정 11건(D-42~D-52) 채택.
+- 2026-09-08: 캐릭터 서사 바이블 추가 제안 3건(D-53~D-55) 채택.
