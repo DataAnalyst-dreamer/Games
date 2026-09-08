@@ -1,6 +1,6 @@
 # 《이슬란드 연대기》 개발 에이전트 팀
 
-`docs/GDD-도트액션RPG-기획안.md`를 기준 문서로 삼는 11인 서브에이전트 팀.
+`docs/GDD-도트액션RPG-기획안.md`를 기준 문서로 삼는 12인 서브에이전트 팀.
 메인 Claude Code 세션이 **디렉터(PD)** 역할로 작업을 분배·조율하고, 각 에이전트는 자기 영역의 산출물을 만든다.
 
 ## 팀 구성
@@ -15,6 +15,7 @@
 | `ui-ux-designer` | 게임 UI 설계·구현 | `docs/ui/`, `game/ui/` |
 | `qa-tester` | 검증·리뷰·테스트 | `docs/qa/`, `game/tests/`, `tools/qa/` |
 | `audio-designer` | 사운드 선별·생성·버스 설계 | `docs/audio/`, `tools/audio/` |
+| `content-researcher` | 세계관·스토리·디자인 레퍼런스 웹 리서치 | `docs/story/research/` |
 | `build-verifier` (Haiku) | 헤드리스 3단계 검증 실행·보고 | 검증 보고서 |
 | `release-manager` (Haiku) | 단계 브랜치·커밋·푸시·PR 생성 | PR |
 | `asset-wrangler` (Haiku) | 스프라이트 변환·인벤토리·라이선스 표 | `game/assets/sprites/`, `tools/art/` |
