@@ -73,6 +73,11 @@ func _ready() -> void:
 	Events.player_stamina_insufficient.connect(_on_stamina_insufficient)
 	Events.player_died.connect(_on_player_died)
 	Events.player_respawned.connect(_on_player_respawned)
+	# F7-1(M1-5): 마스터/BGM/SFX 볼륨은 Settings(D-64 소유)가 관리한다. default_bus_layout.tres
+	# 의 믹스 기준 dB(BGM -8, SFX -3)는 그대로 두고, 사용자 볼륨(0~1)을 그 위에 dB로 얹는
+	# 방식이라 볼륨 1.0(기본값)일 때 기존 믹스 밸런스가 그대로 유지된다.
+	Events.settings_changed.connect(_on_settings_changed)
+	_apply_volume_settings()
 
 	var poll_timer := Timer.new()
 	poll_timer.name = "CombatPollTimer"
@@ -277,3 +282,24 @@ func _on_player_died() -> void:
 
 func _on_player_respawned(_at_gravestone: Node) -> void:
 	play_sfx(&"player_respawn_jingle")
+
+
+## Settings 볼륨(F7-1/D-64) → AudioServer 버스 dB 매핑. default_bus_layout.tres의 믹스
+## 기준 dB에 사용자 볼륨(선형 0~1)을 dB로 얹는다 — 1.0(기본값)이면 델타 0dB로 기존 믹스
+## 그대로 유지, 0.0이면 사실상 무음(-80dB 부근)까지 내려간다.
+func _on_settings_changed(key: StringName, _value: Variant) -> void:
+	if key in [&"master_volume", &"bgm_volume", &"sfx_volume"]:
+		_apply_volume_settings()
+
+
+func _apply_volume_settings() -> void:
+	_set_bus_volume("Master", Settings.master_volume, 0.0)
+	_set_bus_volume("BGM", Settings.bgm_volume, -8.0)
+	_set_bus_volume("SFX", Settings.sfx_volume, -3.0)
+
+
+func _set_bus_volume(bus_name: String, user_volume: float, base_db: float) -> void:
+	var idx := AudioServer.get_bus_index(bus_name)
+	if idx == -1:
+		return
+	AudioServer.set_bus_volume_db(idx, base_db + linear_to_db(clampf(user_volume, 0.0001, 1.0)))

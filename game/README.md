@@ -157,9 +157,11 @@ $GODOT --headless --path game --quit-after 120
   입력으로 활성화되며 `GameState.set_last_waystone(self)`를 기록한다(Main.tscn에 1개 배치). 골드 페널티
   (D-25)와 보스전 예외(D-23)는 골드/보스 시스템이 없어 각각 `Events.player_respawned` 훅 주석과
   `GameState.in_boss_encounter` 플래그 자리만 남겨 두었다.
-- **DebugHud**: 스태미나 라벨이 잔량 비율에 따라 색이 바뀌고(`Events.player_stamina_insufficient` 발신 시
-  빨갛게 깜박임), 상태 줄에 `GUARD`/`JUST-GUARD!`/`ROLL`/`IFRAME` 플래그와 사망 횟수(`GameState.death_count`)를
-  표시한다.
+- **DebugHud**: (M1-5에서 `Hud`로 대체됨 — 아래 HUD 절 참고) 스태미나 라벨이 잔량 비율에 따라 색이
+  바뀌고(`Events.player_stamina_insufficient` 발신 시 빨갛게 깜박임), 상태 줄에 `GUARD`/`JUST-GUARD!`/
+  `ROLL`/`IFRAME` 플래그와 사망 횟수(`GameState.death_count`)를 표시하던 텍스트 전용 씬. 이제 이 로직은
+  `Hud`의 F3 디버그 패널이 그대로 흡수한다(`scenes/ui/DebugHud.tscn`/`debug_hud.gd`는 더는 Main.tscn이
+  참조하지 않지만 참고용으로 남겨 둠).
 
 ## 몬스터 3종·사운드 (M1-3)
 
@@ -180,11 +182,32 @@ $GODOT --headless --path game --quit-after 120
   재생 대신 `print()` 로그만 남긴다. 초원 BGM은 부팅 시 자동 재생, 몬스터가 CHASE/TELEGRAPH/ATTACK
   상태이면 0.25초 폴링으로 전투 BGM으로 크로스페이드한다(전투 이탈 후 3.0s 유예).
 
+## 인게임 HUD (F7-1, M1-5)
+
+`scenes/ui/Hud.tscn` + `scripts/ui/hud.gd`가 `DebugHud`를 대체해 Main.tscn에 배치된다. 좌상단
+HP·스태미나 바(HP 25% 이하 점멸+화면 비네트, 색약 모드는 대각선 해치 패턴)와 버프 아이콘 빈 컨테이너,
+상단 중앙 추적 퀘스트 한 줄(현재 빈 문자열), 우상단 미니맵 토글(`map` 액션, M키/패드 select),
+하단 스킬 슬롯 2개+퀵슬롯 4개(십자키 배치 — 상=1/우=2/하=3/좌=4, D-47), 좌하단 획득 로그(`item_picked_up`/
+`gold_changed` 이벤트, 3초 페이드, 최대 4줄), 보스 HP바(평시 숨김, `Events.boss_started`/`boss_defeated`
+로 표시/숨김 — 지시문의 `boss_encounter_started`는 존재하지 않아 기존 시그널을 재사용, `docs/ui/hud.md`
+참고)를 담당한다. `F3`로 여닫는 디버그 패널이 옛 DebugHud의 HP/스태미나/콤보/상태/사망수 텍스트를
+그대로 흡수했다. 나무 프레임은 `ninja_adventure` Theme Wood 나인패치, 양피지 배경은 `parchment_gui`
+패널 크롭을 사용하며 색·스타일은 전부 `ui/theme.tres` 한 곳에서 정의한다(등급 6색·HUD 색·폰트 2단계
+모두 포함). 상세 와이어프레임·상태표는 `docs/ui/hud.md`.
+
+`scripts/core/settings.gd`(오토로드 `Settings`)가 `user://settings.json`에 접근성·오디오 설정(화면
+흔들림 4단계 `[0, 0.5, 1.0, 1.5]`, 데미지 숫자 on/off(D-07 기본 켜짐), 색약 모드, 폰트 크기 2단계,
+마스터/BGM/SFX 볼륨)을 저장한다(D-64). `camera_shake.gd`는 이제 `Settings.get_shake_scale()`을,
+`hit_feel.gd:spawn_damage_number()`는 `Settings.damage_numbers_enabled`를, `audio_manager.gd`는
+`Settings.master_volume`/`bgm_volume`/`sfx_volume`을 각각 읽는다 — 값이 바뀌면 `Events.settings_changed`
+로 전파된다.
+
 ## 남은 작업 (다음 태스크, M2)
 - 전투: 강공격/차지, 스킬 슬롯, 무기별 가드 가능 여부(현재는 항상 가드 가능 — S2-1c 전제 "방패/가드 가능
   무기 장착"은 장비 시스템 없어 미적용).
 - 월드: LDtk 맵 임포트 → 64×64 청크 3×3 활성화 스트리밍 (`Tuning.CHUNK_TILES`, `ACTIVE_CHUNK_RADIUS`).
-- HUD (`scenes/ui/`) — `ui/theme.tres` 적용 및 정식 게이지 비주얼(현재 `DebugHud`는 텍스트/색상만).
+- HUD (`scenes/ui/`) — 퀵슬롯·스킬 슬롯 실데이터 연동(F7-2 인벤토리/스킬 시스템 완성 후), 아이템명
+  한글화, 미니맵 실제 지형 렌더(현재 placeholder 사각형).
 
 ## M1 게이트 플레이테스트 — 실행 방법·조작 요약
 
@@ -194,6 +217,7 @@ $GODOT --headless --path game --quit-after 120
 **Shift**(`guard`)를 누르고 있으면 가드(적중 직전 0.1초 안에 누르면 저스트 가드), **F**(`interact`)로
 비석 활성화(부활 지점 등록)다. 확인 포인트: 뿔토끼는 근접하면 잠깐 웅크렸다가 빠르게 돌진하니 정면에서
 가드/구르기로 받아보고, 버섯돌이는 근접 접촉 후 자리를 벗어나지 않으면 바닥 장판에서 계속 지속 피해를
-받는지(무적 중에도 깎이는지) 확인한다. 화면 하단 `DebugHud`가 HP/스태미나·상태 플래그(`GUARD`/
-`JUST-GUARD!`/`ROLL`/`IFRAME`)·사망 횟수를 실시간으로 보여준다. 몬스터를 3종 다 만나려면 맵 중앙에서
+받는지(무적 중에도 깎이는지) 확인한다. 좌상단 `Hud` HP/스태미나 바로 상태를 확인하고, **F3**을 누르면
+옛 DebugHud와 같은 HP/스태미나·상태 플래그(`GUARD`/`JUST-GUARD!`/`ROLL`/`IFRAME`)·사망 횟수 패널이
+열린다. 몬스터를 3종 다 만나려면 맵 중앙에서
 사방으로 조금씩 이동하며 탐색하면 된다(슬라임은 근처, 뿔토끼는 좌우로 더 멀리, 버섯돌이는 아래쪽).
