@@ -33,6 +33,20 @@ signal screen_shake_requested(strength: float, duration_sec: float)
 ## 호출부 재량)과 저스트 여부(항상 true — 일반 가드는 이 신호를 쏘지 않는다, 구분용
 ## 편의 인자). M1-3 신규(D-69 예정) — player.gd:_handle_just_guard()가 emit.
 signal player_guarded(amount: int, is_just: bool)
+## M1-4 신규(플레이테스트 계측, docs/qa/m1-gate-playtest.md §4). 가드 상태에서 히트박스가
+## 도달한 "모든" 경우(저스트 성공/일반 가드/스태미나 고갈로 무가드 전환된 경우 포함)에
+## 발신되는 분모용 신호 — player_guarded는 저스트·일반 성공 시에만 나가 가드 붕괴
+## 케이스를 놓친다. 발신 지점 1곳: player.gd:_handle_guarded_hit() 최상단.
+signal guard_hit_attempted(defender: Node, attacker: Node)
+## M1-4 신규(플레이테스트 계측). 구르기가 스태미나 소모에 성공해 실제로 발동한 시점
+## (무적 프레임이 걸리기 직전)에 발신 — 스태미나 부족으로 미발동된 시도는 포함하지
+## 않는다(그 경우는 이미 player_stamina_insufficient가 있다). 발신 지점 1곳:
+## roll.gd:enter() 스태미나 소모 성공 직후.
+signal player_roll_started(player: Node)
+## M1-4 신규(플레이테스트 계측). 콤보 3타(피니셔)가 실제로 시작된 시점 — 적에게 명중
+## 여부와 무관하게 "입력 체이닝으로 3타까지 완주했다"만 센다. 발신 지점 1곳:
+## attack.gd:_start_current_hit() hit_index가 combo.max_hits에 도달했을 때.
+signal combo_finisher_reached(player: Node)
 
 # --- 몬스터 ---
 signal enemy_spawned(enemy: Node2D)

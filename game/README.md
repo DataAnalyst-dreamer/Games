@@ -84,8 +84,31 @@ $GODOT --headless --path game --quit-after 120
 | `Tuning` | `scripts/tuning.gd` | 임시 상수 (스틱 데드존, 애니 FPS, 카메라 줌, 청크 크기 등) |
 | `Events` | `scripts/core/events.gd` | 전역 시그널 버스 (`player_damaged`, `enemy_died`, `item_dropped`, `hitstop_requested` …) |
 | `GameState` | `scripts/core/game_state.gd` | 세이브/부활 전역 상태(M1-2). `last_waystone`(D-28 부활 기준점), `death_count`(디버그), `in_boss_encounter`(D-23 자리표시 플래그, M2 훅) |
+| `Metrics` | `scripts/core/metrics.gd` | 플레이테스트 계측 로깅(M1-4). Events 구독만으로 사망·구르기 성공률·저스트 가드 성공률·몬스터별 처치/TTK·플레이어 피격/피해·콤보 3타 완주 횟수를 집계. `Metrics.summary()`가 Dictionary 반환(향후 HUD가 읽음). 순수 계산은 `scripts/systems/metrics_calc.gd`(`MetricsCalc`, GUT 테스트 대상) |
+| `AudioManager` | `scripts/core/audio_manager.gd` | BGM/SFX 재생 (M1-3) |
 | `PhantomCameraManager` | addons/phantom_camera | Phantom Camera 플러그인이 요구 |
 | `DialogueManager` | addons/dialogue_manager | Dialogue Manager 플러그인이 요구 |
+
+## 플레이테스트 계측 로그 (M1-4)
+
+`Metrics` 오토로드가 5분마다 + 세션 종료 시(창 닫기/`--quit-after` 등 엔진 종료) 아래 경로에
+JSON을 **덮어쓰기 저장**하고(파일명은 세션 시작 시각 1개로 고정 — 5분마다 새 파일이 쌓이지
+않는다), 콘솔에도 요약을 `print()`한다.
+
+- **파일**: `user://playtest/session_<세션 시작 유닉스초>.json`
+- **테스터 식별**: 실행 인자 `--tester=<이름>` (예: `godot --path game --tester=hong`) 또는
+  이전에 저장된 `user://playtest/tester.txt`. 둘 다 없으면 `"anon"`. `--tester=`로 실행하면
+  다음번을 위해 `tester.txt`에도 자동 저장된다.
+- **`user://`의 실제 OS 경로** (`config/name`="이슬란드 연대기 (Chronicles of Isleland)" 기준):
+  - Windows: `%APPDATA%\Godot\app_userdata\이슬란드 연대기 (Chronicles of Isleland)\playtest\`
+  - macOS: `~/Library/Application Support/Godot/app_userdata/이슬란드 연대기 (Chronicles of Isleland)/playtest/`
+  - Linux: `~/.local/share/godot/app_userdata/이슬란드 연대기 (Chronicles of Isleland)/playtest/`
+- **수집 항목**(`docs/qa/m1-gate-playtest.md` §4 스펙): 세션 길이·사망 횟수, 구르기 시도/성공
+  (무적 구간 중 피격 없이 넘긴 시도)/성공률, 저스트 가드 시도(가드 상태 피격 총횟수)/성공/성공률,
+  일반 가드 횟수, 몬스터 종별 처치 수·평균 TTK(최초 피격→사망), 플레이어 피격 횟수·총 피해,
+  콤보 3타(피니셔) 완주 횟수(입력 체이닝 기준, 적중 여부 무관).
+- 테스터에게 파일을 요청할 때는 위 폴더의 `session_*.json`을 전달받으면 된다(`tester.txt`는
+  개인 식별용이라 공유 불필요).
 
 ## 입력 액션 (GDD 4.1, D-37 / 패드는 Xbox 레이아웃)
 

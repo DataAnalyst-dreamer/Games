@@ -63,6 +63,10 @@ func can_roll_cancel() -> bool:
 
 func _start_current_hit() -> void:
 	var hit_index: int = combo.hit_index
+	if hit_index >= combo.max_hits:
+		# M1-4 계측(Metrics.gd): "3타 완주" = 입력 체이닝으로 피니셔가 실제로 시작된 횟수
+		# (적중 여부와 무관). enter()/handle_input()을 거쳐 여기 정확히 한 곳에서만 호출됨.
+		Events.combo_finisher_reached.emit(player)
 	player.play_anim("idle")
 	player.play_attack_swing(hit_index, combo.hit_duration_sec)
 	_play_swing_sfx(hit_index)
