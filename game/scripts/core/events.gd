@@ -51,6 +51,11 @@ signal combo_finisher_reached(player: Node)
 # --- 몬스터 ---
 signal enemy_spawned(enemy: Node2D)
 signal enemy_died(enemy: Node2D, killer: Node)
+## M2-7(F5-1/F5-2 퀘스트) 신설. enemy_died(Node 참조)와 별도로 monster_id 문자열만
+## 실어 보낸다 — QuestSystem이 kill형 목표를 monsters.json id 기준으로 세기 위함(Node
+## 참조는 순수 로직인 QuestSystem이 직접 다루기엔 부적합). monster_base.gd가
+## enemy_died와 같은 지점에서 함께 emit한다.
+signal monster_died(monster_id: StringName)
 ## M2-3 신규(F6-3, elite-and-farming-m2.md §1). enemy_died와 별도로 "정예 처치"만 세는
 ## 전용 신호 — monster_base.gd가 tier=="elite"일 때만 enemy_died와 함께 emit한다.
 ## Metrics가 구독해 정예 처치 수를 집계한다(완료 보고 참고).
@@ -61,6 +66,11 @@ signal boss_defeated(boss_id: StringName)
 # --- 아이템 / 파밍 ---
 signal item_dropped(item_id: StringName, world_position: Vector2, rarity: StringName)
 signal item_picked_up(item_id: StringName, quantity: int)
+## M2-7(F5-2 collect형 퀘스트 목표) 신설. 인벤토리로 들어가든(item_picked_up) 오버플로로
+## 우편함행이든(item_mailed) "실제로 획득은 했다"는 사실만 알려준다 — QuestSystem은
+## 이 신호 하나만 구독하면 된다. GameState.pickup_item()이 두 갈래 분기와 무관하게
+## 항상 emit한다.
+signal item_acquired(item_id: StringName, count: int)
 ## 인벤토리가 가득 차 마을 우편함으로 자동 전송됐을 때(D-10, M2-1). GameState.mailbox에
 ## 쌓인 뒤 발신 — 우편함 UI/수령 처리는 M2-2 이후.
 signal item_mailed(item_id: StringName, quantity: int)
@@ -73,6 +83,10 @@ signal gold_changed(new_amount: int, delta: int)
 signal blacksmith_opened()
 ## 우편함 NPC와 상호작용해 UI를 열어야 할 때(우편함 UI 자체는 다음 단계).
 signal mailbox_opened()
+## M2-7(F5-2 게시판 일일 의뢰) 신설. 게시판 NPC(scenes/world/BoardNpc.tscn)와 상호작용해
+## UI를 열어야 할 때 — 게시판 UI 자체는 다음 단계, 지금은 BlacksmithNpc/MailboxNpc와
+## 동일하게 시그널만 낸다.
+signal board_opened()
 ## Blacksmith(scripts/systems/blacksmith.gd) 4개 동작(enhance/refine/refine_commit/
 ## salvage/craft) 결과를 GameState 래퍼가 호출 직후 그대로 실어 발신 — result는 각
 ## 함수의 반환 Dictionary(ok/reason 또는 성공 필드) 그대로다. action은 "enhance"/
@@ -83,16 +97,54 @@ signal mail_received(mail_id: String, item_id: StringName, count: int)
 ## GameState.claim_mail()이 성공했을 때 — result는 Mailbox.claim()의 반환 Dictionary.
 signal mail_claimed(mail_id: String, result: Dictionary)
 
+# --- 퀘스트 (F5-1·F5-2, M2-7) ---
+## reach형 목표 완료(장소 도달). 실제 트리거 볼륨/레벨 오브젝트는 아직 없다(레벨
+## 디자이너 몫 — docs/specs/quest-data-schema.md _todo_ids.locations 참고). 이름만
+## 선언해 둔다 — 트리거 구현 시 도달 지점에서 이 신호만 emit하면 QuestSystem이 자동
+## 반응한다.
+signal location_reached(location_id: StringName)
+## talk형 목표 완료(NPC 대화). 다이얼로그 매니저(addons/dialogue_manager) 연동은 이후
+## 단계 — 이름만 선언.
+signal npc_talked(npc_id: StringName)
+## interact형 목표 완료(오브젝트 상호작용). 상호작용 가능한 월드 오브젝트는 레벨
+## 디자이너 몫(_todo_ids.objects) — 이름만 선언.
+signal object_interacted(object_id: StringName)
+## QuestSystem.accept()가 성공했을 때.
+signal quest_accepted(quest_id: StringName)
+## QuestSystem이 목표 진행도를 갱신할 때마다(objective_id 단위) — HUD 추적 퀘스트
+## 한 줄(Hud.set_quest_line())이 이 신호로 갱신된다.
+signal quest_objective_updated(quest_id: StringName, objective_id: StringName, current: int, target: int)
+## QuestSystem.advance()가 퀘스트를 완결(보상 지급 + on_complete 적용)했을 때. 메인/
+## 사이드/일일 의뢰 전부 포함 — 메인 퀘스트 완료는 main_quest_stage_completed(아래
+## 월드 섹션, M2-6 기존 신호)도 함께 emit해 SaveManager 오토세이브를 건다.
+signal quest_completed(quest_id: StringName)
+
 # --- 월드 ---
 signal chunk_loaded(chunk_coord: Vector2i)
 signal chunk_unloaded(chunk_coord: Vector2i)
 signal region_entered(region_id: StringName)
 signal time_of_day_changed(hour: int)
+## M2-6(F8-1) 신설. Waystone.activate()가 GameState.set_last_waystone() 직후 emit —
+## SaveManager가 이 신호로 오토세이브를 건다(F8-1 트리거 "워프 비석 활성화").
+signal waystone_activated(waystone_id: StringName)
+## M2-6(F8-1) 신설, M2-7에서 실제 연결됨. QuestSystem.advance()가 type=="main"인 퀘스트를
+## 완결할 때 stage_id=quest_id로 emit — SaveManager가 이 신호로 오토세이브를 건다
+## (save_manager.gd 참고).
+signal main_quest_stage_completed(stage_id: StringName)
+## M2-6(F8-1) 신설. 이름만 선언 — 워프 목적지 선택 UI(여러 비석 중 이동)가 아직 없어
+## (waystone.gd 주석 참고) 아무도 emit하지 않는다. 워프 시스템 구현 시 실제 이동 직후
+## 이 신호를 emit하면 SaveManager의 오토세이브가 자동으로 걸린다.
+signal waystone_warp_used(waystone_id: StringName)
 
 # --- UI / 시스템 ---
 signal menu_opened()
 signal menu_closed()
 signal game_paused(is_paused: bool)
 signal save_requested(slot: int)
-signal save_completed(slot: int)
+## M2-6(F8-1) 신설. SaveManager.save()/load() 결과 — kind는 "manual"|"auto". ok가 false면
+## reason(문자열 사유, 예: "player_dead"/"in_combat"/"boss_room"/"checksum_mismatch"/
+## "not_found"/"io_error")과 함께 발신된다. 과거 시그니처(slot만)를 쓰던 구독부는 없다
+## (grep 확인 — 안전하게 확장).
+signal save_completed(slot: int, kind: StringName, ok: bool)
+signal load_completed(slot: int, kind: StringName, ok: bool)
 signal settings_changed(key: StringName, value: Variant)

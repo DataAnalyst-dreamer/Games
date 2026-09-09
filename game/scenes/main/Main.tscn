@@ -17,6 +17,7 @@
 [ext_resource type="PackedScene" path="res://scenes/entities/monsters/EliteBunchiSpawn.tscn" id="15_elite_bunchi_spawn"]
 [ext_resource type="PackedScene" path="res://scenes/world/BlacksmithNpc.tscn" id="16_blacksmith_npc"]
 [ext_resource type="PackedScene" path="res://scenes/world/MailboxNpc.tscn" id="17_mailbox_npc"]
+[ext_resource type="Script" path="res://scripts/world/quest_layout_spawner.gd" id="18_quest_layout_spawner"]
 
 [node name="Main" type="Node2D"]
 
@@ -56,12 +57,16 @@ position = Vector2(-250, -140)
 
 [node name="Waystone1" parent="." instance=ExtResource("9_waystone")]
 position = Vector2(-40, -100)
+waystone_id = &"waystone1"
 
 [node name="BlacksmithNpc1" parent="." instance=ExtResource("16_blacksmith_npc")]
 position = Vector2(-70, -100)
 
 [node name="MailboxNpc1" parent="." instance=ExtResource("17_mailbox_npc")]
 position = Vector2(-10, -100)
+
+[node name="HartlandQuestLayer" type="Node2D" parent="."]
+script = ExtResource("18_quest_layout_spawner")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 process_callback = 0

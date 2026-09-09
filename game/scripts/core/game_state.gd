@@ -27,8 +27,29 @@ var _player: Player = null
 ## 어디에 둘지는 레벨 디자인 몫, TODO).
 var last_waystone: Node2D = null
 
+## M2-6(F8-1) 신설. last_waystone 노드 참조는 세이브에 직접 담을 수 없어(씬 인스턴스는
+## 로드 시점에 재생성됨) waystone_id 문자열로만 직렬화한다 — 로드 후
+## SaveManager._restore_waystones()가 현재 씬의 &"waystones" 그룹에서 이 id와 일치하는
+## 노드를 찾아 last_waystone을 다시 채운다. waystone_id가 빈 문자열인 비석(디버그용
+## placeholder 등)은 세이브 대상에서 제외한다.
+var last_waystone_id: StringName = &""
+
+## 지금까지 활성화한 모든 비석의 id 집합(중복 없이, 순서 무관). 세이브/로드 시 씬의 모든
+## 비석 시각 상태(is_active)를 복원하는 데 쓴다 — 워프 목적지 선택 UI(M2 범위)가 여러
+## 비석 중 하나를 고르게 되면 이 목록이 곧 "선택 가능한 목적지 목록"이 된다.
+var activated_waystone_ids: Array[String] = []
+
 ## 사망 횟수(디버그 HUD 표시용). 세이브 파일에 영구 기록할지는 F8-3(세이브) 범위.
 var death_count: int = 0
+
+## M2-7(F5-2 게시판 일일 의뢰) 신설. "게임 내 날짜" 정수 카운터 — QuestSystem이 일일
+## 의뢰 재추첨 시드로 쓴다. 새 게임은 0에서 시작. D-111(확정, M2-7 후속): 게임플레이
+## 내부 시간(낮/밤 사이클 등)이 아니라 **실제 달력 날짜**를 기준으로 증가한다 — 유일한
+## 증가 지점은 `SaveManager._advance_day_index_if_new_calendar_day()`(load() 직후)로,
+## 로드한 세이브의 meta.saved_at_unix와 로드 시점의 실제 시각이 연·월·일 중 하나라도
+## 다르면(며칠 차이든) +1을 정확히 한 번만 한다. 여관 숙박 등 그 외 어떤 게임플레이
+## 행동도 이 값을 올리지 않는다(docs/specs/quest-system-m2.md §13 참고). 세이브에 포함된다.
+var day_index: int = 0
 
 ## 보스전 사망 예외(D-23: 골드 손실 없이 보스방 앞 비석에서 즉시 재도전, 보스 HP 초기화)를
 ## 위한 자리표시 플래그. 보스 시스템이 아직 없어 지금은 아무도 이 값을 true로 바꾸지
@@ -50,10 +71,18 @@ var play_time_sec: float = 0.0
 ## 세이브에 포함된다("GameState에 리스폰 타이머 직렬화").
 var elite_respawn_remaining_sec: Dictionary = {}
 
+## M2-6(F8-1 "사망 직후·전투 중·보스방 저장 불가") 전투 중 판정용. play_time_sec(일시정지
+## 제외 실제 플레이 시간, 위 주석 참고)을 기준 시계로 써서 Events.hit_landed(공격자/대상
+## 어느 쪽이든 플레이어가 관여한 타격)가 발신될 때마다 갱신한다. 초기값은 "최근 전투
+## 없음"을 뜻하도록 음수로 크게 잡는다. 임계값은 Tuning.IN_COMBAT_SAVE_LOCK_SEC
+## (테이블 이관 예정, `_balance_todo`).
+var _last_combat_activity_sec: float = -1000.0
+
 
 func _ready() -> void:
 	Events.player_died.connect(_on_player_died)
 	Events.player_spawned.connect(_on_player_spawned)
+	Events.hit_landed.connect(_on_hit_landed)
 
 
 ## 실제 플레이 시간 누적 + 정예 리스폰 카운트다운 감소(D-15). 일시정지 중에는 엔진이
@@ -69,6 +98,13 @@ func _process(delta: float) -> void:
 ## 지금은 "부활 기준점"으로만 쓰인다(D-28: 부활 비석 = 워프 비석 동일 오브젝트).
 func set_last_waystone(waystone: Node2D) -> void:
 	last_waystone = waystone
+	var stone := waystone as Waystone
+	var id: String = String(stone.waystone_id) if stone != null else ""
+	if id.is_empty():
+		return # id 없는 placeholder 비석은 세이브 복원 대상에서 제외(위 주석 참고).
+	last_waystone_id = StringName(id)
+	if not activated_waystone_ids.has(id):
+		activated_waystone_ids.append(id)
 
 
 ## 부활 위치. 비석과 상호작용한 적이 없으면 원점.
@@ -76,6 +112,26 @@ func get_respawn_position() -> Vector2:
 	if last_waystone != null and is_instance_valid(last_waystone):
 		return last_waystone.global_position
 	return Vector2.ZERO
+
+
+## M2-6(F8-1) 저장 가능 여부. reason: "player_dead"|"in_combat"|"boss_room"(비어있으면
+## ok:true). SaveManager.save()가 실제 디스크 쓰기 전에 이 함수 결과부터 확인한다.
+func can_save() -> Dictionary:
+	if _player != null and is_instance_valid(_player) and _player.is_dead:
+		return {"ok": false, "reason": "player_dead"}
+	if in_boss_encounter:
+		return {"ok": false, "reason": "boss_room"}
+	if _is_in_combat():
+		return {"ok": false, "reason": "in_combat"}
+	return {"ok": true, "reason": ""}
+
+
+func _is_in_combat() -> bool:
+	return play_time_sec - _last_combat_activity_sec < Tuning.IN_COMBAT_SAVE_LOCK_SEC
+
+
+func _on_hit_landed(_attacker: Node, _target: Node, _damage: int, _is_advantage: bool, _is_critical: bool) -> void:
+	_last_combat_activity_sec = play_time_sec
 
 
 func _on_player_died() -> void:
@@ -86,6 +142,15 @@ func _on_player_spawned(player: Node2D) -> void:
 	_player = player as Player
 	if _player != null:
 		_apply_equipment_stats_to_player()
+
+
+## SaveManager 전용 접근자(M2-6, F8-1) — 플레이어 위치/자원을 세이브 상태에 담거나
+## 로드 결과를 되돌려 적용하려면 필요하다. null이면(플레이어가 아직 스폰되지 않음)
+## 호출부가 위치/자원 저장·복원을 건너뛴다.
+func get_player() -> Player:
+	if _player != null and is_instance_valid(_player):
+		return _player
+	return null
 
 
 # --- 인벤토리/골드/우편함 (F3-1, D-10) ---
@@ -108,6 +173,7 @@ func pickup_item(item_instance: Dictionary, item_def: Dictionary) -> void:
 		Events.mail_received.emit(mail_id, item_id, qty)
 	else:
 		Events.item_picked_up.emit(item_id, qty)
+	Events.item_acquired.emit(item_id, qty) # M2-7: collect형 퀘스트 목표는 경로와 무관하게 항상 집계.
 	Events.inventory_changed.emit()
 
 
@@ -441,6 +507,10 @@ func to_dict() -> Dictionary:
 		"equipment": equipment.to_dict(),
 		"play_time_sec": play_time_sec,
 		"elite_respawn_remaining_sec": elite_respawn_remaining_sec.duplicate(true),
+		"death_count": death_count,
+		"last_waystone_id": String(last_waystone_id),
+		"activated_waystone_ids": activated_waystone_ids.duplicate(),
+		"day_index": day_index,
 	}
 
 
@@ -451,7 +521,50 @@ func from_dict(data: Dictionary) -> void:
 	equipment.from_dict(data.get("equipment", {}))
 	play_time_sec = float(data.get("play_time_sec", 0.0))
 	elite_respawn_remaining_sec = (data.get("elite_respawn_remaining_sec", {}) as Dictionary).duplicate(true)
+	death_count = int(data.get("death_count", 0))
+	last_waystone_id = StringName(String(data.get("last_waystone_id", "")))
+	var ids: Array[String] = []
+	for id_v: Variant in (data.get("activated_waystone_ids", []) as Array):
+		ids.append(String(id_v))
+	activated_waystone_ids = ids
+	day_index = int(data.get("day_index", 0))
 	_apply_equipment_stats_to_player()
+	_restore_waystones()
+
+
+## 세이브 파일에는 씬 노드를 담을 수 없어 waystone_id 문자열만 저장한다(위
+## last_waystone_id/activated_waystone_ids 주석 참고) — 로드 직후 현재 씬의
+## &"waystones" 그룹(waystone.gd:_ready()가 등록)에서 id가 일치하는 노드를 다시 찾아
+## 시각 상태(is_active)와 last_waystone 참조를 복원한다. 그룹에 아직 아무 비석도 없으면
+## (오토로드 초기화 시점 등) 조용히 넘어간다 — 씬이 준비된 뒤 SaveManager.load()가
+## 다시 호출해도 안전하도록 멱등적으로 짰다.
+func _restore_waystones() -> void:
+	if not is_inside_tree():
+		return
+	last_waystone = null
+	for node: Node in get_tree().get_nodes_in_group(&"waystones"):
+		var stone := node as Waystone
+		if stone == null:
+			continue
+		var id: String = String(stone.waystone_id)
+		if id.is_empty():
+			continue
+		if activated_waystone_ids.has(id):
+			stone.restore_active_silently()
+		if StringName(id) == last_waystone_id:
+			last_waystone = stone
+
+
+## 강화/저장 전 정리(M2-6, F8-1 "_pending_affix 없음 → 저장 전 강제 정리"). 인벤토리·
+## 장착 슬롯 전체를 훑어 미확정 재련이 남아 있으면 Blacksmith.auto_resolve_pending()
+## (D-85 "미commit 시 구 옵션 유지")으로 자동 정리한다 — 세이브 파일에 임시 상태
+## (_pending_affix)가 남는 것을 막는다. SaveManager.save()가 GameState.to_dict() 직전에
+## 호출한다.
+func sanitize_pending_affixes_before_save() -> void:
+	for slot: Dictionary in inventory.slots:
+		Blacksmith.auto_resolve_pending(slot)
+	for slot_name: String in equipment.slots:
+		Blacksmith.auto_resolve_pending(equipment.slots[slot_name])
 
 
 # --- 디버그 (F4, 정식 인벤토리 UI는 M2-2) ---

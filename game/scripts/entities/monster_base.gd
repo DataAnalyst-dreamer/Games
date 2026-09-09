@@ -710,6 +710,7 @@ func _on_hurtbox_hurt(source_hitbox: Hitbox) -> void:
 	if hp <= 0:
 		_enter_state(State.DEAD)
 		Events.enemy_died.emit(self, source_hitbox.source)
+		Events.monster_died.emit(StringName(monster_id)) # M2-7(F5-1/F5-2): kill형 퀘스트 목표 집계용.
 		if tier == "elite":
 			Events.elite_died.emit(self, source_hitbox.source)
 	elif wave_once_per_life and MonsterAiCalc.should_trigger_wave(hp, max_hp, wave_trigger_hp_pct, _wave_triggered):

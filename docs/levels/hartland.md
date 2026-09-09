@@ -394,6 +394,110 @@ game-designer·godot-engineer 협의 필요, D-58 예정 — `drop_table_id`는 
 
 ---
 
+## ⑩ 퀘스트 배치 (M2-8)
+
+> 기준: `docs/story/quests-act1-hartland.md`(메인 7개·사이드 5개), `game/data/quests/act1_hartland.json`
+> (`_todo_ids.locations` 7개·`.objects` 5개·목표 target `npc:dami/meru/pinto/rozel/teo`),
+> `docs/specs/quest-system-m2.md`(Events 시그널 계약). 실제 좌표·id는 `game/data/world_objects.json`
+> (신설, 이 문서가 근거)에 두고 `scripts/world/quest_layout_spawner.gd`(Main.tscn의
+> `HartlandQuestLayer` 노드 1개)가 읽어 인스턴스화한다.
+>
+> **좌표계 주의**: 이 절의 좌표는 ②~⑨절이 쓰는 384×384 타일 6×6 청크 격자(전역 타일
+> 좌표)가 **아니다**. `game/scenes/main/Main.tscn`은 아직 청크 스트리밍이 없는 단일
+> 프로토타입 씬(`scripts/systems/world.gd`가 채우는 64×64 타일 풀밭 한 장, 월드
+> 원점 기준 px)이라, 이 절의 좌표는 그 프로토타입 씬의 px 좌표다 — 청크 격자 좌표로의
+> 정식 이식은 LDtk 맵 제작(⑨절) 시점에 함께 수행한다(그때 world_objects.json의
+> `position`도 `pos_global_tile`(⑤절 스키마)로 재작성).
+
+### 배치 씬 3종
+
+| 씬 | 스크립트 | 대응 kind | 상호작용 시그널 |
+|---|---|---|---|
+| `scenes/world/QuestTrigger.tscn` | `quest_trigger.gd` | `location` | `Events.location_reached(location_id)` |
+| `scenes/world/QuestObject.tscn` | `quest_object.gd` | `object` | `Events.object_interacted(object_id)` |
+| `scenes/world/QuestNpc.tscn` | `quest_npc.gd` | `npc` | `Events.npc_talked(npc_id)` + HUD 토스트(`npc.<id>.greeting`) |
+
+### 좌표표 (`game/data/world_objects.json`, 17건)
+
+| id | kind | 좌표(px) | 대응 랜드마크/방위(②~⑨절 기준) | 비고 |
+|---|---|---|---|---|
+| `bridgeport_dock` | location | (-380, 160) | 브릿지포트 방면 이음새(남서) | MQ01 시작점 |
+| `cargo_pile` | object | (-390, 175) | 위와 동일 | one_shot(짐 확인 후 스프라이트 교체) |
+| `teo` | npc | (-360, 140) | 부두 근처 | 조사단 안내역, MQ01/MQ06/MQ07 talk 대상(결정 필요 D-115) |
+| `heartland_dandelion_village` | location | (-160, -20) | C2R3→C3R3 진입로(마을 어귀) | MQ02 reach |
+| `heartland_dandelion_village_square` | location | (-30, -90) | C3R3 광장(L1 결계석 인근) | MQ05 reach, one_shot=false(재진입 허용) |
+| `heartland_ward_stone` | location | (-40, -100) | C3R3 결계석(L1) 정중앙 | MQ04/MQ07 reach — 광장과 물리적으로 같은 자리(트리거 반경 겹침, 의도됨) |
+| `ward_stone_dandelion` | object | (-42, -96) | 위와 동일 | 기존 `Waystone1`(-40,-100)과 동일 좌표(D-28) |
+| `meru` | npc | (-40, -150) | 여관(마을 북쪽) | MQ02/S4 talk 대상 |
+| `pinto` | npc | (-95, -85) | 대장간(`BlacksmithNpc1` -70,-100) 인접 | S3 talk 대상 |
+| `rozel` | npc | (140, -20) | 목장(마을 동쪽) | S2 talk 대상 |
+| `dami` | npc | (230, 40) | 목초지 초입 | S1 talk 대상(1회성 서사 NPC) |
+| `heartland_pasture_boundary` | location | (260, 60) | C4R3 목초지 → 안전지대 경계 | S1 reach |
+| `montsil_rabbit` | object | (300, 90) | 안전지대 경계 | S1 interact, 상호작용 즉시 `queue_free`(D-94, 첫 상호작용=release 고정) |
+| `heartland_echo_cave_entrance` | location | (280, -180) | C5R2 메아리 굴 입구(L8) 방면 | MQ06 reach |
+| `echo_cave_puzzle_01` | object | (290, -190) | 위와 동일 | placeholder(퍼즐은 던전 단계 별도 제작, ⑦절) |
+| `heartland_hilltop_waypoint` | location | (60, -260) | C4R1 목자 전망대(L2) 방면 언덕 | S5 reach |
+| `waypoint_stone_01` | object | (65, -265) | 위와 동일 | 영구 랜드마크(one_shot=false) |
+
+### 동선 (MQ01 → MQ07, 사이드 S1/S5 포함)
+
+```mermaid
+flowchart LR
+    SPAWN((플레이어 스폰<br/>0,0)) --> TEO1[teo<br/>-360,140]
+    TEO1 --> CARGO[cargo_pile<br/>-390,175]
+    CARGO -->|MQ01 완료| VILLAGE[heartland_dandelion_village<br/>-160,-20]
+    VILLAGE --> MERU1[meru<br/>-40,-150]
+    MERU1 -->|MQ02 완료| SQUARE[village_square/ward_stone<br/>-30,-90 / -40,-100]
+    SQUARE -->|MQ03 습격 전투| SQUARE
+    SQUARE -->|MQ04 완료| SQUARE2[ward_stone 재방문]
+    SQUARE2 -->|MQ05 정예 처치 후| SQUARE
+    SQUARE -->|MQ06| TEO2[teo 재방문<br/>-360,140]
+    TEO2 --> CAVE[echo_cave_entrance/puzzle<br/>280,-180 / 290,-190]
+    CAVE -->|MQ06 완료| WARD3[ward_stone 재방문]
+    WARD3 --> TEO3[teo 재방문<br/>-360,140]
+    TEO3 -->|MQ07 완료, 월드맵 개방| DONE(("1막 종료"))
+
+    SQUARE -.S1.-> DAMI[dami<br/>230,40]
+    DAMI --> PASTURE[pasture_boundary<br/>260,60]
+    PASTURE --> MONTSIL[montsil_rabbit<br/>300,90]
+    SQUARE -.S5.-> HILL[hilltop_waypoint/waypoint_stone<br/>60,-260 / 65,-265]
+```
+
+### MQ01→MQ07 예상 이동 거리·시간
+
+`combat.json.movement.walk_speed_px = 80px/s`(D-42 계열 수치, 이 프로토타입 씬 기준) 적용.
+구간 이동 거리만 계산하고(전투·상호작용 소요 시간 제외), 누적은 스폰부터 MQ07 완료까지다.
+
+| 구간 | 이동 거리(px) | 도보 시간 | 비고 |
+|---|---|---|---|
+| 스폰(0,0) → teo(-360,140) → cargo_pile(-390,175) | 386 + 46 = 432px | 5.4s | MQ01(talk+interact) |
+| cargo_pile → village(-160,-20) → meru(-40,-150) | 302 + 177 = 479px | 6.0s | MQ02(reach+talk) |
+| meru → village_square(-30,-90) | 61px | 0.8s | MQ03 습격 발생 지점(전투 이동은 별도, GDD 4.1 튜토리얼 범위) |
+| village_square → ward_stone(-40,-100) | 14px | 0.2s | MQ04(같은 자리, D-28) |
+| (ward_stone) → village_square 복귀 | 14px | 0.2s | MQ05 정예 처치 후 재도달 |
+| village_square → teo(-360,140) → echo_cave(280,-180) → puzzle(290,-190) | 402 + 716 + 14 = 1132px | 14.2s | MQ06 — teo 재방문으로 인한 왕복 비약 포함(D-115) |
+| echo_cave_puzzle → ward_stone(-40,-100) → teo(-360,140) | 342 + 400 = 742px | 9.3s | MQ07(reach+talk), 완료 시 월드맵 개방 |
+| **누적(MQ01~MQ07)** | **≈ 3,144px** | **≈ 39.3초** | 전투·상호작용·대사 대기 제외 순수 도보 |
+| (참고) S1: village_square → dami(230,40) → pasture_boundary(260,60) → montsil_rabbit(300,90) | 304 + 36 + 50 = 390px | 4.9s | MQ06 이후 아무 때나(병렬) |
+| (참고) S5: ward_stone → hilltop_waypoint(60,-260) | 189px | 2.4s | MQ05 이후 아무 때나(병렬) |
+
+- 순수 도보 약 39초는 GDD가 요구하는 "1막 전체 체감 시간"(수 분 단위, 대화·전투·컷신 포함)에서 이동이
+  병목이 아님을 보여준다 — 이 프로토타입 씬은 384×384 타일 실제 하틀랜드보다 훨씬 작아서(단일
+  64×64 타일 풀밭) 절대 수치를 실제 맵 이동 시간으로 그대로 쓸 수 없다. LDtk 맵 제작 후 이 표는
+  ②절 청크 격자 좌표 기준으로 다시 계산해야 한다(제안, godot-engineer 협의).
+- MQ06 구간이 유독 긴 이유는 D-115(teo 단일 정적 배치) 때문이다 — 아래 결정 필요 항목 참고.
+
+### 배치 결정 필요 항목 (D-115+)
+
+| # | 쟁점 | 현재 처리 | 추천안 |
+|---|---|---|---|
+| D-115(안) | teo가 단일 정적 NPC라 MQ01(부두)·MQ06(동굴 입구)·MQ07(결계석)에서 매번 같은 좌표(-360,140)로 되돌아가 말을 걸어야 한다 — MQ06 구간 이동이 유독 길어짐(위 표) | MQ01 첫인상을 우선해 부두 근처에 고정 배치 | 퀘스트 진행에 따라 teo를 재배치하는 "동행 NPC" 로직(예: `quest_completed` 시그널을 구독해 teo 노드의 `position`을 다음 목적지로 갱신) 도입을 제안 — QuestNpc 자체 수정 없이 별도의 얇은 컨트롤러 스크립트로 가능 |
+| D-116(안) | `heartland_dandelion_village_square`와 `heartland_ward_stone`이 물리적으로 같은 자리라 트리거 반경(28px)이 겹친다 — 광장에 들어서면 둘 다 동시에 `location_reached`가 뜬다 | 의도된 동작으로 채택(문서화·테스트에 반영, `tests/smoke/smoke_quest_layout.gd`) | 게임플레이상 문제 없음 확인됨 — 별도 조정 불필요, 다만 향후 두 reach 목표가 서로 다른 시점에 필요해지면(예: 순서를 엄격히 분리해야 하는 신규 퀘스트) 재검토 |
+| D-117(안) | MQ05(정예 "덩치 뿔토끼" `horn_rabbit_big`)의 실제 스폰 좌표가 이번 world_objects.json에 없음 — 정예 스폰은 스토리 트리거 스폰이라 `game/data/spawns/hartland.json`(⑤절, godot-engineer 협의 대상) 소관으로 분리해 뒀다 | 미배치(스폰 시스템 태스크로 이관) | 스폰 시스템 태스크에서 `elite_id: elite_horn_rabbit_big_story`(1회성, 트리거는 `quest_objective_updated` 또는 `on_complete.events` 훅) 형태로 추가 제안 |
+| D-118(안) | `echo_cave_puzzle_01`은 placeholder(문 안 열림, 즉시 완료 처리) — 실제 "빛무리 징검다리" 퍼즐(⑦절)은 미구현 | placeholder QuestObject 그대로 사용 | 던전 단계 착수 시 `echo_cave.ldtk`(⑨절) 제작과 함께 실제 퍼즐 로직으로 교체 |
+
+---
+
 ## 완료 보고
 
 - **청크 수**: 36개 (6×6 청크 격자, 384×384 타일)
@@ -404,3 +508,4 @@ game-designer·godot-engineer 협의 필요, D-58 예정 — `drop_table_id`는 
 - 결정 D-58은 `docs/brd/04-decisions.md`에는 아직 정식 등재되지 않은 **예정 결정**이며(`combat-tuning-m1-addendum.md` §6-2에서 "확정"으로 표기, ID 부여만 대기), 본 문서의 `drop_table_id: null` 표기는 그 규칙을 선반영한 것이다.
 - 지역 던전 '민들레 뿌리굴'(뭉치 보스전, 30~40분·3페이즈)은 이번 태스크 범위(메아리 굴 미니 던전)에 포함되지 않아 개요 수준으로만 언급했다 — 별도 레벨 디자인 문서/태스크로 상세화가 필요하다(제안).
 - 다른 4개 지방(엘드우드/프로스트헤임/사마르/이그니스) 및 항구도시 브릿지포트는 각 지역 착수 시점에 동일한 문서 구조(①~⑨)로 별도 작성한다.
+- **M2-8 갱신**: ⑩절(퀘스트 배치)을 추가해 1막 메인 7개·사이드 5개 퀘스트가 참조하는 location 7개·object 5개·npc 5개를 `game/data/world_objects.json`으로 실제 배치했다(`act1_hartland.json`의 `_todo_ids.locations`/`.objects`는 비웠다). 좌표는 아직 청크 격자(②~⑨절)가 아니라 프로토타입 단일 씬(Main.tscn) 기준이다 — LDtk 맵 제작 시 재이식 필요.
