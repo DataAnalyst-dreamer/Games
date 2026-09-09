@@ -109,3 +109,11 @@ const ELITE_SPAWN_MIN_SEPARATION_PX: float = 20.0
 ## "초당 4틱"이 아니라 "1틱/초, 4데미지"로 해석. 하위 초 단위 틱 간격이 필요하면 이 상수
 ## 옆에 SPORE_PATCH_TICK_INTERVAL_SEC을 추가하고 monster_base.gd만 고치면 된다).
 const SPORE_PATCH_DURATION_SEC: float = 2.0
+
+# --- 세이브/로드 (F8-1, M2-6) ---
+## "전투 중 저장 불가" 판정 윈도우(초). Events.hit_landed(공격자/대상 어느 쪽이든)가
+## 마지막으로 발신된 뒤 이 시간 안이면 GameState.can_save()가 reason="in_combat"으로
+## 거부한다. F8-1 표는 "전투 중"만 규정하고 구체적인 유예 시간은 정의하지 않아 즉시
+## 이탈형 몬스터전 템포(몬스터 히트 간격 수 초)를 기준으로 잡은 제안값 — game-designer
+## 확인 필요(완료 보고 질문 목록 참고), `_balance_todo`.
+const IN_COMBAT_SAVE_LOCK_SEC: float = 5.0

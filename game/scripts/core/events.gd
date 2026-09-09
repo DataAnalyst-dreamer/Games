@@ -88,11 +88,27 @@ signal chunk_loaded(chunk_coord: Vector2i)
 signal chunk_unloaded(chunk_coord: Vector2i)
 signal region_entered(region_id: StringName)
 signal time_of_day_changed(hour: int)
+## M2-6(F8-1) 신설. Waystone.activate()가 GameState.set_last_waystone() 직후 emit —
+## SaveManager가 이 신호로 오토세이브를 건다(F8-1 트리거 "워프 비석 활성화").
+signal waystone_activated(waystone_id: StringName)
+## M2-6(F8-1) 신설. 이름만 선언 — 퀘스트 시스템 자체는 미구현(godot-engineer TODO:
+## 퀘스트 시스템 구현 태스크가 메인 퀘스트 단계 완료 시 이 신호를 emit하면 SaveManager의
+## 오토세이브가 자동으로 걸린다, save_manager.gd 참고).
+signal main_quest_stage_completed(stage_id: StringName)
+## M2-6(F8-1) 신설. 이름만 선언 — 워프 목적지 선택 UI(여러 비석 중 이동)가 아직 없어
+## (waystone.gd 주석 참고) 아무도 emit하지 않는다. 워프 시스템 구현 시 실제 이동 직후
+## 이 신호를 emit하면 SaveManager의 오토세이브가 자동으로 걸린다.
+signal waystone_warp_used(waystone_id: StringName)
 
 # --- UI / 시스템 ---
 signal menu_opened()
 signal menu_closed()
 signal game_paused(is_paused: bool)
 signal save_requested(slot: int)
-signal save_completed(slot: int)
+## M2-6(F8-1) 신설. SaveManager.save()/load() 결과 — kind는 "manual"|"auto". ok가 false면
+## reason(문자열 사유, 예: "player_dead"/"in_combat"/"boss_room"/"checksum_mismatch"/
+## "not_found"/"io_error")과 함께 발신된다. 과거 시그니처(slot만)를 쓰던 구독부는 없다
+## (grep 확인 — 안전하게 확장).
+signal save_completed(slot: int, kind: StringName, ok: bool)
+signal load_completed(slot: int, kind: StringName, ok: bool)
 signal settings_changed(key: StringName, value: Variant)

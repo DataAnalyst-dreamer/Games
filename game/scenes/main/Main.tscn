@@ -56,6 +56,7 @@ position = Vector2(-250, -140)
 
 [node name="Waystone1" parent="." instance=ExtResource("9_waystone")]
 position = Vector2(-40, -100)
+waystone_id = &"waystone1"
 
 [node name="BlacksmithNpc1" parent="." instance=ExtResource("16_blacksmith_npc")]
 position = Vector2(-70, -100)
