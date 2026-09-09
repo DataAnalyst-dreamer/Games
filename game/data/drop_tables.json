@@ -1,0 +1,184 @@
+{
+  "_comment": "드랍 테이블(F3-1/F3-5). 근거: docs/specs/items-and-drops-m2.md §4. source_id 6종: 하틀랜드 필드 일반 3종(monsters.json.drop_table_id가 가리킴, D-67) + 정예 2종(elite_goblin_captain/elite_bunchi_spawn - docs/levels/hartland.md ⑤, 몬스터 본체는 아직 monsters.json에 없음, 엔지니어 요청 참고) + 필드 보물상자 1종. M2는 common/uncommon/rare 등급 아이템만 존재하므로 모든 소스의 grade_base_weight에서 epic/legendary/relic은 0으로 명시 잠금(items.json에 해당 등급 아이템이 생기기 전까지 참조 무결성을 지키기 위함 - M3에서 epic+ 아이템 추가 시 재조정 필요, 결정 요청 참고). gold_drop은 data_tables.md §9 미정의 신규 필드(엔지니어 요청 참고).",
+
+  "_luck_formula": {
+    "_comment": "D-52: LUK 곱연산 공식의 단일 소스. stats.json.luk.drop_weight_formula는 이 블록을 문자열로 참조만 하고 별도 정의하지 않는다(결정 요청 11 해소).",
+    "formula": "raw_weight[grade] = grade_base_weight[grade] * luk_multiplier[grade]; luk_multiplier[common] = 1.0; luk_multiplier[grade != common] = 1.0 + LUK * luk_coefficient[grade]; final_probability[grade] = raw_weight[grade] / sum(raw_weight[all grades])",
+    "luk_coefficient": {
+      "uncommon": 0.004,
+      "rare": 0.010,
+      "epic": 0.020,
+      "legendary": 0.035,
+      "relic": 0.050
+    },
+    "worked_example": {
+      "source": "elite_goblin_captain",
+      "grade_base_weight": { "common": 0.15, "uncommon": 0.45, "rare": 0.40 },
+      "LUK_0": {
+        "raw_weight": { "common": 0.15, "uncommon": 0.45, "rare": 0.40 },
+        "final_probability": { "common": 0.15, "uncommon": 0.45, "rare": 0.40 }
+      },
+      "LUK_20": {
+        "luk_multiplier": { "common": 1.0, "uncommon": 1.08, "rare": 1.20 },
+        "raw_weight": { "common": 0.15, "uncommon": 0.486, "rare": 0.480 },
+        "final_probability": { "common": 0.1344, "uncommon": 0.4355, "rare": 0.4301 },
+        "note": "LUK 20으로 rare 최종 확률이 0.40 -> 0.4301 (+3.0%p), common은 배율이 항상 1.0이라 절대 확률이 0.15->0.1344로 오히려 줄어든다(다른 등급 raw_weight가 커지며 정규화 분모가 늘기 때문) - '희귀 등급 가중치에 곱연산'이 common을 직접 깎는 게 아니라 상대적으로 밀어내는 방식임을 보여주는 예시"
+      }
+    }
+  },
+
+  "slime_common": {
+    "source_id": "slime_common",
+    "_comment": "몬스터: 방울 슬라임(monster_id=slime). TTK 2타(최약체) -> GDD 6.1대로 field 몬스터는 common/uncommon만, rare 이상은 던전·정예 전용이라 0.",
+    "grade_base_weight": { "common": 0.75, "uncommon": 0.25, "rare": 0.0, "epic": 0.0, "legendary": 0.0, "relic": 0.0 },
+    "gold_drop": { "min": 2, "max": 5 },
+    "entries": [
+      { "item_id": "slime_jelly", "weight": 50, "qty_min": 1, "qty_max": 2 },
+      { "item_id": "salvage_scrap", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "ring_common_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "amulet_common_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "ring_uncommon_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "amulet_uncommon_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "iron_ore", "weight": 20, "qty_min": 1, "qty_max": 1 }
+    ]
+  },
+
+  "horn_rabbit_common": {
+    "source_id": "horn_rabbit_common",
+    "_comment": "몬스터: 뿔토끼(monster_id=horn_rabbit). TTK 3타. slime보다 uncommon 비중을 높여 '더 힘든 적 = 더 나은 보상'을 반영.",
+    "grade_base_weight": { "common": 0.70, "uncommon": 0.30, "rare": 0.0, "epic": 0.0, "legendary": 0.0, "relic": 0.0 },
+    "gold_drop": { "min": 4, "max": 8 },
+    "entries": [
+      { "item_id": "rabbit_horn", "weight": 45, "qty_min": 1, "qty_max": 2 },
+      { "item_id": "salvage_scrap", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "weapon_common_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "boots_common_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "weapon_uncommon_1", "weight": 12, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "boots_uncommon_1", "weight": 12, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "iron_ore", "weight": 16, "qty_min": 1, "qty_max": 1 }
+    ]
+  },
+
+  "mushroom_common": {
+    "source_id": "mushroom_common",
+    "_comment": "몬스터: 버섯돌이(monster_id=mushroom). TTK 4타(가장 탱키) -> 3종 중 uncommon 비중 최고, backpack_small 저확률 편입.",
+    "grade_base_weight": { "common": 0.65, "uncommon": 0.35, "rare": 0.0, "epic": 0.0, "legendary": 0.0, "relic": 0.0 },
+    "gold_drop": { "min": 5, "max": 10 },
+    "entries": [
+      { "item_id": "mushroom_cap", "weight": 40, "qty_min": 1, "qty_max": 2 },
+      { "item_id": "salvage_scrap", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "head_common_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "armor_common_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "sub_common_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "backpack_small", "weight": 3, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "head_uncommon_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "armor_uncommon_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "sub_uncommon_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "iron_ore", "weight": 15, "qty_min": 1, "qty_max": 1 }
+    ]
+  },
+
+  "elite_goblin_captain": {
+    "source_id": "elite_goblin_captain",
+    "_comment": "정예: 고블린 정찰대장(docs/levels/hartland.md ⑤, 베이스 골격=고블린 정찰병, 리스폰 1800s). F6-3 '정예=희귀~영웅'을 따르되 M2는 epic 아이템이 없어 uncommon/rare 위주로 캡, common은 15%만 남겨 전용 소재(goblin_fang)·광석 드랍 통로로만 사용(0%면 grade 자체가 안 뽑혀 해당 엔트리가 죽는다). monsters.json에는 아직 엔트리 없음(엔지니어/레벨디자인 요청).",
+    "grade_base_weight": { "common": 0.15, "uncommon": 0.45, "rare": 0.40, "epic": 0.0, "legendary": 0.0, "relic": 0.0 },
+    "gold_drop": { "min": 25, "max": 45 },
+    "entries": [
+      { "item_id": "weapon_uncommon_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "weapon_uncommon_2", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "ring_uncommon_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "ring_uncommon_2", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "amulet_uncommon_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "amulet_uncommon_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "armor_uncommon_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "armor_uncommon_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "head_uncommon_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "head_uncommon_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "boots_uncommon_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "boots_uncommon_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "sub_uncommon_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "sub_uncommon_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "goblin_fang", "weight": 20, "qty_min": 1, "qty_max": 3 },
+      { "item_id": "backpack_medium", "weight": 4, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "weapon_rare_1", "weight": 12, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "weapon_rare_2", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "ring_rare_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "ring_rare_2", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "amulet_rare_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "amulet_rare_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "armor_rare_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "armor_rare_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "head_rare_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "head_rare_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "boots_rare_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "boots_rare_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "sub_rare_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "sub_rare_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "iron_ore", "weight": 15, "qty_min": 2, "qty_max": 4 }
+    ]
+  },
+
+  "elite_bunchi_spawn": {
+    "source_id": "elite_bunchi_spawn",
+    "_comment": "정예: 뭉치의 새끼/분열체(docs/levels/hartland.md ⑤, 베이스 골격=방울 슬라임, 리스폰 1800s, 2막 스토리 개체 재사용). 아이템 풀·grade_base_weight는 elite_goblin_captain과 동일(공통 common 15%는 marsh_moss 드랍 통로)이나 재료만 습지 테마(marsh_moss)로 교체 - 정예 2종 보상 기대값을 동일하게 맞춰 '어느 쪽을 잡아도 손해 없다'를 보장.",
+    "grade_base_weight": { "common": 0.15, "uncommon": 0.45, "rare": 0.40, "epic": 0.0, "legendary": 0.0, "relic": 0.0 },
+    "gold_drop": { "min": 25, "max": 45 },
+    "entries": [
+      { "item_id": "weapon_uncommon_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "weapon_uncommon_2", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "ring_uncommon_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "ring_uncommon_2", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "amulet_uncommon_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "amulet_uncommon_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "armor_uncommon_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "armor_uncommon_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "head_uncommon_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "head_uncommon_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "boots_uncommon_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "boots_uncommon_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "sub_uncommon_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "sub_uncommon_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "marsh_moss", "weight": 20, "qty_min": 1, "qty_max": 3 },
+      { "item_id": "backpack_medium", "weight": 4, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "weapon_rare_1", "weight": 12, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "weapon_rare_2", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "ring_rare_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "ring_rare_2", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "amulet_rare_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "amulet_rare_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "armor_rare_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "armor_rare_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "head_rare_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "head_rare_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "boots_rare_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "boots_rare_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "sub_rare_1", "weight": 8, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "sub_rare_2", "weight": 6, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "marsh_moss", "weight": 15, "qty_min": 2, "qty_max": 4 }
+    ]
+  },
+
+  "field_treasure_chest": {
+    "source_id": "field_treasure_chest",
+    "_comment": "GDD 6.5 '미니 던전(5~10분) -> 보물상자'용 범용 테이블(지역 무관). 최소 uncommon 보장(common 없음)으로 '상자를 열면 손해는 없다'는 기대를 준다. backpack_large 편입(D-11, 인벤토리 40+40=80칸 상한을 이 소스에서 완결).",
+    "grade_base_weight": { "common": 0.0, "uncommon": 0.40, "rare": 0.60, "epic": 0.0, "legendary": 0.0, "relic": 0.0 },
+    "gold_drop": { "min": 15, "max": 30 },
+    "entries": [
+      { "item_id": "weapon_uncommon_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "ring_uncommon_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "amulet_uncommon_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "armor_uncommon_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "head_uncommon_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "boots_uncommon_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "sub_uncommon_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "weapon_rare_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "ring_rare_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "amulet_rare_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "armor_rare_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "head_rare_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "boots_rare_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "sub_rare_1", "weight": 10, "qty_min": 1, "qty_max": 1 },
+      { "item_id": "backpack_large", "weight": 3, "qty_min": 1, "qty_max": 1 }
+    ]
+  }
+}
