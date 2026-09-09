@@ -1,0 +1,72 @@
+{
+  "_comment": "58개 아이템 아이콘 배정. 모두 CC0 라이선스. region null: 원본 그대로 사용 또는 16x16으로 리사이징.",
+
+  "weapon_common_1": { "path": "res://assets/third_party/ninja_adventure/Items/Weapons/Sword/Sprite.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "weapon_common_2": { "path": "res://assets/third_party/ninja_adventure/Items/Weapons/BigSword/Sprite.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "weapon_uncommon_1": { "path": "res://assets/third_party/ninja_adventure/Items/Weapons/Katana/Sprite.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "weapon_uncommon_2": { "path": "res://assets/third_party/ninja_adventure/Items/Weapons/Axe/Sprite.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "weapon_rare_1": { "path": "res://assets/third_party/ninja_adventure/Items/Weapons/Lance/Sprite.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "weapon_rare_2": { "path": "res://assets/third_party/ninja_adventure/Items/Weapons/Hammer/Sprite.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+
+  "sub_common_1": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Guard.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "sub_common_2": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Guard.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "sub_uncommon_1": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Guard.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "sub_uncommon_2": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Guard.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "sub_rare_1": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Guard.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "sub_rare_2": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Guard.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+
+  "head_common_1": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Helmet.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "head_common_2": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Helmet.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "head_uncommon_1": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Helmet.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "head_uncommon_2": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Helmet.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "head_rare_1": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Helmet.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "head_rare_2": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Helmet.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+
+  "armor_common_1": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Armor.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "armor_common_2": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Armor.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "armor_uncommon_1": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Armor.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "armor_uncommon_2": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Armor.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "armor_rare_1": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Armor.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "armor_rare_2": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Armor.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+
+  "boots_common_1": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Boot.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "boots_common_2": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Boot.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "boots_uncommon_1": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Boot.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "boots_uncommon_2": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Boot.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "boots_rare_1": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Boot.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "boots_rare_2": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Boot.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+
+  "ring_common_1": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Ring.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "ring_common_2": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Ring.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "ring_uncommon_1": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Ring.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "ring_uncommon_2": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Ring.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "ring_rare_1": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Ring.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "ring_rare_2": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Ring.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+
+  "amulet_common_1": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Amulet.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "amulet_common_2": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Amulet.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "amulet_uncommon_1": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Amulet.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "amulet_uncommon_2": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Amulet.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "amulet_rare_1": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Amulet.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "amulet_rare_2": { "path": "res://assets/third_party/ninja_adventure/Ui/Skill Icon/Items & Weapon/Amulet.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+
+  "potion_hp_small": { "path": "res://assets/third_party/ninja_adventure/Items/Potion/LifePot.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "potion_hp_medium": { "path": "res://assets/third_party/ninja_adventure/Items/Potion/MilkPot.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+
+  "food_spicy_mushroom_skewer": { "path": "res://assets/third_party/ninja_adventure/Items/Food/Meat.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "food_honey_berry_tart": { "path": "res://assets/third_party/ninja_adventure/Items/Food/Honey.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+
+  "enhance_stone": { "path": "res://assets/third_party/ninja_adventure/Items/Resource/BarPurple.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "slime_jelly": { "path": "res://assets/third_party/ninja_adventure/Items/Resource/Water.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "rabbit_horn": { "path": "res://assets/third_party/ninja_adventure/Items/Resource/feather.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "mushroom_cap": { "path": "res://assets/third_party/ninja_adventure/Items/Resource/Grass.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "iron_ore": { "path": "res://assets/third_party/ninja_adventure/Items/Resource/BarIron.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "goblin_ear": { "path": "res://assets/third_party/ninja_adventure/Items/Resource/GemRed.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "goblin_fang": { "path": "res://assets/third_party/ninja_adventure/Items/Projectile/Kunai.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "marsh_moss": { "path": "res://assets/third_party/ninja_adventure/Items/Resource/Branch.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "salvage_scrap": { "path": "res://assets/third_party/ninja_adventure/Items/Resource/Rock.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+
+  "backpack_small": { "path": "res://assets/third_party/ninja_adventure/Items/Treasure/LittleTreasureChest.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "backpack_medium": { "path": "res://assets/third_party/ninja_adventure/Items/Treasure/BigTreasureChest.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "backpack_large": { "path": "res://assets/third_party/ninja_adventure/Items/Object/Bag.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" }
+}

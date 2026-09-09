@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/third_party/ninja_adventure/FX/Projectile/Kunai.png" id="1_kunai"]
+[ext_resource type="Script" path="res://scripts/systems/projectile.gd" id="2_projectile"]
+[ext_resource type="Script" path="res://scripts/systems/hitbox.gd" id="3_hitbox"]
+
+[sub_resource type="CircleShape2D" id="body_shape"]
+radius = 3.0
+
+[node name="Projectile" type="CharacterBody2D"]
+collision_layer = 0
+collision_mask = 1
+motion_mode = 1
+script = ExtResource("2_projectile")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_kunai")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("body_shape")
+
+[node name="Hitbox" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 16
+script = ExtResource("3_hitbox")
+team = &"enemy"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+shape = SubResource("body_shape")

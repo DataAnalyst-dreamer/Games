@@ -70,10 +70,10 @@
 |---|---|---|---|---|---|
 | 피격(일반 피해, 가드 아님) | `player.gd:_apply_full_hit()` | 풀: `NA/Sounds/Hit & Impact/Impact.wav`, `Impact2.wav`, `Impact3.wav` | -3 | 0.9–1.1× | 중첩 불필요(피격 무적 0.5s가 자연 쿨다운) |
 | 가드 중 피격(칩데미지 통과) | `player.gd:_handle_guarded_hit()` | 풀: `NA/Sounds/Hit & Impact/Impact4.wav`, `Impact5.wav` | -6 | 0.95–1.05× | 중첩 없음(직전 소리 컷), 쿨다운 없음 |
-| 저스트 가드 성공 | `player.gd:_handle_just_guard()` | **§10 미충족 — sfxr 필요.** 임시 대체: `NA/Sounds/Bonus/Bonus2.wav` | -2 | 1.0±0% | 중첩 1보이스 |
-| 스태미나 고갈(구르기/가드 발동 실패) | `Events.player_stamina_insufficient` (roll.gd, state.gd, player.gd 3곳에서 emit) | **§10 미충족 — sfxr 필요.** 임시 대체: `NA/Sounds/Alert/Alert4.wav` | -6 | 1.0±0% | **디바운스 0.3초**(버튼 연타 시 소리 난사 방지) |
+| 저스트 가드 성공 | `player.gd:_handle_just_guard()` | **자체 제작 완료(§10-2).** `res://assets/audio/sfx/just_guard_parry_ting.wav` | -2 | 1.0±0% | 중첩 1보이스 |
+| 스태미나 고갈(구르기/가드 발동 실패) | `Events.player_stamina_insufficient` (roll.gd, state.gd, player.gd 3곳에서 emit) | **자체 제작 완료(§10-1).** `res://assets/audio/sfx/stamina_exhausted_deny.wav` | -6 | 1.0±0% | **디바운스 0.3초**(버튼 연타 시 소리 난사 방지) |
 
-> 저스트 가드·스태미나 고갈은 "임시 대체" 파일로 즉시 재생 가능하지만, 기존 팩의 다른 용도(경고/UI 취소)와 의미가 겹쳐 정체성이 약하다 — §10에서 전용 sfxr 사운드를 정의한다.
+> 저스트 가드·스태미나 고갈은 기존 임시 대체 파일(Bonus2.wav/Alert4.wav)이 다른 용도(경고/UI 취소)와 의미가 겹쳐 정체성이 약했다 — §10 파라미터로 `tools/audio/sfxr_synth.py`가 합성한 전용 WAV로 교체 완료(`game/data/audio_sfx.json` 반영 완료).
 
 ---
 
@@ -146,9 +146,9 @@ GDD 11장 UI(인벤토리·메뉴 커서 이동)는 M1 로드맵 범위 밖이�
 
 ---
 
-## 10. 미충족 이벤트 — sfxr 파라미터 정의 (3건)
+## 10. 자체 저작 sfxr 사운드 (3건 — 제작 완료)
 
-기존 CC0 팩에 "의미가 정확히 겹치지 않는" 3개 이벤트. 아래는 jsfxr 호환 파라미터 JSON(정규화 0~1 값, `wave_type`: 0=사각파 1=톱니파 2=사인파 3=노이즈)이며, **파일 생성은 다음 단계**(본 세션은 인라인 정의만, `tools/audio/sfxr/<이름>.json`으로 저장 예정).
+기존 CC0 팩에 "의미가 정확히 겹치지 않는" 3개 이벤트. 아래 jsfxr 호환 파라미터 JSON(정규화 0~1 값, `wave_type`: 0=사각파 1=톱니파 2=사인파 3=노이즈)은 `tools/audio/sfxr/<이름>.json`으로 저장돼 있고, `tools/audio/sfxr_synth.py --all tools/audio/sfxr game/assets/audio/sfx`로 WAV를 생성해 `game/data/audio_sfx.json`에 반영 완료했다(재생성 명령: `tools/audio/README.md`). 아래 JSON은 실제 저장된 파일과 동일한 스냅샷이다(참고용, 진짜 소스는 `tools/audio/sfxr/*.json`).
 
 ### 10-1. `stamina_exhausted_deny` — 스태미나 고갈 전용 "안 돼" 신호
 현재 임시 대체(Alert4.wav)는 슬라임 예고(Alert.wav류)와 같은 계열이라 "적이 나를 봤다"와 "내가 자원이 없다"가 청감상 혼동될 수 있다. 짧고 낮은 2음 하강 블립으로 명확히 분리.
@@ -237,18 +237,20 @@ GDD 10장 "전설 드랍 = 전용 효과음 + 빛기둥"의 "전용" 요건을 �
 
 ---
 
-## 11. 확장 참고 — 등급별 드랍 사운드 (M2 예고)
+## 11. 등급별 드랍 사운드 (자체 저작 6종 — 제작·매핑 완료)
 
-`game/data/drop_tables.json`이 아직 없어(`combat-tuning-m1-addendum.md` §6) M1 구현 대상은 아니지만, `Events.item_dropped(item_id, world_position, rarity)`가 이미 `events.gd`에 선언돼 있으므로 사운드 자산만 미리 지정해 둔다. 등급 6종은 GDD 6.1 표(색상 포함) 그대로. `rarity` StringName 값(`common`/`uncommon`/`rare`/`epic`/`legendary`/`relic`)은 아직 `items.json`이 없어 game-designer 제안값 — M2 스키마 확정 시 재검토. 상세 차별화 규칙(빛기둥 등 시각 연동 포함)은 `audio-spec.md` §4.
+`game/scripts/world/item_drop.gd:_play_drop_sfx()`가 이미 `AudioManager.play_sfx(StringName("drop_%s" % grade), global_position)`를 호출하고 있어(코드 확인 완료 — 이 문서 최초 작성 시점의 "M2 예고" 가정과 달리 드랍 훅 자체는 M1 코드에 이미 존재) `game/data/audio_sfx.json`에 `drop_<grade>` 6종을 채우기만 하면 코드 변경 없이 소리가 난다. `grade` 문자열은 `game/scripts/ui/rarity.gd`의 `Rarity.KEYS`(`common`/`uncommon`/`rare`/`epic`/`legendary`/`relic`)와 정확히 일치(코드 확인 완료). 기존에는 이 6종이 비어 있었던 상태 — 이번에 CC0 팩 재활용 대신 `tools/audio/sfxr_synth.py`로 전부 **자체 저작**해 등급 진행에 따른 일관된 "뽁뽁" 계열 톤을 확보했다. 상세 차별화 규칙(빛기둥 등 시각 연동 포함)은 `audio-spec.md` §4.
 
-| 등급(GDD 6.1) | `rarity` 제안값 | 파일 | 비고 |
-|---|---|---|---|
-| 일반(흰) | `common` | `NA/Sounds/Bonus/Coin.wav` | |
-| 고급(초록) | `uncommon` | `NA/Sounds/Bonus/Coin2.wav` | 일반과 거의 동일 톤(파밍 스팸 방지, 미세 피치 차이만) |
-| 희귀(파랑) | `rare` | `NA/Sounds/Bonus/Bonus.wav` | |
-| 영웅(보라) | `epic` | `NA/Sounds/Bonus/Bonus3.wav` + `NA/Sounds/Bonus/Gold2.wav` 레이어 | |
-| **전설(주황)** | `legendary` | `NA/Jingles/Secret1.wav` + **`legendary_drop_sparkle`(§10-3, 전용)** | 유일하게 "전용 효과음"을 갖는 등급 — GDD 10장 명시 요구사항 |
-| 유물(붉은 금색) | `relic` | `NA/Jingles/Secret2.wav`(임시, 전설과 동일 계열) | GDD 10장은 유물 전용 사운드를 명시하지 않음 — 전설과 차별화할지는 결정 요청 대상(M2, 유물 콘텐츠 착수 시) |
+| 등급(GDD 6.1) | `grade` | 파일 | 길이 | 비고 |
+|---|---|---|---|---|
+| 일반(흰) | `common` | `drop_common.wav` | 0.022s | 뽁뽁 패밀리 최소 버전(파밍 스팸 방지) |
+| 고급(초록) | `uncommon` | `drop_uncommon.wav` | 0.027s | common과 거의 동일 계열, 미세 피치 상승만 |
+| 희귀(파랑) | `rare` | `drop_rare.wav` | 0.059s | 단일 사운드, 펀치·비브라토 소폭 증가 |
+| 영웅(보라) | `epic` | `drop_epic.wav` + `drop_epic_layer.wav`(사인 트윙클) | 0.124s + 0.133s | **2레이어** — godot-engineer가 `grade=="epic"` 분기에서 layer 추가 호출 필요(§12 갱신) |
+| **전설(주황)** | `legendary` | `drop_legendary.wav` + **`legendary_drop_sparkle.wav`(§10-3, 전용)** | 0.227s + 0.454s | 유일하게 "전용 효과음"을 갖는 등급(GDD 10장 명시 요구사항) — 스파클 레이어는 다른 어떤 이벤트에도 재사용 금지(`audio-spec.md` §4 규칙 3) |
+| 유물(붉은 금색) | `relic` | `drop_relic.wav`(사인파, 뽁뽁 패밀리 최상위) | 0.360s | GDD 10장은 유물 전용 사운드를 명시하지 않지만, 이번 일괄 제작으로 legendary_drop_sparkle을 재사용하지 않는 독자 파형을 만들어 두었다 — 전설과의 최종 차별화 정책(색만 다르고 완전히 같은 취급 vs 지금처럼 별개 톤 유지) 확정은 여전히 game-designer 결정 요청 대상 |
+
+> **godot-engineer 전달(신규)**: `item_drop.gd`는 grade당 `play_sfx` 1회만 호출한다. `epic`/`legendary`의 2번째 레이어(`drop_epic_layer`/`legendary_drop_sparkle`)를 실제로 겹쳐 들리게 하려면 `_play_drop_sfx()`에 `grade` 분기 추가 호출이 필요하다 — `game/`은 본 세션에서 수정하지 않으므로 명세로만 남긴다(`audio_sfx.json`의 각 항목 `_comment`에도 동일 요청 기재).
 
 ---
 
@@ -265,6 +267,7 @@ M1 코드를 읽고 실제 훅 지점을 확인한 결과, 아래는 **Events �
 | 슬라임 예고/공격/피격/사망(§5) | `monster_base.gd`의 각 상태 진입 함수에서 직접 호출 | 몬스터 전용 이벤트라 전역 Events에 없음(의도된 설계 — 몬스터마다 다른 사운드 세트를 가지므로 전역 시그널화는 오히려 결합도만 늘림) |
 | 플레이어 사망/부활(§6) | `Events.player_died` / `Events.player_respawned` 구독 | 페이로드 불필요, 안전하게 구독 가능 |
 | 비석 활성화(§7) | `waystone.gd:_play_activation_feedback()` 안에서 직접 호출 | 전용 시그널 없음, 호출부가 유일해 신호 추가 실익 없음 |
+| 등급별 드랍(§11) | `item_drop.gd:_play_drop_sfx()`는 이미 구현됨(grade→`drop_<grade>` 직접 호출) — **추가 요청**: `epic`/`legendary` 분기에서 레이어 id(`drop_epic_layer`/`legendary_drop_sparkle`) 2차 호출 추가 | 현재 코드는 grade당 1회 호출뿐이라 레이어가 겹쳐 들리지 않음 — `Events.item_dropped`에 layer 유무 정보가 없어 구독만으로는 처리 불가, 호출부 직접 수정 필요 |
 
 **코드 주의 재확인(§2와 동일 항목, 반복 강조)**: `events.gd`의 `hit_landed(attacker, target, damage, is_critical)` 시그니처와 실제 emit(`hit_feel.gd`)이 넘기는 값(`is_advantage`, 원소 상성)이 이름과 다르다. 오디오 구현 시점에 게임 디자인팀 확인 없이 이름만 보고 "진짜 크리티컬"로 오해하지 않도록 이 문서와 결정 요청 목록에 남긴다.
 
@@ -272,7 +275,7 @@ M1 코드를 읽고 실제 훅 지점을 확인한 결과, 아래는 **Events �
 
 ## 13. 요약
 
-- **파일로 매핑된 이벤트**: 19건 (§1~§8, UI 3건 포함 · sfxr 대기 2건 제외)
-- **sfxr 필요(미충족) 이벤트**: 3건 (§10 — 저스트 가드 성공, 스태미나 고갈, 전설 드랍 전용 레이어) — 모두 임시 대체 파일 지정 완료, 즉시 플레이 가능
+- **파일로 매핑된 이벤트**: 19건 (§1~§8, UI 3건 포함) + **자체 저작 11건**(§10 sfxr 3건 + §11 등급별 드랍 6종 + 영웅 레이어 1 + `goblin_whistle` 1) = 총 30건
+- **sfxr 자체 저작 완료**: 저스트 가드 성공·스태미나 고갈·전설 드랍 전용 레이어(§10, 기존 임시 대체 파일 교체) + 등급별 드랍 6종(§11, 신규) + 영웅 2번째 레이어(`drop_epic_layer`) + `goblin_whistle`(M2-3 선반영, 훅 없음) — 합성기: `tools/audio/sfxr_synth.py`, 파라미터: `tools/audio/sfxr/*.json`, 검증표는 완료 보고 참고
 - **BGM 후보**: 4곡 (초원 목가풍 3 + 전투 전환 1)
-- **godot-engineer 전달 사항**: §12 배선 권장표 7건, §2 코드 네이밍 불일치 1건
+- **godot-engineer 전달 사항**: §12 배선 권장표 8건(신규 1건 — 드랍 레이어 2차 호출), §2 코드 네이밍 불일치 1건

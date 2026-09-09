@@ -285,12 +285,61 @@ HP·스태미나 바(HP 25% 이하 점멸+화면 비네트, 색약 모드는 대
   표시한다(기존 M1-5 기능 재사용). `F4`(`debug_inventory_dump` 액션)를 누르면
   `GameState.dump_inventory_debug()`가 인벤토리 슬롯·장비·골드·우편함 요약을 콘솔에
   텍스트로 덤프한다(정식 인벤토리 UI는 M2-2).
-- **정예/파밍 소스 데이터**(M2-3 선반영): `monsters.json`에 `goblin_scout`(일반,
-  `drop_table_id=null`, D-80)·`elite_goblin_captain`·`elite_bunchi_spawn`(정예 2종,
-  D-75 예정, `docs/specs/elite-and-farming-m2.md` §1-4 JSON 그대로)을 추가하고 기존
-  슬라임/뿔토끼/버섯돌이의 `region_id`를 `greenfield_prototype`→`hartland`로
-  마이그레이션했다(D-81 예정). 정예의 호루라기 호출(`ranged_dart`)/웨이브/분열 AI와
-  전용 씬은 아직 구현하지 않았다 — 데이터만 있고 몬스터 본체 씬은 M2-3 범위.
+- **아이템 아이콘**(소규모 추가): `data/item_icons.json`(asset-wrangler, 58개 배정,
+  `docs/art/item-icon-map.md`)을 `scripts/ui/item_icon.gd`(`ItemIcon.resolve(item_id)`)
+  로 조회해 `ItemDrop`(필드 드랍)과 `Hud` 획득 로그가 카테고리 placeholder 대신 아이템별
+  아이콘(경로+region이 있으면 AtlasTexture, 없으면 원본 그대로)을 우선 쓰도록 연결했다.
+  표에 없는 아이템은 기존 카테고리 대표 아이콘으로 자동 폴백한다.
+- **드랍 SFX 레이어**(소규모 추가): `item_drop.gd:_play_drop_sfx()`가 등급별
+  `drop_<grade>` 기본 재생에 더해 epic은 `drop_epic_layer`, legendary는
+  `legendary_drop_sparkle`을 같은 프레임에 추가로 재생해 2레이어로 겹쳐 들리게 한다
+  (audio-designer `audio_sfx.json`/`docs/audio/sound-map-m1.md` §4, `goblin_whistle`
+  훅은 아래 정예 절 참고).
+
+## 정예 2종 · 고블린 정찰병 · 정예 리스폰 (M2-3, F6-3/D-15)
+
+- **`goblin_scout`(일반, 원거리 경보형)**: `scenes/entities/monsters/GoblinScout.tscn`
+  (Ninja Adventure `Actor/Monster/Cyclope` 대역 — 전용 고블린 시트가 팩에 없어 소형
+  외눈 인간형으로 대체, 완료 보고 참고). `attack_pattern_id="ranged_dart"` —
+  `monster_base.gd`가 접촉 히트박스 대신 `scenes/effects/Projectile.tscn`
+  (`scripts/systems/projectile.gd`, CharacterBody2D+Hitbox 재사용, 벽 충돌/대상 명중/
+  `Tuning.RANGED_DART_LIFETIME_SEC` 중 먼저 오는 조건에 소멸)을 발사한다. 호루라기
+  증원 호출(`whistle_*`, `docs/specs/elite-and-farming-m2.md` §1-1-1)은 상태머신에
+  `WHISTLE` 상태를 추가해 구현 — IDLE/PATROL/CHASE 중 플레이어가 `aggro_range_px`
+  안이고 쿨다운이 다 찼으면 `whistle_cast_sec` 동안 시전(피격 시 여느 상태처럼 즉시
+  HURT로 끊겨 카운터플레이 성립) 후 `whistle_range_px` 안의 `whistle_summon_pool`
+  대상을 강제로 CHASE시킨다. SFX 훅은 `goblin_whistle`(audio-designer 제작 완료).
+- **정예 공통**(`MonsterBase`, `tier=="elite"`): 이름표(`name_ko`)+등급 테두리 HP바를
+  디버그 수준(Label+ColorRect 2장)으로 자동 표시하고, 처치 시 `Events.enemy_died`와
+  별도로 `Events.elite_died`를 추가 emit한다(`Metrics`가 구독해 `elite_kills_by_monster`
+  로 집계, `Metrics.summary().elite_kills`). `elite_base_monster_id`는 참고용 필드로만
+  읽는다(배율은 monsters.json에 이미 계산돼 있음).
+- **`elite_goblin_captain`**: `EliteGoblinCaptain.tscn`(Cyclope2 대역, 콜리전은 그대로
+  두고 스프라이트만 1.3배 확대 — 판정 크기를 키우면 회피가 불공정해지므로 시각 효과만
+  분리). 호루라기 범위/인원이 확대된 값을 그대로 쓰고(데이터 주도), HP
+  `wave_trigger_hp_pct`(0.5) 이하 도달 시 1회(`wave_once_per_life`) `WAVE` 상태로
+  전이해 `wave_cast_sec` 시전 후 `wave_summon_count`(3)마리를 `whistle_range_px` 반경
+  안에 겹치지 않게(`MonsterAiCalc.pick_non_overlapping_offsets`) 스폰하고 즉시
+  CHASE시킨다.
+- **`elite_bunchi_spawn`**: `EliteBunchiSpawn.tscn`(슬라임 스프라이트 재사용, 1.4배
+  확대+보라 틴트로만 구분 — 신규 애셋 없이 골격 재사용). 사망 시
+  `on_death_split_monster_id`("slime")를 `on_death_split_count`(2)마리
+  `on_death_split_spawn_radius_px` 반경에 겹치지 않게 스폰한다. 분열체는
+  `suppress_loot_drop=true`로 스폰되어 `loot_spawner.gd`가 드랍을 굴리지 않는다(부모만
+  드랍) — 스폰된 개체는 일반 `slime` 데이터를 그대로 쓰므로(`on_death_split_*` 필드
+  없음) 재귀 분열이 데이터 상 불가능하다.
+- **정예 리스폰**(D-15): `scripts/systems/elite_spawner.gd`가 `farming_sources.json`의
+  정예 2종을 `hartland.md` §5 좌표(임시 상수, `SPAWN_POS_GLOBAL_TILE`)에 고정 스폰하고,
+  처치 시 `respawn_seconds`(1800초=30분)를 `GameState.elite_respawn_remaining_sec`에
+  채운다. `GameState`에 신설된 `play_time_sec`(실제 플레이 시간 누적, `_process(delta)`
+  가 매 프레임 더함 — 일시정지 중엔 엔진이 이 콜백 자체를 스킵해 자동으로 오프라인/
+  일시정지 시간이 제외된다)가 같은 `_process()`에서 리스폰 카운트다운을 함께 깎는다.
+  두 필드 모두 `to_dict()`/`from_dict()`로 세이브에 포함된다. `EliteSpawner`는
+  `Main.tscn`(정예 2종을 이미 고정 배치해 둠, 아래 참고)에는 배치하지 않는다 — 같이
+  쓰면 중복 스폰된다. 실제 오픈월드가 들어오면 레벨 루트에 이 노드 하나만 배치하면 된다.
+- **Main.tscn 배치**: 기존 슬라임 3·뿔토끼 2·버섯돌이 1에 더해 `GoblinScout` 2마리
+  (220,-80)/(-220,-60)와 정예 2종 각 1(`EliteGoblinCaptain1` (250,140),
+  `EliteBunchiSpawn1` (-250,-140))을 아레나 가장자리에 배치했다.
 
 ## 남은 작업 (다음 태스크, M2)
 - 전투: 강공격/차지, 스킬 슬롯, 무기별 가드 가능 여부(현재는 항상 가드 가능 — S2-1c 전제 "방패/가드 가능

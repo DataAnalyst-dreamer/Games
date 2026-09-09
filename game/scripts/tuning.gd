@@ -79,6 +79,29 @@ const MONSTER_HURT_STUN_SEC: float = 0.2
 ## (완료 보고 질문 목록 참고). _balance_todo 취급.
 const DASH_WALL_STUN_SEC: float = 0.5
 
+## 고블린 정찰병/정찰대장 다트(ranged_dart, M2-3) 투사체 속도(px/s)·최대 생존시간(초).
+## elite-and-farming-m2.md §1-1/§1-2 어디에도 투사체 자체의 비행 속도가 정의돼 있지
+## 않다(멜리/장판형과 달리 "발사체가 날아가는 시간"이라는 새 축이 필요해짐) — 뿔토끼
+## 돌진(dash_speed_px=200)과 비슷한 체감을 주는 제안값. lifetime은 melee_range_px(90,
+## 발사 트리거 거리)를 이 속도로 왕복 이상 커버할 수 있게 넉넉히 잡았다(사거리 밖으로
+## 나간 다트가 무한히 날아다니지 않도록 하는 안전장치). game-designer 확인 필요
+## (완료 보고 질문 목록 참고) — _balance_todo.
+const RANGED_DART_SPEED_PX: float = 220.0
+const RANGED_DART_LIFETIME_SEC: float = 1.2
+
+## 호루라기(whistle_cast_sec)·웨이브(wave_cast_sec) 시전 중 표시할 텔레그래프 색상.
+## 일반 피격 예고(붉은 점멸, monster_base.gd:_start_telegraph_flash)와 구분되는 "유틸
+## 액션" 색으로 파란 계열을 썼다 — 데미지가 없는 액션이라 GDD 4.2 강제 규칙 대상은
+## 아니지만(elite-and-farming-m2.md §1-1-1), 카운터플레이(달려들어 끊기)가 성립하려면
+## 시전 중임이 시각적으로 드러나야 한다. 전용 이펙트는 pixel-artist TODO — 완료 보고 참고.
+const WHISTLE_CAST_FLASH_COLOR: Color = Color(0.5, 0.7, 1.0)
+
+## 정예 소환 웨이브(elite_goblin_captain)·분열(elite_bunchi_spawn) 스폰 지점 간 최소
+## 이격 거리(px, MonsterAiCalc.pick_non_overlapping_offsets). "겹침 방지"(§1-2) 요구를
+## 만족하는 최소값 — 몬스터 바디 콜리전 크기(약 10px)보다 넉넉히 크게 잡은 제안값.
+## game-designer 확인 필요 — _balance_todo.
+const ELITE_SPAWN_MIN_SEPARATION_PX: float = 20.0
+
 ## 버섯돌이 포자 장판(spore_patch) 지속시간(초). combat-tuning-m1(-addendum) 어디에도
 ## 정의되지 않은 완전 신규 제안값 — game-designer 확인 필요(완료 보고 질문 목록 참고).
 ## 장판 내부 초당 피해는 monsters.json.atk_tick_per_sec(4.0/초)를 그대로 쓰되, 실제 틱은

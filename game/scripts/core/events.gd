@@ -51,6 +51,10 @@ signal combo_finisher_reached(player: Node)
 # --- 몬스터 ---
 signal enemy_spawned(enemy: Node2D)
 signal enemy_died(enemy: Node2D, killer: Node)
+## M2-3 신규(F6-3, elite-and-farming-m2.md §1). enemy_died와 별도로 "정예 처치"만 세는
+## 전용 신호 — monster_base.gd가 tier=="elite"일 때만 enemy_died와 함께 emit한다.
+## Metrics가 구독해 정예 처치 수를 집계한다(완료 보고 참고).
+signal elite_died(enemy: Node2D, killer: Node)
 signal boss_started(boss_id: StringName)
 signal boss_defeated(boss_id: StringName)
 

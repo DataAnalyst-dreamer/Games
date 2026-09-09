@@ -23,6 +23,8 @@ func _ready() -> void:
 func _on_enemy_died(enemy: Node2D, _killer: Node) -> void:
 	if enemy == null or not (enemy is MonsterBase):
 		return
+	if (enemy as MonsterBase).suppress_loot_drop:
+		return # M2-3 §1-3: 정예 분열로 스폰된 개체는 드랍 없음(부모가 드랍).
 	var monster_def: Dictionary = Data.get_value("monsters", (enemy as MonsterBase).monster_id, {})
 	var drop_table_id_raw: Variant = monster_def.get("drop_table_id")
 	if drop_table_id_raw == null:

@@ -12,6 +12,9 @@
 [ext_resource type="PackedScene" path="res://scenes/entities/monsters/HornRabbit.tscn" id="10_horn_rabbit"]
 [ext_resource type="PackedScene" path="res://scenes/entities/monsters/Mushroom.tscn" id="11_mushroom"]
 [ext_resource type="Script" path="res://scripts/systems/loot_spawner.gd" id="12_loot_spawner"]
+[ext_resource type="PackedScene" path="res://scenes/entities/monsters/GoblinScout.tscn" id="13_goblin_scout"]
+[ext_resource type="PackedScene" path="res://scenes/entities/monsters/EliteGoblinCaptain.tscn" id="14_elite_goblin_captain"]
+[ext_resource type="PackedScene" path="res://scenes/entities/monsters/EliteBunchiSpawn.tscn" id="15_elite_bunchi_spawn"]
 
 [node name="Main" type="Node2D"]
 
@@ -36,6 +39,18 @@ position = Vector2(-150, 60)
 
 [node name="Mushroom1" parent="." instance=ExtResource("11_mushroom")]
 position = Vector2(0, 170)
+
+[node name="GoblinScout1" parent="." instance=ExtResource("13_goblin_scout")]
+position = Vector2(220, -80)
+
+[node name="GoblinScout2" parent="." instance=ExtResource("13_goblin_scout")]
+position = Vector2(-220, -60)
+
+[node name="EliteGoblinCaptain1" parent="." instance=ExtResource("14_elite_goblin_captain")]
+position = Vector2(250, 140)
+
+[node name="EliteBunchiSpawn1" parent="." instance=ExtResource("15_elite_bunchi_spawn")]
+position = Vector2(-250, -140)
 
 [node name="Waystone1" parent="." instance=ExtResource("9_waystone")]
 position = Vector2(-40, -100)
