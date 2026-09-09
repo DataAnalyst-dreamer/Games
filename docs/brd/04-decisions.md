@@ -133,6 +133,89 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 | D-68 | 가드 이동·회복 배율 | `guard.move_speed_multiplier` 0.5, `stamina.guard_regen_multiplier` 0.5 **확정**(`_balance_todo` 해제), BRD S2-1c에 문구 반영 | 요청8 | combat.json, BRD 02-전투 |
 | D-69 | M1 사망 페널티 범위 | **HP 전량 회복 + 비석 부활만** 구현, 골드 5%·상한(D-25)은 M2 경제 스펙에서 재확정 | 요청9 | F8-2 |
 | D-70 | 가드 중 스태미나 부족 | 가드 유지 중 피격 시 `guard_hit` 비용(10)을 지불할 수 없으면 **그 타격은 가드 실패 → 전량 피해 + Hurt 상태**("스태미나 부족 시 액션 미발동" 규칙의 타격 단위 확장) | M1-2 엔지니어 가정 승인 | combat 스펙, S2-1c |
+| D-71 | 뿔토끼·버섯돌이 신규 제안값 | 돌진 벽 충돌 기절 `DASH_WALL_STUN_SEC` **0.5s**, 포자 장판 지속 `SPORE_PATCH_DURATION_SEC` **2.0s**(틱 간격 1s) — **임시 반영 + `_balance_todo`**, M1 게이트 테스트에서 실측 | M1-3 엔지니어 제안 승인 | tuning.gd → monsters.json 이관 예정 |
+| D-72 | 계측 "콤보 3타 완주" 정의 | M1은 **입력 체이닝으로 피니셔(3타)가 시작된 횟수**(적중 무관). 적중 기준이 필요하면 M2에서 `hit_landed`에 `hit_index` 추가 | M1-4 | metrics.gd |
+| D-73 | 계측 TTK 정의 | **최초 피격 → 사망** 시간(플레이테스트 문서 §4의 "인지 전이 기준" 대신). 게이트 보고서는 이 정의로 통일 | M1-4 | metrics.gd, m1-gate-playtest.md |
+| D-74 | 플레이어 방어력 소비 공식 | `items-and-drops-m2.md` 제안 공식을 **임시 채택 + `_balance_todo`**, M2 버티컬 슬라이스 플레이테스트에서 실측 후 확정 | M2-0 요청A | combat.json/stats.json |
+| D-75 | 정예 2종(고블린 정찰대장·뭉치의 새끼) 본체 스탯 | **game-designer 담당**, M2-1 명세에서 확정(일반 몬스터 배율 강화 + 강화 패턴 1개 규칙, BRD F6-3) | M2-0 요청B | monsters.json |
+| D-76 | M2 범위 영웅 이상 등급 가중치 | 영웅+ 아이템이 없는 M2에서는 정예·상자의 epic 이상 가중치 **0으로 잠금** 승인. M3에서 해제 | M2-0 요청C | drop_tables.json |
+| D-77 | farming_sources.json | **M2-2에서 생성**하고 정예 시간당 기대치를 그 테이블 기준으로 재검증 | M2-0 요청D | farming_sources.json |
+| D-78 | LUK 공식 단일 소스 유지 | `drop_tables.json._luck_formula`가 유일한 정의(D-52). `stats.json`은 LUK 스탯 정의만 갖고 공식은 참조 주석만 | M2-0 요청E | stats.json |
+| D-79 | M2 버티컬 슬라이스 던전 범위 | GDD 13장 "던전 1개·보스 1종" = **미니 던전 메아리 굴(1막) + 지역 던전 민들레 뿌리굴(보스 슬라임 킹)**. 월드 보스 제단은 M3 | elite-and-farming-m2.md 요청A | GDD 13장, docs/levels/hartland.md |
+| D-80 | goblin_scout 드랍 테이블 | **game-designer가 M2-2에서 추가**. 그때까지 `drop_table_id: null`(D-67 규칙) | 요청B | drop_tables.json |
+| D-81 | 기존 몬스터 `region_id` 마이그레이션 | **M2-1에서** 슬라임·뿔토끼·버섯돌이의 `region_id`를 `hartland`로 갱신 | 요청C | monsters.json |
+| D-82 | 수식 문자열 표기 | 데이터·코드에 쓰는 수식 문자열은 **ASCII 연산자**(`*`, `-`, `/`)로 통일. 문서의 유니코드 연산자(×, −)는 서술용이며 정본은 `stats.json`·`drop_tables.json`의 ASCII 문자열 | M2-1 질문1 | stats.json, combat.json `_comment`, combat-tuning-m1.md |
+| D-83 | M2-3 정예·투사체 제안값 | 다트 속도 220px/s·생존 1.2s, 스폰 최소 이격 20px, 정예 시각 구분은 스프라이트만 1.3배(콜리전 불변) — **임시 승인 + `_balance_todo`**, M2 플레이테스트에서 실측 | M2-3 엔지니어 제안 | tuning.gd → monsters.json 이관 예정 |
+| D-84 | 고블린 대역 스프라이트 | Ninja Adventure에 고블린이 없어 `Cyclope`(정찰병)·`Cyclope2`(정찰대장) 대역 채택. 원작 고블린 도트는 M3 아트 교체 목록에 등재 | M2-3 | docs/art/sprite-layouts-m1.md 후속 |
+
+## M. 대장간 UI 설계 반영 (2026-09-09, `docs/ui/blacksmith.md` 결정 필요 항목 채택)
+
+| ID | 항목 | 결정 | 출처 | 반영 |
+|---|---|---|---|---|
+| D-85 | Y 홀드 시간 이원화 | 가역 액션(분해 표시 토글 등 마킹) **0.5초**, 비가역 확정(실제 소모·파괴) **0.8초**. `wireframes.md` §0.1 원칙에 "되돌릴 수 없는 최종 확정은 0.8초" 각주 | UI 결정1 | wireframes.md, blacksmith.md |
+| D-86 | 재련 비용·횟수 차감 시점 | `refine()` 호출(재굴림 버튼) 순간 골드·횟수 **즉시 차감** 후 새 옵션 굴림. `refine_commit(keep_new)`은 신·구 택1만(추가 비용 없음). D-13 "확정 시 차감"은 "굴림 결과 확정"으로 해석 통일. 미commit 재련은 구 옵션 유지로 자동 처리 | UI 결정2 | blacksmith.gd, BRD S3-3b |
+| D-87 | 우편함 오브젝트 성격 | **대사 없는 필드 상호작용 오브젝트**(`hartland.md` 배치 유지). 2막 "테오의 우편" 연출은 우편 내용물(편지 아이템)로 처리, NPC 승격 없음 | UI 결정3 | MailboxNpc.tscn, docs/story |
+| D-88 | 장비 잠금 플래그 | 아이템 인스턴스에 `locked: bool`(기본 false) 추가, `Inventory.set_locked(uid, bool)`. 분해는 장착 중·잠금 장비 거부(이유 코드 `equipped`/`locked`). **M2-4 로직 단계에서 함께 구현**, 인벤토리 UI 토글은 M2-5 | UI 결정4 | inventory.gd, blacksmith.gd |
+| D-89 | 제작 탭 데이터 연결 시점 | `blueprints.json`이 M2-4에서 신설되므로 제작 탭 **레이아웃과 데이터 연결을 M2-5에 모두 포함**(이연 없음). 도감 등록 연동만 도감 단계로 | UI 결정5 | blueprints.json, blacksmith_menu.gd |
+| D-90 | 강화 +7 이상 확인 팝업 | **생략**. 상시 경고 문구(`ui.smith.enhance.warning_no_ceiling`)로 대체. 실패 페널티가 강화석 소실뿐이라 매번 확인창은 마찰만 증가 | UI 결정6 | blacksmith.md §1.1 |
+| D-91 | 전체화면 UI 위 `pause` 입력 | 대장간·우편함 등 전체화면 UI가 열려 있으면 `pause`는 `ui_close`와 동일(해당 화면 닫기, 설정 화면 열지 않음). 전체화면 UI 2중 오픈 원천 차단 | UI 결정7 | ui_root.gd |
+
+## N. 1막 하트랜드 퀘스트 설계 반영 (2026-09-09, `docs/story/quests-act1-hartland.md` 결정 필요 항목 채택)
+
+| ID | 항목 | 결정 | 출처 | 반영 |
+|---|---|---|---|---|
+| D-92 | 워프 비석 최초 활성화 시점 | 사이드 S5(워프 비석) 선행 조건을 **MQ05 완료로 앞당김**(MQ06 던전과 병렬). 게시판 개방(MQ05)보다 늦지 않게 | 퀘스트 결정1 | act1_hartland.json |
+| D-93 | 지역 사이드 퀘스트 동시 보유 | **제한 없음**(모두 동시 수주·진행). 게시판 일일 의뢰만 3개 제한(F5-2) 유지. 로그 UI 과밀은 퀘스트 로그 설계 시 탭·접기로 해결 | 퀘스트 결정2 | F5-2, docs/ui 후속 |
+| D-94 | 몽실이 사이드 분기 보상 | 놓아주기/붙잡기 시도 **결과·보상 완전 동일**, 서사 연출만 분기(`converges: true`) | 퀘스트 결정3 | act1_hartland.json |
+| D-95 | 1막 스토리 정예 첫 클리어 보상 | MQ05 `horn_rabbit_big`는 **F6-3 확정 보상 예외**(스토리 전용 단일 개체). 스토리 보상만 지급. F6-3은 2막 이후 필드 정예에 적용 | 퀘스트 결정4 | F6-3, monsters.json 후속 |
+| D-96 | 1막 퀘스트 보상 수치 | 현재 `_balance_todo` 잠정치(레벨 1~3 가정) 유지. **M2 경제 스펙(D-25·F8-2 후속) 확정 시 game-designer가 일괄 갱신** | 퀘스트 결정5 | act1_hartland.json |
+| D-97 | 게시판 일일 의뢰 풀 테이블 | `game/data/pools.json` **신설**(몬스터/아이템 풀 태그 → 구성원·가중치). 초안 구성원: `heartland_field_low`={horn_rabbit, mushroom}, `heartland_field_material_low`={mushroom_cap, iron_ore, rabbit_horn}. 퀘스트 시스템 구현 단계에서 game-designer 작성 | 퀘스트 결정6 | pools.json, data.gd 스키마 |
+
+## O. 대장간 로직 구현 반영 (2026-09-09, `docs/specs/blacksmith-m2.md` 미결정 질문 채택)
+
+| ID | 항목 | 결정 | 출처 | 반영 |
+|---|---|---|---|---|
+| D-98 | 강화 실패 시 골드 소모 | **매 시행마다 골드+강화석 모두 소모**, 실패 시 단계 유지. `data_tables.md` §6 기대 비용표가 정본. F3-3 "강화석만 소실"은 "장비는 어떤 경우에도 소실·하락 없음"의 뜻으로 문구 명확화 | 로직 질문1 | BRD F3-3, blacksmith.gd |
+| D-99 | D-13 차감 시점 문구 | D-86이 D-13의 "확정 시 횟수 차감"을 **대체**한다. D-13은 "신·구 택1" 부분만 유효. 재련 횟수·골드는 굴림 시 차감 | 로직 질문2 | D-13 각주, BRD S3-3b |
+| D-100 | 분해 배치 부분 성공 | 백엔드 `salvage(Array)`는 하나라도 성공하면 `ok=true` + `results[]` 개별 결과. 영웅 이상 포함 시 확인 다이얼로그(F3-3 예외)와 부분 실패 안내는 **UI 단계(M2-5)** 책임 | 로직 질문3 | blacksmith_menu.gd |
+| D-101 | 우편 만료 필드 | `expires_day` **유지하되 기본 null**(무기한, D-10). 값이 있는 우편만 이벤트성 만료 대상이며 만료 처리 로직은 시즌·이벤트 시스템 도입 시 구현 | 로직 질문4 | mailbox.gd 스키마 |
+| D-102 | 분해 미리보기 범위 | `get_salvage_preview()`는 원시 등급별 산출 합산만. **장착·잠금 장비는 UI 선택 목록 단계에서 제외**(`blacksmith.md` 분해 탭 설계와 일치), 실제 거부는 `salvage()`가 최종 보증 | 로직 질문5 | blacksmith_menu.gd |
+
+## P. 세이브/로드 구현 반영 (2026-09-09, `docs/specs/save-load-m2.md` 결정 필요 항목 채택)
+
+| ID | 항목 | 결정 | 출처 | 반영 |
+|---|---|---|---|---|
+| D-103 | 세이브 암호화 | M2~M3는 **평문 JSON + sha256 체크섬**(손상 검출 전용). 출시 빌드(M4)에서 AES-256 + 빌드 상수 키로 전환, 목적은 우연 편집·손상 방지이지 치트 방지가 아님(싱글 게임). 포맷 version 필드로 마이그레이션 | 세이브 결정1 | save_manager.gd, F8-1 |
+| D-104 | 전투 중 저장 잠금 | `IN_COMBAT_SAVE_LOCK_SEC` **5.0초 임시 승인**(`_balance_todo`). 기준: 플레이어 피격 또는 플레이어 공격 적중 시점 양쪽 모두 갱신. 플레이테스트 후 combat.json 이관 | 세이브 결정2 | tuning.gd |
+| D-105 | 슬롯 카드 메타 임시값 | character/level/region_id placeholder **승인**. 캐릭터 선택(M3)·레벨 시스템 연결 시 실제값으로 교체 | 세이브 결정3 | save_manager.gd meta |
+| D-106 | 오토세이브 슬롯 | 오토세이브는 **현재 활성 슬롯**(로드 또는 새 게임 시작 시 결정)에 기록. M2는 활성 슬롯이 항상 1이라 슬롯1 고정과 동일. 슬롯 선택 UI는 타이틀 화면 단계 | 세이브 결정4 | save_manager.gd |
+| D-107 | 사망 후 저장 재개 | **부활 완료 즉시 허용**(유예 없음). "사망 직후 저장 불가"는 dead 상태 동안만 적용 | 세이브 결정5 | game_state.can_save() |
+
+## Q. 대장간 UI 구현 반영 (2026-09-09, `docs/ui/blacksmith.md` §9 결정 필요 항목 채택)
+
+| ID | 항목 | 결정 | 출처 | 반영 |
+|---|---|---|---|---|
+| D-108 | 인벤토리 Y 홀드 의미 | "분해 표시" 마킹을 **잠금 토글로 대체 승인**. 분해 대상 지정은 대장간 분해 탭의 체크 선택으로 일원화(F3-2 "일괄 분해 지정" 문구를 "잠금 지정"으로 갱신) | UI 구현 결정1 | inventory_menu.gd, BRD F3-2 |
+| D-109 | 장착 중 장비의 강화·재련 | **탭에 노출 승인**(`[E]` 배지, 벗지 않고 강화·재련 가능). 분해만 장착·잠금 제외(D-102) | UI 구현 결정2 | blacksmith_menu.gd |
+| D-110 | 브람 필드 간이 제작 진입 | M2 범위 밖. **M3 캐릭터 고유 메커니즘 단계**에서 메뉴(Tab) 안 "간이 제작" 항목으로 진입, 소모품·재료 가공 도면만 노출(D-31) | UI 구현 결정3 | F2-5, M3 백로그 |
+
+## R. 퀘스트 시스템 구현 반영 (2026-09-09, `docs/specs/quest-system-m2.md` §12 결정 필요 항목 채택)
+
+| ID | 항목 | 결정 | 출처 | 반영 |
+|---|---|---|---|---|
+| D-111 | `day_index` 증가 시점 | **실제 달력 날짜 기준**: 게임 시작·로드 시 저장 시각(`saved_at_unix`)과 현재 로컬 날짜가 다르면 `day_index += 1`(하루 이상 차이도 +1만). 여관 숙박(시간 스킵)은 증가시키지 않음(버프 전용). 일일 의뢰는 이 값으로 재추첨 | 퀘스트 결정1 | game_state.gd, save_manager.gd |
+| D-112 | 스킬 포인트·호감도 placeholder | `on_complete.grant_skill_point` → `GameState.pending_skill_points`, `affinity_stage` → `story_flags` 누적 **승인**. 스킬 트리(M3)·NPC 호감도 시스템이 이 값을 읽어가며 QuestSystem은 변경 없음 | 퀘스트 결정2 | quest_system.gd |
+| D-113 | HUD 추적 퀘스트 n/m 규칙 | 활성 목표가 **하나면 `진행 count/target`**(예: 3/5), **둘 이상이면 `완료 목표 수/전체 목표 수`**. 목표 순차형은 현재 단계만 표시 | 퀘스트 결정3 | quest_system.get_tracked_quest_progress() |
+| D-114 | 일일 의뢰 풀 가중치·보상 | `pools.json` 균등 가중치 1.0 **임시 승인**(`_balance_todo`), daily 보상 수치는 D-96과 함께 M2 경제 스펙에서 game-designer가 확정 | 퀘스트 결정4 | pools.json, act1_hartland.json |
+
+## S. 하트랜드 퀘스트 배치 반영 (2026-09-09, `docs/levels/hartland.md` ⑩ 결정 필요 항목 채택)
+
+| ID | 항목 | 결정 | 출처 | 반영 |
+|---|---|---|---|---|
+| D-115 | 동행 NPC(테오) 위치 | M2는 **정적 단일 배치 임시 승인**. `world_objects.json`에 `stage_positions: {quest_id: position}` 확장을 예약해 퀘스트 단계별 NPC 재배치를 퀘스트 로그 UI 단계(M2-9)에서 구현 | 배치 결정1 | world_objects.json, quest_layout_spawner.gd |
+| D-116 | 광장·결계석 트리거 반경 중첩 | **채택**. 중첩은 의도된 것으로 두 location이 동시에 발신되어도 퀘스트 목표는 각자 1회 처리 | 배치 결정2 | hartland.md ⑩ |
+| D-117 | 스토리 정예 스폰 좌표 | `horn_rabbit_big` 등 몬스터 스폰 좌표는 `spawns.json`(정예·스폰존 배치 단계) 소관. world_objects.json에 넣지 않음 | 배치 결정3 | elite_spawner 후속 |
+| D-118 | 메아리 동굴 퍼즐 placeholder | `echo_cave_puzzle_01`은 **상호작용 1회 오브젝트로 임시 승인**. M2 던전 단계(D-79 범위)에서 실제 퍼즐로 교체 | 배치 결정4 | QuestObject, 던전 단계 |
 
 ## 변경 이력
 - 2026-09-08: 37건 최초 확정 (추천안 일괄 채택). GDD v1.0 → v1.1 개정.
@@ -142,3 +225,16 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 - 2026-09-08: 스토리 정합성 검수 판단 항목 5건(D-56~D-60) 확정.
 - 2026-09-08: 전투 수치 부록 결정 9건(D-61~D-69) 확정.
 - 2026-09-08: 가드 스태미나 부족 규칙(D-70) 확정.
+- 2026-09-08: 뿔토끼·버섯돌이 제안값 임시 승인(D-71).
+- 2026-09-08: 계측 정의 2건(D-72·D-73) 확정.
+- 2026-09-08: M2-0 아이템·드랍 테이블 결정 5건(D-74~D-78) 확정.
+- 2026-09-08: 정예·파밍 명세 결정 3건(D-79~D-81) 확정.
+- 2026-09-08: 수식 문자열 ASCII 통일(D-82).
+- 2026-09-09: M2-3 제안값·고블린 대역(D-83·D-84).
+- 2026-09-09: 대장간 UI 설계 결정 7건(D-85~D-91) 확정.
+- 2026-09-09: 1막 하트랜드 퀘스트 설계 결정 6건(D-92~D-97) 확정.
+- 2026-09-09: 대장간 로직 구현 결정 5건(D-98~D-102) 확정.
+- 2026-09-09: 세이브/로드 구현 결정 5건(D-103~D-107) 확정.
+- 2026-09-09: 대장간 UI 구현 결정 3건(D-108~D-110) 확정.
+- 2026-09-09: 퀘스트 시스템 구현 결정 4건(D-111~D-114) 확정.
+- 2026-09-09: 하트랜드 퀘스트 배치 결정 4건(D-115~D-118) 확정.
