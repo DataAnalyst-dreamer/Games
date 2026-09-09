@@ -29,3 +29,47 @@ const CHUNK_TILES: int = 64
 const ACTIVE_CHUNK_RADIUS: int = 1
 ## 프로토타입 타일 크기(px). 원작 아트는 32px (GDD 9장).
 const TILE_SIZE_PROTOTYPE: int = 16
+
+# --- 전투: characters.json 이관 예정 (M1-1, docs/specs/combat-tuning-m1.md §0) ---
+## 레벨1·무기 미장착 기준 임시 공격력. characters.json 확정 전까지 여기에만 존재해야 한다.
+const PLAYER_BASE_ATTACK: float = 10.0
+## 레벨1 임시 최대 HP. characters.json/stats.json 확정 전 임시값(F2-2 HP바 표시용).
+const PLAYER_MAX_HP: int = 100
+
+# --- 전투: 애니메이션/타이밍 (combat.json 미확정 — game-designer 질문 목록 참고) ---
+## 공격 애니메이션 프레임 재생 속도. S2-1a "캐릭터별 공격 애니메이션 4~6프레임" 기준,
+## 실제 스프라이트가 없어(무기 스프라이트 회전으로 대체) 임시로 4프레임/12fps ≈ 0.333초/타로 잡는다.
+const ATTACK_ANIM_FPS: float = 12.0
+const ATTACK_ANIM_FRAMES: int = 4
+## 1·2타 활성(스윙) 지속시간(초) = ATTACK_ANIM_FRAMES / ATTACK_ANIM_FPS. combo.input_buffer_sec의
+## 기준점(콤보 타이밍 모델, scripts/systems/combo_state.gd 참고). game-designer 실측 필요.
+const ATTACK_HIT_DURATION_SEC: float = float(ATTACK_ANIM_FRAMES) / ATTACK_ANIM_FPS
+## 타별 짧은 전진 이동 거리(px, S2-1a "각 타는 짧은 전진 이동 포함"). 제안값.
+const ATTACK_LUNGE_PX: float = 6.0
+
+## 피격 넉백을 "고정 거리(px)를 고정 시간 동안 이동"으로 처리하는 지속시간(초).
+## combat.json의 knockback.normal_px/heavy_px는 거리만 정의하므로 속도 환산에 필요.
+const KNOCKBACK_DURATION_SEC: float = 0.12
+
+## Hurt 상태 경직 시간과 무적 프레임(초). GDD/스펙에 수치 미확정 — 제안값.
+const HURT_STUN_SEC: float = 0.25
+const HURT_IFRAMES_SEC: float = 0.5
+
+# --- 카메라 셰이크 강도 (테이블 이관 예정 → camera.json / 접근성 설정) ---
+## 강공격·크리티컬(피니셔) 타격 시 노이즈 진폭(px)·지속시간(초). F2-2: 일반 타격은 셰이크 없음.
+## GDD/스펙에 구체 수치가 없어 제안값 — game-designer 확인 필요.
+const SHAKE_AMPLITUDE_HEAVY: float = 6.0
+const SHAKE_DURATION_HEAVY: float = 0.18
+
+# --- 몬스터 AI (테이블 이관 예정 → monsters.json 확장 필드 또는 attack_patterns.json) ---
+## monsters.json에는 hp/atk/속도/예고 시간만 있고(F6-1, D-49) 인지 범위·근접 사거리·
+## 공격 후딜·순찰 반경·귀환(leash) 거리는 아직 정의되지 않아 M1-1 프로토타입 공통값으로 둔다.
+## game-designer 확인 필요(질문 목록 참고).
+const MONSTER_DETECTION_RADIUS_PX: float = 64.0
+const MONSTER_MELEE_RANGE_PX: float = 14.0
+const MONSTER_ATTACK_ACTIVE_SEC: float = 0.2
+const MONSTER_ATTACK_RECOVERY_SEC: float = 0.4
+const MONSTER_PATROL_RADIUS_PX: float = 32.0
+const MONSTER_PATROL_PAUSE_SEC: float = 1.2
+const MONSTER_LEASH_RANGE_PX: float = 140.0
+const MONSTER_HURT_STUN_SEC: float = 0.2
