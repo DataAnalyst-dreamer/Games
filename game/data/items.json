@@ -1,5 +1,5 @@
 {
-  "_comment": "아이템 정의 테이블(F3-1/F3-2). 근거: docs/specs/items-and-drops-m2.md. M2 범위: 하틀랜드(초원) 장비 7슬롯 카테고리(weapon/sub/head/armor/boots/ring/amulet, 반지는 2슬롯 공유) x 등급(common/uncommon/rare) x 레벨티어(1,2) = 42종 + 소모품 4 + 재료 8 + 백팩 3 = 57개. level_min/base_stats/element/inventory_slot_bonus/effect_* 필드는 이 M2 패스에서 신규 추가 (기존 data_tables.md §7 스키마에 없던 필드 - 문서 갱신 완료, 엔지니어 요청 참고). affix(랜덤 옵션 실값)는 드랍 시점에 affixes.json에서 별도로 굴려 붙는다 - 이 테이블은 affix_slot_count(칸 수)만 갖는다. epic/legendary/relic 등급 아이템은 M2 범위 밖(M3에서 추가 예정, drop_tables.json 해당 등급 가중치는 0으로 잠금).",
+  "_comment": "아이템 정의 테이블(F3-1/F3-2). 근거: docs/specs/items-and-drops-m2.md. M2 범위: 하틀랜드(초원) 장비 7슬롯 카테고리(weapon/sub/head/armor/boots/ring/amulet, 반지는 2슬롯 공유) x 등급(common/uncommon/rare) x 레벨티어(1,2) = 42종 + 소모품 4 + 재료 9 + 백팩 3 = 58개. level_min/base_stats/element/inventory_slot_bonus/effect_* 필드는 이 M2 패스에서 신규 추가 (기존 data_tables.md §7 스키마에 없던 필드 - 문서 갱신 완료, 엔지니어 요청 참고). affix(랜덤 옵션 실값)는 드랍 시점에 affixes.json에서 별도로 굴려 붙는다 - 이 테이블은 affix_slot_count(칸 수)만 갖는다. epic/legendary/relic 등급 아이템은 M2 범위 밖(M3에서 추가 예정, drop_tables.json 해당 등급 가중치는 0으로 잠금). D-80: goblin_ear(재료) 신규 추가 — goblin_scout 전용 드랍 테이블(drop_tables.json.goblin_scout_common) 재료, 재료 8종→9종(items-and-drops-m2.md §1/§5 갱신).",
   "weapon_common_1": {
     "item_id": "weapon_common_1",
     "name_key": "item_weapon_common_1_name",
@@ -712,6 +712,16 @@
     "grade": "common",
     "affix_slot_count": 0,
     "sell_price": 5,
+    "stack_max": 99
+  },
+  "goblin_ear": {
+    "item_id": "goblin_ear",
+    "name_key": "item_goblin_ear_name",
+    "desc_key": "item_goblin_ear_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 3,
     "stack_max": 99
   },
   "goblin_fang": {

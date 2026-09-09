@@ -10,6 +10,35 @@ extends Node
 
 const DATA_DIR := "res://data"
 
+## M2-1(아이템/드랍) 검증에 쓰는 공용 enum류 상수. tools/qa/validate_tables.py와 반드시
+## 동일한 값을 유지한다(오프라인 파이썬 검증과 런타임 Data 검증이 같은 기준을 봐야 함,
+## docs/specs/items-and-drops-m2.md §10 엔지니어 요청 1/5).
+const ITEM_GRADES := ["common", "uncommon", "rare", "epic", "legendary", "relic"]
+const AFFIX_SLOT_BY_GRADE := {"common": 0, "uncommon": 1, "rare": 2, "epic": 3, "legendary": 3, "relic": 3}
+const EQUIP_CATEGORIES := ["weapon", "sub", "head", "armor", "boots", "ring", "amulet"]
+const ITEM_CATEGORIES := [
+	"weapon", "sub", "head", "armor", "boots", "ring", "amulet",
+	"costume_hat", "costume_outfit", "costume_backpack",
+	"consumable", "material",
+]
+
+## D-45 정본 문자열(구르기 스태미나 DEX 경감식, combat-tuning-m1.md §3-3 / combat.json.
+## stamina._comment와 "수학적으로" 동일해야 한다 — 단, combat.json 쪽 서술은 유니코드
+## 연산자(×, −)를 쓰는 자연어 문장 안에 있어 stats.json의 ASCII 단독 필드값과 바이트
+## 단위로는 절대 일치하지 않는다(기존에도 이미 그랬던 표기 차이). 그래서 여기서는
+## stats.json 자신의 값이 이 정본 문자열과 일치하는지만 검사한다 — combat.json 서술과의
+## 사람 눈 대조는 완료 보고 질문 목록으로 남긴다(elite-and-farming-m2.md §4-3 규칙1).
+const DEX_ROLL_COST_FORMULA_CANONICAL := "cost * (1 - min(0.5, DEX/300))"
+
+## farming_sources.json: GDD 6.5 기준 type별 respawn_seconds(D-15, 실제 플레이 시간
+## 기준). elite-and-farming-m2.md §4-2 규칙1.
+const FARMING_TYPE_RESPAWN_SECONDS := {
+	"field": 0, "gathering": 0, "treasure_map": 0, "region_dungeon": 0,
+	"elite": 1800, "mini_dungeon": 86400, "world_boss": 259200,
+}
+## GDD 7.3 "정예·월드 보스 리스폰 상태 아이콘" 대상 타입(elite-and-farming-m2.md §4-2 규칙4).
+const FARMING_MAP_ICON_TYPES := ["elite", "world_boss"]
+
 ## 필수 테이블 → 필수 키 목록(점 표기 경로). 테이블이 늘어나면 여기에 추가한다.
 ## 스키마 문서: docs/specs/data_tables.md (game-designer 소유)
 const REQUIRED_SCHEMA := {
@@ -63,6 +92,44 @@ const REQUIRED_SCHEMA := {
 		"status_effects.shock.buildup_threshold",
 		"boss_resistance_multiplier",
 	],
+	# M2-1(items-and-drops-m2.md §10 엔지니어 요청 1/2/3): items/affixes는 item_id/
+	# affix_id 키의 동적 딕셔너리라 monsters.json처럼 여기엔 "테이블이 존재해야 한다"만
+	# 등록하고, 실제 필드 단위 검증은 _validate_items()/_validate_affixes()에 위임한다.
+	"items": [],
+	"affixes": [],
+	# drop_tables._luck_formula는 파일 로드 시 반드시 존재해야 하는 고정 경로라
+	# REQUIRED_SCHEMA로 표현 가능(요청 2 "_luck_formula가 스키마 키인지 확인").
+	"drop_tables": [
+		"_luck_formula.formula",
+		"_luck_formula.luk_coefficient.uncommon",
+		"_luck_formula.luk_coefficient.rare",
+		"_luck_formula.luk_coefficient.epic",
+		"_luck_formula.luk_coefficient.legendary",
+		"_luck_formula.luk_coefficient.relic",
+	],
+	# enhance.json 신규 필드(요청 3): refine.cost_material_id·max_attempts. 등급별
+	# cost_by_grade_and_attempt는 동적 키(등급명)라 _validate_enhance()에서 순회 확인.
+	"enhance": [
+		"refine.max_attempts",
+		"refine.cost_material_id",
+		"enhance_levels.+1.success_rate",
+		"enhance_levels.+10.success_rate",
+	],
+	# stats.json(F1-2, docs/specs/elite-and-farming-m2.md §4-4 요청 1) — 고정 경로만.
+	# 등급별/스탯별 나머지 필드(*_per_point, *_cap 등)는 동적이라 _validate_stats()에서
+	# 순회 확인한다.
+	"stats": [
+		"max_level",
+		"stat_points_per_levelup",
+		"skill_points_per_levelup",
+		"dex.stamina_cost_reduction_formula",
+		"luk._luck_formula_ref",
+		"vit.defense_formula",
+	],
+	# farming_sources.json은 source_id 키의 동적 딕셔너리라(monsters.json과 동일 사정)
+	# "테이블 존재"만 여기 등록하고 필드 단위 검증은 _validate_farming_sources()에 위임
+	# (요청 2).
+	"farming_sources": [],
 }
 
 ## monsters.json은 monster_id를 키로 하는 동적 딕셔너리라 REQUIRED_SCHEMA(고정 경로)로
@@ -123,6 +190,31 @@ const RELEASE_FALLBACKS := {
 		"status_effects.shock.buildup_threshold": 100.0,
 		"boss_resistance_multiplier": 0.5,
 	},
+	"items": {},
+	"affixes": {},
+	"drop_tables": {
+		"_luck_formula.formula": "raw_weight[grade] = grade_base_weight[grade] * luk_multiplier[grade]",
+		"_luck_formula.luk_coefficient.uncommon": 0.004,
+		"_luck_formula.luk_coefficient.rare": 0.010,
+		"_luck_formula.luk_coefficient.epic": 0.020,
+		"_luck_formula.luk_coefficient.legendary": 0.035,
+		"_luck_formula.luk_coefficient.relic": 0.050,
+	},
+	"enhance": {
+		"refine.max_attempts": 3,
+		"refine.cost_material_id": "enhance_stone",
+		"enhance_levels.+1.success_rate": 1.0,
+		"enhance_levels.+10.success_rate": 0.25,
+	},
+	"stats": {
+		"max_level": 50,
+		"stat_points_per_levelup": 3,
+		"skill_points_per_levelup": 1,
+		"dex.stamina_cost_reduction_formula": "cost * (1 - min(0.5, DEX/300))",
+		"luk._luck_formula_ref": "drop_tables.json",
+		"vit.defense_formula": "damage_taken = incoming_atk * 100 / (100 + defense)",
+	},
+	"farming_sources": {},
 }
 
 ## 테이블 이름(파일명에서 .json 제거) → Dictionary
@@ -189,6 +281,12 @@ func _validate() -> void:
 				if not OS.is_debug_build():
 					_set_path(tables[table_name], key_path, RELEASE_FALLBACKS[table_name][key_path])
 	_validate_monsters()
+	_validate_items()
+	_validate_affixes()
+	_validate_drop_tables()
+	_validate_enhance()
+	_validate_stats()
+	_validate_farming_sources()
 	_validate_value_rules()
 
 
@@ -228,6 +326,338 @@ func _validate_monsters() -> void:
 			var melee2: float = float(dict_entry["melee_range_px"])
 			if not (aoe >= melee2):
 				_report("monsters.%s: aoe_radius_px(%s) >= melee_range_px(%s) 위반" % [monster_id, aoe, melee2])
+		# M2-1(items-and-drops-m2.md §10 엔지니어 요청 5, D-67): drop_table_id가 null이
+		# 아니면 drop_tables.json에 실존하는 키여야 한다. null은 "확정된 드랍 없음"으로
+		# 허용(D-67 원문 그대로).
+		if dict_entry.has("drop_table_id") and dict_entry["drop_table_id"] != null:
+			var dt_id: String = String(dict_entry["drop_table_id"])
+			var drop_tables_table: Dictionary = tables.get("drop_tables", {})
+			if not drop_tables_table.has(dt_id):
+				_report("monsters.%s: drop_table_id '%s' 가 drop_tables.json에 없음 (D-67 위반)" % [monster_id, dt_id])
+
+
+## items.json 필드 단위 검증(M2-1, tools/qa/validate_tables.py:validate_items() 이식).
+## 오프라인 스크립트가 CI에서만 잡던 것을 개발 빌드가 즉시 push_error+assert로 잡는다.
+func _validate_items() -> void:
+	if not tables.has("items"):
+		return
+	var items: Dictionary = tables["items"]
+	for item_id: String in items:
+		if item_id.begins_with("_"):
+			continue
+		if typeof(items[item_id]) != TYPE_DICTIONARY:
+			_report("items.%s 가 객체가 아님" % item_id)
+			continue
+		var entry: Dictionary = items[item_id]
+		for field: String in ["item_id", "category", "grade", "sell_price"]:
+			if not entry.has(field):
+				_report("items.%s: 필수 키 누락 '%s'" % [item_id, field])
+		if String(entry.get("item_id", "")) != item_id:
+			_report("items.%s: item_id 필드값('%s')이 키와 불일치" % [item_id, entry.get("item_id")])
+		var category: String = String(entry.get("category", ""))
+		if entry.has("category") and not ITEM_CATEGORIES.has(category):
+			_report("items.%s: category '%s' 가 enum에 없음" % [item_id, category])
+		var grade: String = String(entry.get("grade", ""))
+		if entry.has("grade") and not ITEM_GRADES.has(grade):
+			_report("items.%s: grade '%s' 가 enum에 없음" % [item_id, grade])
+		if EQUIP_CATEGORIES.has(category):
+			if not entry.has("affix_slot_count"):
+				_report("items.%s: 장비인데 affix_slot_count 없음" % item_id)
+			elif AFFIX_SLOT_BY_GRADE.has(grade):
+				var expected: int = int(AFFIX_SLOT_BY_GRADE[grade])
+				if int(entry["affix_slot_count"]) != expected:
+					_report("items.%s: affix_slot_count=%s != grade '%s' 규칙값(%d)" \
+						% [item_id, entry["affix_slot_count"], grade, expected])
+		if entry.get("unique_skill_id") != null and grade != "legendary":
+			_report("items.%s: unique_skill_id가 있으면 grade는 legendary여야 함 (현재 %s)" % [item_id, grade])
+		if entry.get("set_id") != null and grade != "relic":
+			_report("items.%s: set_id가 있으면 grade는 relic이어야 함 (현재 %s)" % [item_id, grade])
+		if float(entry.get("sell_price", 0)) < 0.0:
+			_report("items.%s: sell_price는 0 이상이어야 함" % item_id)
+		if entry.has("base_stats") and typeof(entry["base_stats"]) == TYPE_DICTIONARY:
+			var base_stats: Dictionary = entry["base_stats"]
+			for k: String in base_stats:
+				if k.ends_with("_min"):
+					var max_key: String = k.substr(0, k.length() - 4) + "_max"
+					if base_stats.has(max_key) and float(base_stats[k]) > float(base_stats[max_key]):
+						_report("items.%s: base_stats.%s(%s) > %s(%s)" \
+							% [item_id, k, base_stats[k], max_key, base_stats[max_key]])
+
+
+## affixes.json 필드 단위 검증(validate_tables.py:validate_affixes() 이식).
+func _validate_affixes() -> void:
+	if not tables.has("affixes"):
+		return
+	var affixes: Dictionary = tables["affixes"]
+	var stat_types: Dictionary = {}
+	for affix_id: String in affixes:
+		if affix_id.begins_with("_"):
+			continue
+		if typeof(affixes[affix_id]) != TYPE_DICTIONARY:
+			_report("affixes.%s 가 객체가 아님" % affix_id)
+			continue
+		var entry: Dictionary = affixes[affix_id]
+		for field: String in ["affix_id", "stat_type", "value_min", "value_max", "applicable_categories", "weight"]:
+			if not entry.has(field):
+				_report("affixes.%s: 필수 키 누락 '%s'" % [affix_id, field])
+		if String(entry.get("affix_id", "")) != affix_id:
+			_report("affixes.%s: affix_id 필드값이 키와 불일치" % affix_id)
+		if entry.has("value_min") and entry.has("value_max") \
+				and float(entry["value_min"]) > float(entry["value_max"]):
+			_report("affixes.%s: value_min(%s) > value_max(%s)" % [affix_id, entry["value_min"], entry["value_max"]])
+		if float(entry.get("weight", 0)) <= 0.0:
+			_report("affixes.%s: weight는 0보다 커야 함 (현재 %s)" % [affix_id, entry.get("weight")])
+		for cat: String in (entry.get("applicable_categories", []) as Array):
+			if not ITEM_CATEGORIES.has(cat):
+				_report("affixes.%s: applicable_categories의 '%s' 가 items 카테고리 enum에 없음" % [affix_id, cat])
+		stat_types[String(entry.get("stat_type", ""))] = true
+	if stat_types.size() < 20:
+		_report("affixes: stat_type 종류가 %d개 (GDD 6.3 '20종' 미달)" % stat_types.size())
+
+
+## drop_tables.json 검증(validate_tables.py:validate_drop_tables() 이식) — LUK 계수
+## 단조증가, grade_base_weight 합계 1.0, entries 참조 무결성, 빈 드랍 풀 방지(D-67 원인이
+## 됐던 실제 버그), gold_drop 범위.
+func _validate_drop_tables() -> void:
+	if not tables.has("drop_tables"):
+		return
+	var drop_tables: Dictionary = tables["drop_tables"]
+	var items: Dictionary = tables.get("items", {})
+
+	if drop_tables.has("_luck_formula") and typeof(drop_tables["_luck_formula"]) == TYPE_DICTIONARY:
+		var luk: Dictionary = drop_tables["_luck_formula"]
+		var coeff: Dictionary = luk.get("luk_coefficient", {})
+		var ordered: Array = []
+		for grade: String in ITEM_GRADES:
+			if grade == "common":
+				continue
+			if not coeff.has(grade):
+				_report("drop_tables._luck_formula.luk_coefficient: '%s' 계수 없음" % grade)
+				continue
+			if float(coeff[grade]) <= 0.0:
+				_report("drop_tables._luck_formula.luk_coefficient.%s: 0보다 커야 함" % grade)
+			ordered.append(grade)
+		for i in range(ordered.size() - 1):
+			var a: String = ordered[i]
+			var b: String = ordered[i + 1]
+			if float(coeff[a]) >= float(coeff[b]):
+				_report("drop_tables._luck_formula.luk_coefficient: %s(%s) >= %s(%s) - 등급이 높을수록 커야 함" \
+					% [a, coeff[a], b, coeff[b]])
+	else:
+		_report("drop_tables: 최상단 '_luck_formula' 필드 없음 (D-52 단일 소스 위반)")
+
+	for source_id: String in drop_tables:
+		if source_id.begins_with("_"):
+			continue
+		if typeof(drop_tables[source_id]) != TYPE_DICTIONARY:
+			_report("drop_tables.%s 가 객체가 아님" % source_id)
+			continue
+		var table: Dictionary = drop_tables[source_id]
+		if String(table.get("source_id", "")) != source_id:
+			_report("drop_tables.%s: source_id 필드값이 키와 불일치" % source_id)
+
+		var entries: Array = table.get("entries", [])
+		var gbw: Variant = table.get("grade_base_weight")
+		if typeof(gbw) != TYPE_DICTIONARY:
+			_report("drop_tables.%s: grade_base_weight 없음" % source_id)
+		else:
+			var gbw_dict: Dictionary = gbw
+			var missing: Array = []
+			for g: String in ITEM_GRADES:
+				if not gbw_dict.has(g):
+					missing.append(g)
+			if not missing.is_empty():
+				_report("drop_tables.%s: grade_base_weight에 등급 누락 %s" % [source_id, missing])
+			var total := 0.0
+			for g2: String in ITEM_GRADES:
+				total += float(gbw_dict.get(g2, 0.0))
+			if abs(total - 1.0) > 1e-6:
+				_report("drop_tables.%s: grade_base_weight 합계=%s (1.0이어야 함)" % [source_id, total])
+			var covered_grades: Dictionary = {}
+			for e: Dictionary in entries:
+				var iid: String = String(e.get("item_id", ""))
+				if items.has(iid):
+					covered_grades[String((items[iid] as Dictionary).get("grade", ""))] = true
+			for g3: String in ITEM_GRADES:
+				if float(gbw_dict.get(g3, 0.0)) > 0.0 and not covered_grades.has(g3):
+					_report("drop_tables.%s: grade_base_weight.%s>0 인데 entries에 해당 등급 아이템이 하나도 없음(드랍 시 빈 풀)" \
+						% [source_id, g3])
+
+		for e2: Dictionary in entries:
+			var item_id: String = String(e2.get("item_id", ""))
+			if not items.has(item_id):
+				_report("drop_tables.%s: entries의 item_id '%s' 가 items.json에 없음" % [source_id, item_id])
+			if float(e2.get("weight", 0)) <= 0.0:
+				_report("drop_tables.%s: entries[%s].weight는 0보다 커야 함" % [source_id, item_id])
+			if e2.has("qty_min") and e2.has("qty_max") and int(e2["qty_min"]) > int(e2["qty_max"]):
+				_report("drop_tables.%s: entries[%s] qty_min(%s) > qty_max(%s)" \
+					% [source_id, item_id, e2["qty_min"], e2["qty_max"]])
+
+		var gold: Variant = table.get("gold_drop")
+		if typeof(gold) == TYPE_DICTIONARY:
+			var gold_dict: Dictionary = gold
+			if float(gold_dict.get("min", 0)) > float(gold_dict.get("max", 0)):
+				_report("drop_tables.%s: gold_drop.min > gold_drop.max" % source_id)
+			if float(gold_dict.get("min", 0)) < 0.0:
+				_report("drop_tables.%s: gold_drop.min < 0" % source_id)
+
+
+## enhance.json 검증(validate_tables.py:validate_enhance() 이식) — D-14 성공률 고정값,
+## 배율 단조증가, D-13 재련 3회 상한(common 제외), 분해 산출 단조증가.
+func _validate_enhance() -> void:
+	if not tables.has("enhance"):
+		return
+	var enhance: Dictionary = tables["enhance"]
+	var levels: Dictionary = enhance.get("enhance_levels", {})
+
+	for lv: String in ["+1", "+2", "+3", "+4", "+5", "+6"]:
+		var rate: Variant = (levels.get(lv, {}) as Dictionary).get("success_rate")
+		if rate != 1.0:
+			_report("enhance.enhance_levels.%s.success_rate=%s (D-14: +1~+6은 1.0이어야 함)" % [lv, rate])
+	var expected_rates: Dictionary = {"+7": 0.70, "+8": 0.55, "+9": 0.40, "+10": 0.25}
+	for lv2: String in expected_rates:
+		var rate2: Variant = (levels.get(lv2, {}) as Dictionary).get("success_rate")
+		if rate2 != expected_rates[lv2]:
+			_report("enhance.enhance_levels.%s.success_rate=%s (D-14 고정값 %s 위반)" % [lv2, rate2, expected_rates[lv2]])
+
+	var prev_mult := 0.0
+	for lv3: String in ["+1", "+2", "+3", "+4", "+5", "+6", "+7", "+8", "+9", "+10"]:
+		if not levels.has(lv3):
+			_report("enhance.enhance_levels: '%s' 단계 없음" % lv3)
+			continue
+		var mult: float = float((levels[lv3] as Dictionary).get("stat_multiplier", 0.0))
+		if mult <= prev_mult:
+			_report("enhance.enhance_levels.%s.stat_multiplier=%s 가 이전 단계(%s) 이하 - 단조증가 위반" % [lv3, mult, prev_mult])
+		prev_mult = mult
+
+	var refine: Dictionary = enhance.get("refine", {})
+	if int(refine.get("max_attempts", -1)) != 3:
+		_report("enhance.refine.max_attempts=%s (D-13: 3이어야 함)" % refine.get("max_attempts"))
+	var cost_by_grade: Dictionary = refine.get("cost_by_grade_and_attempt", {})
+	if cost_by_grade.has("common"):
+		_report("enhance.refine.cost_by_grade_and_attempt: 'common'은 affix_slot_count=0이라 재련 대상이 아님")
+
+	var yields: Dictionary = (enhance.get("disassemble", {}) as Dictionary).get("yield_by_grade", {})
+	var prev_stone := -1
+	var prev_mat := -1
+	for grade: String in ITEM_GRADES:
+		if not yields.has(grade):
+			_report("enhance.disassemble.yield_by_grade: '%s' 없음" % grade)
+			continue
+		var y: Dictionary = yields[grade]
+		var stone: int = int(y.get("stone_qty", 0))
+		var mat: int = int(y.get("material_qty", 0))
+		if stone <= prev_stone:
+			_report("enhance.disassemble.yield_by_grade.%s.stone_qty가 이전 등급 이하 - 단조증가 위반" % grade)
+		if mat <= prev_mat:
+			_report("enhance.disassemble.yield_by_grade.%s.material_qty가 이전 등급 이하 - 단조증가 위반" % grade)
+		prev_stone = stone
+		prev_mat = mat
+
+
+## stats.json 검증(elite-and-farming-m2.md §4-3 규칙 1~3. 규칙4 "defense_formula가
+## 실제 피해 계산에 연결되지 않았는지"는 런타임 검증 불가라 코드 리뷰 항목으로 남긴다).
+func _validate_stats() -> void:
+	if not tables.has("stats"):
+		return
+	var stats: Dictionary = tables["stats"]
+
+	var dex: Dictionary = stats.get("dex", {})
+	var formula: String = String(dex.get("stamina_cost_reduction_formula", ""))
+	if formula != DEX_ROLL_COST_FORMULA_CANONICAL:
+		_report("stats.dex.stamina_cost_reduction_formula='%s' 가 D-45 정본 문자열('%s')과 다름" \
+			% [formula, DEX_ROLL_COST_FORMULA_CANONICAL])
+
+	var luk: Dictionary = stats.get("luk", {})
+	if String(luk.get("_luck_formula_ref", "")) != "drop_tables.json":
+		_report("stats.luk._luck_formula_ref='%s' (D-52/D-78 예정: 'drop_tables.json' 고정값이어야 함)" \
+			% luk.get("_luck_formula_ref"))
+	if luk.has("drop_weight_formula"):
+		_report("stats.luk.drop_weight_formula 필드가 존재함 — D-52/D-78(예정) 위반(공식은 drop_tables.json 하나에만 존재해야 함)")
+
+	# *_cap 계열은 0~1 범위(비율).
+	if luk.has("crit_chance_cap"):
+		var crit_cap: float = float(luk["crit_chance_cap"])
+		if crit_cap < 0.0 or crit_cap > 1.0:
+			_report("stats.luk.crit_chance_cap=%s 범위(0~1) 위반" % crit_cap)
+	var int_stat: Dictionary = stats.get("int", {})
+	if int_stat.has("cooldown_reduction_cap_pct"):
+		var cd_cap: float = float(int_stat["cooldown_reduction_cap_pct"])
+		if cd_cap < 0.0 or cd_cap > 1.0:
+			_report("stats.int.cooldown_reduction_cap_pct=%s 범위(0~1) 위반" % cd_cap)
+
+	# 만렙 풀분배(한 스탯 몰빵 가정: (max_level-1) × stat_points_per_levelup 포인트) 도달
+	# 시에도 상한을 넘지 못하면 그 상한은 사실상 죽은 설정이다 — 에러가 아니라 경고만
+	# (규칙3, _report()는 개발 빌드에서 assert까지 걸어 항상 "에러"가 되므로 여기선 쓰지
+	# 않고 push_warning()을 직접 부른다).
+	var max_points: float = float(stats.get("stat_points_per_levelup", 3)) \
+		* float(int(stats.get("max_level", 50)) - 1)
+	if luk.has("base_crit_chance") and luk.has("crit_chance_per_point") and luk.has("crit_chance_cap"):
+		var projected_crit: float = float(luk["base_crit_chance"]) + max_points * float(luk["crit_chance_per_point"])
+		if projected_crit <= float(luk["crit_chance_cap"]):
+			push_warning("[Data] stats.luk: 만렙 몰빵(%.0f포인트) crit_chance=%.4f 가 상한(%.4f)에 못 미침 — 상한이 사실상 의미 없음" \
+				% [max_points, projected_crit, luk["crit_chance_cap"]])
+	if int_stat.has("cooldown_reduction_per_point") and int_stat.has("cooldown_reduction_cap_pct"):
+		var projected_cd: float = max_points * float(int_stat["cooldown_reduction_per_point"])
+		if projected_cd <= float(int_stat["cooldown_reduction_cap_pct"]):
+			push_warning("[Data] stats.int: 만렙 몰빵 cooldown_reduction=%.4f 가 상한(%.4f)에 못 미침 — 상한이 사실상 의미 없음" \
+				% [projected_cd, int_stat["cooldown_reduction_cap_pct"]])
+
+
+## farming_sources.json 검증(elite-and-farming-m2.md §4-2 규칙 1~4).
+func _validate_farming_sources() -> void:
+	if not tables.has("farming_sources"):
+		return
+	var farming: Dictionary = tables["farming_sources"]
+	var drop_tables: Dictionary = tables.get("drop_tables", {})
+	var monsters: Dictionary = tables.get("monsters", {})
+
+	for source_id: String in farming:
+		if source_id.begins_with("_"):
+			continue
+		if typeof(farming[source_id]) != TYPE_DICTIONARY:
+			_report("farming_sources.%s 가 객체가 아님" % source_id)
+			continue
+		var entry: Dictionary = farming[source_id]
+		var type: String = String(entry.get("type", ""))
+		var respawn: int = int(entry.get("respawn_seconds", -1))
+		if respawn < 0:
+			_report("farming_sources.%s: respawn_seconds는 0 이상이어야 함 (현재 %s)" % [source_id, respawn])
+		if FARMING_TYPE_RESPAWN_SECONDS.has(type) and respawn != int(FARMING_TYPE_RESPAWN_SECONDS[type]):
+			_report("farming_sources.%s: type='%s'의 respawn_seconds=%d 가 GDD 6.5 기준값(%d)과 다름" \
+				% [source_id, type, respawn, FARMING_TYPE_RESPAWN_SECONDS[type]])
+
+		# 규칙2: reward_table_ids 원소는 drop_tables.json 실제 source_id여야 한다.
+		# (type=gathering이거나 아직 보상 미확정 소스는 배열이 비어 있어 자연히 통과한다.)
+		for list_field: String in ["first_clear_reward_table_ids", "repeat_reward_table_ids"]:
+			for ref_id: Variant in (entry.get(list_field, []) as Array):
+				if not drop_tables.has(String(ref_id)):
+					_report("farming_sources.%s.%s: '%s' 가 drop_tables.json에 없음" % [source_id, list_field, ref_id])
+
+		# 규칙3: type=elite는 monsters.json에 tier=elite이고 drop_table_id가 이 소스의
+		# repeat_reward_table_ids[0]과 일치하는 엔트리가 최소 1개 있어야 한다.
+		if type == "elite":
+			var repeat_ids: Array = entry.get("repeat_reward_table_ids", [])
+			var expected_drop_table: String = String(repeat_ids[0]) if not repeat_ids.is_empty() else ""
+			var found := false
+			for monster_id: String in monsters:
+				if monster_id.begins_with("_"):
+					continue
+				var m: Dictionary = monsters[monster_id]
+				if typeof(m) == TYPE_DICTIONARY and String(m.get("tier", "")) == "elite" \
+						and String(m.get("drop_table_id", "")) == expected_drop_table:
+					found = true
+					break
+			if not found:
+				_report("farming_sources.%s: type=elite인데 tier='elite'·drop_table_id='%s'인 monsters.json 엔트리가 없음" \
+					% [source_id, expected_drop_table])
+
+		# 규칙4: show_respawn_icon_on_map은 elite/world_boss 타입과 정확히 일치해야 한다.
+		var show_icon: bool = bool(entry.get("show_respawn_icon_on_map", false))
+		var expected_icon: bool = FARMING_MAP_ICON_TYPES.has(type)
+		if show_icon != expected_icon:
+			_report("farming_sources.%s: show_respawn_icon_on_map=%s 가 type='%s' 기준(%s)과 다름" \
+				% [source_id, show_icon, type, expected_icon])
 
 
 ## 값 간 정합성 규칙(data_tables.md §1 검증 규칙, 단순 존재 확인이 아닌 관계식).

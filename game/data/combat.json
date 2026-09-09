@@ -49,7 +49,7 @@
   },
 
   "stamina": {
-    "_comment": "GDD 4.2-3: 구르기·강공격·가드는 스태미나 소모, 완전 고갈 시 회복 딜레이 페널티. max/regen/regen_delay/costs.roll은 combat-tuning-m1.md §3 확정. exhausted_penalty_sec은 D-44로 1.5→1.0 하향 확정. heavy_attack/guard_hit 비용은 M1 플레이테스트 후 결정(D-46: 임시 반영, 유지). guard_regen_multiplier(가드 중 회복 50%)는 addendum §7-2가 독립 역산으로 재확인 — 결정 요청 8 승인(D-68 예정)에 따라 확정 전환, _balance_todo 해제. DEX 구르기 경감식(cost × (1 − min(0.5, DEX/300)))은 D-45로 구르기 전용 확정(stats.json 미구현이라 코드는 DEX=0 경로만 동작).",
+    "_comment": "GDD 4.2-3: 구르기·강공격·가드는 스태미나 소모, 완전 고갈 시 회복 딜레이 페널티. max/regen/regen_delay/costs.roll은 combat-tuning-m1.md §3 확정. exhausted_penalty_sec은 D-44로 1.5→1.0 하향 확정. heavy_attack/guard_hit 비용은 M1 플레이테스트 후 결정(D-46: 임시 반영, 유지). guard_regen_multiplier(가드 중 회복 50%)는 addendum §7-2가 독립 역산으로 재확인 — 결정 요청 8 승인(D-68 예정)에 따라 확정 전환, _balance_todo 해제. DEX 구르기 경감식(cost * (1 - min(0.5, DEX/300)))은 D-45로 구르기 전용 확정(stats.json 미구현이라 코드는 DEX=0 경로만 동작). D-82: 이 수식 문자열은 ASCII 연산자가 정본이며 stats.json.dex.stamina_cost_reduction_formula와 반드시 문자열 일치(data_tables.md §3 검증 규칙).",
     "max": 100.0,
     "regen_per_sec": 25.0,
     "regen_delay_sec": 0.5,

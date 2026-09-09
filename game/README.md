@@ -83,7 +83,7 @@ $GODOT --headless --path game --quit-after 120
 | `Data` | `scripts/core/data.gd` | 부팅 시 `res://data/*.json` 전부 로드 → `Data.tables["combat"]`, `Data.get_value(table, "a.b.c", default)`. 필수 키 누락 시 개발 빌드는 `push_error`+`assert`, 릴리즈는 경고 후 기본값 대체 |
 | `Tuning` | `scripts/tuning.gd` | 임시 상수 (스틱 데드존, 애니 FPS, 카메라 줌, 청크 크기 등) |
 | `Events` | `scripts/core/events.gd` | 전역 시그널 버스 (`player_damaged`, `enemy_died`, `item_dropped`, `hitstop_requested` …) |
-| `GameState` | `scripts/core/game_state.gd` | 세이브/부활 전역 상태(M1-2). `last_waystone`(D-28 부활 기준점), `death_count`(디버그), `in_boss_encounter`(D-23 자리표시 플래그, M2 훅) |
+| `GameState` | `scripts/core/game_state.gd` | 세이브/부활 + 인벤토리/장비/골드 전역 상태(M1-2, M2-1). `last_waystone`(D-28 부활 기준점), `death_count`(디버그), `in_boss_encounter`(D-23 자리표시 플래그, M2 훅), `inventory`/`equipment`/`gold`/`mailbox`(F3-1·F3-2, D-10/D-11/D-12) |
 | `Metrics` | `scripts/core/metrics.gd` | 플레이테스트 계측 로깅(M1-4). Events 구독만으로 사망·구르기 성공률·저스트 가드 성공률·몬스터별 처치/TTK·플레이어 피격/피해·콤보 3타 완주 횟수를 집계. `Metrics.summary()`가 Dictionary 반환(향후 HUD가 읽음). 순수 계산은 `scripts/systems/metrics_calc.gd`(`MetricsCalc`, GUT 테스트 대상) |
 | `AudioManager` | `scripts/core/audio_manager.gd` | BGM/SFX 재생 (M1-3) |
 | `PhantomCameraManager` | addons/phantom_camera | Phantom Camera 플러그인이 요구 |
@@ -224,6 +224,73 @@ HP·스태미나 바(HP 25% 이하 점멸+화면 비네트, 색약 모드는 대
 `hit_feel.gd:spawn_damage_number()`는 `Settings.damage_numbers_enabled`를, `audio_manager.gd`는
 `Settings.master_volume`/`bgm_volume`/`sfx_volume`을 각각 읽는다 — 값이 바뀌면 `Events.settings_changed`
 로 전파된다.
+
+## 드랍·인벤토리·장비 (M2-1, F3-1·F3-2)
+
+- **데이터**: `data/{items,affixes,drop_tables,enhance}.json`(57/20/6/1개, game-designer
+  소유, `docs/specs/items-and-drops-m2.md`)와 `data/{farming_sources,stats}.json`(8/1개,
+  `docs/specs/elite-and-farming-m2.md`). `Data`(`scripts/core/data.gd`)가 부팅 시 필수
+  테이블·필수 키(REQUIRED_SCHEMA)뿐 아니라 `_validate_items()`/`_validate_affixes()`/
+  `_validate_drop_tables()`/`_validate_enhance()`/`_validate_stats()`/
+  `_validate_farming_sources()`로 등급별 옵션 슬롯 규칙·LUK 계수 단조증가·드랍 확률
+  합계 1.0·빈 드랍 풀 방지·강화 성공률(D-14)·재련 3회 상한(D-13)·`farming_sources.
+  repeat_reward_table_ids[]`↔`drop_tables` 참조까지 개발 빌드에서 즉시 검증한다
+  (`tools/qa/validate_tables.py`가 같은 규칙의 오프라인 버전 — 두 곳은 항상 같이
+  갱신할 것). `monsters.json.drop_table_id`가 null이 아니면 `drop_tables.json`에
+  실존해야 한다(D-67) — `goblin_scout`은 전용 테이블이 아직 없어 `null`(D-80).
+- **LootSystem**(`scripts/systems/loot_system.gd`, 순수 로직·오토로드 아님): LUK
+  곱연산 등급 판정(`compute_final_probabilities`/`pick_grade`, D-52 `drop_tables.json.
+  _luck_formula` 단일 소스) → 그 등급 안에서 `entries.weight` 가중 추첨(`pick_entry`)
+  → 장비면 `affix_slot_count`만큼 중복 없이 옵션 추첨(`roll_affixes`). 실제 게임
+  진입점은 `roll_drop(drop_table_id, luck, rng?)`/`roll_gold(...)` — `Data` 오토로드
+  테이블을 대신 읽어주는 편의 래퍼이고, 핵심 계산은 전부 static 함수라 GUT에서 직접
+  테이블 딕셔너리를 넣어 테스트한다. ItemInstance는 Dictionary(`uid`/`item_id`/`grade`/
+  `quantity`/`affixes`/`enhance_level`/`refine_left`).
+- **드랍 스폰**: `scripts/systems/loot_spawner.gd`(Main.tscn에 배치된 평범한 Node,
+  `Events.enemy_died` 구독) → 골드는 `GameState.add_gold()`로 즉시 지급, 아이템은
+  `scenes/world/ItemDrop.tscn`(`scripts/world/item_drop.gd`)으로 스폰. 등급 색 외곽선은
+  `Rarity.color_of(Rarity.from_string(grade), theme)`(`ui/theme.tres` 단일 소스),
+  카테고리별 placeholder 아이콘은 `ninja_adventure` Items/Ui 팩에서 대표 이미지 1장씩
+  매핑(개별 아이템 57종 아이콘은 pixel-artist TODO). 접근 시 자동 획득(Area2D,
+  Waystone과 동일한 `collision_mask=2`) → `GameState.pickup_item()`. 등급별 드랍 SFX는
+  `drop_common`..`drop_legendary` id 훅만 걸어 두었다(`audio_sfx.json`에 없으면
+  `AudioManager.play_sfx()`가 조용히 no-op — sound-designer가 채우면 코드 변경 없이
+  소리가 남).
+- **Inventory**(`scripts/systems/inventory.gd`, 순수 로직): 기본 40칸 + 백팩으로 최대
+  80칸(D-11, `set_backpack_bonus()`). 재료/소모품은 `stack_max`까지 같은 슬롯에 합치고
+  (`AddResult.STACKED`), 장비는 절대 스택하지 않는다. 가득 차면 인벤토리를 바꾸지 않고
+  `AddResult.FULL`만 반환 — 호출부(`GameState.pickup_item()`)가 D-10대로 우편함(`
+  GameState.mailbox`)에 넣고 `Events.item_mailed`를 쏜다(정상 획득은 `item_picked_up`).
+  `sort_slots(items_table)`가 등급→종류→id 순으로 자동 정렬한다.
+- **Equipment**(`scripts/systems/equipment.gd`, 순수 로직): 8슬롯(무기/보조/투구/갑옷/
+  신발/`ring1`/`ring2`/부적) — 반지 슬롯 2개가 독립적이라 동일 반지 중복 장착(D-12)이
+  자연스럽게 허용된다. `compute_stats(equipped, items_table, enhance_table)`이 무기
+  `atk_min~max` 평균·방어구 `defense_min~max` 평균에 강화 배율(`enhance.json.
+  enhance_levels."+N".stat_multiplier`)을 곱하고, `atk_pct`/`defense_flat`/
+  `max_hp_flat`/`move_speed_pct` 옵션을 합산해 `{attack, defense, max_hp, speed_pct}`를
+  반환한다. `GameState.equip_item()`/`unequip_item()`이 이 값을
+  `Player.apply_equipment_stats()`로 넘겨 `resources.max_hp`·`walk_speed`를 갱신하고,
+  `Player.get_attack_power()`(`Tuning.PLAYER_BASE_ATTACK + equip_attack_bonus`)를
+  `attack.gd`의 콤보 데미지 계산이 그대로 소비한다. 방어력을 실제 피해 감소로 쓰는
+  공식은 아직 결정되지 않아(`items-and-drops-m2.md`/`elite-and-farming-m2.md`
+  결정 요청 A, D-74 예정 `_balance_todo`) `equip_defense`는 보관만 한다. STR 요구치
+  (`items.json.str_requirement`)는 stats 시스템 확정 전이라 `Equipment.can_equip()`에
+  훅 주석만 남겼다.
+- **GameState 확장**: `inventory`/`equipment`/`gold`/`mailbox`를 들고 있고
+  `pickup_item()`/`add_gold()`/`equip_item()`/`unequip_item()`/`get_player_luck()`
+  (LUK 스탯 미구현이라 0.0 고정, stats.json 확정 시 이 함수만 고치면 됨)을 제공한다.
+  `to_dict()`/`from_dict()`로 세이브용 Dictionary 변환까지만 준비했다(디스크 입출력은
+  M2-4 세이브 시스템 범위).
+- **디버그**: `Hud`의 좌하단 획득 로그가 `item_picked_up`/`gold_changed`를 그대로
+  표시한다(기존 M1-5 기능 재사용). `F4`(`debug_inventory_dump` 액션)를 누르면
+  `GameState.dump_inventory_debug()`가 인벤토리 슬롯·장비·골드·우편함 요약을 콘솔에
+  텍스트로 덤프한다(정식 인벤토리 UI는 M2-2).
+- **정예/파밍 소스 데이터**(M2-3 선반영): `monsters.json`에 `goblin_scout`(일반,
+  `drop_table_id=null`, D-80)·`elite_goblin_captain`·`elite_bunchi_spawn`(정예 2종,
+  D-75 예정, `docs/specs/elite-and-farming-m2.md` §1-4 JSON 그대로)을 추가하고 기존
+  슬라임/뿔토끼/버섯돌이의 `region_id`를 `greenfield_prototype`→`hartland`로
+  마이그레이션했다(D-81 예정). 정예의 호루라기 호출(`ranged_dart`)/웨이브/분열 AI와
+  전용 씬은 아직 구현하지 않았다 — 데이터만 있고 몬스터 본체 씬은 M2-3 범위.
 
 ## 남은 작업 (다음 태스크, M2)
 - 전투: 강공격/차지, 스킬 슬롯, 무기별 가드 가능 여부(현재는 항상 가드 가능 — S2-1c 전제 "방패/가드 가능

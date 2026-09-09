@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""M2-0 아이템/드랍 테이블 검증 스크립트.
+"""M2 아이템/드랍/정예/파밍 소스/스탯 테이블 검증 스크립트.
 
-game/data/{items,affixes,drop_tables,enhance,monsters}.json 을 읽어
-docs/specs/data_tables.md 의 검증 규칙(및 docs/specs/items-and-drops-m2.md
-§6 검증 규칙)을 확인한다. godot-engineer의 data.gd REQUIRED_SCHEMA는 아직
-items/affixes/drop_tables/enhance를 다루지 않으므로(문서 끝 "엔지니어
-요청" 참고), 이 스크립트가 그 자리를 메우는 오프라인 게이트다.
+game/data/{items,affixes,drop_tables,enhance,monsters,farming_sources,stats}.json 을
+읽어 docs/specs/data_tables.md·items-and-drops-m2.md §6·elite-and-farming-m2.md §4의
+검증 규칙을 확인한다. game/scripts/core/data.gd가 런타임(Godot 부팅 시)에 동일한
+규칙을 이식해 두고 있지만, 이 스크립트는 Godot 없이도(CI 등) 빠르게 돌릴 수 있는
+오프라인 게이트다 — 두 곳의 규칙은 항상 같이 갱신할 것.
 
 종료 코드: 0 = 통과, 1 = 하나 이상 위반.
 사용법: python3 tools/qa/validate_tables.py [--data-dir game/data]
@@ -28,6 +28,12 @@ ITEM_CATEGORIES = {
     "consumable", "material",
 }
 EQUIP_CATEGORIES = {"weapon", "sub", "head", "armor", "boots", "ring", "amulet"}
+DEX_ROLL_COST_FORMULA_CANONICAL = "cost * (1 - min(0.5, DEX/300))"
+FARMING_TYPE_RESPAWN_SECONDS = {
+    "field": 0, "gathering": 0, "treasure_map": 0, "region_dungeon": 0,
+    "elite": 1800, "mini_dungeon": 86400, "world_boss": 259200,
+}
+FARMING_MAP_ICON_TYPES = {"elite", "world_boss"}
 EPS = 1e-6
 
 
@@ -231,6 +237,92 @@ def validate_enhance(enhance: Dict[str, Any], report: Report) -> None:
         prev_stone, prev_mat = y.get("stone_qty", 0), y.get("material_qty", 0)
 
 
+def validate_stats(stats: Dict[str, Any], report: Report) -> None:
+    """elite-and-farming-m2.md §4-3 규칙 1~3 (규칙4는 코드 리뷰 항목, 런타임/오프라인
+    검증 불가)."""
+    dex = stats.get("dex", {})
+    formula = dex.get("stamina_cost_reduction_formula")
+    if formula != DEX_ROLL_COST_FORMULA_CANONICAL:
+        report.error(
+            f"stats.dex.stamina_cost_reduction_formula='{formula}' 가 D-45 정본 문자열"
+            f"('{DEX_ROLL_COST_FORMULA_CANONICAL}')과 다름"
+        )
+
+    luk = stats.get("luk", {})
+    if luk.get("_luck_formula_ref") != "drop_tables.json":
+        report.error(
+            f"stats.luk._luck_formula_ref='{luk.get('_luck_formula_ref')}' "
+            "(D-52/D-78 예정: 'drop_tables.json' 고정값이어야 함)"
+        )
+    if "drop_weight_formula" in luk:
+        report.error("stats.luk.drop_weight_formula 필드가 존재함 — D-52/D-78(예정) 위반(공식 중복 정의 금지)")
+
+    if "crit_chance_cap" in luk and not (0.0 <= luk["crit_chance_cap"] <= 1.0):
+        report.error(f"stats.luk.crit_chance_cap={luk['crit_chance_cap']} 범위(0~1) 위반")
+    int_stat = stats.get("int", {})
+    if "cooldown_reduction_cap_pct" in int_stat and not (0.0 <= int_stat["cooldown_reduction_cap_pct"] <= 1.0):
+        report.error(f"stats.int.cooldown_reduction_cap_pct={int_stat['cooldown_reduction_cap_pct']} 범위(0~1) 위반")
+
+    max_points = float(stats.get("stat_points_per_levelup", 3)) * float(int(stats.get("max_level", 50)) - 1)
+    if {"base_crit_chance", "crit_chance_per_point", "crit_chance_cap"} <= luk.keys():
+        projected = luk["base_crit_chance"] + max_points * luk["crit_chance_per_point"]
+        if projected <= luk["crit_chance_cap"]:
+            report.warn(
+                f"stats.luk: 만렙 몰빵({max_points:.0f}포인트) crit_chance={projected:.4f} 가 "
+                f"상한({luk['crit_chance_cap']:.4f})에 못 미침 — 상한이 사실상 의미 없음"
+            )
+    if {"cooldown_reduction_per_point", "cooldown_reduction_cap_pct"} <= int_stat.keys():
+        projected_cd = max_points * int_stat["cooldown_reduction_per_point"]
+        if projected_cd <= int_stat["cooldown_reduction_cap_pct"]:
+            report.warn(
+                f"stats.int: 만렙 몰빵 cooldown_reduction={projected_cd:.4f} 가 "
+                f"상한({int_stat['cooldown_reduction_cap_pct']:.4f})에 못 미침 — 상한이 사실상 의미 없음"
+            )
+
+
+def validate_farming_sources(
+    farming_sources: Dict[str, Any], drop_table_ids: Dict[str, Any], monsters: Dict[str, Any], report: Report
+) -> None:
+    """elite-and-farming-m2.md §4-2 규칙 1~4."""
+    data = entries(farming_sources)
+    for source_id, entry in data.items():
+        type_ = entry.get("type")
+        respawn = entry.get("respawn_seconds", -1)
+        if respawn < 0:
+            report.error(f"farming_sources.{source_id}: respawn_seconds는 0 이상이어야 함 (현재 {respawn})")
+        if type_ in FARMING_TYPE_RESPAWN_SECONDS and respawn != FARMING_TYPE_RESPAWN_SECONDS[type_]:
+            report.error(
+                f"farming_sources.{source_id}: type='{type_}'의 respawn_seconds={respawn} 가 "
+                f"GDD 6.5 기준값({FARMING_TYPE_RESPAWN_SECONDS[type_]})과 다름"
+            )
+
+        for list_field in ("first_clear_reward_table_ids", "repeat_reward_table_ids"):
+            for ref_id in entry.get(list_field, []):
+                if ref_id not in drop_table_ids:
+                    report.error(f"farming_sources.{source_id}.{list_field}: '{ref_id}' 가 drop_tables.json에 없음")
+
+        if type_ == "elite":
+            repeat_ids = entry.get("repeat_reward_table_ids", [])
+            expected_drop_table = repeat_ids[0] if repeat_ids else ""
+            found = any(
+                m.get("tier") == "elite" and m.get("drop_table_id") == expected_drop_table
+                for m in entries(monsters).values()
+            )
+            if not found:
+                report.error(
+                    f"farming_sources.{source_id}: type=elite인데 tier='elite'·"
+                    f"drop_table_id='{expected_drop_table}'인 monsters.json 엔트리가 없음"
+                )
+
+        show_icon = bool(entry.get("show_respawn_icon_on_map", False))
+        expected_icon = type_ in FARMING_MAP_ICON_TYPES
+        if show_icon != expected_icon:
+            report.error(
+                f"farming_sources.{source_id}: show_respawn_icon_on_map={show_icon} 가 "
+                f"type='{type_}' 기준({expected_icon})과 다름"
+            )
+
+
 def validate_monsters_cross_ref(monsters: Dict[str, Any], drop_table_ids: Dict[str, Any], report: Report) -> None:
     data = entries(monsters)
     for monster_id, monster in data.items():
@@ -258,15 +350,20 @@ def main() -> int:
     drop_tables = load_json(data_dir / "drop_tables.json", report)
     enhance = load_json(data_dir / "enhance.json", report)
     monsters = load_json(data_dir / "monsters.json", report)
+    farming_sources = load_json(data_dir / "farming_sources.json", report)
+    stats = load_json(data_dir / "stats.json", report)
 
     item_ids = validate_items(items, report)
     validate_affixes(affixes, item_ids, report)
     drop_table_ids = validate_drop_tables(drop_tables, item_ids, report)
     validate_enhance(enhance, report)
     validate_monsters_cross_ref(monsters, drop_table_ids, report)
+    validate_stats(stats, report)
+    validate_farming_sources(farming_sources, drop_table_ids, monsters, report)
 
     print(f"[validate_tables] items={len(item_ids)} affixes={len(entries(affixes))} "
-          f"drop_tables={len(drop_table_ids)} monsters={len(entries(monsters))}")
+          f"drop_tables={len(drop_table_ids)} monsters={len(entries(monsters))} "
+          f"farming_sources={len(entries(farming_sources))}")
 
     if report.warnings:
         print(f"\n경고 {len(report.warnings)}건:")

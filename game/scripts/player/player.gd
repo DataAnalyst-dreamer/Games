@@ -35,12 +35,22 @@ var is_dead: bool = false
 ## (상태 전환과 무관하게) Player._process에서 직접 관리한다.
 var _iframe_remaining: float = 0.0
 
+## 장비 스탯 합산 결과(M2-1, F3-2 — GameState._apply_equipment_stats_to_player()가
+## Equipment.compute_stats() 결과로 채운다). 방어력을 실제 피해 감소로 쓰는 공식은 아직
+## 없어(docs/specs/items-and-drops-m2.md 결정 요청 A, D-74 예정 `_balance_todo`)
+## equip_defense는 보관만 하고 소비하는 코드가 없다 — 전투 데미지 공식 확정 시 여기
+## 값을 읽어 쓰면 된다.
+var equip_attack_bonus: float = 0.0
+var equip_defense: float = 0.0
+var _base_walk_speed: float = 0.0
+
 
 func _ready() -> void:
 	# QA 리뷰 Minor-2(docs/qa/review-m1-1-m1-2.md): fallback을 80.0(RELEASE_FALLBACKS와
 	# 동일한 확정값)으로 맞춘다 — 예전엔 0.0이라 키가 사라지면 플레이어가 완전히
 	# 움직이지 못하는 최악의 실패 모드가 조용히 발생했다.
 	walk_speed = float(Data.get_value("combat", "movement.walk_speed_px", 80.0))
+	_base_walk_speed = walk_speed
 	for dir_name: String in DIR_NAMES.values():
 		sprite.sprite_frames.set_animation_speed("walk_" + dir_name, Tuning.ANIM_WALK_FPS)
 		sprite.sprite_frames.set_animation_speed("idle_" + dir_name, Tuning.ANIM_IDLE_FPS)
@@ -206,6 +216,27 @@ func get_roll_cost() -> float:
 
 func has_stamina_for_roll() -> bool:
 	return resources.stamina >= get_roll_cost()
+
+
+## GameState._apply_equipment_stats_to_player()가 장착/해제 때마다 호출한다(F3-2 "장착
+## 즉시 스탯 재계산"). stats: Equipment.compute_stats()의 반환값(attack/defense/max_hp/
+## speed_pct). max_hp 증가분은 즉시 채워주고(가득 찬 채로 장착했다는 느낌), 감소분은
+## 현재 HP를 새 상한으로 클램프만 한다(체력 손실 없이 안전).
+func apply_equipment_stats(stats: Dictionary) -> void:
+	equip_attack_bonus = float(stats.get("attack", 0.0))
+	equip_defense = float(stats.get("defense", 0.0))
+	var new_max_hp: int = Tuning.PLAYER_MAX_HP + int(stats.get("max_hp", 0))
+	var hp_gain: int = maxi(new_max_hp - resources.max_hp, 0)
+	resources.max_hp = new_max_hp
+	resources.hp = clampi(resources.hp + hp_gain, 0, resources.max_hp)
+	walk_speed = _base_walk_speed * (1.0 + float(stats.get("speed_pct", 0.0)))
+	Events.player_hp_changed.emit(resources.hp, resources.max_hp)
+
+
+## 실제 타격 데미지 계산이 읽는 공격력(F2-1 기본값 + 장비 합산, M2-1). characters.json/
+## stats.json이 확정되면 STR 등 스탯 기반 공격력 공식으로 교체될 자리(godot-engineer TODO).
+func get_attack_power() -> float:
+	return Tuning.PLAYER_BASE_ATTACK + equip_attack_bonus
 
 
 ## 공격 프레임이 없는 Knight 시트 대신 무기 스프라이트를 회전시켜 휘두름을 표현한다

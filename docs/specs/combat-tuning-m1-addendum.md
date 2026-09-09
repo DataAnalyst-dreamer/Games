@@ -9,6 +9,9 @@
 
 ## 0. 공통 전제 (선행 문서와 동일)
 
+- D-82: 코드 정본(`stats.json`/`combat.json._comment`의 수식 문자열)은 ASCII 연산자만 쓴다. 이 문서의 수식/기호(×, →,
+  ≤, ≥ 등)는 서술 목적의 유니코드 표기이며 코드와 문자열을 맞출 필요는 없다(코드와 리터럴 일치가 필요한 유일한
+  수식은 `combat-tuning-m1.md` §3-3 DEX 보정식뿐 — 이 문서엔 해당 수식이 없음).
 - 모든 프레임 수치는 60fps 기준, 코드는 delta 기반.
 - 프로토타입 자산은 16px 타일 + 카메라 줌 2 (`combat-tuning-m1.md` §0).
 - 플레이어 기준값: `PLAYER_BASE_ATTACK = 10`, `PLAYER_MAX_HP = 100` (레벨1, `characters.json` 확정 전 임시, `tuning.gd`).

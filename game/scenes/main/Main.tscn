@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" path="res://scenes/world/Waystone.tscn" id="9_waystone"]
 [ext_resource type="PackedScene" path="res://scenes/entities/monsters/HornRabbit.tscn" id="10_horn_rabbit"]
 [ext_resource type="PackedScene" path="res://scenes/entities/monsters/Mushroom.tscn" id="11_mushroom"]
+[ext_resource type="Script" path="res://scripts/systems/loot_spawner.gd" id="12_loot_spawner"]
 
 [node name="Main" type="Node2D"]
 
@@ -62,6 +63,9 @@ emitter = NodePath("NoiseEmitter")
 [node name="NoiseEmitter" type="Node2D" parent="CameraShake"]
 script = ExtResource("8_noise_emitter")
 noise_emitter_layer = 1
+
+[node name="LootSpawner" type="Node" parent="."]
+script = ExtResource("12_loot_spawner")
 
 [node name="Hud" parent="." instance=ExtResource("6_hud")]
 

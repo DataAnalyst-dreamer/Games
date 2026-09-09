@@ -121,6 +121,9 @@ func _process(_delta: float) -> void:
 		minimap_container.visible = not minimap_container.visible
 	if Input.is_action_just_pressed(&"debug_toggle"):
 		debug_panel.visible = not debug_panel.visible
+	# F4: 인벤토리 텍스트 덤프(M2-1). 정식 인벤토리 UI는 M2-2 — 지금은 콘솔 출력만.
+	if Input.is_action_just_pressed(&"debug_inventory_dump"):
+		GameState.dump_inventory_debug()
 
 
 # --- 테마 적용 ---
@@ -249,8 +252,15 @@ func _kill_tween(t: Tween) -> void:
 
 # --- 획득 로그 (좌하단, 3초, 최대 4줄) ---
 
+## M2-1: 아이템명은 아직 로컬라이징 CSV가 없어(README "텍스트 규칙" 참고) name_key
+## 문자열 자체를 그대로 보여준다(M2-2에서 tr(name_key)로 교체 예정) — 대신 등급 색은
+## game/ui/theme.tres 단일 소스(Rarity)를 바로 붙인다.
 func _on_item_picked_up(item_id: StringName, quantity: int) -> void:
-	_push_log_line("%s x%d" % [String(item_id), quantity])
+	var item_def: Dictionary = Data.get_value("items", String(item_id), {})
+	var name_key: String = String(item_def.get("name_key", item_id))
+	var grade: String = String(item_def.get("grade", "common"))
+	var color: Color = Rarity.color_of(Rarity.from_string(grade), theme)
+	_push_log_line("%s x%d" % [name_key, quantity], color)
 
 
 func _on_gold_changed(_new_amount: int, delta: int) -> void:
@@ -258,10 +268,10 @@ func _on_gold_changed(_new_amount: int, delta: int) -> void:
 		_push_log_line("+%d %s" % [delta, tr(&"ui.hud.gold_unit")])
 
 
-func _push_log_line(text: String) -> void:
+func _push_log_line(text: String, color: Variant = null) -> void:
 	var label := Label.new()
 	label.text = text
-	label.add_theme_color_override("font_color", theme.get_color(&"text_default", &"HUD"))
+	label.add_theme_color_override("font_color", color if color is Color else theme.get_color(&"text_default", &"HUD"))
 	log_list.add_child(label)
 	while log_list.get_child_count() > LOG_MAX_LINES:
 		var oldest: Node = log_list.get_child(0)
