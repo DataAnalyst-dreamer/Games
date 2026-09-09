@@ -783,5 +783,74 @@
     "affix_slot_count": 0,
     "sell_price": 220,
     "inventory_slot_bonus": 40
+  },
+  "wool_soft": {
+    "item_id": "wool_soft",
+    "name_key": "item_wool_soft_name",
+    "desc_key": "item_wool_soft_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 3,
+    "stack_max": 99,
+    "_comment": "M2-7(F5-1/F5-2 퀘스트) 신설. quest_main_a1_05_reclaim 보상 재료 — docs/data/quests/act1_hartland.json _todo_ids.items에서 해소. game-designer 확인 전 sell_price는 동급 재료(mushroom_cap 등) 기준 잠정치."
+  },
+  "herb_common": {
+    "item_id": "herb_common",
+    "name_key": "item_herb_common_name",
+    "desc_key": "item_herb_common_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 2,
+    "stack_max": 99,
+    "_comment": "M2-7 신설. quest_side_heartland_herbrun collect 목표 재료 — act1_hartland.json _todo_ids.items에서 해소."
+  },
+  "ribbon_dandelion": {
+    "item_id": "ribbon_dandelion",
+    "name_key": "item_ribbon_dandelion_name",
+    "desc_key": "item_ribbon_dandelion_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 3,
+    "stack_max": 99,
+    "_comment": "M2-7 신설. quest_side_heartland_festival_prep collect 목표 재료 — act1_hartland.json _todo_ids.items에서 해소."
+  },
+  "stew_basic": {
+    "item_id": "stew_basic",
+    "name_key": "item_stew_basic_name",
+    "desc_key": "item_stew_basic_desc",
+    "category": "consumable",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 15,
+    "stack_max": 5,
+    "effect_type": "heal_hp",
+    "effect_value": 30,
+    "duration_sec": 0,
+    "_comment": "M2-7 신설(_balance_todo). quest_side_heartland_montsil/quest_side_heartland_herbrun 보상 — effect_value=30은 potion_hp_small(40)보다 약한 '집밥' 컨셉 잠정치, game-designer 확인 필요."
+  },
+  "horn_shard": {
+    "item_id": "horn_shard",
+    "name_key": "item_horn_shard_name",
+    "desc_key": "item_horn_shard_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 5,
+    "stack_max": 99,
+    "_comment": "M2-7 신설. quest_main_a1_07_fiveroads 보상 — characters.md 6.2절 기존 플레이버 재사용(narrative-writer). 현재 크래프팅/강화 재료로 소비되지 않는 순수 기념품(flavor) 아이템 — 실제 용처는 game-designer TODO."
+  },
+  "ribbon_charm": {
+    "item_id": "ribbon_charm",
+    "name_key": "item_ribbon_charm_name",
+    "desc_key": "item_ribbon_charm_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 5,
+    "stack_max": 99,
+    "_comment": "M2-7 신설. quest_side_heartland_festival_prep 보상 — 로젤이 엮어준 리본 부적(flavor). horn_shard와 동일하게 현재 용처 없는 기념품 아이템, game-designer TODO."
   }
 }

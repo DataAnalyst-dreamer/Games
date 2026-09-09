@@ -23,6 +23,7 @@ Tuning="*res://scripts/tuning.gd"
 Events="*res://scripts/core/events.gd"
 Settings="*res://scripts/core/settings.gd"
 GameState="*res://scripts/core/game_state.gd"
+QuestSystem="*res://scripts/systems/quest_system.gd"
 SaveManager="*res://scripts/core/save_manager.gd"
 Metrics="*res://scripts/core/metrics.gd"
 AudioManager="*res://scripts/core/audio_manager.gd"
@@ -240,7 +241,7 @@ ui_compare_lock={
 
 [internationalization]
 
-locale/translations=PackedStringArray("res://localization/ui_ko.ko.translation")
+locale/translations=PackedStringArray("res://localization/ui_ko.ko.translation", "res://localization/quest_ko.ko.translation")
 
 [rendering]
 

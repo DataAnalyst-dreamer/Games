@@ -22,6 +22,8 @@ var _saved_in_boss: bool
 var _saved_death_count: int
 var _saved_last_combat: float
 var _saved_player: Player
+var _saved_day_index: int
+var _saved_quest_dict: Dictionary
 
 
 func before_each() -> void:
@@ -38,8 +40,12 @@ func before_each() -> void:
 	_saved_death_count = GameState.death_count
 	_saved_last_combat = GameState._last_combat_activity_sec
 	_saved_player = GameState._player
+	_saved_day_index = GameState.day_index
+	_saved_quest_dict = QuestSystem.to_dict() # M2-7 D-111: QuestSystem도 save()/load()가 건드림.
 
 	GameState.gold = 0
+	GameState.day_index = 0
+	QuestSystem.reset()
 	GameState.inventory.slots.clear()
 	GameState.equipment = Equipment.new()
 	GameState.mailbox = Mailbox.new()
@@ -71,6 +77,8 @@ func after_each() -> void:
 	GameState.death_count = _saved_death_count
 	GameState._last_combat_activity_sec = _saved_last_combat
 	GameState._player = _saved_player if is_instance_valid(_saved_player) else null
+	GameState.day_index = _saved_day_index
+	QuestSystem.from_dict(_saved_quest_dict)
 	SaveManager.delete(TEST_SLOT)
 
 
@@ -269,3 +277,66 @@ func test_delete_removes_manual_auto_and_backup_files() -> void:
 	assert_false(FileAccess.file_exists("user://saves/slot%d_manual.json" % TEST_SLOT))
 	assert_false(FileAccess.file_exists("user://saves/slot%d_manual.json.bak" % TEST_SLOT))
 	assert_false(FileAccess.file_exists("user://saves/slot%d_auto.json" % TEST_SLOT))
+
+
+# --- day_index 실제 달력 날짜 경과(D-111, M2-7 후속) ---
+# checksum은 state 블록만 대상이라(meta 제외, save_manager.gd 주석 참고) 저장 후
+# meta.saved_at_unix만 파일에서 직접 조작해도 체크섬 검증을 그대로 통과한다.
+
+func _rewrite_saved_at(unix_time: int) -> void:
+	var path := "user://saves/slot%d_manual.json" % TEST_SLOT
+	var payload: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path))
+	(payload["meta"] as Dictionary)["saved_at_unix"] = unix_time
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	file.store_string(JSON.stringify(payload))
+	file.close()
+
+
+func test_day_index_advances_once_when_saved_on_a_previous_calendar_day() -> void:
+	GameState.day_index = 0
+	SaveManager.save(TEST_SLOT, "manual")
+	_rewrite_saved_at(Time.get_unix_time_from_system() - 86400) # 정확히 하루 전(UTC 기준 - 항상 이전 날짜).
+
+	var result: Dictionary = SaveManager.load(TEST_SLOT, "manual")
+
+	assert_true(result.get("ok", false))
+	assert_eq(GameState.day_index, 1, "저장 시점과 로드 시점의 달력 날짜가 다르면 +1")
+
+
+func test_day_index_unchanged_when_saved_same_calendar_day() -> void:
+	GameState.day_index = 0
+	SaveManager.save(TEST_SLOT, "manual") # saved_at_unix = 지금(오늘) 그대로.
+
+	SaveManager.load(TEST_SLOT, "manual")
+
+	assert_eq(GameState.day_index, 0, "같은 날 안에서는 day_index가 그대로여야 함")
+
+
+func test_day_index_advances_only_by_one_regardless_of_gap() -> void:
+	GameState.day_index = 0
+	SaveManager.save(TEST_SLOT, "manual")
+	_rewrite_saved_at(Time.get_unix_time_from_system() - 86400 * 10) # 10일 전.
+
+	SaveManager.load(TEST_SLOT, "manual")
+
+	assert_eq(GameState.day_index, 1, "며칠 차이든 항상 +1만 되어야 함(D-111)")
+
+
+func test_daily_quest_availability_resets_after_day_index_advances_on_load() -> void:
+	# "일일 의뢰 목록이 바뀜" 검증: 어제 이미 완료했던 게시판 일일 의뢰가, 날짜가 지나
+	# 로드되면 다시 available로 돌아와야 한다(QuestSystem._ensure_daily_bucket이
+	# GameState.day_index 변화를 감지해 completed_ids를 비움).
+	GameState.day_index = 0
+	QuestSystem._completed.append("quest_main_a1_05_reclaim") # 게시판 전체 선행 조건.
+	QuestSystem._daily = {"day_index": 0, "completed_ids": ["quest_daily_heartland_01"]}
+	assert_eq(QuestSystem.get_state("quest_daily_heartland_01"), "completed", "저장 전: 오늘은 이미 완료함")
+
+	SaveManager.save(TEST_SLOT, "manual")
+	_rewrite_saved_at(Time.get_unix_time_from_system() - 86400)
+	QuestSystem.reset() # 완전히 새 프로세스를 흉내(SmokeSaveLoad와 동일 원칙).
+
+	SaveManager.load(TEST_SLOT, "manual")
+
+	assert_eq(GameState.day_index, 1)
+	assert_eq(QuestSystem.get_state("quest_daily_heartland_01"), "available",
+		"날짜가 지나 day_index가 올라가면 어제 완료한 일일 의뢰가 다시 수주 가능해야 함")

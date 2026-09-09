@@ -1,0 +1,859 @@
+{
+  "_schema_version": "0.1",
+  "_source_doc": "docs/story/quests-act1-hartland.md",
+  "_todo_ids": {
+    "monsters": [],
+    "items": [],
+    "_resolved_m2_7": "horn_rabbit_big(monsters.json)·wool_soft/herb_common/ribbon_dandelion/stew_basic/horn_shard/ribbon_charm(items.json)·heartland_field_low/heartland_field_material_low(pools.json)를 M2-7에서 실제 테이블에 채워 monsters/items/pools 목록에서 제거했다. 장소·오브젝트 id는 아직 level-designer 몫이라 아래에 남긴다.",
+    "locations": [
+      "bridgeport_dock",
+      "heartland_dandelion_village",
+      "heartland_dandelion_village_square",
+      "heartland_ward_stone",
+      "heartland_echo_cave_entrance",
+      "heartland_pasture_boundary",
+      "heartland_hilltop_waypoint"
+    ],
+    "objects": [
+      "cargo_pile",
+      "ward_stone_dandelion",
+      "echo_cave_puzzle_01",
+      "montsil_rabbit",
+      "waypoint_stone_01"
+    ],
+    "pools": []
+  },
+  "quests": [
+    {
+      "id": "quest_main_a1_01_arrival",
+      "type": "main",
+      "region": "heartland",
+      "title_key": "quest_main_a1_01_arrival_title",
+      "desc_key": "quest_main_a1_01_arrival_desc",
+      "giver": "teo",
+      "prerequisites": {
+        "quests_completed": [],
+        "story_flags": []
+      },
+      "objectives": [
+        {
+          "id": "obj_01",
+          "type": "talk",
+          "target": "npc:teo",
+          "count": 1,
+          "text_key": "quest_main_a1_01_arrival_obj_01"
+        },
+        {
+          "id": "obj_02",
+          "type": "interact",
+          "target": "object:cargo_pile",
+          "count": 1,
+          "text_key": "quest_main_a1_01_arrival_obj_02"
+        }
+      ],
+      "branch": null,
+      "fail_conditions": [],
+      "rewards": {
+        "_balance_todo": true,
+        "gold": 0,
+        "exp": 5,
+        "items": [],
+        "affinity": []
+      },
+      "on_complete": {
+        "events": [
+          "register_quest:quest_main_a1_02_firstlook"
+        ]
+      },
+      "template": false,
+      "template_vars": null,
+      "foreshadowing_refs": [],
+      "repeatable": false
+    },
+    {
+      "id": "quest_main_a1_02_firstlook",
+      "type": "main",
+      "region": "heartland",
+      "title_key": "quest_main_a1_02_firstlook_title",
+      "desc_key": "quest_main_a1_02_firstlook_desc",
+      "giver": "teo",
+      "prerequisites": {
+        "quests_completed": [
+          "quest_main_a1_01_arrival"
+        ],
+        "story_flags": []
+      },
+      "objectives": [
+        {
+          "id": "obj_01",
+          "type": "reach",
+          "target": "location:heartland_dandelion_village",
+          "count": 1,
+          "text_key": "quest_main_a1_02_firstlook_obj_01"
+        },
+        {
+          "id": "obj_02",
+          "type": "talk",
+          "target": "npc:meru",
+          "count": 1,
+          "text_key": "quest_main_a1_02_firstlook_obj_02"
+        }
+      ],
+      "branch": null,
+      "fail_conditions": [],
+      "rewards": {
+        "_balance_todo": true,
+        "gold": 0,
+        "exp": 5,
+        "items": [],
+        "affinity": []
+      },
+      "on_complete": {
+        "events": [
+          "register_quest:quest_main_a1_03_shadowfall"
+        ]
+      },
+      "template": false,
+      "template_vars": null,
+      "foreshadowing_refs": [],
+      "repeatable": false
+    },
+    {
+      "id": "quest_main_a1_03_shadowfall",
+      "type": "main",
+      "region": "heartland",
+      "title_key": "quest_main_a1_03_shadowfall_title",
+      "desc_key": "quest_main_a1_03_shadowfall_desc",
+      "giver": "system",
+      "prerequisites": {
+        "quests_completed": [
+          "quest_main_a1_02_firstlook"
+        ],
+        "story_flags": []
+      },
+      "objectives": [
+        {
+          "id": "obj_01",
+          "type": "kill",
+          "target": "monster:horn_rabbit",
+          "count": 4,
+          "text_key": "quest_main_a1_03_shadowfall_obj_01"
+        }
+      ],
+      "branch": null,
+      "fail_conditions": [],
+      "rewards": {
+        "_balance_todo": true,
+        "gold": 10,
+        "exp": 15,
+        "items": [],
+        "affinity": []
+      },
+      "on_complete": {
+        "events": [
+          "register_quest:quest_main_a1_04_theshard"
+        ]
+      },
+      "template": false,
+      "template_vars": null,
+      "foreshadowing_refs": [],
+      "repeatable": false
+    },
+    {
+      "id": "quest_main_a1_04_theshard",
+      "type": "main",
+      "region": "heartland",
+      "title_key": "quest_main_a1_04_theshard_title",
+      "desc_key": "quest_main_a1_04_theshard_desc",
+      "giver": "system",
+      "prerequisites": {
+        "quests_completed": [
+          "quest_main_a1_03_shadowfall"
+        ],
+        "story_flags": []
+      },
+      "objectives": [
+        {
+          "id": "obj_01",
+          "type": "reach",
+          "target": "location:heartland_ward_stone",
+          "count": 1,
+          "text_key": "quest_main_a1_04_theshard_obj_01"
+        },
+        {
+          "id": "obj_02",
+          "type": "interact",
+          "target": "object:ward_stone_dandelion",
+          "count": 1,
+          "text_key": "quest_main_a1_04_theshard_obj_02"
+        }
+      ],
+      "branch": null,
+      "fail_conditions": [],
+      "rewards": {
+        "_balance_todo": true,
+        "gold": 0,
+        "exp": 5,
+        "items": [],
+        "affinity": []
+      },
+      "on_complete": {
+        "events": [
+          "register_quest:quest_main_a1_05_reclaim"
+        ]
+      },
+      "template": false,
+      "template_vars": null,
+      "foreshadowing_refs": [
+        "narrative:guardian_concept_intro"
+      ],
+      "repeatable": false
+    },
+    {
+      "id": "quest_main_a1_05_reclaim",
+      "type": "main",
+      "region": "heartland",
+      "title_key": "quest_main_a1_05_reclaim_title",
+      "desc_key": "quest_main_a1_05_reclaim_desc",
+      "giver": "system",
+      "prerequisites": {
+        "quests_completed": [
+          "quest_main_a1_04_theshard"
+        ],
+        "story_flags": []
+      },
+      "objectives": [
+        {
+          "id": "obj_01",
+          "type": "kill",
+          "target": "monster:horn_rabbit_big",
+          "count": 1,
+          "text_key": "quest_main_a1_05_reclaim_obj_01"
+        },
+        {
+          "id": "obj_02",
+          "type": "reach",
+          "target": "location:heartland_dandelion_village_square",
+          "count": 1,
+          "text_key": "quest_main_a1_05_reclaim_obj_02"
+        }
+      ],
+      "branch": null,
+      "fail_conditions": [],
+      "rewards": {
+        "_balance_todo": true,
+        "gold": 40,
+        "exp": 30,
+        "items": [
+          {
+            "id": "wool_soft",
+            "qty": 2
+          }
+        ],
+        "affinity": []
+      },
+      "on_complete": {
+        "events": [
+          "unlock_facility:smith",
+          "unlock_facility:shop",
+          "unlock_facility:inn",
+          "unlock_facility:board",
+          "unlock_facility:mailbox",
+          "save_checkpoint",
+          "register_quest:quest_main_a1_06_echocave"
+        ],
+        "cutscene_key": "main_a1_s05_heartland_meru_01"
+      },
+      "template": false,
+      "template_vars": null,
+      "foreshadowing_refs": [],
+      "repeatable": false
+    },
+    {
+      "id": "quest_main_a1_06_echocave",
+      "type": "main",
+      "region": "heartland",
+      "title_key": "quest_main_a1_06_echocave_title",
+      "desc_key": "quest_main_a1_06_echocave_desc",
+      "giver": "teo",
+      "prerequisites": {
+        "quests_completed": [
+          "quest_main_a1_05_reclaim"
+        ],
+        "story_flags": []
+      },
+      "objectives": [
+        {
+          "id": "obj_01",
+          "type": "talk",
+          "target": "npc:teo",
+          "count": 1,
+          "text_key": "quest_main_a1_06_echocave_obj_01"
+        },
+        {
+          "id": "obj_02",
+          "type": "reach",
+          "target": "location:heartland_echo_cave_entrance",
+          "count": 1,
+          "text_key": "quest_main_a1_06_echocave_obj_02"
+        },
+        {
+          "id": "obj_03",
+          "type": "interact",
+          "target": "object:echo_cave_puzzle_01",
+          "count": 1,
+          "text_key": "quest_main_a1_06_echocave_obj_03"
+        },
+        {
+          "id": "obj_04",
+          "type": "collect",
+          "target": "item:iron_ore",
+          "count": 1,
+          "text_key": "quest_main_a1_06_echocave_obj_04"
+        }
+      ],
+      "branch": null,
+      "fail_conditions": [],
+      "rewards": {
+        "_balance_todo": true,
+        "gold": 30,
+        "exp": 25,
+        "items": [
+          {
+            "id": "iron_ore",
+            "qty": 1
+          }
+        ],
+        "affinity": []
+      },
+      "on_complete": {
+        "events": [
+          "grant_skill_point:1",
+          "register_quest:quest_main_a1_07_fiveroads"
+        ],
+        "cutscene_key": "main_a1_s06_heartland_teo_01"
+      },
+      "template": false,
+      "template_vars": null,
+      "foreshadowing_refs": [],
+      "repeatable": false
+    },
+    {
+      "id": "quest_main_a1_07_fiveroads",
+      "type": "main",
+      "region": "heartland",
+      "title_key": "quest_main_a1_07_fiveroads_title",
+      "desc_key": "quest_main_a1_07_fiveroads_desc",
+      "giver": "teo",
+      "prerequisites": {
+        "quests_completed": [
+          "quest_main_a1_06_echocave"
+        ],
+        "story_flags": []
+      },
+      "objectives": [
+        {
+          "id": "obj_01",
+          "type": "reach",
+          "target": "location:heartland_ward_stone",
+          "count": 1,
+          "text_key": "quest_main_a1_07_fiveroads_obj_01"
+        },
+        {
+          "id": "obj_02",
+          "type": "talk",
+          "target": "npc:teo",
+          "count": 1,
+          "text_key": "quest_main_a1_07_fiveroads_obj_02"
+        }
+      ],
+      "branch": null,
+      "fail_conditions": [],
+      "rewards": {
+        "_balance_todo": true,
+        "gold": 20,
+        "exp": 20,
+        "items": [
+          {
+            "id": "horn_shard",
+            "qty": 1
+          }
+        ],
+        "affinity": []
+      },
+      "on_complete": {
+        "events": [
+          "unlock_worldmap",
+          "register_main_act2_regions"
+        ],
+        "cutscene_key": "main_a1_s08_heartland_teo_01"
+      },
+      "template": false,
+      "template_vars": null,
+      "foreshadowing_refs": [],
+      "repeatable": false
+    },
+    {
+      "id": "quest_side_heartland_montsil",
+      "type": "side",
+      "region": "heartland",
+      "title_key": "quest_side_heartland_montsil_title",
+      "desc_key": "quest_side_heartland_montsil_desc",
+      "giver": "dami",
+      "prerequisites": {
+        "quests_completed": [
+          "quest_main_a1_06_echocave"
+        ],
+        "story_flags": []
+      },
+      "objectives": [
+        {
+          "id": "obj_01",
+          "type": "talk",
+          "target": "npc:dami",
+          "count": 1,
+          "text_key": "quest_side_heartland_montsil_obj_01"
+        },
+        {
+          "id": "obj_02",
+          "type": "reach",
+          "target": "location:heartland_pasture_boundary",
+          "count": 1,
+          "text_key": "quest_side_heartland_montsil_obj_02"
+        },
+        {
+          "id": "obj_03",
+          "type": "interact",
+          "target": "object:montsil_rabbit",
+          "count": 1,
+          "text_key": "quest_side_heartland_montsil_obj_03"
+        }
+      ],
+      "branch": {
+        "at_objective": "obj_03",
+        "choices": [
+          {
+            "id": "release",
+            "text_key": "quest_side_heartland_montsil_choice_release",
+            "outcome_flag": "montsil_released"
+          },
+          {
+            "id": "capture_attempt",
+            "text_key": "quest_side_heartland_montsil_choice_capture",
+            "outcome_flag": "montsil_capture_tried"
+          }
+        ],
+        "converges": true
+      },
+      "fail_conditions": [],
+      "rewards": {
+        "_balance_todo": true,
+        "gold": 15,
+        "exp": 10,
+        "items": [
+          {
+            "id": "stew_basic",
+            "qty": 1
+          }
+        ],
+        "affinity": []
+      },
+      "on_complete": {
+        "events": [],
+        "cutscene_key": "main_a1_s07_heartland_dami_04"
+      },
+      "template": false,
+      "template_vars": null,
+      "foreshadowing_refs": [
+        "narrative:mist_creatures_were_once_harmless"
+      ],
+      "repeatable": false
+    },
+    {
+      "id": "quest_side_heartland_festival_prep",
+      "type": "side",
+      "region": "heartland",
+      "title_key": "quest_side_heartland_festival_prep_title",
+      "desc_key": "quest_side_heartland_festival_prep_desc",
+      "giver": "rozel",
+      "prerequisites": {
+        "quests_completed": [
+          "quest_main_a1_05_reclaim"
+        ],
+        "story_flags": []
+      },
+      "objectives": [
+        {
+          "id": "obj_01",
+          "type": "talk",
+          "target": "npc:rozel",
+          "count": 1,
+          "text_key": "quest_side_heartland_festival_prep_obj_01"
+        },
+        {
+          "id": "obj_02",
+          "type": "kill",
+          "target": "monster:horn_rabbit",
+          "count": 3,
+          "text_key": "quest_side_heartland_festival_prep_obj_02"
+        },
+        {
+          "id": "obj_03",
+          "type": "collect",
+          "target": "item:ribbon_dandelion",
+          "count": 5,
+          "text_key": "quest_side_heartland_festival_prep_obj_03"
+        }
+      ],
+      "branch": null,
+      "fail_conditions": [],
+      "rewards": {
+        "_balance_todo": true,
+        "gold": 35,
+        "exp": 20,
+        "items": [
+          {
+            "id": "ribbon_charm",
+            "qty": 1
+          }
+        ],
+        "affinity": [
+          {
+            "npc": "rozel",
+            "amount": 1
+          }
+        ]
+      },
+      "on_complete": {
+        "events": [
+          "affinity_stage:rozel:acq"
+        ],
+        "cutscene_key": "npc_heartland_rozel_acq_01"
+      },
+      "template": false,
+      "template_vars": null,
+      "foreshadowing_refs": [
+        "F-06"
+      ],
+      "repeatable": false
+    },
+    {
+      "id": "quest_side_heartland_orefetch",
+      "type": "side",
+      "region": "heartland",
+      "title_key": "quest_side_heartland_orefetch_title",
+      "desc_key": "quest_side_heartland_orefetch_desc",
+      "giver": "pinto",
+      "prerequisites": {
+        "quests_completed": [
+          "quest_main_a1_05_reclaim"
+        ],
+        "story_flags": []
+      },
+      "objectives": [
+        {
+          "id": "obj_01",
+          "type": "talk",
+          "target": "npc:pinto",
+          "count": 1,
+          "text_key": "quest_side_heartland_orefetch_obj_01"
+        },
+        {
+          "id": "obj_02",
+          "type": "kill",
+          "target": "monster:mushroom",
+          "count": 3,
+          "text_key": "quest_side_heartland_orefetch_obj_02"
+        },
+        {
+          "id": "obj_03",
+          "type": "collect",
+          "target": "item:iron_ore",
+          "count": 4,
+          "text_key": "quest_side_heartland_orefetch_obj_03"
+        }
+      ],
+      "branch": null,
+      "fail_conditions": [],
+      "rewards": {
+        "_balance_todo": true,
+        "gold": 35,
+        "exp": 20,
+        "items": [
+          {
+            "id": "iron_ore",
+            "qty": 2
+          }
+        ],
+        "affinity": [
+          {
+            "npc": "pinto",
+            "amount": 1
+          }
+        ]
+      },
+      "on_complete": {
+        "events": [
+          "affinity_stage:pinto:acq"
+        ],
+        "cutscene_key": "npc_heartland_pinto_acq_01"
+      },
+      "template": false,
+      "template_vars": null,
+      "foreshadowing_refs": [],
+      "repeatable": false
+    },
+    {
+      "id": "quest_side_heartland_herbrun",
+      "type": "side",
+      "region": "heartland",
+      "title_key": "quest_side_heartland_herbrun_title",
+      "desc_key": "quest_side_heartland_herbrun_desc",
+      "giver": "meru",
+      "prerequisites": {
+        "quests_completed": [
+          "quest_main_a1_05_reclaim"
+        ],
+        "story_flags": []
+      },
+      "objectives": [
+        {
+          "id": "obj_01",
+          "type": "talk",
+          "target": "npc:meru",
+          "count": 1,
+          "text_key": "quest_side_heartland_herbrun_obj_01"
+        },
+        {
+          "id": "obj_02",
+          "type": "collect",
+          "target": "item:herb_common",
+          "count": 4,
+          "text_key": "quest_side_heartland_herbrun_obj_02"
+        },
+        {
+          "id": "obj_03",
+          "type": "collect",
+          "target": "item:mushroom_cap",
+          "count": 2,
+          "text_key": "quest_side_heartland_herbrun_obj_03"
+        }
+      ],
+      "branch": null,
+      "fail_conditions": [],
+      "rewards": {
+        "_balance_todo": true,
+        "gold": 25,
+        "exp": 15,
+        "items": [
+          {
+            "id": "stew_basic",
+            "qty": 1
+          }
+        ],
+        "affinity": [
+          {
+            "npc": "meru",
+            "amount": 1
+          }
+        ]
+      },
+      "on_complete": {
+        "events": [
+          "affinity_stage:meru:acq"
+        ],
+        "cutscene_key": "npc_heartland_meru_acq_01"
+      },
+      "template": false,
+      "template_vars": null,
+      "foreshadowing_refs": [],
+      "repeatable": false
+    },
+    {
+      "id": "quest_side_heartland_waypoint",
+      "type": "side",
+      "region": "heartland",
+      "title_key": "quest_side_heartland_waypoint_title",
+      "desc_key": "quest_side_heartland_waypoint_desc",
+      "giver": "teo",
+      "prerequisites": {
+        "quests_completed": [
+          "quest_main_a1_05_reclaim"
+        ],
+        "story_flags": []
+      },
+      "objectives": [
+        {
+          "id": "obj_01",
+          "type": "reach",
+          "target": "location:heartland_hilltop_waypoint",
+          "count": 1,
+          "text_key": "quest_side_heartland_waypoint_obj_01"
+        },
+        {
+          "id": "obj_02",
+          "type": "interact",
+          "target": "object:waypoint_stone_01",
+          "count": 1,
+          "text_key": "quest_side_heartland_waypoint_obj_02"
+        }
+      ],
+      "branch": null,
+      "fail_conditions": [],
+      "rewards": {
+        "_balance_todo": true,
+        "gold": 15,
+        "exp": 10,
+        "items": [],
+        "affinity": []
+      },
+      "on_complete": {
+        "events": [
+          "unlock_system:warp_waypoint"
+        ]
+      },
+      "template": false,
+      "template_vars": null,
+      "foreshadowing_refs": [],
+      "repeatable": false
+    },
+    {
+      "id": "quest_daily_heartland_01",
+      "type": "daily_template",
+      "region": "heartland",
+      "title_key": "quest_daily_heartland_01_title",
+      "desc_key": "quest_daily_heartland_01_desc",
+      "giver": "rozel",
+      "prerequisites": {
+        "quests_completed": [
+          "quest_main_a1_05_reclaim"
+        ],
+        "story_flags": []
+      },
+      "objectives": [
+        {
+          "id": "obj_01",
+          "type": "kill",
+          "target": "pool:heartland_field_low",
+          "count": 0,
+          "text_key": "quest_daily_heartland_01_obj_01"
+        }
+      ],
+      "branch": null,
+      "fail_conditions": [],
+      "rewards": {
+        "_balance_todo": true,
+        "gold": 20,
+        "exp": 10,
+        "items": [],
+        "affinity": []
+      },
+      "on_complete": {
+        "events": []
+      },
+      "template": true,
+      "template_vars": {
+        "monster_pool": "heartland_field_low",
+        "count_range": [
+          3,
+          5
+        ],
+        "item_pool": null
+      },
+      "foreshadowing_refs": [],
+      "repeatable": true
+    },
+    {
+      "id": "quest_daily_heartland_02",
+      "type": "daily_template",
+      "region": "heartland",
+      "title_key": "quest_daily_heartland_02_title",
+      "desc_key": "quest_daily_heartland_02_desc",
+      "giver": "meru",
+      "prerequisites": {
+        "quests_completed": [
+          "quest_main_a1_05_reclaim"
+        ],
+        "story_flags": []
+      },
+      "objectives": [
+        {
+          "id": "obj_01",
+          "type": "collect",
+          "target": "pool:heartland_field_material_low",
+          "count": 0,
+          "text_key": "quest_daily_heartland_02_obj_01"
+        }
+      ],
+      "branch": null,
+      "fail_conditions": [],
+      "rewards": {
+        "_balance_todo": true,
+        "gold": 15,
+        "exp": 5,
+        "items": [],
+        "affinity": []
+      },
+      "on_complete": {
+        "events": []
+      },
+      "template": true,
+      "template_vars": {
+        "monster_pool": null,
+        "item_pool": "heartland_field_material_low",
+        "count_range": [
+          3,
+          5
+        ]
+      },
+      "foreshadowing_refs": [],
+      "repeatable": true
+    },
+    {
+      "id": "quest_daily_heartland_03",
+      "type": "daily_template",
+      "region": "heartland",
+      "title_key": "quest_daily_heartland_03_title",
+      "desc_key": "quest_daily_heartland_03_desc",
+      "giver": "pinto",
+      "prerequisites": {
+        "quests_completed": [
+          "quest_main_a1_05_reclaim"
+        ],
+        "story_flags": []
+      },
+      "objectives": [
+        {
+          "id": "obj_01",
+          "type": "kill",
+          "target": "pool:heartland_field_low",
+          "count": 0,
+          "text_key": "quest_daily_heartland_03_obj_01"
+        }
+      ],
+      "branch": null,
+      "fail_conditions": [],
+      "rewards": {
+        "_balance_todo": true,
+        "gold": 20,
+        "exp": 10,
+        "items": [],
+        "affinity": []
+      },
+      "on_complete": {
+        "events": []
+      },
+      "template": true,
+      "template_vars": {
+        "monster_pool": "heartland_field_low",
+        "count_range": [
+          3,
+          5
+        ],
+        "item_pool": null
+      },
+      "foreshadowing_refs": [],
+      "repeatable": true
+    }
+  ]
+}

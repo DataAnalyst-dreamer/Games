@@ -42,6 +42,15 @@ var activated_waystone_ids: Array[String] = []
 ## 사망 횟수(디버그 HUD 표시용). 세이브 파일에 영구 기록할지는 F8-3(세이브) 범위.
 var death_count: int = 0
 
+## M2-7(F5-2 게시판 일일 의뢰) 신설. "게임 내 날짜" 정수 카운터 — QuestSystem이 일일
+## 의뢰 재추첨 시드로 쓴다. 새 게임은 0에서 시작. D-111(확정, M2-7 후속): 게임플레이
+## 내부 시간(낮/밤 사이클 등)이 아니라 **실제 달력 날짜**를 기준으로 증가한다 — 유일한
+## 증가 지점은 `SaveManager._advance_day_index_if_new_calendar_day()`(load() 직후)로,
+## 로드한 세이브의 meta.saved_at_unix와 로드 시점의 실제 시각이 연·월·일 중 하나라도
+## 다르면(며칠 차이든) +1을 정확히 한 번만 한다. 여관 숙박 등 그 외 어떤 게임플레이
+## 행동도 이 값을 올리지 않는다(docs/specs/quest-system-m2.md §13 참고). 세이브에 포함된다.
+var day_index: int = 0
+
 ## 보스전 사망 예외(D-23: 골드 손실 없이 보스방 앞 비석에서 즉시 재도전, 보스 HP 초기화)를
 ## 위한 자리표시 플래그. 보스 시스템이 아직 없어 지금은 아무도 이 값을 true로 바꾸지
 ## 않는다 — M2에서 보스 인카운터 진입/종료 시 이 플래그를 토글하도록 연결할 것.
@@ -164,6 +173,7 @@ func pickup_item(item_instance: Dictionary, item_def: Dictionary) -> void:
 		Events.mail_received.emit(mail_id, item_id, qty)
 	else:
 		Events.item_picked_up.emit(item_id, qty)
+	Events.item_acquired.emit(item_id, qty) # M2-7: collect형 퀘스트 목표는 경로와 무관하게 항상 집계.
 	Events.inventory_changed.emit()
 
 
@@ -500,6 +510,7 @@ func to_dict() -> Dictionary:
 		"death_count": death_count,
 		"last_waystone_id": String(last_waystone_id),
 		"activated_waystone_ids": activated_waystone_ids.duplicate(),
+		"day_index": day_index,
 	}
 
 
@@ -516,6 +527,7 @@ func from_dict(data: Dictionary) -> void:
 	for id_v: Variant in (data.get("activated_waystone_ids", []) as Array):
 		ids.append(String(id_v))
 	activated_waystone_ids = ids
+	day_index = int(data.get("day_index", 0))
 	_apply_equipment_stats_to_player()
 	_restore_waystones()
 
