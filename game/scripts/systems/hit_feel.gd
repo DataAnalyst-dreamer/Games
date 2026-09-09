@@ -31,7 +31,7 @@ static func apply(defender_body: Node2D, flash_target: CanvasItem, hitbox: Hitbo
 	if flash_target != null:
 		HitFlash.flash(flash_target)
 
-	_spawn_damage_number(defender_body, damage, is_advantage)
+	spawn_damage_number(defender_body, damage, is_advantage)
 
 	Events.hit_landed.emit(hitbox.source, defender_body, damage, is_advantage)
 
@@ -60,7 +60,9 @@ static func _apply_knockback(body: Node2D, direction: Vector2, distance_px: floa
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 
-static func _spawn_damage_number(at_body: Node2D, damage: int, is_advantage: bool) -> void:
+## public: 가드 칩데미지 등 HitFeel.apply() 전체 파이프라인을 타지 않는 경로(플레이어
+## Guard 상태의 부분 피해 표시 등)에서도 같은 데미지 숫자 연출을 재사용하기 위해 공개.
+static func spawn_damage_number(at_body: Node2D, damage: int, is_advantage: bool) -> void:
 	if at_body == null or not is_instance_valid(at_body):
 		return
 	var tree := at_body.get_tree()

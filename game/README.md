@@ -83,6 +83,7 @@ $GODOT --headless --path game --quit-after 120
 | `Data` | `scripts/core/data.gd` | 부팅 시 `res://data/*.json` 전부 로드 → `Data.tables["combat"]`, `Data.get_value(table, "a.b.c", default)`. 필수 키 누락 시 개발 빌드는 `push_error`+`assert`, 릴리즈는 경고 후 기본값 대체 |
 | `Tuning` | `scripts/tuning.gd` | 임시 상수 (스틱 데드존, 애니 FPS, 카메라 줌, 청크 크기 등) |
 | `Events` | `scripts/core/events.gd` | 전역 시그널 버스 (`player_damaged`, `enemy_died`, `item_dropped`, `hitstop_requested` …) |
+| `GameState` | `scripts/core/game_state.gd` | 세이브/부활 전역 상태(M1-2). `last_waystone`(D-28 부활 기준점), `death_count`(디버그), `in_boss_encounter`(D-23 자리표시 플래그, M2 훅) |
 | `PhantomCameraManager` | addons/phantom_camera | Phantom Camera 플러그인이 요구 |
 | `DialogueManager` | addons/dialogue_manager | Dialogue Manager 플러그인이 요구 |
 
@@ -107,8 +108,9 @@ $GODOT --headless --path game --quit-after 120
 
 `scenes/player/Player.tscn` → `StateMachine`(`scripts/player/state_machine.gd`) 아래 자식 노드 하나가 상태 하나.
 각 상태는 `scripts/player/states/state.gd`(`PlayerState`)를 상속한 별도 스크립트이며 노드 이름이 상태 이름이다.
-전환은 상태 안에서 `finished.emit(&"Move", {})`. 현재 `Idle`/`Move`/`Attack`(3타 콤보)/`Hurt`/`Dead` 다섯 개.
-`Roll`/`Guard`는 M1-2에서 같은 방식(스크립트 추가 + 노드 추가)으로 붙인다.
+전환은 상태 안에서 `finished.emit(&"Move", {})`. 현재 `Idle`/`Move`/`Attack`(3타 콤보)/`Hurt`/`Dead`/
+`Roll`/`Guard` 일곱 개(M1-2에서 `Roll`/`Guard` 추가). 구르기 발동 공통 로직(`try_enter_roll()`)과
+회복 배율 훅(`get_stamina_regen_multiplier()`)은 `state.gd` 베이스에 있어 모든 상태가 공유한다.
 
 ## 전투 기초 (M1-1)
 
@@ -127,11 +129,40 @@ $GODOT --headless --path game --quit-after 120
   항목 추가만으로 만든다. 현재 씬이 있는 몬스터는 `scenes/entities/monsters/Slime.tscn` 하나뿐(뿔토끼·버섯돌이는
   데이터만 존재, 씬은 이후 태스크).
 - **속성 상성**: `data/elements.json`(D-50: 단일 소스) + `scripts/systems/element_calc.gd`(순수 함수, GUT 테스트).
-- **HP/스태미나**: `scripts/player/resources.gd`(순수 로직). 스태미나는 값만 준비돼 있고 소모하는 액션
-  (구르기/강공격/가드)은 아직 없다 — M1-2 범위.
+- **HP/스태미나**: `scripts/player/resources.gd`(순수 로직). `tick(delta, regen_multiplier)`이 상태별
+  회복 배율(가드 중 0.5배 등)을 받는다. `roll_cost_with_dex(base, dex)`는 DEX 경감식(D-45, 순수 static
+  함수) — stats 시스템이 없어 호출부(`Player.get_roll_cost()`)는 전부 dex=0으로 고정한다.
 
-## 남은 작업 (다음 태스크, M1-2)
-- 전투: 구르기(무적 0.3초, 스태미나 소모, 공격 프레임10 이후 캔슬 — `ComboState.can_roll_cancel()` 이미 존재),
-  가드/저스트 가드, 스태미나 소모 연결, 플레이어 사망 후 부활.
+## 구르기·가드·사망/부활 (M1-2)
+
+- **구르기**: `scripts/player/states/roll.gd` + `scripts/systems/roll_calc.gd`(무적/종료 판정 순수 로직,
+  GUT 테스트 대상). 거리·시간 모델(D-43: `roll.distance_px / roll.duration_sec`로 속도 역산, 등속 이동).
+  무적은 Hurt와 동일한 `Player.start_iframes()`를 재사용해 상태 전환과 무관하게 지속시킨다. 잔상 이펙트는
+  전용 아트가 없어 `scripts/systems/roll_ghost.gd`가 현재 스프라이트 프레임을 복제·페이드하는 방식으로
+  대체(pixel-artist TODO). 발동 공통 로직은 `PlayerState.try_enter_roll()`(스태미나 부족 시
+  `Events.player_stamina_insufficient` 발신) — Idle/Move/Guard(항상)와 Attack(피니셔 후딜 프레임 10 이후,
+  `ComboState.can_roll_cancel()`)에서 호출한다.
+- **가드/저스트 가드**: `scripts/player/states/guard.gd` + `scripts/systems/guard_calc.gd`(판정 순수 로직).
+  가드 버튼을 누른 뒤 `guard.just_guard_window_sec`(0.1s, D-05) 이내에 맞으면 저스트 가드(피해 0·스태미나
+  소모 없음·`Hitbox.stagger_requested` 신호로 공격자에게 경직 요청), 그 밖엔 일반 가드(칩데미지
+  `guard.chip_damage_ratio`, 히트당 `stamina.costs.guard_hit` 소모 — 스태미나 부족 시 이번 타격은
+  무가드로 처리, 제안 규칙). 실제 분기는 `Player._on_hurtbox_hurt()`가 현재 상태를 `GuardState`로 캐스트해
+  처리한다(Hurtbox는 "맞았다"는 사실만 전달). 가드 중 이동 배율(`guard.move_speed_multiplier`)·스태미나
+  회복 배율(`stamina.guard_regen_multiplier`)은 각 0.5 — docs/specs/combat-tuning-m1-addendum.md §7-1/7-2가
+  독립 역산으로 재확인(공식 D-번호 배정 전까지 `_balance_todo` 유지). `Hitbox.unguardable`은 가드 불가
+  공격(잡기 등) 플래그 — 현재 M1 몬스터 3종엔 해당 패턴 없어 실제 연출 훅은 미구현.
+- **사망·부활(F8-2, D-28)**: `scripts/player/states/dead.gd`가 `Tuning.DEATH_RESPAWN_DELAY_SEC`(1.0초)
+  동안 짧은 페이드를 재생한 뒤 `Player.respawn()`을 호출 → `GameState.last_waystone` 위치로 텔레포트하고
+  HP/스태미나를 전량 채운다. `scenes/world/Waystone.tscn`(`scripts/world/waystone.gd`)이 Area2D + `interact`
+  입력으로 활성화되며 `GameState.set_last_waystone(self)`를 기록한다(Main.tscn에 1개 배치). 골드 페널티
+  (D-25)와 보스전 예외(D-23)는 골드/보스 시스템이 없어 각각 `Events.player_respawned` 훅 주석과
+  `GameState.in_boss_encounter` 플래그 자리만 남겨 두었다.
+- **DebugHud**: 스태미나 라벨이 잔량 비율에 따라 색이 바뀌고(`Events.player_stamina_insufficient` 발신 시
+  빨갛게 깜박임), 상태 줄에 `GUARD`/`JUST-GUARD!`/`ROLL`/`IFRAME` 플래그와 사망 횟수(`GameState.death_count`)를
+  표시한다.
+
+## 남은 작업 (다음 태스크, M1-3)
+- 전투: 강공격/차지, 스킬 슬롯, 무기별 가드 가능 여부(현재는 항상 가드 가능 — S2-1c 전제 "방패/가드 가능
+  무기 장착"은 장비 시스템 없어 미적용).
 - 월드: LDtk 맵 임포트 → 64×64 청크 3×3 활성화 스트리밍 (`Tuning.CHUNK_TILES`, `ACTIVE_CHUNK_RADIUS`).
-- HUD (`scenes/ui/`) — `ui/theme.tres` 적용(현재 `DebugHud`는 텍스트만).
+- HUD (`scenes/ui/`) — `ui/theme.tres` 적용 및 정식 게이지 비주얼(현재 `DebugHud`는 텍스트/색상만).

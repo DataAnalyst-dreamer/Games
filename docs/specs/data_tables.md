@@ -322,6 +322,7 @@ final_probability[grade] = raw_weight[grade] / Σ raw_weight[all grades]
 
 **용도**: F6-1, F6-3.
 **소유**: game-designer.
+**밸런스 근거**: `combat-tuning-m1.md` §8(hp/atk/속도/예고), `combat-tuning-m1-addendum.md` §4(AI 공통 필드 승격, D-53 예정)·§6(`drop_table_id` null 허용 규칙, D-58 예정).
 
 | 키 | 타입 | 범위/단위 | 필수 | 설명 |
 |---|---|---|---|---|
@@ -333,15 +334,27 @@ final_probability[grade] = raw_weight[grade] / Σ raw_weight[all grades]
 | `move_speed_px` | number | ≥0 | ● | 이동속도(px/s, 16px 프로토타입 기준) |
 | `telegraph_sec` | number | **≥0.5** | ● | 공격 예고시간 (GDD 4.2 최소값 강제) |
 | `attack_pattern_id` | string | 패턴 테이블 참조 | ● | 행동 패턴 |
-| `drop_table_id` | string | `drop_tables.json` 참조 | ● | 처치 드랍 |
+| `drop_table_id` | string \| null | `drop_tables.json` 참조, **`null` 허용**(§ 검증 규칙 2 참고) | ● | 처치 드랍. `null` = "드랍 없음"으로 확정되었거나 `drop_tables.json` 부재 시기의 자리표시자 |
 | `element` | string, optional | 5속성 중 하나 | ○ | 속성 부여 몬스터만 |
 | `tags` | array[string] | 예: `["demon"]` | ○ | `elements.json.holy_bonus_vs_tags` 참조 대상 |
 | `codex_entry_id` | string | 도감 참조 | ● | GDD 8.1 "처치 시 도감 등록" |
+| `aggro_range_px` | number | >0, `melee_range_px`보다 커야 함 | ● (M1-1부터 정식 필드, `combat-tuning-m1-addendum.md` §4) | 인지(추적 시작) 반경. F6-1 "인지 범위 진입 시 추적" |
+| `melee_range_px` | number | >0 | ● | 근접/접촉 판정 발동 거리(장판형 몬스터는 "장판 트리거 거리"로 해석) |
+| `attack_recovery_sec` | number | >0 | ● | 공격 후 재사용 대기(후딜). 플레이어 반격 타이밍의 근거 |
+| `patrol_radius_px` | number | ≥0 | ● | 비추적 상태 순찰 반경. 0 = 고정형(순찰 없음) |
+| `leash_range_px` | number | >0, `aggro_range_px`보다 커야 함 | ● | 추적 포기 후 원위치 복귀를 시작하는 거리(F6-1 "일정 거리 이탈 시 복귀") |
+| `dash_speed_px` | number | >0 | ○ (돌진형 종만, 예: 뿔토끼) | 돌진 중 이동속도 |
+| `dash_duration_sec` | number | >0 | ○ (돌진형 종만) | 돌진 지속시간 |
+| `atk_tick_per_sec` | number | >0 | ○ (장판형 종만, 예: 버섯돌이) | 장판 내부 지속 피해(초당) |
+| `aoe_radius_px` | number | >0, `melee_range_px` 이상 | ○ (장판형 종만) | 실제 전개된 장판 반경. `melee_range_px`(트리거 거리)와 별개 값 — 장판은 트리거 지점보다 넓게 퍼진다 |
 
 ### 검증 규칙 (F8-4 명시 항목: "참조 ID 존재")
 1. `telegraph_sec ≥ 0.5` 위반 시 빌드 에러 (GDD 4.2 강제 규칙)
-2. `drop_table_id`가 `drop_tables.json`에 존재
+2. `drop_table_id` 참조 무결성: **`drop_tables.json` 파일 자체가 아직 로더에 존재하지 않는 동안(M1, M2 F3 착수 전)에는 이 규칙을 적용하지 않는다** — `drop_table_id`가 `null`이든 임의 문자열이든 빌드를 막지 않는다. `drop_tables.json`이 생성된 이후(M2 F3 착수)부터: `drop_table_id == null`은 "확정된 드랍 없음"으로 유효, `null`이 아니면 반드시 `drop_tables.json`에 실제로 존재해야 한다(위반 시 빌드 에러). 현재 `monsters.json`에 남아있는 `"slime_common"` 등 문자열은 이 시점까지 기능적으로 아무것도 참조하지 않는 예정 ID 메모이며, M2 F3 착수 시 game-designer가 실제 테이블 항목으로 채우거나 `null`로 정리한다.
 3. `tags`에 사용된 각 값이 `elements.json.holy_bonus_vs_tags`와 일관(신규 태그 추가 시 두 파일 동시 갱신)
+4. `leash_range_px > aggro_range_px > melee_range_px` (AI 상태 전이가 논리적으로 겹치지 않도록 강제)
+5. `aoe_radius_px`가 존재하면 `aoe_radius_px ≥ melee_range_px`
+6. 방어력 필드는 아직 없음 — M1은 단순 모델(`combat-tuning-m1.md` §0), 도입 시점은 D-49(M2) 유지
 
 ---
 

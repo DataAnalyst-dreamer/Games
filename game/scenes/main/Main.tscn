@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/DebugHud.tscn" id="6_hud"]
 [ext_resource type="Script" path="res://scripts/systems/camera_shake.gd" id="7_camera_shake"]
 [ext_resource type="Script" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_noise_emitter_2d.gd" id="8_noise_emitter"]
+[ext_resource type="PackedScene" path="res://scenes/world/Waystone.tscn" id="9_waystone"]
 
 [node name="Main" type="Node2D"]
 
@@ -23,6 +24,9 @@ position = Vector2(-70, 30)
 
 [node name="Slime3" parent="." instance=ExtResource("5_slime")]
 position = Vector2(20, 90)
+
+[node name="Waystone1" parent="." instance=ExtResource("9_waystone")]
+position = Vector2(-40, -100)
 
 [node name="Camera2D" type="Camera2D" parent="."]
 process_callback = 0

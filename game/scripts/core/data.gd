@@ -201,6 +201,15 @@ func _validate_value_rules() -> void:
 			var duration: float = float(get_value("combat", "roll.duration_sec"))
 			if not (iframes <= duration):
 				_report("roll.iframes_sec(%s) <= roll.duration_sec(%s) 위반" % [iframes, duration])
+		# M1-2 신규 키(제안값, godot-engineer 반영): 배율은 0~1 범위(0=완전 정지/완전 고갈, 1=무배율).
+		if has_value("combat", "guard.move_speed_multiplier"):
+			var guard_move_mult: float = float(get_value("combat", "guard.move_speed_multiplier"))
+			if not (guard_move_mult >= 0.0 and guard_move_mult <= 1.0):
+				_report("guard.move_speed_multiplier(%s) 범위(0~1) 위반" % guard_move_mult)
+		if has_value("combat", "stamina.guard_regen_multiplier"):
+			var guard_regen_mult: float = float(get_value("combat", "stamina.guard_regen_multiplier"))
+			if not (guard_regen_mult >= 0.0 and guard_regen_mult <= 1.0):
+				_report("stamina.guard_regen_multiplier(%s) 범위(0~1) 위반" % guard_regen_mult)
 	if tables.has("elements") and has_value("elements", "cycle"):
 		var cycle: Array = get_value("elements", "cycle")
 		if cycle.size() != 4:

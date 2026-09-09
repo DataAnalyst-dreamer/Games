@@ -55,6 +55,11 @@ const KNOCKBACK_DURATION_SEC: float = 0.12
 const HURT_STUN_SEC: float = 0.25
 const HURT_IFRAMES_SEC: float = 0.5
 
+## 사망 판정 직후 텔레포트(부활)까지의 순수 UX 지연(초, F8-2). 밸런스와 무관한 연출
+## 값이라 combat.json이 아닌 여기 둔다 — docs/specs/combat-tuning-m1-addendum.md §7-3
+## 제안값(DEATH_RESPAWN_DELAY_SEC=1.0)과 동일한 이름/값으로 맞췄다.
+const DEATH_RESPAWN_DELAY_SEC: float = 1.0
+
 # --- 카메라 셰이크 강도 (테이블 이관 예정 → camera.json / 접근성 설정) ---
 ## 강공격·크리티컬(피니셔) 타격 시 노이즈 진폭(px)·지속시간(초). F2-2: 일반 타격은 셰이크 없음.
 ## GDD/스펙에 구체 수치가 없어 제안값 — game-designer 확인 필요.

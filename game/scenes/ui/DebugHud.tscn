@@ -10,13 +10,13 @@ anchors_preset = 0
 offset_left = 8.0
 offset_top = 8.0
 offset_right = 200.0
-offset_bottom = 60.0
+offset_bottom = 120.0
 script = ExtResource("1_script")
 
 [node name="VBox" type="VBoxContainer" parent="Root"]
 layout_mode = 0
 offset_right = 192.0
-offset_bottom = 52.0
+offset_bottom = 112.0
 
 [node name="HPLabel" type="Label" parent="Root/VBox"]
 layout_mode = 2
@@ -29,3 +29,11 @@ text = "STAMINA: -- / --"
 [node name="ComboLabel" type="Label" parent="Root/VBox"]
 layout_mode = 2
 text = "COMBO: -"
+
+[node name="StatusLabel" type="Label" parent="Root/VBox"]
+layout_mode = 2
+text = "STATUS: -"
+
+[node name="DeathLabel" type="Label" parent="Root/VBox"]
+layout_mode = 2
+text = "DEATHS: 0"

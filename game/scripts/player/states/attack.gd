@@ -33,6 +33,11 @@ func handle_input(event: InputEvent) -> void:
 				_lunge_dir = new_dir
 				player.set_facing(new_dir)
 			_start_current_hit()
+	elif event.is_action_pressed("roll") and can_roll_cancel():
+		# S2-1b: "공격 애니메이션 특정 프레임 이후 구르기로 캔슬 가능" — 피니셔 후딜 중
+		# combo.finisher_roll_cancel_after_sec 이후부터 허용(can_roll_cancel() 참고).
+		# exit()가 콤보를 리셋하므로 여기서 별도 정리는 필요 없다.
+		try_enter_roll()
 
 
 func physics_update(delta: float) -> void:

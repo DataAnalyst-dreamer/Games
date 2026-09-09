@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3]
+[gd_scene load_steps=32 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/third_party/ninja_adventure/Actor/Character/Knight/SpriteSheet.png" id="1_knight"]
 [ext_resource type="Script" path="res://scripts/player/player.gd" id="2_player"]
@@ -8,6 +8,8 @@
 [ext_resource type="Script" path="res://scripts/player/states/attack.gd" id="6_attack"]
 [ext_resource type="Script" path="res://scripts/player/states/hurt.gd" id="7_hurt"]
 [ext_resource type="Script" path="res://scripts/player/states/dead.gd" id="8_dead"]
+[ext_resource type="Script" path="res://scripts/player/states/roll.gd" id="12_roll"]
+[ext_resource type="Script" path="res://scripts/player/states/guard.gd" id="13_guard"]
 [ext_resource type="Script" path="res://scripts/systems/hitbox.gd" id="9_hitbox"]
 [ext_resource type="Script" path="res://scripts/systems/hurtbox.gd" id="10_hurtbox"]
 [ext_resource type="Texture2D" path="res://assets/third_party/ninja_adventure/Items/Weapons/Sword/Sprite.png" id="11_sword"]
@@ -233,3 +235,9 @@ script = ExtResource("7_hurt")
 
 [node name="Dead" type="Node" parent="StateMachine"]
 script = ExtResource("8_dead")
+
+[node name="Roll" type="Node" parent="StateMachine"]
+script = ExtResource("12_roll")
+
+[node name="Guard" type="Node" parent="StateMachine"]
+script = ExtResource("13_guard")

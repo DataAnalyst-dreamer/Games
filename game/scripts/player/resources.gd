@@ -53,13 +53,25 @@ func try_spend(amount: float) -> bool:
 	return true
 
 
-func tick(delta: float) -> void:
+## regen_multiplier: 이번 프레임에 적용할 회복 속도 배율(기본 1.0). Guard 유지 중처럼
+## 특정 상태에서 회복이 느려지는 규칙(M1-2 제안값, combat.json stamina.guard_regen_
+## multiplier)을 호출부(Player)가 전달한다. 회복 대기(_regen_wait) 자체에는 영향 없음 —
+## "회복이 재개된 뒤의 속도"만 배율 대상이다.
+func tick(delta: float, regen_multiplier: float = 1.0) -> void:
 	if _regen_wait > 0.0:
 		_regen_wait = maxf(_regen_wait - delta, 0.0)
 		return
 	if stamina < max_stamina:
-		stamina = minf(stamina + stamina_regen_per_sec * delta, max_stamina)
+		stamina = minf(stamina + stamina_regen_per_sec * regen_multiplier * delta, max_stamina)
 
 
 func is_dead() -> bool:
 	return hp <= 0
+
+
+## DEX 스태미나 경감식(S2-1b 규칙, docs/specs/combat-tuning-m1.md §3-3, D-45: M1은 구르기
+## 전용). 순수 함수라 Node 없이 GUT에서 직접 테스트 가능. dex=0이면 경감 없음(현재 stats
+## 시스템 미구현이라 호출부는 전부 dex=0으로 고정 — characters.json/stats.json 확정 후
+## 실제 DEX 값을 전달하도록 교체할 것, godot-engineer TODO).
+static func roll_cost_with_dex(base_cost: float, dex: float) -> float:
+	return base_cost * (1.0 - minf(0.5, dex / 300.0))
