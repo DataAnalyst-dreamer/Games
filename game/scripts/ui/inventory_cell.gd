@@ -1,6 +1,8 @@
-## 인벤토리/장비 슬롯 셀 하나(F7-2, M2-2). 격자 40~80칸과 장비 8슬롯+치장 3슬롯 모두
-## 이 씬을 재사용한다(장비 슬롯은 비어있을 때 CaptionLabel로 슬롯 이름을 보여준다는
-## 점만 다르다). 색·나인패치는 game/ui/theme.tres 한 곳에서만 읽어온다.
+## 인벤토리/장비 슬롯 셀 하나(F7-2, M2-2 / 잠금 배지·장착 배지는 M2-5 D-88 신설).
+## 격자 40~80칸과 장비 8슬롯+치장 3슬롯, 그리고 대장간(BlacksmithMenu, M2-5) 좌측
+## 목록 아이콘까지 이 씬을 재사용한다(장비 슬롯은 비어있을 때 CaptionLabel로 슬롯
+## 이름을 보여준다는 점만 다르다). 색·나인패치는 game/ui/theme.tres 한 곳에서만
+## 읽어온다.
 class_name InventoryCell
 extends Panel
 
@@ -10,7 +12,8 @@ extends Panel
 @onready var enhance_label: Label = $EnhanceLabel
 @onready var qty_label: Label = $QtyLabel
 @onready var caption_label: Label = $CaptionLabel
-@onready var discard_overlay: ColorRect = $DiscardOverlay
+@onready var lock_overlay: ColorRect = $LockOverlay
+@onready var badge_label: Label = $BadgeLabel
 @onready var focus_ring: Panel = $FocusRing
 
 
@@ -20,7 +23,7 @@ func _ready() -> void:
 	# 직접 읽으면 null이다.
 	add_theme_stylebox_override("panel", get_theme_stylebox(&"slot_cell", &"HUD"))
 	focus_ring.add_theme_stylebox_override("panel", get_theme_stylebox(&"focus_highlight", &"Inventory"))
-	discard_overlay.color = get_theme_color(&"discard_mark", &"Inventory")
+	lock_overlay.color = get_theme_color(&"locked_mark", &"Inventory")
 	clear()
 
 
@@ -31,7 +34,8 @@ func clear() -> void:
 	grade_icon.visible = false
 	enhance_label.visible = false
 	qty_label.visible = false
-	discard_overlay.visible = false
+	lock_overlay.visible = false
+	badge_label.visible = false
 
 
 ## 빈 장비 슬롯에 표시할 슬롯 이름(예: "무기"). 격자 칸은 빈 문자열로 둔다.
@@ -58,8 +62,17 @@ func set_focused(focused: bool) -> void:
 	focus_ring.visible = focused
 
 
-func set_discard_marked(marked: bool) -> void:
-	discard_overlay.visible = marked
+## 즐겨찾기 잠금 표시(M2-5 D-88). 잠긴 아이템은 대장간 분해 탭 목록에서 자동 제외된다
+## (`BlacksmithUiCalc.filter_salvage_indices`).
+func set_locked_marked(marked: bool) -> void:
+	lock_overlay.visible = marked
+
+
+## 대장간 강화/재련 좌측 목록에서 "지금 장착 중"임을 알리는 배지(docs/ui/blacksmith.md
+## §1.1 "[E]"). 인벤토리 격자·장비 슬롯 자체는 쓰지 않는다(기본 숨김).
+func set_equipped_badge(equipped: bool) -> void:
+	badge_label.visible = equipped
+	badge_label.text = "[E]" if equipped else ""
 
 
 func set_disabled(disabled: bool) -> void:

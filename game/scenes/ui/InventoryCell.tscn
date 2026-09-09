@@ -63,11 +63,19 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
 
-[node name="DiscardOverlay" type="ColorRect" parent="."]
+[node name="LockOverlay" type="ColorRect" parent="."]
 layout_mode = 0
 offset_right = 26.0
 offset_bottom = 26.0
 mouse_filter = 2
+visible = false
+
+[node name="BadgeLabel" type="Label" parent="."]
+layout_mode = 0
+offset_right = 12.0
+offset_bottom = 9.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 7
 visible = false
 
 [node name="FocusRing" type="Panel" parent="."]

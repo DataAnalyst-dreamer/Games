@@ -1,6 +1,8 @@
 {
   "_comment": "SFX 이벤트 → 파일 매핑(F8-4 데이터 테이블 원칙 — AudioManager 코드에 경로/dB/피치를 하드코딩하지 않는다). 출처: docs/audio/sound-map-m1.md(§1~§8, §10~§11) + docs/audio/audio-spec.md §6-2 스키마·§4 드랍 규칙. sfxr 필요 3건(just_guard_success/stamina_exhausted/legendary_drop_sparkle)은 tools/audio/sfxr_synth.py로 자체 저작 WAV를 생성해 반영 완료(임시 대체 파일 교체, tools/audio/README.md 재생성 명령 참고). 등급별 드랍 6종(drop_common..drop_relic)도 같은 합성기로 신규 제작 — item_drop.gd가 이미 AudioManager.play_sfx(\"drop_%s\" % grade, ...)를 호출하고 있어 이 테이블만 채우면 코드 변경 없이 소리가 난다. priority는 audio-spec.md §3-2 티어(0=최우선~3=최하), max_voices/cooldown_sec은 sound-map의 '재생 규칙' 열을 그대로 옮긴다. files가 2개 이상이면 재생마다 무작위 하나를 고른다(풀). '_layer'/'_sparkle' 접미 항목(drop_epic_layer, legendary_drop_sparkle)은 item_drop.gd가 아직 두 번째 play_sfx 호출을 하지 않으므로 godot-engineer가 grade별 분기(epic/legendary)에서 기본 id 재생 직후 추가 호출해야 실제로 겹쳐 들린다 — audio-spec.md §4 참고.",
 
+  "_todo_blacksmith_m2_5": "BlacksmithMenu(scripts/ui/blacksmith_menu.gd, M2-5)가 이미 AudioManager.play_sfx()를 호출하지만 이 테이블엔 아직 항목이 없어 헤드리스 로그도 없이 조용히 no-op된다(entry.is_empty()면 그냥 null 반환, 정상 동작). 필요 SFX 5종 — blacksmith_enhance_success(모루 타격+반짝임), blacksmith_enhance_fail(연기, 페널티 최소화를 배신하지 않는 가벼운 톤), blacksmith_refine_roll(구슬 굴림/찰칵), blacksmith_salvage_complete(분해 파쇄음), blacksmith_craft_complete(완성 팡파레) — 자체 저작(sfxr) 또는 기존 팩 재사용 여부는 sound-designer 확인 필요.",
+
   "atk_swing_1": {
     "files": [
       "res://assets/third_party/ninja_adventure/Audio/Sounds/Whoosh & Slash/Slash.wav",

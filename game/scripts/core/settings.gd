@@ -15,6 +15,10 @@ var screen_shake_index: int = 2
 var damage_numbers_enabled: bool = true
 ## 색약 모드: 등급 색 옆 아이콘 강조 + HP 위험 비네트를 패턴으로 대체.
 var colorblind_mode: bool = false
+## 결과 연출 강도(M2-5 D-89/§4 신설, damage_numbers_enabled와 동일 패턴). 대장간 강화
+## 성공/실패·재련·분해의 화면 전체 플래시(빛기둥/연기)를 껐을 때 "결과 텍스트+아이콘"만
+## 남긴다(광과민성 접근성 대응) — 기본 켜짐.
+var effect_flash_enabled: bool = true
 ## 폰트 크기: false=기본, true=크게 (2단계, wireframes 화면10).
 var font_size_large: bool = false
 ## 볼륨 0.0~1.0. AudioServer 버스(Master/BGM/SFX)에 매핑된다.
@@ -38,6 +42,7 @@ static func default_dict() -> Dictionary:
 		"damage_numbers_enabled": true,
 		"colorblind_mode": false,
 		"font_size_large": false,
+		"effect_flash_enabled": true,
 		"master_volume": 1.0,
 		"bgm_volume": 1.0,
 		"sfx_volume": 1.0,
@@ -51,6 +56,7 @@ func to_dict() -> Dictionary:
 		"damage_numbers_enabled": damage_numbers_enabled,
 		"colorblind_mode": colorblind_mode,
 		"font_size_large": font_size_large,
+		"effect_flash_enabled": effect_flash_enabled,
 		"master_volume": master_volume,
 		"bgm_volume": bgm_volume,
 		"sfx_volume": sfx_volume,
@@ -66,6 +72,7 @@ func apply_dict(data: Dictionary) -> void:
 		data.get("damage_numbers_enabled", defaults["damage_numbers_enabled"]))
 	colorblind_mode = bool(data.get("colorblind_mode", defaults["colorblind_mode"]))
 	font_size_large = bool(data.get("font_size_large", defaults["font_size_large"]))
+	effect_flash_enabled = bool(data.get("effect_flash_enabled", defaults["effect_flash_enabled"]))
 	master_volume = clampf(float(data.get("master_volume", defaults["master_volume"])), 0.0, 1.0)
 	bgm_volume = clampf(float(data.get("bgm_volume", defaults["bgm_volume"])), 0.0, 1.0)
 	sfx_volume = clampf(float(data.get("sfx_volume", defaults["sfx_volume"])), 0.0, 1.0)
@@ -134,6 +141,12 @@ func set_colorblind_mode(enabled: bool) -> void:
 func set_font_size_large(enabled: bool) -> void:
 	font_size_large = enabled
 	Events.settings_changed.emit(&"font_size_large", enabled)
+	save_settings()
+
+
+func set_effect_flash_enabled(enabled: bool) -> void:
+	effect_flash_enabled = enabled
+	Events.settings_changed.emit(&"effect_flash_enabled", enabled)
 	save_settings()
 
 

@@ -95,8 +95,13 @@ Inventory/colors/negative = Color(0.847059, 0.294118, 0.294118, 1)
 Inventory/colors/neutral = Color(0.72, 0.72, 0.72, 1)
 Inventory/colors/focus = Color(0.901961, 0.792157, 0.396078, 1)
 Inventory/colors/disabled = Color(0.45, 0.45, 0.45, 0.55)
-Inventory/colors/discard_mark = Color(0.847059, 0.223529, 0.223529, 0.55)
+Inventory/colors/locked_mark = Color(0.290196, 0.4, 0.564706, 0.5)
 Inventory/colors/tab_active = Color(1, 1, 1, 1)
 Inventory/colors/tab_inactive = Color(0.62, 0.62, 0.62, 1)
 Inventory/styles/focus_highlight = SubResource("StyleBoxFlat_focus_highlight")
 Inventory/styles/backdrop = SubResource("StyleBoxFlat_backdrop")
+
+; --- 대장간·우편함 화면 전용 (F3-3·F3-4, M2-5). 등급 색·포커스·비활성·긍정/부정 색은
+; 위 Inventory/colors/* 를 그대로 재사용한다(중복 정의 금지) — 여기는 D-90 "+7부터
+; 실패 가능"이라는 상시 경고 문구를 강조할 색 하나만 추가한다. ---
+Inventory/colors/warning = Color(0.886275, 0.694118, 0.243137, 1)

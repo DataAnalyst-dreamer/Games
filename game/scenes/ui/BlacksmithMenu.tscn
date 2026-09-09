@@ -1,0 +1,360 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/blacksmith_menu.gd" id="1_smith_script"]
+[ext_resource type="Theme" path="res://ui/theme.tres" id="2_theme"]
+
+[node name="BlacksmithMenu" type="CanvasLayer"]
+layer = 11
+process_mode = 3
+
+[node name="Root" type="Control" parent="."]
+process_mode = 3
+theme = ExtResource("2_theme")
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+visible = false
+script = ExtResource("1_smith_script")
+
+[node name="Backdrop" type="Panel" parent="Root"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 1
+
+[node name="TabBar" type="HBoxContainer" parent="Root"]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 3.0
+offset_right = 300.0
+offset_bottom = 15.0
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="GoldLabel" type="Label" parent="Root"]
+layout_mode = 0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -140.0
+offset_top = 3.0
+offset_right = -4.0
+offset_bottom = 15.0
+mouse_filter = 2
+horizontal_alignment = 2
+
+[node name="ContentArea" type="Control" parent="Root"]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 19.0
+offset_right = 636.0
+offset_bottom = 340.0
+mouse_filter = 2
+
+[node name="Body" type="HBoxContainer" parent="Root/ContentArea"]
+layout_mode = 0
+offset_right = 632.0
+offset_bottom = 321.0
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="LeftPanel" type="VBoxContainer" parent="Root/ContentArea/Body"]
+custom_minimum_size = Vector2(230, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="FilterRow" type="HBoxContainer" parent="Root/ContentArea/Body/LeftPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="ListScroll" type="ScrollContainer" parent="Root/ContentArea/Body/LeftPanel"]
+custom_minimum_size = Vector2(0, 280)
+layout_mode = 2
+mouse_filter = 2
+horizontal_scroll_mode = 0
+
+[node name="ListContainer" type="VBoxContainer" parent="Root/ContentArea/Body/LeftPanel/ListScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = 2
+
+[node name="EmptyHint" type="Label" parent="Root/ContentArea/Body/LeftPanel"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+visible = false
+
+[node name="RightPanel" type="VBoxContainer" parent="Root/ContentArea/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="EnhancePanel" type="VBoxContainer" parent="Root/ContentArea/Body/RightPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="NameLabel" type="Label" parent="Root/ContentArea/Body/RightPanel/EnhancePanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="LevelLabel" type="Label" parent="Root/ContentArea/Body/RightPanel/EnhancePanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="RateLabel" type="Label" parent="Root/ContentArea/Body/RightPanel/EnhancePanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="StatLabel" type="Label" parent="Root/ContentArea/Body/RightPanel/EnhancePanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="CostLabel" type="Label" parent="Root/ContentArea/Body/RightPanel/EnhancePanel"]
+layout_mode = 2
+mouse_filter = 2
+autowrap_mode = 2
+
+[node name="WarningLabel" type="Label" parent="Root/ContentArea/Body/RightPanel/EnhancePanel"]
+layout_mode = 2
+mouse_filter = 2
+autowrap_mode = 2
+
+[node name="ActionLabel" type="Label" parent="Root/ContentArea/Body/RightPanel/EnhancePanel"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+
+[node name="RefinePanel" type="VBoxContainer" parent="Root/ContentArea/Body/RightPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+visible = false
+
+[node name="NameLabel" type="Label" parent="Root/ContentArea/Body/RightPanel/RefinePanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="RemainingLabel" type="Label" parent="Root/ContentArea/Body/RightPanel/RefinePanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="AffixContainer" type="VBoxContainer" parent="Root/ContentArea/Body/RightPanel/RefinePanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="CostLabel" type="Label" parent="Root/ContentArea/Body/RightPanel/RefinePanel"]
+layout_mode = 2
+mouse_filter = 2
+autowrap_mode = 2
+
+[node name="ActionLabel" type="Label" parent="Root/ContentArea/Body/RightPanel/RefinePanel"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+
+[node name="SalvagePanel" type="VBoxContainer" parent="Root/ContentArea/Body/RightPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+visible = false
+
+[node name="YieldHeaderLabel" type="Label" parent="Root/ContentArea/Body/RightPanel/SalvagePanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="YieldContainer" type="VBoxContainer" parent="Root/ContentArea/Body/RightPanel/SalvagePanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="SelectedLabel" type="Label" parent="Root/ContentArea/Body/RightPanel/SalvagePanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="HoldLabel" type="Label" parent="Root/ContentArea/Body/RightPanel/SalvagePanel"]
+layout_mode = 2
+mouse_filter = 2
+visible = false
+
+[node name="HoldBar" type="ProgressBar" parent="Root/ContentArea/Body/RightPanel/SalvagePanel"]
+layout_mode = 2
+mouse_filter = 2
+show_percentage = false
+visible = false
+
+[node name="CraftPanel" type="VBoxContainer" parent="Root/ContentArea/Body/RightPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+visible = false
+
+[node name="NameLabel" type="Label" parent="Root/ContentArea/Body/RightPanel/CraftPanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="GradeNoteLabel" type="Label" parent="Root/ContentArea/Body/RightPanel/CraftPanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="MaterialsHeaderLabel" type="Label" parent="Root/ContentArea/Body/RightPanel/CraftPanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="MaterialsContainer" type="VBoxContainer" parent="Root/ContentArea/Body/RightPanel/CraftPanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="CostLabel" type="Label" parent="Root/ContentArea/Body/RightPanel/CraftPanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="ActionLabel" type="Label" parent="Root/ContentArea/Body/RightPanel/CraftPanel"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+
+[node name="GuideBar" type="Label" parent="Root"]
+layout_mode = 0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = -16.0
+offset_right = 636.0
+offset_bottom = -2.0
+mouse_filter = 2
+
+[node name="RefineComparePopup" type="Panel" parent="Root"]
+layout_mode = 1
+anchor_left = 0.15
+anchor_top = 0.25
+anchor_right = 0.85
+anchor_bottom = 0.75
+mouse_filter = 1
+visible = false
+
+[node name="Margin" type="MarginContainer" parent="Root/RefineComparePopup"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="Root/RefineComparePopup/Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="TitleLabel" type="Label" parent="Root/RefineComparePopup/Margin/VBox"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+
+[node name="Choices" type="HBoxContainer" parent="Root/RefineComparePopup/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="OldPanel" type="Panel" parent="Root/RefineComparePopup/Margin/VBox/Choices"]
+custom_minimum_size = Vector2(120, 60)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="Root/RefineComparePopup/Margin/VBox/Choices/OldPanel"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="NewPanel" type="Panel" parent="Root/RefineComparePopup/Margin/VBox/Choices"]
+custom_minimum_size = Vector2(120, 60)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="Root/RefineComparePopup/Margin/VBox/Choices/NewPanel"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="HintLabel" type="Label" parent="Root/RefineComparePopup/Margin/VBox"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+
+[node name="SalvageConfirmPopup" type="Panel" parent="Root"]
+layout_mode = 1
+anchor_left = 0.2
+anchor_top = 0.35
+anchor_right = 0.8
+anchor_bottom = 0.65
+mouse_filter = 1
+visible = false
+
+[node name="Margin" type="MarginContainer" parent="Root/SalvageConfirmPopup"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="Root/SalvageConfirmPopup/Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="TitleLabel" type="Label" parent="Root/SalvageConfirmPopup/Margin/VBox"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+
+[node name="BodyLabel" type="Label" parent="Root/SalvageConfirmPopup/Margin/VBox"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="HintLabel" type="Label" parent="Root/SalvageConfirmPopup/Margin/VBox"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+
+[node name="ResultFlash" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+visible = false
+
+[node name="ResultToast" type="Label" parent="Root"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.08
+anchor_right = 0.5
+anchor_bottom = 0.08
+offset_left = -120.0
+offset_right = 120.0
+offset_bottom = 16.0
+mouse_filter = 2
+horizontal_alignment = 1
+visible = false

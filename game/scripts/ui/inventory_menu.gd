@@ -15,7 +15,12 @@ signal close_requested()
 const CELL_SCENE := preload("res://scenes/ui/InventoryCell.tscn")
 const EQUIP_CELL_SPACING := 30.0
 const GRID_COLS := 8
-const DISCARD_HOLD_SEC := 0.5
+## D-88(M2-5): Y 홀드로 "즐겨찾기 잠금"을 토글한다(가역 마킹 0.5초 — 대장간 분해 탭의
+## 비가역 확정 홀드 0.8초와 의도적으로 다른 시간 상수, docs/ui/blacksmith.md §8 결정1).
+## 예전에는 같은 Y 홀드가 소비자가 없던 "분해 표시(marked_discard)" placeholder였다 —
+## 실제 분해 UI(BlacksmithMenu 분해 탭)가 생긴 이번 스테이지에서 잠금 토글로 대체했다
+## (완료 보고 "설계 대비 변경점" 참고).
+const LOCK_HOLD_SEC := 0.5
 
 const TABS: Array[String] = ["inventory", "skill", "codex", "quest"]
 const TAB_LABEL_KEYS := {
@@ -83,8 +88,8 @@ var _visible_indices: Array[int] = [] # grid cell 위치 -> GameState.inventory.
 var _tab_buttons: Dictionary = {} # tab_id -> Button
 var _filter_buttons: Array = [] # Array[Button], GRADE_FILTERS와 같은 순서
 
-var _discard_hold_time: float = 0.0
-var _discard_hold_triggered: bool = false
+var _lock_hold_time: float = 0.0
+var _lock_hold_triggered: bool = false
 
 var _last_input_was_pad: bool = false
 
@@ -350,7 +355,7 @@ func _paint_cell_with_slot(cell: InventoryCell, slot: Dictionary) -> void:
 	var grade_enum: Rarity.Grade = Rarity.from_string(String(slot.get("grade", item_def.get("grade", "common"))))
 	cell.set_item(Rarity.color_of(grade_enum, theme), Rarity.icon_of(grade_enum),
 		int(slot.get("quantity", 1)), int(slot.get("enhance_level", 0)))
-	cell.set_discard_marked(bool(slot.get("marked_discard", false)))
+	cell.set_locked_marked(bool(slot.get("locked", false)))
 
 
 func _on_grid_cell_gui_input(event: InputEvent, index: int) -> void:
@@ -455,25 +460,25 @@ func _confirm_equip_slot() -> void:
 		GameState.unequip_item(_focus_equip_slot)
 
 
-# --- 분해 표시(Y 홀드) ---
+# --- 즐겨찾기 잠금 토글(Y 홀드 0.5s, D-88) ---
 
-func _update_discard_hold(delta: float) -> void:
+func _update_lock_hold(delta: float) -> void:
 	if TABS[_tab_index] != "inventory" or _focus_area != "grid" or Input.is_action_pressed(&"ui_mark_discard") == false:
-		_discard_hold_time = 0.0
-		_discard_hold_triggered = false
+		_lock_hold_time = 0.0
+		_lock_hold_triggered = false
 		return
-	_discard_hold_time += delta
-	if _discard_hold_time >= DISCARD_HOLD_SEC and not _discard_hold_triggered:
-		_discard_hold_triggered = true
-		_toggle_discard_mark()
+	_lock_hold_time += delta
+	if _lock_hold_time >= LOCK_HOLD_SEC and not _lock_hold_triggered:
+		_lock_hold_triggered = true
+		_toggle_locked()
 
 
-func _toggle_discard_mark() -> void:
+func _toggle_locked() -> void:
 	if _focus_grid_index >= _visible_indices.size():
 		return
 	var slot_index: int = _visible_indices[_focus_grid_index]
 	var slot: Dictionary = GameState.inventory.slots[slot_index]
-	slot["marked_discard"] = not bool(slot.get("marked_discard", false))
+	GameState.inventory.set_locked(String(slot.get("uid", "")), not bool(slot.get("locked", false)))
 	_rebuild_grid()
 
 
@@ -619,4 +624,4 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed(&"ui_confirm"):
 		_handle_confirm()
 
-	_update_discard_hold(delta)
+	_update_lock_hold(delta)
