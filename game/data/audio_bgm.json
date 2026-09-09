@@ -1,0 +1,11 @@
+{
+  "_comment": "BGM 트랙 id → 파일. 출처: docs/audio/sound-map-m1.md §9(1순위 후보), docs/audio/audio-spec.md §2(크로스페이드 규칙). 지역→BGM 매핑은 audio_manager.gd의 REGION_BGM 상수(M1은 greenfield_prototype 하나뿐이라 별도 테이블 불필요, region_id가 늘어나면 이 파일에 매핑 테이블을 추가하는 편이 낫다 — game-designer TODO).",
+
+  "bgm_grassland_1": {
+    "file": "res://assets/third_party/ninja_adventure/Audio/Musics/31 - Sunny.ogg",
+    "_comment": "초원(하틀랜드) 메인 BGM 1순위 후보. 후보 2/3(Calm Village/Peaceful)은 아직 미배선 — 필드 탐험 구간 교차 재생은 M2 검토."
+  },
+  "bgm_battle": {
+    "file": "res://assets/third_party/ninja_adventure/Audio/Musics/17 - Fight.ogg"
+  }
+}

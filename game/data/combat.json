@@ -1,5 +1,5 @@
 {
-  "_comment": "전투 밸런스 테이블. 출처: GDD 4.1/4.2, D-05(저스트 가드 6프레임), docs/specs/combat-tuning-m1.md(M1 확정안), D-42~D-52(2026-09-08 결정). 프레임 수치는 60fps 기준(frame_rate_reference), 코드는 delta 기반으로 사용한다. '_balance_todo' 항목은 game-designer가 M1 플레이테스트 실측 후 조정 예정인 임시 반영값(D-46).",
+  "_comment": "전투 밸런스 테이블. 출처: GDD 4.1/4.2, D-05(저스트 가드 6프레임), docs/specs/combat-tuning-m1.md(M1 확정안), D-42~D-52(2026-09-08 결정), docs/specs/combat-tuning-m1-addendum.md(넉백/피격 무적/카메라 셰이크/가드 배율 확정, D-61~D-70 예정 부여— 04-decisions.md 반영은 game-designer/release-manager 몫). 프레임 수치는 60fps 기준(frame_rate_reference), 코드는 delta 기반으로 사용한다. '_balance_todo' 항목은 game-designer가 M1 플레이테스트 실측 후 조정 예정인 임시 반영값(D-46, 카메라 셰이크는 addendum §3 결정 요청 3).",
   "frame_rate_reference": 60,
 
   "roll": {
@@ -10,13 +10,13 @@
   },
 
   "guard": {
-    "_comment": "D-05: 적중 직전 6프레임(0.1초) 내 입력 시 저스트 가드. chip_damage_ratio는 combat-tuning-m1.md §5-1 확정. just_guard_enemy_stagger_sec은 §5-3 제안값(D-46: 임시 반영). move_speed_multiplier는 M1-2 신규 키 — godot-engineer 제안값(가드 중 이속 0.5배)으로 반영했고, 이후 작성된 docs/specs/combat-tuning-m1-addendum.md §7-1이 동일값을 독립 역산으로 재확인(결정 요청 8) — 공식 D-번호 배정 후 _balance_todo 해제 예정.",
+    "_comment": "D-05: 적중 직전 6프레임(0.1초) 내 입력 시 저스트 가드. chip_damage_ratio는 combat-tuning-m1.md §5-1 확정. just_guard_enemy_stagger_sec은 §5-3 제안값(D-46: 임시 반영, 유지). move_speed_multiplier(가드 중 이속 0.5배)는 addendum §7-1이 독립 역산으로 재확인 — 결정 요청 8 승인(D-68 예정)에 따라 확정 전환, _balance_todo 해제.",
     "just_guard_window_frames": 6,
     "just_guard_window_sec": 0.1,
     "chip_damage_ratio": 0.2,
     "just_guard_enemy_stagger_sec": 0.4,
     "move_speed_multiplier": 0.5,
-    "_balance_todo": ["just_guard_enemy_stagger_sec", "move_speed_multiplier"]
+    "_balance_todo": ["just_guard_enemy_stagger_sec"]
   },
 
   "hitstop": {
@@ -33,7 +33,7 @@
   },
 
   "combo": {
-    "_comment": "GDD 4.1: 기본 공격 3타 콤보. combat-tuning-m1.md §4 확정. finisher_recovery_sec은 §4-2 제안값(D-46: 임시 반영), 프레임 10(0.167s)부터 구르기 캔슬 가능.",
+    "_comment": "GDD 4.1: 기본 공격 3타 콤보. combat-tuning-m1.md §4 확정. finisher_recovery_sec은 §4-2 제안값(D-46: 임시 반영), 프레임 10(0.167s)부터 구르기 캔슬 가능. 선딜/1·2타 후딜 프레임(addendum §5-2, 결정 요청 6)은 실제 애니메이션 자산 확보 전 임시 반영 보류 — scripts/tuning.gd에 이름만 정식으로 남겨둔다(ATTACK_STARTUP_FRAMES/ATTACK_RECOVER_TO_IDLE_FRAMES).",
     "hits": 3,
     "damage_multipliers": [1.0, 1.0, 1.5],
     "input_buffer_sec": 0.2,
@@ -49,7 +49,7 @@
   },
 
   "stamina": {
-    "_comment": "GDD 4.2-3: 구르기·강공격·가드는 스태미나 소모, 완전 고갈 시 회복 딜레이 페널티. max/regen/regen_delay/costs.roll은 combat-tuning-m1.md §3 확정. exhausted_penalty_sec은 D-44로 1.5→1.0 하향 확정. heavy_attack/guard_hit 비용은 M1 플레이테스트 후 결정(D-46: 임시 반영). guard_regen_multiplier는 M1-2 신규 키 — godot-engineer 제안값(가드 유지 중 회복 50%)으로 반영했고, 이후 작성된 docs/specs/combat-tuning-m1-addendum.md §7-2가 동일값을 독립 역산으로 재확인(결정 요청 8) — 공식 D-번호 배정 후 _balance_todo 해제 예정. DEX 구르기 경감식(cost × (1 − min(0.5, DEX/300)))은 D-45로 구르기 전용 확정(stats.json 미구현이라 코드는 DEX=0 경로만 동작).",
+    "_comment": "GDD 4.2-3: 구르기·강공격·가드는 스태미나 소모, 완전 고갈 시 회복 딜레이 페널티. max/regen/regen_delay/costs.roll은 combat-tuning-m1.md §3 확정. exhausted_penalty_sec은 D-44로 1.5→1.0 하향 확정. heavy_attack/guard_hit 비용은 M1 플레이테스트 후 결정(D-46: 임시 반영, 유지). guard_regen_multiplier(가드 중 회복 50%)는 addendum §7-2가 독립 역산으로 재확인 — 결정 요청 8 승인(D-68 예정)에 따라 확정 전환, _balance_todo 해제. DEX 구르기 경감식(cost × (1 − min(0.5, DEX/300)))은 D-45로 구르기 전용 확정(stats.json 미구현이라 코드는 DEX=0 경로만 동작).",
     "max": 100.0,
     "regen_per_sec": 25.0,
     "regen_delay_sec": 0.5,
@@ -60,13 +60,29 @@
       "heavy_attack": 25.0,
       "guard_hit": 10.0
     },
-    "_balance_todo": ["costs.heavy_attack", "costs.guard_hit", "guard_regen_multiplier"]
+    "_balance_todo": ["costs.heavy_attack", "costs.guard_hit"]
   },
 
   "knockback": {
-    "_comment": "combat-tuning-m1.md §6-2 제안값(D-46: 임시 반영). 일반 타격/강공격·크리티컬 넉백 거리(px, 16px 프로토타입 기준).",
+    "_comment": "combat-tuning-m1.md §6-2 제안값(D-46: 임시 반영, 거리 유지) + addendum §1 확정: 지속시간은 강도와 무관하게 0.12초 단일값(D-61 예정) — 8px/20px 두 거리 모두 이 시간 동안 Tween 등속 보간. 벽 충돌 시 이동만 즉시 클램프하고 경직 타이머(hurt.stun_sec)는 그대로 흘려보낸다(코드 정책, 별도 키 불필요).",
     "normal_px": 8,
     "heavy_px": 20,
+    "duration_sec": 0.12,
     "_balance_todo": ["normal_px", "heavy_px"]
+  },
+
+  "hurt": {
+    "_comment": "addendum §2 확정(D-61 예정): stun_sec(경직) ≤ iframes_sec(무적) 불변식 — 스턴이 끝난 뒤에도 0.25초의 안전 여유가 남아 일방적 피격 사슬(스턴락)을 방지한다. 슬라임/뿔토끼/버섯돌이 3종 기준 최악 DPS 재검증 결과 기존 히트 수(12.5/6.7/8.3회)와 정확히 일치해 확정.",
+    "stun_sec": 0.25,
+    "iframes_sec": 0.5
+  },
+
+  "camera_shake": {
+    "_comment": "addendum §3-2 제안표(결정 요청 3 — M1 게이트 실측 전 임시 반영, _balance_todo). normal(플레이어 1·2타 적중)은 GDD 4.2 문구 그대로 셰이크 없음을 명시적 0으로 표기. heavy=강공격/3타 피니셔, crit=원소 상성 적중(현재 코드 기준 hit_landed의 is_advantage, 진짜 크리티컬은 M2 LUK 도입 후), hit=몬스터 공격이 플레이어에 적중(GDD 4.2 문구 확장 결정 요청 2, 승인 전까지 임시). 배율은 Tuning.SCREEN_SHAKE_LEVELS를 진폭에만 곱하고 지속시간에는 곱하지 않는다(멀미 방지, §3-3).",
+    "normal": { "amplitude_px": 0.0, "duration_sec": 0.0 },
+    "heavy": { "amplitude_px": 6.0, "duration_sec": 0.18 },
+    "crit": { "amplitude_px": 9.0, "duration_sec": 0.22 },
+    "hit": { "amplitude_px": 4.0, "duration_sec": 0.12 },
+    "_balance_todo": ["heavy", "crit", "hit"]
   }
 }

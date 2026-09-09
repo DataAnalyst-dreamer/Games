@@ -20,10 +20,19 @@ signal player_hp_changed(current: int, max_value: int)
 signal player_level_up(new_level: int)
 
 # --- 전투 ---
-signal hit_landed(attacker: Node, target: Node, damage: int, is_critical: bool)
+## is_advantage: 원소 상성 적중 여부(ElementCalc.get_multiplier() > 1.0). is_critical:
+## LUK 기반 진짜 크리티컬(M2, stats.json 도입 후) — M1은 크리티컬 시스템이 없어 항상
+## false로 emit된다. 과거(M1-2까지) 4번째 인자 이름이 is_critical이면서 실제 값은
+## is_advantage였던 네이밍 불일치를 바로잡았다(sound-map-m1.md §2/§12 코드 주의 반영,
+## D-61 예정 — 시그니처가 바뀌었으므로 구독부는 이 순서(공격자/대상/피해/상성/크리)로 갱신).
+signal hit_landed(attacker: Node, target: Node, damage: int, is_advantage: bool, is_critical: bool)
 signal just_guard_succeeded(defender: Node, attacker: Node)
 signal hitstop_requested(duration_sec: float)
 signal screen_shake_requested(strength: float, duration_sec: float)
+## 저스트 가드 성공 시 가드 측이 낸 방어 성공량(칩데미지 대비 막아낸 원본 피해량 등,
+## 호출부 재량)과 저스트 여부(항상 true — 일반 가드는 이 신호를 쏘지 않는다, 구분용
+## 편의 인자). M1-3 신규(D-69 예정) — player.gd:_handle_just_guard()가 emit.
+signal player_guarded(amount: int, is_just: bool)
 
 # --- 몬스터 ---
 signal enemy_spawned(enemy: Node2D)

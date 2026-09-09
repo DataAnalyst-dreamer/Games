@@ -94,6 +94,85 @@ func test_slime_stats_match_combat_tuning_m1_spec() -> void:
 	assert_almost_eq(float(slime.get("telegraph_sec")), 0.5, 0.0001, "combat-tuning-m1.md §8-4")
 
 
+func test_ai_common_fields_present_and_positive() -> void:
+	# addendum §4-3 확정: AI 공통 5필드가 3종 전부에 존재하고 양수(patrol_radius_px는 0 허용).
+	for monster_id: String in ["slime", "horn_rabbit", "mushroom"]:
+		var entry: Dictionary = _data.get_value("monsters", monster_id, {})
+		assert_gt(float(entry.get("aggro_range_px", 0.0)), 0.0, "%s aggro_range_px > 0" % monster_id)
+		assert_gt(float(entry.get("melee_range_px", 0.0)), 0.0, "%s melee_range_px > 0" % monster_id)
+		assert_gt(float(entry.get("attack_recovery_sec", 0.0)), 0.0, "%s attack_recovery_sec > 0" % monster_id)
+		assert_gte(float(entry.get("patrol_radius_px", -1.0)), 0.0, "%s patrol_radius_px >= 0" % monster_id)
+		assert_gt(float(entry.get("leash_range_px", 0.0)), 0.0, "%s leash_range_px > 0" % monster_id)
+
+
+func test_ai_field_invariant_leash_gt_aggro_gt_melee() -> void:
+	# data_tables.md §12 검증 규칙 4.
+	for monster_id: String in ["slime", "horn_rabbit", "mushroom"]:
+		var entry: Dictionary = _data.get_value("monsters", monster_id, {})
+		var leash: float = float(entry.get("leash_range_px"))
+		var aggro: float = float(entry.get("aggro_range_px"))
+		var melee: float = float(entry.get("melee_range_px"))
+		assert_gt(leash, aggro, "%s leash_range_px > aggro_range_px" % monster_id)
+		assert_gt(aggro, melee, "%s aggro_range_px > melee_range_px" % monster_id)
+
+
+func test_horn_rabbit_dash_fields_match_addendum() -> void:
+	var entry: Dictionary = _data.get_value("monsters", "horn_rabbit", {})
+	assert_almost_eq(float(entry.get("dash_speed_px")), 200.0, 0.0001)
+	assert_almost_eq(float(entry.get("dash_duration_sec")), 0.3, 0.0001)
+	assert_almost_eq(float(entry.get("aggro_range_px")), 80.0, 0.0001)
+	assert_almost_eq(float(entry.get("melee_range_px")), 16.0, 0.0001)
+	assert_almost_eq(float(entry.get("attack_recovery_sec")), 0.7, 0.0001)
+	assert_almost_eq(float(entry.get("patrol_radius_px")), 96.0, 0.0001)
+	assert_almost_eq(float(entry.get("leash_range_px")), 180.0, 0.0001)
+
+
+func test_mushroom_spore_patch_fields_match_addendum() -> void:
+	var entry: Dictionary = _data.get_value("monsters", "mushroom", {})
+	assert_almost_eq(float(entry.get("atk_tick_per_sec")), 4.0, 0.0001)
+	assert_almost_eq(float(entry.get("aoe_radius_px")), 32.0, 0.0001)
+	assert_almost_eq(float(entry.get("aggro_range_px")), 96.0, 0.0001)
+	assert_almost_eq(float(entry.get("melee_range_px")), 20.0, 0.0001)
+	assert_almost_eq(float(entry.get("attack_recovery_sec")), 1.0, 0.0001)
+	assert_eq(float(entry.get("patrol_radius_px")), 0.0, "버섯돌이는 고정형(순찰 없음)")
+	assert_almost_eq(float(entry.get("leash_range_px")), 120.0, 0.0001)
+	assert_gte(float(entry.get("aoe_radius_px")), float(entry.get("melee_range_px")),
+		"aoe_radius_px >= melee_range_px(장판이 트리거 지점보다 넓게 퍼짐)")
+
+
+func test_aoe_radius_below_melee_range_is_rejected() -> void:
+	var probe := DataScript.new()
+	add_child_autofree(probe)
+	probe.tables["monsters"] = {
+		"broken_aoe": {
+			"region_id": "x", "tier": "normal", "hp": 1, "atk": 1, "move_speed_px": 1,
+			"telegraph_sec": 0.5, "attack_pattern_id": "spore_patch", "drop_table_id": null,
+			"codex_entry_id": "x", "aggro_range_px": 100, "melee_range_px": 20,
+			"attack_recovery_sec": 1.0, "patrol_radius_px": 0, "leash_range_px": 150,
+			"aoe_radius_px": 10,
+		}
+	}
+	probe.validation_errors.clear()
+	probe._validate_monsters()
+	assert_gt(probe.validation_errors.size(), 0, "aoe_radius_px < melee_range_px는 에러여야 한다")
+
+
+func test_leash_not_greater_than_aggro_is_rejected() -> void:
+	var probe := DataScript.new()
+	add_child_autofree(probe)
+	probe.tables["monsters"] = {
+		"broken_leash": {
+			"region_id": "x", "tier": "normal", "hp": 1, "atk": 1, "move_speed_px": 1,
+			"telegraph_sec": 0.5, "attack_pattern_id": "melee_contact", "drop_table_id": null,
+			"codex_entry_id": "x", "aggro_range_px": 64, "melee_range_px": 14,
+			"attack_recovery_sec": 0.4, "patrol_radius_px": 32, "leash_range_px": 50,
+		}
+	}
+	probe.validation_errors.clear()
+	probe._validate_monsters()
+	assert_gt(probe.validation_errors.size(), 0, "leash_range_px <= aggro_range_px는 에러여야 한다")
+
+
 func test_reject_bad_monster_entry_detected_by_generic_validator() -> void:
 	# _validate_monsters()가 특정 monster_id에 하드코딩되지 않고 임의 항목을 검사하는지 확인.
 	var probe := DataScript.new()

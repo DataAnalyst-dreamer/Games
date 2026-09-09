@@ -22,6 +22,7 @@ Data="*res://scripts/core/data.gd"
 Tuning="*res://scripts/tuning.gd"
 Events="*res://scripts/core/events.gd"
 GameState="*res://scripts/core/game_state.gd"
+AudioManager="*res://scripts/core/audio_manager.gd"
 PhantomCameraManager="*res://addons/phantom_camera/scripts/managers/phantom_camera_manager.gd"
 DialogueManager="*res://addons/dialogue_manager/dialogue_manager.gd"
 
