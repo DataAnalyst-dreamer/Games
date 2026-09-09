@@ -169,12 +169,34 @@ func load(slot: int, kind: String) -> Dictionary:
 		return _finish_load(slot, kind, {"ok": false, "reason": "version_unsupported"})
 
 	_apply_payload(payload)
+	_advance_day_index_if_new_calendar_day(payload) # D-111(M2-7): 실제 달력 날짜 경과 판정.
 	return _finish_load(slot, kind, {"ok": true, "reason": ""})
 
 
 func _finish_load(slot: int, kind: String, result: Dictionary) -> Dictionary:
 	Events.load_completed.emit(slot, StringName(kind), bool(result.get("ok", false)))
 	return result
+
+
+## D-111(M2-7 후속) 확정: GameState.day_index는 "실제 달력 날짜"가 지났을 때만
+## +1(며칠 차이든 항상 +1)된다 — 여관 숙박 등 게임플레이 행동은 올리지 않는다(그런
+## 행동은 이 값을 직접 건드리지 않으므로 자연히 제외됨). 유일한 증가 지점은 여기 하나
+## 뿐이다: 로드한 세이브의 meta.saved_at_unix(저장 시점)와 "지금"(로드 시점의 실제
+## 시스템 시각)의 연·월·일이 다르면 로드 직후 1회 올린다. 새 게임(로드 자체가 없음)은
+## GameState.day_index 기본값 0 그대로 시작한다. 이 값이 바뀌면 QuestSystem의 일일
+## 의뢰 풀 추첨(_daily_pick)이 day_index를 시드로 쓰는 순수 함수라 자동으로 재추첨된
+## 결과를 돌려준다 — 별도로 "재추첨" 호출을 할 필요가 없다.
+func _advance_day_index_if_new_calendar_day(payload: Dictionary) -> void:
+	var meta: Dictionary = payload.get("meta", {})
+	var saved_at_unix: int = int(meta.get("saved_at_unix", 0))
+	if saved_at_unix <= 0:
+		return
+	var saved_date: Dictionary = Time.get_date_dict_from_unix_time(saved_at_unix)
+	var now_date: Dictionary = Time.get_date_dict_from_unix_time(Time.get_unix_time_from_system())
+	if saved_date.get("year") != now_date.get("year") \
+			or saved_date.get("month") != now_date.get("month") \
+			or saved_date.get("day") != now_date.get("day"):
+		GameState.day_index += 1
 
 
 ## 파일을 읽어 JSON 파싱 + 체크섬 검증까지 통과했을 때만 payload를 반환한다. 파일 없음/

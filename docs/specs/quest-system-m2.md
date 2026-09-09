@@ -163,11 +163,27 @@ validate_tables.py`에 동일 규칙을 오프라인(파이썬)으로 이식해 
 생기기 전까지는 `Events.location_reached`/`npc_talked`/`object_interacted`를 발신할
 곳이 없다.
 
+## 13. `GameState.day_index` 증가 규칙 (D-111 확정, M2-7 후속)
+
+증가 지점은 `SaveManager._advance_day_index_if_new_calendar_day()` 단 한 곳뿐이다
+(`load()`가 `_apply_payload()` 직후 호출). 로직: 로드한 payload의
+`meta.saved_at_unix`(저장 시점 실제 시각)와 `Time.get_unix_time_from_system()`(로드
+시점 실제 시각)을 각각 `Time.get_date_dict_from_unix_time()`으로 연/월/일만 비교해,
+다르면(하루든 열흘이든) `GameState.day_index += 1`을 정확히 한 번만 한다. `saved_at_unix`
+자체는 이미 세이브 파일 최상단 `meta`에 있었으므로(F8-1) 스키마 변경이 필요 없었다.
+`day_index`가 바뀌면 `QuestSystem._ensure_daily_bucket()`이 저장된 `_daily.day_index`와의
+불일치를 감지해 `completed_ids`를 비우므로, 게시판 일일 의뢰는 별도 호출 없이 자연히
+재추첨(재가용)된다 — 테스트는 `test_save_manager.gd`의
+`test_day_index_advances_once_when_saved_on_a_previous_calendar_day`/
+`test_day_index_unchanged_when_saved_same_calendar_day`/
+`test_day_index_advances_only_by_one_regardless_of_gap`/
+`test_daily_quest_availability_resets_after_day_index_advances_on_load` 참고.
+
 ## 12. 결정 필요 (D-111~D-114로 기록)
 
 | # | 쟁점 | 임시 처리 |
 |---|---|---|
-| D-111 | `GameState.day_index`를 언제 올릴지(수면 상호작용? 자정 타이머? 명시적 "하루 종료" 버튼?) — 게시판 일일 의뢰 재추첨 트리거가 곧 이 값의 증가 시점 | 지금은 아무도 증가시키지 않는 순수 카운터로만 둠(0 고정). game-designer가 "하루" 개념을 확정하면 그 지점에서 `GameState.day_index += 1` 한 줄만 추가하면 됨. |
+| D-111(확정) | `GameState.day_index`를 언제 올릴지 | **실제 달력 날짜 기준**으로 확정(§13) — `SaveManager.load()` 직후, 로드한 세이브 meta의 `saved_at_unix`와 현재 시각의 연·월·일이 다르면(`Time.get_date_dict_from_unix_time`) 며칠 차이든 `day_index += 1` 딱 1회. 새 게임은 0 시작. 여관 숙박 등 게임플레이 행동은 이 값을 건드리지 않는다(증가 지점이 저기 하나뿐이라 자동으로 제외됨). |
 | D-112 | `on_complete.grant_skill_point`/`affinity_stage`가 실제 스킬 포인트 지급 UI·npcs.json 호감도 시스템에 연결되지 않고 placeholder(`pending_skill_points`/`story_flags`)로만 쌓임 | 두 시스템이 각각 확정되면 QuestSystem 쪽 변경 없이 그 시스템이 이 값을 읽어가기만 하면 됨. |
 | D-113 | HUD 추적 퀘스트 n/m 표시 규칙(§7, "목표 하나짜리는 완료 목표 수/전체 목표 수로 대신") | game-designer/UI-UX 확인 필요 — 확정되면 `get_tracked_quest_progress()`만 수정. |
 | D-114 | `pools.json` 가중치(현재 전부 균등 1.0)와 daily 보상 `_balance_todo` 수치 | game-designer 확인 대기(D-96/D-97 연장선). |
