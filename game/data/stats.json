@@ -13,7 +13,7 @@
   },
 
   "dex": {
-    "_comment": "GDD 5.2: 공격속도/회피 스태미나 효율/원거리 데미지 3효과. stamina_cost_reduction_formula는 D-45 확정 문자열(구르기 전용, combat-tuning-m1.md §3-3과 완전 동일 - 절대 재작성 금지, 수정 시 두 문서 동시 갱신). attack_speed_per_point/ranged_damage_per_point는 M1 미구현 계수라 GDD 5.2 3효과 중 코드 반영이 안 된 2개를 메우는 M2 제안값(엔지니어 훅 없음, _balance_todo).",
+    "_comment": "GDD 5.2: 공격속도/회피 스태미나 효율/원거리 데미지 3효과. stamina_cost_reduction_formula는 D-45 확정 문자열(구르기 전용, combat-tuning-m1.md §3-3과 완전 동일 - 절대 재작성 금지, 수정 시 두 문서 동시 갱신). D-82: 이 문자열은 ASCII 연산자(*, -)가 정본 — combat.json._comment/combat-tuning-m1.md §3-3의 수식도 이 문자열과 완전히 동일하게 ASCII로 통일했다(각 문서의 서술용 유니코드 기호(×,→,≤ 등)는 그대로 둠). attack_speed_per_point/ranged_damage_per_point는 M1 미구현 계수라 GDD 5.2 3효과 중 코드 반영이 안 된 2개를 메우는 M2 제안값(엔지니어 훅 없음, _balance_todo).",
     "stamina_cost_reduction_formula": "cost * (1 - min(0.5, DEX/300))",
     "stamina_cost_reduction_scope": "roll_only",
     "attack_speed_per_point": 0.0015,

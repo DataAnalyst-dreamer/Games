@@ -206,7 +206,7 @@
 
 **용도**: F3-1, F3-2.
 **소유**: game-designer.
-**밸런스 근거**: `docs/specs/items-and-drops-m2.md` §1~2 (M2 실장, 57개: 장비42+소모품4+재료8+백팩3).
+**밸런스 근거**: `docs/specs/items-and-drops-m2.md` §1~2 (M2 실장, 58개: 장비42+소모품4+재료9+백팩3 — D-80으로 재료에 `goblin_ear` 추가).
 
 | 키 | 타입 | 범위/단위 | 필수 | 설명 |
 |---|---|---|---|---|
@@ -265,10 +265,10 @@
 
 **용도**: F3-1, F3-5.
 **소유**: game-designer.
-**밸런스 근거**: `docs/specs/items-and-drops-m2.md` §4~5. M2 실제 소스 6개: `slime_common`/`horn_rabbit_common`/
-`mushroom_common`(필드 일반 3종, `monsters.json.drop_table_id`가 그대로 가리킴 — D-67 활성화) +
-`elite_goblin_captain`/`elite_bunchi_spawn`(정예 2종, `docs/levels/hartland.md` ⑤ — 몬스터 본체는 아직
-`monsters.json`에 없음) + `field_treasure_chest`(미니던전 보물상자, 지역 무관 범용).
+**밸런스 근거**: `docs/specs/items-and-drops-m2.md` §4~5. M2 실제 소스 7개: `slime_common`/`horn_rabbit_common`/
+`mushroom_common`/`goblin_scout_common`(필드 일반 4종, `monsters.json.drop_table_id`가 그대로 가리킴 — D-67 활성화,
+`goblin_scout_common`은 D-80 신설) + `elite_goblin_captain`/`elite_bunchi_spawn`(정예 2종, `docs/levels/hartland.md`
+⑤, 몬스터 본체는 `monsters.json`에 실존 — D-75) + `field_treasure_chest`(미니던전 보물상자, 지역 무관 범용).
 **규칙(GDD 12장 필수 반영)**: "LUK 스탯은 희귀 등급 가중치에 곱연산" — 최상단 `_luck_formula` 필드(D-52 단일 소스)로
 표준화한다. **`luk_coefficient`는 `_luck_formula` 안에만 존재하는 전역 값**이며 소스별 `grade_base_weight`와는 별도
 키다(과거 버전의 표는 이 둘을 소스별로 함께 나열해 오해를 유발했음 — 이번 갱신으로 분리 명시).
@@ -343,18 +343,32 @@ final_probability[grade] = raw_weight[grade] / Σ raw_weight[all grades]
 
 **용도**: F3-5, F6-3.
 **소유**: game-designer.
+**밸런스 근거**: `docs/specs/elite-and-farming-m2.md` §2 (실제 8행 — `field`/`gathering`/`treasure_map` 각 1 + `elite` 2
++ `mini_dungeon`/`region_dungeon`/`world_boss` 각 1. `type`은 GDD 6.5 7종 카테고리 그대로이나 `elite`는 개체별
+리스폰 타이머가 독립적이라 `source_id`를 2개(`elite_goblin_captain`/`elite_bunchi_spawn`)로 분리했다).
+
+> 갱신(§4 엔지니어 요청 반영): 이 절은 원래 단수 `first_clear_reward_table_id`/`repeat_reward_table_id`(string)로
+> 정의돼 있었으나, 실제 `game/data/farming_sources.json`은 상위호환 확장 필드인 복수형 배열
+> `first_clear_reward_table_ids`/`repeat_reward_table_ids`(array[string])를 쓴다 — 아래 표는 실제 키 기준으로 갱신했다.
 
 | 키 | 타입 | 범위/단위 | 필수 | 설명 |
 |---|---|---|---|---|
-| `source_id` | string | 고유 | ● | 소스 식별자 |
+| `source_id` | string | 고유(= JSON 키와 동일) | ● | 소스 식별자 |
 | `type` | string enum | `field`/`elite`/`mini_dungeon`/`region_dungeon`/`world_boss`/`gathering`/`treasure_map` | ● | GDD 6.5 7종 |
-| `respawn_seconds` | int | ≥0, **실제 플레이 시간 기준**(D-15) | ● | field/gathering=0(상시), elite=1800, mini_dungeon=86400, world_boss=259200, region_dungeon=0(재입장 자유) |
-| `first_clear_reward_table_id` | string | `drop_tables.json` 참조 | ○ | 첫 클리어 전용(D-15: "첫 클리어와 반복 파밍은 별도 테이블") |
-| `repeat_reward_table_id` | string | `drop_tables.json` 참조 | ● | 반복 파밍 |
+| `region_id` | string | `monsters.json.region_id`와 동일 계열 | ● | 소속 지역 |
+| `respawn_seconds` | int | ≥0, **실제 플레이 시간 기준**(D-15) | ● | field/gathering/treasure_map/region_dungeon=0, elite=1800, mini_dungeon=86400, world_boss=259200 |
+| `respawn_trigger` | string enum | `always`/`on_kill`/`on_completion`/`on_map_use` | ● (**신규**) | 리스폰 카운트다운을 시작시키는 이벤트 — `respawn_seconds=0`(상시)인 소스는 대개 `always`, `treasure_map`은 쿨다운이 아니라 "지도 보유 시 언제든" 의미로 `on_map_use` |
+| `first_clear_reward_table_ids` | array[string] | `drop_tables.json.source_id` 참조 | ● (**신규**, 배열 — 비어도 됨) | 첫 클리어 전용(D-15: "첫 클리어와 반복 파밍은 별도 테이블"). M2는 `mini_dungeon_echo_cave`만 값 있음, 나머지는 빈 배열 |
+| `repeat_reward_table_ids` | array[string] | `drop_tables.json.source_id` 참조 | ● (**신규**, 배열 — 비어도 됨) | 반복 파밍. `type=field`는 지역 내 필드 몬스터 전원의 드랍 테이블을 한 배열에 묶는다(예: `field_hartland`=4종) |
+| `first_clear_bonus_item_id` | string, optional | `items.json` 참조 | ○ (**신규**, `mini_dungeon`류만) | 확률 드랍이 아닌 고정 지급 첫 클리어 보너스(GDD 5.3) |
+| `show_respawn_icon_on_map` | bool | | ● (**신규**) | 월드맵에 리스폰 상태 아이콘 표시 여부 — `type`이 `elite`/`world_boss`일 때만 `true` |
+| `location` | object, optional | `{chunk_id, pos_global_tile:[x,y], landmark}` 또는 `{quest_id, landmark}` 또는 `{landmark}`만 | ○ (**신규**) | 고정 스폰 좌표가 있는 소스(정예/월드보스)는 `chunk_id`+`pos_global_tile`, 퀘스트 연동 소스는 `quest_id`, 나머지는 `landmark` 서술만 |
 
 ### 검증 규칙
-- `respawn_seconds`가 타입별 GDD 6.5 기준과 일치
-- `*_reward_table_id`가 `drop_tables.json.source_id`에 존재
+1. `respawn_seconds`가 타입별 GDD 6.5 기준과 일치(`tools/qa/validate_tables.py`의 `FARMING_TYPE_RESPAWN_SECONDS` 참고)
+2. `first_clear_reward_table_ids`/`repeat_reward_table_ids`의 각 원소가 `drop_tables.json.source_id`에 존재
+3. `type == "elite"`이면 `repeat_reward_table_ids[0]`을 `drop_table_id`로 갖는 `tier == "elite"` `monsters.json` 엔트리가 최소 1개 존재해야 함(D-67/D-75 교차 참조)
+4. `show_respawn_icon_on_map == (type in {"elite", "world_boss"})` (그 외 타입은 항상 `false`)
 
 ---
 
@@ -362,7 +376,7 @@ final_probability[grade] = raw_weight[grade] / Σ raw_weight[all grades]
 
 **용도**: F6-1, F6-3.
 **소유**: game-designer.
-**밸런스 근거**: `combat-tuning-m1.md` §8(hp/atk/속도/예고), `combat-tuning-m1-addendum.md` §4(AI 공통 필드 승격, D-53 예정)·§6(`drop_table_id` null 허용 규칙, D-58 예정).
+**밸런스 근거**: `combat-tuning-m1.md` §8(hp/atk/속도/예고), `combat-tuning-m1-addendum.md` §4(AI 공통 필드 승격, D-53 예정)·§6(`drop_table_id` null 허용 규칙, D-58 예정), `elite-and-farming-m2.md` §1-0~1-4(정예 배율 규칙·`goblin_scout`/정예 2종 신규 필드, D-75 예정).
 
 | 키 | 타입 | 범위/단위 | 필수 | 설명 |
 |---|---|---|---|---|
@@ -387,14 +401,24 @@ final_probability[grade] = raw_weight[grade] / Σ raw_weight[all grades]
 | `dash_duration_sec` | number | >0 | ○ (돌진형 종만) | 돌진 지속시간 |
 | `atk_tick_per_sec` | number | >0 | ○ (장판형 종만, 예: 버섯돌이) | 장판 내부 지속 피해(초당) |
 | `aoe_radius_px` | number | >0, `melee_range_px` 이상 | ○ (장판형 종만) | 실제 전개된 장판 반경. `melee_range_px`(트리거 거리)와 별개 값 — 장판은 트리거 지점보다 넓게 퍼진다 |
+| `whistle_cooldown_sec` / `whistle_cast_sec` / `whistle_range_px` | number | 각 >0 | ○ (**신규**, 원거리 경보형 종만 — `goblin_scout`/`elite_goblin_captain`) | 증원 호출 쿨다운·시전시간·유효 반경(`elite-and-farming-m2.md` §1-1-1) |
+| `whistle_summon_pool` | array[monster_id] | `monsters.json` 참조 | ○ (위와 동일 종만, **신규**) | 호출 가능 대상 풀 |
+| `whistle_summon_count` | int | >0 | ○ (위와 동일 종만, **신규**) | 1회 호출당 소환 마리 수 |
+| `wave_trigger_hp_pct` / `wave_cast_sec` / `wave_summon_count` | number | 0~1 / >0 / >0 | ○ (**신규**, 정예 강화 패턴 보유 종만 — 예: `elite_goblin_captain`) | HP 비율 임계값 도달 시 1회 발동하는 웨이브 소환(시전시간·마리 수) |
+| `wave_summon_pool` | array[monster_id] | `monsters.json` 참조 | ○ (위와 동일 종만, **신규**) | 웨이브 소환 대상 풀 |
+| `wave_once_per_life` | bool | | ○ (위와 동일 종만, **신규**) | 생애주기당 1회만 발동(재발동 없음) |
+| `on_death_split_monster_id` | string | `monsters.json` 참조 | ○ (**신규**, 분열형 종만 — 예: `elite_bunchi_spawn`) | 처치 시 분열 스폰될 몬스터(재귀 방지: 스폰된 개체는 일반 데이터 그대로 사용) |
+| `on_death_split_count` / `on_death_split_spawn_radius_px` | int / number | >0 | ○ (위와 동일 종만, **신규**) | 분열 마리 수·스폰 반경 |
+| `elite_base_monster_id` | string | `monsters.json` 참조(`tier=normal` 엔트리) | ○ (**신규**, `tier=elite`만, 참고용) | 이 정예의 배율 계산 베이스가 된 일반 몬스터(`elite-and-farming-m2.md` §1-0 배율 규칙의 입력). 스키마 확정 전 참고 필드 |
 
 ### 검증 규칙 (F8-4 명시 항목: "참조 ID 존재")
 1. `telegraph_sec ≥ 0.5` 위반 시 빌드 에러 (GDD 4.2 강제 규칙)
-2. `drop_table_id` 참조 무결성: **M2 F3-1(`game/data/drop_tables.json` 생성)로 이 규칙이 활성화됐다(D-67).** `drop_table_id == null`은 "확정된 드랍 없음"으로 유효, `null`이 아니면 반드시 `drop_tables.json`에 실제로 존재해야 한다(위반 시 빌드 에러). `monsters.json`의 `"slime_common"`/`"horn_rabbit_common"`/`"mushroom_common"`은 이제 `drop_tables.json`의 실존 키를 가리키는 정식 참조다(값 자체는 변경하지 않았고 "자리표시자" 딱지만 뗐다). **코드 구현(`Data._validate()`에 이 교차 검증 추가)은 아직 안 됐다** — `tools/qa/validate_tables.py`가 오프라인으로 이를 검증하며, `data.gd` 반영은 godot-engineer 몫(`docs/specs/items-and-drops-m2.md` §10 엔지니어 요청 5).
+2. `drop_table_id` 참조 무결성: **M2 F3-1(`game/data/drop_tables.json` 생성)로 이 규칙이 활성화됐다(D-67).** `drop_table_id == null`은 "확정된 드랍 없음"으로 유효, `null`이 아니면 반드시 `drop_tables.json`에 실제로 존재해야 한다(위반 시 빌드 에러). `monsters.json`의 `"slime_common"`/`"horn_rabbit_common"`/`"mushroom_common"`/`"goblin_scout_common"`(D-80)/`"elite_goblin_captain"`/`"elite_bunchi_spawn"`은 모두 `drop_tables.json`의 실존 키를 가리키는 정식 참조다. **코드 구현(`Data._validate()`에 이 교차 검증 추가)은 아직 안 됐다** — `tools/qa/validate_tables.py`가 오프라인으로 이를 검증하며, `data.gd` 반영은 godot-engineer 몫(`docs/specs/items-and-drops-m2.md` §10 엔지니어 요청 5).
 3. `tags`에 사용된 각 값이 `elements.json.holy_bonus_vs_tags`와 일관(신규 태그 추가 시 두 파일 동시 갱신)
 4. `leash_range_px > aggro_range_px > melee_range_px` (AI 상태 전이가 논리적으로 겹치지 않도록 강제)
 5. `aoe_radius_px`가 존재하면 `aoe_radius_px ≥ melee_range_px`
 6. 방어력 필드는 아직 없음 — M1은 단순 모델(`combat-tuning-m1.md` §0), 도입 시점은 D-49(M2) 유지
+7. `whistle_summon_pool`/`wave_summon_pool`/`on_death_split_monster_id`/`elite_base_monster_id`의 각 값이 `monsters.json`에 실존하는 `monster_id`여야 함(정예 신규 필드, `elite-and-farming-m2.md` §1 참고 — 코드 검증 미구현, `tools/qa/validate_tables.py` 범위 밖)
 
 ---
 
