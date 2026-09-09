@@ -15,6 +15,8 @@
 [ext_resource type="PackedScene" path="res://scenes/entities/monsters/GoblinScout.tscn" id="13_goblin_scout"]
 [ext_resource type="PackedScene" path="res://scenes/entities/monsters/EliteGoblinCaptain.tscn" id="14_elite_goblin_captain"]
 [ext_resource type="PackedScene" path="res://scenes/entities/monsters/EliteBunchiSpawn.tscn" id="15_elite_bunchi_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/world/BlacksmithNpc.tscn" id="16_blacksmith_npc"]
+[ext_resource type="PackedScene" path="res://scenes/world/MailboxNpc.tscn" id="17_mailbox_npc"]
 
 [node name="Main" type="Node2D"]
 
@@ -54,6 +56,12 @@ position = Vector2(-250, -140)
 
 [node name="Waystone1" parent="." instance=ExtResource("9_waystone")]
 position = Vector2(-40, -100)
+
+[node name="BlacksmithNpc1" parent="." instance=ExtResource("16_blacksmith_npc")]
+position = Vector2(-70, -100)
+
+[node name="MailboxNpc1" parent="." instance=ExtResource("17_mailbox_npc")]
+position = Vector2(-10, -100)
 
 [node name="Camera2D" type="Camera2D" parent="."]
 process_callback = 0

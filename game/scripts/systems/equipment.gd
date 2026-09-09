@@ -98,7 +98,7 @@ static func compute_stats(equipped: Dictionary, items_table: Dictionary, enhance
 			continue
 		var category: String = String(item_def.get("category", ""))
 		var base_stats: Dictionary = item_def.get("base_stats", {})
-		var enhance_mult: float = _enhance_multiplier(int(item.get("enhance_level", 0)), enhance_table)
+		var enhance_mult: float = enhance_multiplier(int(item.get("enhance_level", 0)), enhance_table)
 
 		match category:
 			"weapon":
@@ -133,7 +133,10 @@ static func compute_stats(equipped: Dictionary, items_table: Dictionary, enhance
 	}
 
 
-static func _enhance_multiplier(enhance_level: int, enhance_table: Dictionary) -> float:
+## 강화 단계별 스탯 배율(enhance.json.enhance_levels["+N"].stat_multiplier). 공개 함수 —
+## Equipment.compute_stats()뿐 아니라 InventoryUiCalc(비교 툴팁)·Blacksmith(강화 미리보기,
+## M2-4)가 전부 이 함수 하나만 쓴다(디렉터 결정 D-85: 중복 정의 금지, 한 곳에만 둔다).
+static func enhance_multiplier(enhance_level: int, enhance_table: Dictionary) -> float:
 	if enhance_level <= 0:
 		return 1.0
 	var levels: Dictionary = enhance_table.get("enhance_levels", {})
