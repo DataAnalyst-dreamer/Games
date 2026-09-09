@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/quest_trigger.gd" id="1_script"]
+
+[sub_resource type="CircleShape2D" id="area_shape"]
+radius = 28.0
+
+[node name="QuestTrigger" type="Area2D"]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("1_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("area_shape")

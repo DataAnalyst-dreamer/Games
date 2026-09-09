@@ -112,6 +112,9 @@ func _ready() -> void:
 	Events.boss_defeated.connect(_on_boss_defeated)
 	Events.settings_changed.connect(_on_settings_changed)
 	Events.save_completed.connect(_on_save_completed)
+	# M2-8(QuestNpc, F5-1/F5-2). 정식 대사 팝업(다이얼로그 매니저 연동)이 아직 없어
+	# 좌하단 획득 로그 자리를 재사용해 "npc.<id>.greeting" 한 줄을 토스트로 띄운다.
+	Events.npc_talked.connect(_on_npc_talked)
 
 	# M2-7(F5-1/F5-2 퀘스트) 신설. 추적 퀘스트 한 줄 최소 표시 — 퀘스트 로그 UI(다음
 	# 단계) 이전까지는 "가장 우선순위 높은 활성 퀘스트"를 자동으로 계속 갱신만 한다.
@@ -292,6 +295,13 @@ func _on_item_picked_up(item_id: StringName, quantity: int) -> void:
 func _on_gold_changed(_new_amount: int, delta: int) -> void:
 	if delta > 0:
 		_push_log_line("+%d %s" % [delta, tr(&"ui.hud.gold_unit")])
+
+
+## M2-8(QuestNpc). "npc.<id>.greeting" key가 없으면(신규 NPC 배치 전 등) key 문자열
+## 자체가 그대로 나온다 — tr()의 기본 동작(번역 없으면 원문 반환)에 맡긴다.
+func _on_npc_talked(npc_id: StringName) -> void:
+	var greeting_key := StringName("npc.%s.greeting" % npc_id)
+	_push_log_line(tr(greeting_key))
 
 
 func _push_log_line(text: String, color: Variant = null, icon: Texture2D = null) -> void:

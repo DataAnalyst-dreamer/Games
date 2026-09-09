@@ -4,23 +4,10 @@
   "_todo_ids": {
     "monsters": [],
     "items": [],
-    "_resolved_m2_7": "horn_rabbit_big(monsters.json)·wool_soft/herb_common/ribbon_dandelion/stew_basic/horn_shard/ribbon_charm(items.json)·heartland_field_low/heartland_field_material_low(pools.json)를 M2-7에서 실제 테이블에 채워 monsters/items/pools 목록에서 제거했다. 장소·오브젝트 id는 아직 level-designer 몫이라 아래에 남긴다.",
-    "locations": [
-      "bridgeport_dock",
-      "heartland_dandelion_village",
-      "heartland_dandelion_village_square",
-      "heartland_ward_stone",
-      "heartland_echo_cave_entrance",
-      "heartland_pasture_boundary",
-      "heartland_hilltop_waypoint"
-    ],
-    "objects": [
-      "cargo_pile",
-      "ward_stone_dandelion",
-      "echo_cave_puzzle_01",
-      "montsil_rabbit",
-      "waypoint_stone_01"
-    ],
+    "_resolved_m2_7": "horn_rabbit_big(monsters.json)·wool_soft/herb_common/ribbon_dandelion/stew_basic/horn_shard/ribbon_charm(items.json)·heartland_field_low/heartland_field_material_low(pools.json)를 M2-7에서 실제 테이블에 채워 monsters/items/pools 목록에서 제거했다.",
+    "_resolved_m2_8": "locations 7개(bridgeport_dock 등)·objects 5개(cargo_pile 등)를 M2-8에서 game/data/world_objects.json에 실제 배치(kind=location|object, 좌표·씬 포함)로 채워 목록에서 제거했다. npc:teo/meru/pinto/rozel/dami도 world_objects.json에 kind=npc로 채워졌다(퀘스트 스키마상 npc 참조는 원래 _todo_ids 대상이 아니었으나 world_objects.json 도입으로 함께 검증된다, Data._validate_quests() 참고). 배치 근거는 docs/levels/hartland.md 10절.",
+    "locations": [],
+    "objects": [],
     "pools": []
   },
   "quests": [
