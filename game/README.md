@@ -119,9 +119,9 @@ JSON을 **덮어쓰기 저장**하고(파일명은 세션 시작 시각 1개로 
 | `heavy_attack` | 마우스 우 | RT |
 | `roll` | Space | B |
 | `guard` | Shift | LT |
-| `skill_1` / `skill_2` | Q / E | LB / RB |
+| `skill_1` / `skill_2` | Q / R | LB / RB |
 | `quick_1~4` | 1~4 | 십자키 상/우/하/좌 |
-| `interact` | F | A |
+| `interact` | E | A |
 | `menu` | Tab | Back(Select) |
 | `pause` | Esc | Start |
 | `map` | M | 우스틱 클릭(R3) |
