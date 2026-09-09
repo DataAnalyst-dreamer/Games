@@ -1,0 +1,200 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/inventory_menu.gd" id="1_inv_script"]
+[ext_resource type="Theme" path="res://ui/theme.tres" id="2_theme"]
+
+[node name="InventoryMenu" type="CanvasLayer"]
+layer = 10
+process_mode = 3
+
+[node name="Root" type="Control" parent="."]
+process_mode = 3
+theme = ExtResource("2_theme")
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+visible = false
+script = ExtResource("1_inv_script")
+
+[node name="Backdrop" type="Panel" parent="Root"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 1
+
+[node name="TabBar" type="HBoxContainer" parent="Root"]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 3.0
+offset_right = 300.0
+offset_bottom = 15.0
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="GoldLabel" type="Label" parent="Root"]
+layout_mode = 0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -140.0
+offset_top = 3.0
+offset_right = -4.0
+offset_bottom = 15.0
+mouse_filter = 2
+horizontal_alignment = 2
+
+[node name="ContentArea" type="Control" parent="Root"]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 19.0
+offset_right = 636.0
+offset_bottom = 340.0
+mouse_filter = 2
+
+[node name="InventoryTab" type="HBoxContainer" parent="Root/ContentArea"]
+layout_mode = 0
+offset_right = 632.0
+offset_bottom = 321.0
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="LeftPanel" type="VBoxContainer" parent="Root/ContentArea/InventoryTab"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="PortraitPlaceholder" type="ColorRect" parent="Root/ContentArea/InventoryTab/LeftPanel"]
+custom_minimum_size = Vector2(64, 44)
+layout_mode = 2
+color = Color(0.352941, 0.227451, 0.133333, 1)
+
+[node name="EquipArea" type="Control" parent="Root/ContentArea/InventoryTab/LeftPanel"]
+custom_minimum_size = Vector2(150, 128)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="CostumeHeader" type="Label" parent="Root/ContentArea/InventoryTab/LeftPanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="CostumeArea" type="Control" parent="Root/ContentArea/InventoryTab/LeftPanel"]
+custom_minimum_size = Vector2(150, 30)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="StatsSummary" type="VBoxContainer" parent="Root/ContentArea/InventoryTab/LeftPanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="AttackLabel" type="Label" parent="Root/ContentArea/InventoryTab/LeftPanel/StatsSummary"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="DefenseLabel" type="Label" parent="Root/ContentArea/InventoryTab/LeftPanel/StatsSummary"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="MaxHpLabel" type="Label" parent="Root/ContentArea/InventoryTab/LeftPanel/StatsSummary"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="SpeedLabel" type="Label" parent="Root/ContentArea/InventoryTab/LeftPanel/StatsSummary"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="RightPanel" type="VBoxContainer" parent="Root/ContentArea/InventoryTab"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="FilterRow" type="HBoxContainer" parent="Root/ContentArea/InventoryTab/RightPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="SortButton" type="Button" parent="Root/ContentArea/InventoryTab/RightPanel/FilterRow"]
+layout_mode = 2
+size_flags_horizontal = 10
+mouse_filter = 1
+
+[node name="GridScroll" type="ScrollContainer" parent="Root/ContentArea/InventoryTab/RightPanel"]
+custom_minimum_size = Vector2(0, 160)
+layout_mode = 2
+mouse_filter = 2
+horizontal_scroll_mode = 0
+
+[node name="GridContainer" type="GridContainer" parent="Root/ContentArea/InventoryTab/RightPanel/GridScroll"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/h_separation = 2
+theme_override_constants/v_separation = 2
+columns = 8
+
+[node name="EmptyHint" type="Label" parent="Root/ContentArea/InventoryTab/RightPanel"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+visible = false
+
+[node name="CompareTooltip" type="Panel" parent="Root/ContentArea/InventoryTab/RightPanel"]
+custom_minimum_size = Vector2(0, 110)
+layout_mode = 2
+mouse_filter = 2
+visible = false
+
+[node name="TooltipMargin" type="MarginContainer" parent="Root/ContentArea/InventoryTab/RightPanel/CompareTooltip"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 4
+
+[node name="TooltipVBox" type="VBoxContainer" parent="Root/ContentArea/InventoryTab/RightPanel/CompareTooltip/TooltipMargin"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="HeaderLabel" type="Label" parent="Root/ContentArea/InventoryTab/RightPanel/CompareTooltip/TooltipMargin/TooltipVBox"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="EnhanceLabel" type="Label" parent="Root/ContentArea/InventoryTab/RightPanel/CompareTooltip/TooltipMargin/TooltipVBox"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="StatRows" type="VBoxContainer" parent="Root/ContentArea/InventoryTab/RightPanel/CompareTooltip/TooltipMargin/TooltipVBox"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="AffixNoteLabel" type="Label" parent="Root/ContentArea/InventoryTab/RightPanel/CompareTooltip/TooltipMargin/TooltipVBox"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="PlaceholderTab" type="Control" parent="Root/ContentArea"]
+layout_mode = 0
+offset_right = 632.0
+offset_bottom = 321.0
+mouse_filter = 2
+visible = false
+
+[node name="PlaceholderLabel" type="Label" parent="Root/ContentArea/PlaceholderTab"]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="GuideBar" type="Label" parent="Root"]
+layout_mode = 0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = -16.0
+offset_right = 636.0
+offset_bottom = -2.0
+mouse_filter = 2

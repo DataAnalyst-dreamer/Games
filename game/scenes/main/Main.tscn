@@ -5,7 +5,7 @@
 [ext_resource type="Script" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="3_pcam_host"]
 [ext_resource type="Script" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_2d.gd" id="4_pcam_2d"]
 [ext_resource type="PackedScene" path="res://scenes/entities/monsters/Slime.tscn" id="5_slime"]
-[ext_resource type="PackedScene" path="res://scenes/ui/Hud.tscn" id="6_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/UiRoot.tscn" id="6_ui_root"]
 [ext_resource type="Script" path="res://scripts/systems/camera_shake.gd" id="7_camera_shake"]
 [ext_resource type="Script" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_noise_emitter_2d.gd" id="8_noise_emitter"]
 [ext_resource type="PackedScene" path="res://scenes/world/Waystone.tscn" id="9_waystone"]
@@ -67,7 +67,7 @@ noise_emitter_layer = 1
 [node name="LootSpawner" type="Node" parent="."]
 script = ExtResource("12_loot_spawner")
 
-[node name="Hud" parent="." instance=ExtResource("6_hud")]
+[node name="UiRoot" parent="." instance=ExtResource("6_ui_root")]
 
-[node name="Root" parent="Hud" index="0"]
-player_path = NodePath("../../Player")
+[node name="Root" parent="UiRoot/Hud" index="0"]
+player_path = NodePath("../../../Player")

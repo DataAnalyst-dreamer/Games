@@ -98,6 +98,21 @@ func get_player_luck() -> float:
 
 ## 슬롯에 장착한다. 이전에 있던 아이템은 인벤토리로 돌아간다(가득 차 있으면 우편함으로,
 ## pickup_item()과 동일 경로). 카테고리가 안 맞으면 false — 아무것도 바뀌지 않는다.
+## 가방의 index번째 슬롯을 slot_name에 장착한다(F7-2 인벤토리 UI 전용 진입점 — 어느
+## 슬롯에 넣을지는 호출부(inventory_menu.gd)가 카테고리로 이미 정해서 넘긴다). 카테고리가
+## 안 맞으면 인벤토리를 건드리지 않고 false를 반환한다. 성공하면 그 슬롯을 인벤토리에서
+## 빼고 장착하고, 기존 장착품은 equip_item()이 인벤토리로 돌려놓는다.
+func equip_from_slot(index: int, slot_name: String) -> bool:
+	if index < 0 or index >= inventory.slots.size():
+		return false
+	var item_instance: Dictionary = inventory.slots[index]
+	var item_def: Dictionary = Data.get_value("items", String(item_instance.get("item_id", "")), {})
+	if not equipment.can_equip(slot_name, item_def):
+		return false
+	inventory.remove_slot(index)
+	return equip_item(slot_name, item_instance, item_def)
+
+
 func equip_item(slot_name: String, item_instance: Dictionary, item_def: Dictionary) -> bool:
 	var result: Dictionary = equipment.equip(slot_name, item_instance, item_def)
 	if result.has("__error__"):
@@ -106,6 +121,31 @@ func equip_item(slot_name: String, item_instance: Dictionary, item_def: Dictiona
 		var previous_def: Dictionary = Data.get_value("items", String(result.get("item_id", "")), {})
 		pickup_item(result, previous_def)
 	_apply_equipment_stats_to_player()
+	Events.inventory_changed.emit()
+	return true
+
+
+## 소모품 사용(M2-2, F7-2 인벤토리 "A=사용"). effect_type=="heal_hp"만 실제 효과를
+## 적용한다(player.resources.heal) — buff_* 계열(공격력/이속 등 지속버프)은 버프
+## 시스템이 아직 없어(M2 이후 범위) 소모만 되고 효과는 적용되지 않는다(엔지니어 TODO:
+## 버프 시스템 확정 시 이 match에 분기만 추가하면 됨). 인벤토리 UI가 아닌 다른 화면
+## (대장간 등)에서도 재사용할 수 있도록 GameState에 둔다.
+func use_item(index: int) -> bool:
+	if index < 0 or index >= inventory.slots.size():
+		return false
+	var slot: Dictionary = inventory.slots[index]
+	var item_def: Dictionary = Data.get_value("items", String(slot.get("item_id", "")), {})
+	if String(item_def.get("category", "")) != "consumable":
+		return false
+	var effect_type := String(item_def.get("effect_type", ""))
+	if effect_type == "heal_hp" and _player != null and is_instance_valid(_player):
+		_player.resources.heal(int(item_def.get("effect_value", 0)))
+		Events.player_hp_changed.emit(_player.resources.hp, _player.resources.max_hp)
+	var remaining: int = int(slot.get("quantity", 1)) - 1
+	if remaining <= 0:
+		inventory.remove_slot(index)
+	else:
+		slot["quantity"] = remaining
 	Events.inventory_changed.emit()
 	return true
 

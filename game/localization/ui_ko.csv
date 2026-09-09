@@ -1,0 +1,125 @@
+keys,ko
+ui.hud.level_prefix,레벨
+ui.hud.gold_unit,골드
+ui.inv.tab.inventory,가방
+ui.inv.tab.skill,스킬
+ui.inv.tab.codex,도감
+ui.inv.tab.quest,퀘스트
+ui.inv.gold_label,골드
+ui.inv.filter.all,전체
+ui.inv.filter.common,일반
+ui.inv.filter.uncommon,고급
+ui.inv.filter.rare,희귀
+ui.inv.filter.epic,영웅
+ui.inv.filter.legendary,전설
+ui.inv.filter.relic,유물
+ui.inv.slot.weapon,무기
+ui.inv.slot.sub,보조
+ui.inv.slot.head,투구
+ui.inv.slot.armor,갑옷
+ui.inv.slot.boots,신발
+ui.inv.slot.ring,반지
+ui.inv.slot.amulet,부적
+ui.inv.slot.costume_hat,모자
+ui.inv.slot.costume_outfit,의상
+ui.inv.slot.costume_backpack,백팩
+ui.inv.slot.empty,비어있음
+ui.inv.costume_header,치장 (준비중)
+ui.inv.sort_button,정렬
+ui.inv.placeholder_tab,준비 중인 화면입니다
+ui.inv.empty_grid,가방이 비어 있어요. 모험을 떠나 볼까요?
+ui.inv.filter_empty,이 등급의 아이템이 없어요
+ui.inv.discard_marked,분해 표시됨
+ui.inv.compare.header,장착 중과 비교
+ui.inv.compare.enhance,강화
+ui.inv.compare.refine,재련
+ui.inv.compare.no_affix,옵션 없음
+ui.inv.compare.new_affix,신규
+ui.inv.qty_prefix,수량
+ui.inv.guide.confirm,결정
+ui.inv.guide.close,닫기
+ui.inv.guide.tab,탭
+ui.inv.guide.filter,필터
+ui.inv.guide.sort,정렬
+ui.inv.guide.mark,분해표시
+ui.inv.stat.attack,공격
+ui.inv.stat.defense,방어
+ui.inv.stat.max_hp,최대 체력
+ui.inv.stat.speed_pct,이동속도
+ui.inv.stat.atk_pct,공격력 %
+ui.inv.stat.crit_chance,치명타 확률
+ui.inv.stat.crit_damage_pct,치명타 피해
+ui.inv.stat.move_speed_pct,이동속도
+ui.inv.stat.gold_find_pct,골드 획득량
+ui.inv.stat.item_find_pct,아이템 획득률
+ui.inv.stat.exp_gain_pct,경험치 획득량
+ui.inv.stat.life_steal_pct,생명력 흡수
+ui.inv.stat.damage_reduction_pct,피해 감소
+ui.inv.stat.cooldown_reduction_pct,쿨타임 감소
+ui.inv.stat.attack_speed_pct,공격 속도
+ui.inv.stat.stamina_cost_reduction_pct,스태미나 소모 감소
+ui.inv.stat.max_stamina_flat,최대 스태미나
+ui.inv.stat.defense_flat,방어력
+ui.inv.stat.max_hp_flat,최대 체력
+ui.inv.stat.elemental_dmg_fire_pct,화속성 피해
+ui.inv.stat.elemental_dmg_water_pct,수속성 피해
+ui.inv.stat.elemental_dmg_wind_pct,풍속성 피해
+ui.inv.stat.elemental_dmg_thunder_pct,뇌속성 피해
+ui.inv.stat.elemental_dmg_holy_pct,빛속성 피해
+item_weapon_common_1_name,낡은 검
+item_weapon_common_2_name,무쇠 검
+item_weapon_uncommon_1_name,정련된 장검
+item_weapon_uncommon_2_name,은빛 세검
+item_weapon_rare_1_name,서리 인챈트 검
+item_weapon_rare_2_name,화염 인챈트 검
+item_sub_common_1_name,나무 방패
+item_sub_common_2_name,철제 방패
+item_sub_uncommon_1_name,정련된 방패
+item_sub_uncommon_2_name,은빛 방패
+item_sub_rare_1_name,서리의 방패
+item_sub_rare_2_name,화염의 방패
+item_head_common_1_name,천 두건
+item_head_common_2_name,가죽 모자
+item_head_uncommon_1_name,사슬 투구
+item_head_uncommon_2_name,강철 투구
+item_head_rare_1_name,서리 투구
+item_head_rare_2_name,화염 투구
+item_armor_common_1_name,천 옷
+item_armor_common_2_name,가죽 갑옷
+item_armor_uncommon_1_name,사슬 갑옷
+item_armor_uncommon_2_name,강철 갑옷
+item_armor_rare_1_name,서리 갑옷
+item_armor_rare_2_name,화염 갑옷
+item_boots_common_1_name,천 신발
+item_boots_common_2_name,가죽 장화
+item_boots_uncommon_1_name,사슬 장화
+item_boots_uncommon_2_name,강철 장화
+item_boots_rare_1_name,서리 장화
+item_boots_rare_2_name,화염 장화
+item_ring_common_1_name,구리 반지
+item_ring_common_2_name,철 반지
+item_ring_uncommon_1_name,은 반지
+item_ring_uncommon_2_name,옥 반지
+item_ring_rare_1_name,서리 반지
+item_ring_rare_2_name,화염 반지
+item_amulet_common_1_name,나무 부적
+item_amulet_common_2_name,뼈 부적
+item_amulet_uncommon_1_name,은 부적
+item_amulet_uncommon_2_name,흑요석 부적
+item_amulet_rare_1_name,서리 부적
+item_amulet_rare_2_name,화염 부적
+item_potion_hp_small_name,소형 체력 물약
+item_potion_hp_medium_name,중형 체력 물약
+item_food_spicy_mushroom_skewer_name,매운 버섯 꼬치
+item_food_honey_berry_tart_name,꿀베리 타르트
+item_enhance_stone_name,강화석
+item_slime_jelly_name,슬라임 젤리
+item_rabbit_horn_name,토끼 뿔
+item_mushroom_cap_name,버섯 갓
+item_iron_ore_name,철광석
+item_goblin_fang_name,고블린 송곳니
+item_marsh_moss_name,늪 이끼
+item_salvage_scrap_name,고철 조각
+item_backpack_small_name,작은 배낭
+item_backpack_medium_name,중간 배낭
+item_backpack_large_name,큰 배낭

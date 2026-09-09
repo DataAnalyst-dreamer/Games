@@ -1,0 +1,78 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/inventory_cell.gd" id="1_cell_script"]
+
+[node name="InventoryCell" type="Panel"]
+custom_minimum_size = Vector2(26, 26)
+offset_right = 26.0
+offset_bottom = 26.0
+mouse_filter = 1
+script = ExtResource("1_cell_script")
+
+[node name="Icon" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 3.0
+offset_top = 3.0
+offset_right = 23.0
+offset_bottom = 23.0
+mouse_filter = 2
+color = Color(0.5, 0.5, 0.5, 0.85)
+
+[node name="GradeBar" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 22.0
+offset_right = 24.0
+offset_bottom = 24.0
+mouse_filter = 2
+
+[node name="GradeIcon" type="Label" parent="."]
+layout_mode = 0
+offset_left = 15.0
+offset_right = 26.0
+offset_bottom = 10.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 2
+
+[node name="EnhanceLabel" type="Label" parent="."]
+layout_mode = 0
+offset_top = 16.0
+offset_right = 14.0
+offset_bottom = 26.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 8
+
+[node name="QtyLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 16.0
+offset_right = 26.0
+offset_bottom = 26.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 2
+
+[node name="CaptionLabel" type="Label" parent="."]
+layout_mode = 0
+offset_right = 26.0
+offset_bottom = 26.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 7
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="DiscardOverlay" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 26.0
+offset_bottom = 26.0
+mouse_filter = 2
+visible = false
+
+[node name="FocusRing" type="Panel" parent="."]
+layout_mode = 0
+offset_right = 26.0
+offset_bottom = 26.0
+mouse_filter = 2
+visible = false
