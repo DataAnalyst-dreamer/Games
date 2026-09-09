@@ -130,6 +130,10 @@ const REQUIRED_SCHEMA := {
 	# "테이블 존재"만 여기 등록하고 필드 단위 검증은 _validate_farming_sources()에 위임
 	# (요청 2).
 	"farming_sources": [],
+	# blueprints.json(F3-4, M2-4 신설) — blueprint_id 키의 동적 딕셔너리라 "테이블 존재"만
+	# 여기 등록하고 필드 단위 검증은 _validate_blueprints()에 위임(items/drop_tables와
+	# 동일 패턴).
+	"blueprints": [],
 }
 
 ## monsters.json은 monster_id를 키로 하는 동적 딕셔너리라 REQUIRED_SCHEMA(고정 경로)로
@@ -215,6 +219,7 @@ const RELEASE_FALLBACKS := {
 		"vit.defense_formula": "damage_taken = incoming_atk * 100 / (100 + defense)",
 	},
 	"farming_sources": {},
+	"blueprints": {},
 }
 
 ## 테이블 이름(파일명에서 .json 제거) → Dictionary
@@ -287,6 +292,7 @@ func _validate() -> void:
 	_validate_enhance()
 	_validate_stats()
 	_validate_farming_sources()
+	_validate_blueprints()
 	_validate_value_rules()
 
 
@@ -658,6 +664,38 @@ func _validate_farming_sources() -> void:
 		if show_icon != expected_icon:
 			_report("farming_sources.%s: show_respawn_icon_on_map=%s 가 type='%s' 기준(%s)과 다름" \
 				% [source_id, show_icon, type, expected_icon])
+
+
+## blueprints.json 검증(F3-4, M2-4 신설 — tools/qa/validate_tables.py:validate_blueprints()
+## 이식). result_item_id/materials[].item_id 참조 무결성, cost_gold·qty 범위.
+func _validate_blueprints() -> void:
+	if not tables.has("blueprints"):
+		return
+	var blueprints: Dictionary = tables["blueprints"]
+	var items: Dictionary = tables.get("items", {})
+	for blueprint_id: String in blueprints:
+		if blueprint_id.begins_with("_"):
+			continue
+		if typeof(blueprints[blueprint_id]) != TYPE_DICTIONARY:
+			_report("blueprints.%s 가 객체가 아님" % blueprint_id)
+			continue
+		var entry: Dictionary = blueprints[blueprint_id]
+		for field: String in ["blueprint_id", "name_key", "desc_key", "result_item_id", "cost_gold", "materials"]:
+			if not entry.has(field):
+				_report("blueprints.%s: 필수 키 누락 '%s'" % [blueprint_id, field])
+		if String(entry.get("blueprint_id", "")) != blueprint_id:
+			_report("blueprints.%s: blueprint_id 필드값이 키와 불일치" % blueprint_id)
+		var result_item_id: String = String(entry.get("result_item_id", ""))
+		if entry.has("result_item_id") and not items.has(result_item_id):
+			_report("blueprints.%s: result_item_id '%s' 가 items.json에 없음" % [blueprint_id, result_item_id])
+		if float(entry.get("cost_gold", 0)) < 0.0:
+			_report("blueprints.%s: cost_gold는 0 이상이어야 함" % blueprint_id)
+		for material: Dictionary in (entry.get("materials", []) as Array):
+			var mat_id: String = String(material.get("item_id", ""))
+			if not items.has(mat_id):
+				_report("blueprints.%s: materials의 item_id '%s' 가 items.json에 없음" % [blueprint_id, mat_id])
+			if int(material.get("qty", 0)) <= 0:
+				_report("blueprints.%s: materials[%s].qty는 0보다 커야 함" % [blueprint_id, mat_id])
 
 
 ## 값 간 정합성 규칙(data_tables.md §1 검증 규칙, 단순 존재 확인이 아닌 관계식).

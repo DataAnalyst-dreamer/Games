@@ -323,6 +323,29 @@ def validate_farming_sources(
             )
 
 
+def validate_blueprints(blueprints: Dict[str, Any], item_ids: Dict[str, Any], report: Report) -> Dict[str, Any]:
+    """F3-4, M2-4 신설. result_item_id·materials[].item_id 참조 무결성, cost_gold/qty 범위."""
+    data = entries(blueprints)
+    for blueprint_id, bp in data.items():
+        for field in ("blueprint_id", "name_key", "desc_key", "result_item_id", "cost_gold", "materials"):
+            if field not in bp:
+                report.error(f"blueprints.{blueprint_id}: 필수 키 누락 '{field}'")
+        if bp.get("blueprint_id") != blueprint_id:
+            report.error(f"blueprints.{blueprint_id}: blueprint_id 필드값이 키와 불일치")
+        result_item_id = bp.get("result_item_id")
+        if result_item_id is not None and result_item_id not in item_ids:
+            report.error(f"blueprints.{blueprint_id}: result_item_id '{result_item_id}' 가 items.json에 없음")
+        if bp.get("cost_gold", 0) < 0:
+            report.error(f"blueprints.{blueprint_id}: cost_gold는 0 이상이어야 함")
+        for material in bp.get("materials", []):
+            mat_id = material.get("item_id")
+            if mat_id not in item_ids:
+                report.error(f"blueprints.{blueprint_id}: materials의 item_id '{mat_id}' 가 items.json에 없음")
+            if material.get("qty", 0) <= 0:
+                report.error(f"blueprints.{blueprint_id}: materials[{mat_id}].qty는 0보다 커야 함")
+    return data
+
+
 def validate_monsters_cross_ref(monsters: Dict[str, Any], drop_table_ids: Dict[str, Any], report: Report) -> None:
     data = entries(monsters)
     for monster_id, monster in data.items():
@@ -352,6 +375,7 @@ def main() -> int:
     monsters = load_json(data_dir / "monsters.json", report)
     farming_sources = load_json(data_dir / "farming_sources.json", report)
     stats = load_json(data_dir / "stats.json", report)
+    blueprints = load_json(data_dir / "blueprints.json", report)
 
     item_ids = validate_items(items, report)
     validate_affixes(affixes, item_ids, report)
@@ -360,10 +384,11 @@ def main() -> int:
     validate_monsters_cross_ref(monsters, drop_table_ids, report)
     validate_stats(stats, report)
     validate_farming_sources(farming_sources, drop_table_ids, monsters, report)
+    blueprint_ids = validate_blueprints(blueprints, item_ids, report)
 
     print(f"[validate_tables] items={len(item_ids)} affixes={len(entries(affixes))} "
           f"drop_tables={len(drop_table_ids)} monsters={len(entries(monsters))} "
-          f"farming_sources={len(entries(farming_sources))}")
+          f"farming_sources={len(entries(farming_sources))} blueprints={len(blueprint_ids)}")
 
     if report.warnings:
         print(f"\n경고 {len(report.warnings)}건:")
