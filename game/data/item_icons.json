@@ -1,5 +1,5 @@
 {
-  "_comment": "58개 아이템 아이콘 배정. 모두 CC0 라이선스. region null: 원본 그대로 사용 또는 16x16으로 리사이징.",
+  "_comment": "64개 아이템 아이콘 배정. 모두 CC0 라이선스. region null: 원본 그대로 사용 또는 16x16으로 리사이징. M1 게이트 플레이테스트 후속(art-director, 2026-09): herb_common/horn_shard/ribbon_charm/ribbon_dandelion/stew_basic/wool_soft 6종 추가(M2-7 신설 아이템, docs/art/item-icon-map.md 참고) — 완전 일치하는 CC0 아이콘이 없어 형태/색 유사도 기준으로 선정한 근사 매핑.",
 
   "weapon_common_1": { "path": "res://assets/third_party/ninja_adventure/Items/Weapons/Sword/Sprite.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
   "weapon_common_2": { "path": "res://assets/third_party/ninja_adventure/Items/Weapons/BigSword/Sprite.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
@@ -55,6 +55,7 @@
 
   "food_spicy_mushroom_skewer": { "path": "res://assets/third_party/ninja_adventure/Items/Food/Meat.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
   "food_honey_berry_tart": { "path": "res://assets/third_party/ninja_adventure/Items/Food/Honey.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "stew_basic": { "path": "res://assets/third_party/ninja_adventure/Items/Food/Noodle.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
 
   "enhance_stone": { "path": "res://assets/third_party/ninja_adventure/Items/Resource/BarPurple.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
   "slime_jelly": { "path": "res://assets/third_party/ninja_adventure/Items/Resource/Water.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
@@ -65,6 +66,11 @@
   "goblin_fang": { "path": "res://assets/third_party/ninja_adventure/Items/Projectile/Kunai.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
   "marsh_moss": { "path": "res://assets/third_party/ninja_adventure/Items/Resource/Branch.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
   "salvage_scrap": { "path": "res://assets/third_party/ninja_adventure/Items/Resource/Rock.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "herb_common": { "path": "res://assets/third_party/ninja_adventure/Items/Food/TeaLeaf.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "wool_soft": { "path": "res://assets/third_party/ninja_adventure/Items/Food/Nut.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "horn_shard": { "path": "res://assets/third_party/ninja_adventure/Items/Weapons/Bone/Sprite.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "ribbon_dandelion": { "path": "res://assets/third_party/ninja_adventure/Items/Other/Stamp.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
+  "ribbon_charm": { "path": "res://assets/third_party/ninja_adventure/Items/Other/Letter2.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
 
   "backpack_small": { "path": "res://assets/third_party/ninja_adventure/Items/Treasure/LittleTreasureChest.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },
   "backpack_medium": { "path": "res://assets/third_party/ninja_adventure/Items/Treasure/BigTreasureChest.png", "region": null, "source_pack": "ninja_adventure", "license": "CC0" },

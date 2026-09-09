@@ -1,6 +1,6 @@
 # 아이템 아이콘 배정표 및 아틀라스
 
-58개 게임 아이템의 아이콘 배정 완료(2026-09-09). 모든 아이콘은 Ninja Adventure CC0 팩에서 조달.
+64개 게임 아이템의 아이콘 배정 완료(최초 58개: 2026-09-09, +6개 M1 게이트 플레이테스트 후속: 2026-09-09). 모든 아이콘은 Ninja Adventure CC0 팩에서 조달.
 
 ## 배정 완료 현황
 
@@ -13,10 +13,10 @@
 | **boots** (신발) | 6 | Boot.png 대표 1개 | 완전 배정 ✓ |
 | **ring** (반지) | 6 | Ring.png 대표 1개 | 완전 배정 ✓ |
 | **amulet** (부적) | 6 | Amulet.png 대표 1개 | 완전 배정 ✓ |
-| **consumable** (소비품) | 4 | potion 2개(LifePot/MilkPot), food 2개(Meat/Honey) | 완전 배정 ✓ |
-| **material** (재료) | 9 | Resource/Projectile 폴더 아이콘 | 완전 배정 ✓ |
+| **consumable** (소비품) | 5 | potion 2개(LifePot/MilkPot), food 2개(Meat/Honey), stew_basic(Noodle) | 완전 배정 ✓ |
+| **material** (재료) | 14 | Resource/Projectile/Food/Weapons/Other 폴더 아이콘 | 완전 배정 ✓ |
 | **costume_backpack** (배낭) | 3 | Treasure 폴더 아이콘 | 완전 배정 ✓ |
-| **총계** | **58** | **모든 아이템** | **완전 배정 ✓** |
+| **총계** | **64** | **모든 아이템** | **완전 배정 ✓** |
 
 ## 아이콘 배정 목록
 
@@ -67,7 +67,7 @@
 |---|---|---|---|
 | amulet_common_1 ~ amulet_rare_2 | Ui/Skill Icon/Items & Weapon/Amulet.png | 16×16 | 부적 대표 아이콘 ×6 |
 
-### Consumable (소비품, 4개)
+### Consumable (소비품, 5개)
 
 | item_id | 아이콘 원본 | 크기 | 비고 |
 |---|---|---|---|
@@ -75,8 +75,9 @@
 | potion_hp_medium | Items/Potion/MilkPot.png | 9×11 → 16×16 | 흰 약병 |
 | food_spicy_mushroom_skewer | Items/Food/Meat.png | 15×15 → 16×16 | 고기 |
 | food_honey_berry_tart | Items/Food/Honey.png | 16×16 | 꿀병 |
+| stew_basic | Items/Food/Noodle.png | 16×16 → 16×16 | 머루 할머니표 스튜(면 요리 그릇으로 대체, M2-7) |
 
-### Material (재료, 9개)
+### Material (재료, 14개)
 
 | item_id | 아이콘 원본 | 크기 | 비고 |
 |---|---|---|---|
@@ -89,6 +90,11 @@
 | goblin_fang | Items/Projectile/Kunai.png | 16×16 | 고블린 이빨(쿠나이) |
 | marsh_moss | Items/Resource/Branch.png | 16×16 | 늪지 이끼(나뭇가지) |
 | salvage_scrap | Items/Resource/Rock.png | 16×16 | 스크랩(돌) |
+| herb_common | Items/Food/TeaLeaf.png | 16×16 | 잡초 약초(찻잎, M2-7) — 형태 일치 |
+| wool_soft | Items/Food/Nut.png | 16×16 | 양털(둥글고 흰 견과, M2-7) — 완전 일치 아이콘 없어 흰색·둥근 형태로 근사 |
+| horn_shard | Items/Weapons/Bone/Sprite.png | 16×16 | 뿔 파편(뼈 무기, M2-7) — 동물성 파편 이미지로 근사, 무기 카테고리엔 미사용이라 중복 없음 |
+| ribbon_dandelion | Items/Other/Stamp.png | 16×16 | 민들레제 리본 재료(우표, M2-7) — 작고 화사한 패턴 소품으로 근사, 리본 전용 CC0 에셋 없음 |
+| ribbon_charm | Items/Other/Letter2.png | 16×16 | 로젤이 엮어준 리본 부적(하트 봉인 편지, M2-7) — "정표/선물" 느낌으로 근사, ribbon_dandelion과 형태 구분됨 |
 
 ### Costume_backpack (배낭, 3개)
 
@@ -126,7 +132,7 @@
 
 ### 라이선스 결론
 
-**모든 58개 아이콘 = CC0 (저작권 포기)**
+**모든 64개 아이콘 = CC0 (저작권 포기)**
 
 - 상용·수정·재배포 전부 자유
 - 크레딧: "Ninja Adventure asset pack by Pixel-boy & AAA (CC0)"
@@ -147,5 +153,5 @@ python3 tools/art/build_item_icon_sheet.py
 
 ---
 
-**배정 완료 일자**: 2026-09-09  
-**담당**: Claude Haiku 4.5 (asset integration agent)
+**배정 완료 일자**: 2026-09-09(최초), 2026-09-09(6종 추가 — M1 게이트 플레이테스트 후속)  
+**담당**: Claude Haiku 4.5 (asset integration agent), art-director(6종 추가)

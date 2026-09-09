@@ -283,74 +283,110 @@
       "w": 16,
       "h": 16
     },
-    "enhance_stone": {
+    "stew_basic": {
       "x": 238,
       "y": 34,
       "w": 16,
       "h": 16
     },
-    "slime_jelly": {
+    "enhance_stone": {
       "x": 255,
       "y": 34,
       "w": 16,
       "h": 16
     },
-    "rabbit_horn": {
+    "slime_jelly": {
       "x": 0,
       "y": 51,
       "w": 16,
       "h": 16
     },
-    "mushroom_cap": {
+    "rabbit_horn": {
       "x": 17,
       "y": 51,
       "w": 16,
       "h": 16
     },
-    "iron_ore": {
+    "mushroom_cap": {
       "x": 34,
       "y": 51,
       "w": 16,
       "h": 16
     },
-    "goblin_ear": {
+    "iron_ore": {
       "x": 51,
       "y": 51,
       "w": 16,
       "h": 16
     },
-    "goblin_fang": {
+    "goblin_ear": {
       "x": 68,
       "y": 51,
       "w": 16,
       "h": 16
     },
-    "marsh_moss": {
+    "goblin_fang": {
       "x": 85,
       "y": 51,
       "w": 16,
       "h": 16
     },
-    "salvage_scrap": {
+    "marsh_moss": {
       "x": 102,
       "y": 51,
       "w": 16,
       "h": 16
     },
-    "backpack_small": {
+    "salvage_scrap": {
       "x": 119,
       "y": 51,
       "w": 16,
       "h": 16
     },
-    "backpack_medium": {
+    "herb_common": {
       "x": 136,
       "y": 51,
       "w": 16,
       "h": 16
     },
-    "backpack_large": {
+    "wool_soft": {
       "x": 153,
+      "y": 51,
+      "w": 16,
+      "h": 16
+    },
+    "horn_shard": {
+      "x": 170,
+      "y": 51,
+      "w": 16,
+      "h": 16
+    },
+    "ribbon_dandelion": {
+      "x": 187,
+      "y": 51,
+      "w": 16,
+      "h": 16
+    },
+    "ribbon_charm": {
+      "x": 204,
+      "y": 51,
+      "w": 16,
+      "h": 16
+    },
+    "backpack_small": {
+      "x": 221,
+      "y": 51,
+      "w": 16,
+      "h": 16
+    },
+    "backpack_medium": {
+      "x": 238,
+      "y": 51,
+      "w": 16,
+      "h": 16
+    },
+    "backpack_large": {
+      "x": 255,
       "y": 51,
       "w": 16,
       "h": 16
