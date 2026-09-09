@@ -1,5 +1,5 @@
 {
-  "_comment": "SFX 이벤트 → 파일 매핑(F8-4 데이터 테이블 원칙 — AudioManager 코드에 경로/dB/피치를 하드코딩하지 않는다). 출처: docs/audio/sound-map-m1.md(§1~§8) + docs/audio/audio-spec.md §6-2 스키마. sfxr 필요 3건 중 2건(just_guard_success/stamina_exhausted)은 기존 CC0 팩 임시 대체 파일로 즉시 재생 가능(§10) — legendary_drop_sparkle은 드랍 시스템(M2) 자체가 없어 이번 테이블에서 제외. priority는 audio-spec.md §3-2 티어(0=최우선~3=최하), max_voices/cooldown_sec은 sound-map의 '재생 규칙' 열을 그대로 옮긴다. files가 2개 이상이면 재생마다 무작위 하나를 고른다(풀).",
+  "_comment": "SFX 이벤트 → 파일 매핑(F8-4 데이터 테이블 원칙 — AudioManager 코드에 경로/dB/피치를 하드코딩하지 않는다). 출처: docs/audio/sound-map-m1.md(§1~§8, §10~§11) + docs/audio/audio-spec.md §6-2 스키마·§4 드랍 규칙. sfxr 필요 3건(just_guard_success/stamina_exhausted/legendary_drop_sparkle)은 tools/audio/sfxr_synth.py로 자체 저작 WAV를 생성해 반영 완료(임시 대체 파일 교체, tools/audio/README.md 재생성 명령 참고). 등급별 드랍 6종(drop_common..drop_relic)도 같은 합성기로 신규 제작 — item_drop.gd가 이미 AudioManager.play_sfx(\"drop_%s\" % grade, ...)를 호출하고 있어 이 테이블만 채우면 코드 변경 없이 소리가 난다. priority는 audio-spec.md §3-2 티어(0=최우선~3=최하), max_voices/cooldown_sec은 sound-map의 '재생 규칙' 열을 그대로 옮긴다. files가 2개 이상이면 재생마다 무작위 하나를 고른다(풀). '_layer'/'_sparkle' 접미 항목(drop_epic_layer, legendary_drop_sparkle)은 item_drop.gd가 아직 두 번째 play_sfx 호출을 하지 않으므로 godot-engineer가 grade별 분기(epic/legendary)에서 기본 id 재생 직후 추가 호출해야 실제로 겹쳐 들린다 — audio-spec.md §4 참고.",
 
   "atk_swing_1": {
     "files": [
@@ -69,14 +69,14 @@
     "max_voices": 1, "cooldown_sec": 0.0, "priority": 0
   },
   "just_guard_success": {
-    "_comment": "sfxr 필요(§10-2 just_guard_parry_ting) — 임시 대체 파일.",
-    "files": ["res://assets/third_party/ninja_adventure/Audio/Sounds/Bonus/Bonus2.wav"],
+    "_comment": "자체 저작(§10-2 just_guard_parry_ting, tools/audio/sfxr/just_guard_parry_ting.json) — 기존 Bonus2.wav 임시 대체를 교체 완료.",
+    "files": ["res://assets/audio/sfx/just_guard_parry_ting.wav"],
     "bus": "SFX", "volume_db": -2.0, "pitch_min": 1.0, "pitch_max": 1.0,
     "max_voices": 1, "cooldown_sec": 0.0, "priority": 0
   },
   "stamina_exhausted": {
-    "_comment": "sfxr 필요(§10-1 stamina_exhausted_deny) — 임시 대체 파일.",
-    "files": ["res://assets/third_party/ninja_adventure/Audio/Sounds/Alert/Alert4.wav"],
+    "_comment": "자체 저작(§10-1 stamina_exhausted_deny, tools/audio/sfxr/stamina_exhausted_deny.json) — 기존 Alert4.wav 임시 대체를 교체 완료.",
+    "files": ["res://assets/audio/sfx/stamina_exhausted_deny.wav"],
     "bus": "SFX", "volume_db": -6.0, "pitch_min": 1.0, "pitch_max": 1.0,
     "max_voices": 1, "cooldown_sec": 0.3, "priority": 0
   },
@@ -121,6 +121,62 @@
     "files": ["res://assets/third_party/ninja_adventure/Audio/Jingles/Success2.wav"],
     "bus": "SFX", "volume_db": -4.0, "pitch_min": 1.0, "pitch_max": 1.0,
     "max_voices": 1, "cooldown_sec": 0.0, "priority": 0
+  },
+
+  "drop_common": {
+    "_comment": "등급별 드랍 사운드 1/6(GDD 6.1 일반/흰, audio-spec.md §4). item_drop.gd:_play_drop_sfx()가 grade 문자열로 직접 호출. 자체 저작(tools/audio/sfxr/drop_common.json).",
+    "files": ["res://assets/audio/sfx/drop_common.wav"],
+    "bus": "SFX", "volume_db": -9.0, "pitch_min": 0.95, "pitch_max": 1.05,
+    "max_voices": 8, "cooldown_sec": 0.0, "priority": 3
+  },
+  "drop_uncommon": {
+    "_comment": "등급별 드랍 사운드 2/6(고급/초록). common과 거의 동일 계열(파밍 스팸 방지, audio-spec.md §4 원칙 1) — 미세 피치 차이만. 자체 저작(tools/audio/sfxr/drop_uncommon.json).",
+    "files": ["res://assets/audio/sfx/drop_uncommon.wav"],
+    "bus": "SFX", "volume_db": -8.0, "pitch_min": 0.95, "pitch_max": 1.05,
+    "max_voices": 8, "cooldown_sec": 0.0, "priority": 3
+  },
+  "drop_rare": {
+    "_comment": "등급별 드랍 사운드 3/6(희귀/파랑) — 단일 사운드(audio-spec.md §4 원칙 2). 자체 저작(tools/audio/sfxr/drop_rare.json).",
+    "files": ["res://assets/audio/sfx/drop_rare.wav"],
+    "bus": "SFX", "volume_db": -5.0, "pitch_min": 0.95, "pitch_max": 1.05,
+    "max_voices": 6, "cooldown_sec": 0.0, "priority": 3
+  },
+  "drop_epic": {
+    "_comment": "등급별 드랍 사운드 4/6(영웅/보라) 베이스 레이어 — drop_epic_layer와 2레이어 구성(audio-spec.md §4 원칙 2). 자체 저작(tools/audio/sfxr/drop_epic.json).",
+    "files": ["res://assets/audio/sfx/drop_epic.wav"],
+    "bus": "SFX", "volume_db": -2.0, "pitch_min": 0.97, "pitch_max": 1.03,
+    "max_voices": 4, "cooldown_sec": 0.0, "priority": 3
+  },
+  "drop_epic_layer": {
+    "_comment": "drop_epic 위에 얹는 사인 트윙클 레이어. godot-engineer가 grade==\"epic\" 분기에서 drop_epic 재생 직후 추가 호출 필요(현재 item_drop.gd는 단일 호출만 함, 위 테이블 주석 참고). 자체 저작(tools/audio/sfxr/drop_epic_layer.json).",
+    "files": ["res://assets/audio/sfx/drop_epic_layer.wav"],
+    "bus": "SFX", "volume_db": -6.0, "pitch_min": 1.0, "pitch_max": 1.0,
+    "max_voices": 2, "cooldown_sec": 0.0, "priority": 3
+  },
+  "drop_legendary": {
+    "_comment": "등급별 드랍 사운드 5/6(전설/주황) 베이스 팡파레 — legendary_drop_sparkle(§10-3, 전설 전용 레이어)과 함께 재생. 피치 고정(1.0±0%, '전용' 정체성은 항상 동일해야 학습됨). 자체 저작(tools/audio/sfxr/drop_legendary.json).",
+    "files": ["res://assets/audio/sfx/drop_legendary.wav"],
+    "bus": "SFX", "volume_db": 0.0, "pitch_min": 1.0, "pitch_max": 1.0,
+    "max_voices": 2, "cooldown_sec": 0.0, "priority": 3
+  },
+  "legendary_drop_sparkle": {
+    "_comment": "sfxr 필요(§10-3) — 전설 드랍 전용 반짝임 레이어. 다른 어떤 이벤트에도 재사용 금지(audio-spec.md §4 규칙 3). godot-engineer가 grade==\"legendary\" 분기에서 drop_legendary 재생과 같은 프레임에 추가 호출(빛기둥 VFX 스폰과도 동일 프레임 권장, audio-spec.md §4). 자체 저작(tools/audio/sfxr/legendary_drop_sparkle.json).",
+    "files": ["res://assets/audio/sfx/legendary_drop_sparkle.wav"],
+    "bus": "SFX", "volume_db": -4.0, "pitch_min": 1.0, "pitch_max": 1.0,
+    "max_voices": 2, "cooldown_sec": 0.0, "priority": 3
+  },
+  "drop_relic": {
+    "_comment": "등급별 드랍 사운드 6/6(유물/붉은 금색) — 뽁뽁 패밀리 최상위(피치·길이·비브라토 최대). GDD가 유물 전용 사운드를 요구하진 않으나 이번 sfxr 일괄 제작으로 legendary_drop_sparkle을 재사용하지 않는 별도 파형으로 자체 제작함(전설의 '전용성' 훼손 없음) — 전설과의 최종 차별화 정책은 여전히 game-designer 결정 요청 대상(sound-map-m1.md §11). 자체 저작(tools/audio/sfxr/drop_relic.json).",
+    "files": ["res://assets/audio/sfx/drop_relic.wav"],
+    "bus": "SFX", "volume_db": 0.0, "pitch_min": 1.0, "pitch_max": 1.0,
+    "max_voices": 2, "cooldown_sec": 0.0, "priority": 3
+  },
+
+  "goblin_whistle": {
+    "_comment": "M2-3 예고 — 고블린 정찰 호루라기. M1 코드에는 고블린 몬스터 자체가 없어 훅 지점이 없다(sound-map-m1.md §5) — 자산만 선반영, M2-3 엔지니어가 몬스터 경보/예고 상태 진입 시 play_sfx(&\"goblin_whistle\", pos) 호출 추가. slime_telegraph와 동일한 '예고' 우선순위 티어(2) 적용. 자체 저작(tools/audio/sfxr/goblin_whistle.json).",
+    "files": ["res://assets/audio/sfx/goblin_whistle.wav"],
+    "bus": "SFX", "volume_db": -6.0, "pitch_min": 0.95, "pitch_max": 1.05,
+    "max_voices": 4, "cooldown_sec": 0.0, "priority": 2
   },
 
   "waystone_activate": {

@@ -89,4 +89,9 @@ static func build_summary(raw: Dictionary) -> Dictionary:
 		},
 		"monsters": build_monster_stats(
 			raw.get("kills_by_monster", {}), raw.get("ttk_samples_by_monster", {})),
+		## M2-3 신규(F6-3): 정예 처치 수만 별도로 노출({monster_id: kills}). 이미
+		## build_monster_stats()에 잡힌 elite_goblin_captain/elite_bunchi_spawn 처치 수의
+		## 부분집합이지만(enemy_died도 정예에 대해 함께 emit되므로), 정예만 빠르게 보고
+		## 싶을 때(예: F6-3 리텐션 지표)를 위한 전용 키다.
+		"elite_kills": (raw.get("elite_kills_by_monster", {}) as Dictionary).duplicate(),
 	}

@@ -260,7 +260,9 @@ func _on_item_picked_up(item_id: StringName, quantity: int) -> void:
 	var name_key: String = String(item_def.get("name_key", item_id))
 	var grade: String = String(item_def.get("grade", "common"))
 	var color: Color = Rarity.color_of(Rarity.from_string(grade), theme)
-	_push_log_line("%s x%d" % [name_key, quantity], color)
+	# M2-3 소규모 추가: item_icons.json에 배정된 아이템은 로그 줄 앞에 16x16 아이콘을
+	# 붙인다(ItemIcon.resolve() — 없으면 null, 이 경우 기존처럼 텍스트만 표시).
+	_push_log_line("%s x%d" % [name_key, quantity], color, ItemIcon.resolve(String(item_id)))
 
 
 func _on_gold_changed(_new_amount: int, delta: int) -> void:
@@ -268,11 +270,24 @@ func _on_gold_changed(_new_amount: int, delta: int) -> void:
 		_push_log_line("+%d %s" % [delta, tr(&"ui.hud.gold_unit")])
 
 
-func _push_log_line(text: String, color: Variant = null) -> void:
+func _push_log_line(text: String, color: Variant = null, icon: Texture2D = null) -> void:
 	var label := Label.new()
 	label.text = text
 	label.add_theme_color_override("font_color", color if color is Color else theme.get_color(&"text_default", &"HUD"))
-	log_list.add_child(label)
+
+	# 아이콘이 있으면 [아이콘 | 텍스트] 가로 배치, 없으면 예전처럼 라벨 하나만(골드 줄 등).
+	var row: Control = label
+	if icon != null:
+		var hbox := HBoxContainer.new()
+		var icon_rect := TextureRect.new()
+		icon_rect.texture = icon
+		icon_rect.custom_minimum_size = Vector2(16.0, 16.0)
+		icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		hbox.add_child(icon_rect)
+		hbox.add_child(label)
+		row = hbox
+
+	log_list.add_child(row)
 	while log_list.get_child_count() > LOG_MAX_LINES:
 		var oldest: Node = log_list.get_child(0)
 		log_list.remove_child(oldest)
@@ -280,11 +295,11 @@ func _push_log_line(text: String, color: Variant = null) -> void:
 
 	var timer := get_tree().create_timer(LOG_DURATION_SEC)
 	timer.timeout.connect(func() -> void:
-		if not is_instance_valid(label):
+		if not is_instance_valid(row):
 			return
 		var fade := create_tween()
-		fade.tween_property(label, "modulate:a", 0.0, 0.4)
-		fade.tween_callback(label.queue_free)
+		fade.tween_property(row, "modulate:a", 0.0, 0.4)
+		fade.tween_callback(row.queue_free)
 	)
 
 

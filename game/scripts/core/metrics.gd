@@ -42,6 +42,8 @@ var _combo_finisher_reached_count: int = 0
 var _player_hits_taken: int = 0
 var _player_damage_taken_total: int = 0
 var _kills_by_monster: Dictionary = {} ## {monster_id: int}
+## M2-3 신규(F6-3). Events.elite_died 전용 카운터 — enemy_died와 별개로 "정예만" 센다.
+var _elite_kills_by_monster: Dictionary = {} ## {monster_id: int}
 var _ttk_samples_by_monster: Dictionary = {} ## {monster_id: Array[float]}
 ## 몬스터 인스턴스 최초 피격 시각(get_ticks_msec). 죽으면 TTK 계산 후 제거된다.
 ## 키는 get_instance_id()(해제된 인스턴스를 다시 조회하지 않기 위해 Node 참조 대신 id 사용).
@@ -65,6 +67,7 @@ func _ready() -> void:
 	Events.combo_finisher_reached.connect(_on_combo_finisher_reached)
 	Events.hit_landed.connect(_on_hit_landed)
 	Events.enemy_died.connect(_on_enemy_died)
+	Events.elite_died.connect(_on_elite_died)
 
 	var timer := Timer.new()
 	timer.name = "SaveIntervalTimer"
@@ -151,6 +154,14 @@ func _on_enemy_died(enemy: Node2D, _killer: Node) -> void:
 		_monster_first_hit_ticks.erase(id)
 
 
+## M2-3 신규(F6-3). enemy_died와 별개로 "정예 처치"만 센다.
+func _on_elite_died(enemy: Node2D, _killer: Node) -> void:
+	if enemy == null or not (enemy is MonsterBase):
+		return
+	var monster_id: String = (enemy as MonsterBase).monster_id
+	_elite_kills_by_monster[monster_id] = int(_elite_kills_by_monster.get(monster_id, 0)) + 1
+
+
 # --- 테스터 식별 ---
 
 func _resolve_tester_name() -> String:
@@ -208,6 +219,7 @@ func _build_raw_snapshot() -> Dictionary:
 		"player_damage_taken_total": _player_damage_taken_total,
 		"kills_by_monster": _kills_by_monster,
 		"ttk_samples_by_monster": _ttk_samples_by_monster,
+		"elite_kills_by_monster": _elite_kills_by_monster,
 	}
 
 

@@ -83,12 +83,13 @@ in_player.volume_db  = linear_to_db(sin(t * PI/2))       # 들어오는 트랙
 
 ## 4. 등급별 드랍 사운드 차별화 규칙
 
-GDD 6.1의 6개 등급(일반/고급/희귀/영웅/전설/유물)과 GDD 10장 "등급별 아이템 드랍 사운드 차별화, 전설 드랍 = 전용 효과음 + 빛기둥"을 다음 3원칙으로 구현한다. 파일 매핑은 `sound-map-m1.md` §11.
+GDD 6.1의 6개 등급(일반/고급/희귀/영웅/전설/유물)과 GDD 10장 "등급별 아이템 드랍 사운드 차별화, 전설 드랍 = 전용 효과음 + 빛기둥"을 다음 3원칙으로 구현한다. 파일 매핑은 `sound-map-m1.md` §11(6종 전부 `tools/audio/sfxr_synth.py` 자체 저작 완료, `game/data/audio_sfx.json`에 `drop_common`..`drop_relic` 반영 완료 — `item_drop.gd:_play_drop_sfx()`가 이미 grade→id 직접 호출을 구현해 두어 테이블만 채우면 바로 재생된다).
 
 1. **낮은 등급일수록 짧고 겹쳐도 무해하게**: 일반/고급은 동일 계열 사운드(피치만 미세 차이)로 파밍 스팸(몬스터 다수 처치 시 드랍 폭주)에도 청감 피로가 없게 한다. 볼륨도 가장 낮게(-8dB대).
 2. **등급이 오를수록 레이어 추가, 볼륨·지속시간 증가**: 희귀(단일 사운드, -5dB) → 영웅(2레이어, -2dB) → 전설(전용 사운드+스파클 레이어, 0dB, 지속시간 가장 김).
 3. **전설만 "전용"**: `legendary_drop_sparkle`(sound-map §10-3)은 다른 어떤 이벤트에도 재사용하지 않는다 — GDD가 명시적으로 "전용 효과음"을 요구하는 유일한 등급이므로, 이 원칙을 어기면(예: 다른 곳에 재사용) 전설의 특별함이 희석된다. 유물은 GDD가 전용 사운드를 요구하지 않으므로 M1 시점엔 전설과 동일 계열 재사용(§11 표 참고, 결정 요청 대상).
 - **빛기둥 연동(시각)**: 전설 드랍의 빛기둥 이펙트는 pixel-artist/godot-engineer 소관(본 문서 범위 밖)이나, 오디오 재생 시점은 **빛기둥 스폰과 동일 프레임**이어야 한다 — `Events.item_dropped` 구독 시점에 `rarity == &"legendary"`면 SFX와 VFX를 같은 콜백에서 트리거하도록 구현 지점을 통일할 것을 권장.
+- **레이어 2차 호출 필요(godot-engineer 전달)**: `item_drop.gd:_play_drop_sfx()`는 현재 grade당 `AudioManager.play_sfx()`를 1회만 호출한다. 영웅(`drop_epic`+`drop_epic_layer`)과 전설(`drop_legendary`+`legendary_drop_sparkle`)은 정의상 2레이어이므로, 해당 grade 분기에서 기본 id 재생 직후 레이어 id를 추가 호출해야 실제로 겹쳐 들린다(`sound-map-m1.md` §12 갱신 항목).
 - **볼륨 표**: 일반 -9dB / 고급 -8dB / 희귀 -5dB / 영웅 -2dB / 전설 0dB / 유물 0dB(전설과 동일, 위 결정 요청 전까지).
 
 ---

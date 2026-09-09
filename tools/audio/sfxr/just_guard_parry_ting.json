@@ -1,0 +1,23 @@
+{
+  "_comment": "sound-map-m1.md §10-2 — 저스트 가드 성공 전용 금속성 '쨍'. 짧고 밝은 고음 핑.",
+  "oldParams": true,
+  "seed": 1002,
+  "wave_type": 0,
+  "p_env_attack": 0.0,
+  "p_env_sustain": 0.08,
+  "p_env_punch": 0.35,
+  "p_env_decay": 0.25,
+  "p_base_freq": 0.62,
+  "p_freq_limit": 0.0,
+  "p_freq_ramp": 0.15,
+  "p_freq_dramp": 0.0,
+  "p_duty": 0.5,
+  "p_duty_ramp": 0.0,
+  "p_repeat_speed": 0.0,
+  "p_lpf_freq": 1.0,
+  "p_lpf_ramp": 0.0,
+  "p_lpf_resonance": 0.0,
+  "p_hpf_freq": 0.1,
+  "p_hpf_ramp": 0.0,
+  "sound_vol": 0.45
+}

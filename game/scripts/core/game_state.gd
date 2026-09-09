@@ -34,10 +34,34 @@ var death_count: int = 0
 ## 않는다 — M2에서 보스 인카운터 진입/종료 시 이 플래그를 토글하도록 연결할 것.
 var in_boss_encounter: bool = false
 
+## 실제 플레이 시간 누적기(D-15: 정예/월드 보스 리스폰 타이머는 오프라인 시간 미포함).
+## Node._process(delta)는 SceneTree.paused == true면 자동으로 호출되지 않으므로(기본
+## process_mode=INHERIT), 일시정지 제외 조건은 별도 분기 없이 엔진이 보장해 준다.
+## scripts/systems/elite_spawner.gd(M2-3)가 이 값을 직접 읽는 대신 아래
+## elite_respawn_remaining_sec을 통해서만 리스폰 판정을 하고, 이 값 자체는 세이브
+## 참고용/디버그용으로만 노출한다.
+var play_time_sec: float = 0.0
+
+## 정예 리스폰 카운트다운(초). source_id(=monster_id, elite_goblin_captain/
+## elite_bunchi_spawn) -> 남은 초. 0 이하이거나 키가 없으면 "리스폰 준비됨"(스폰 가능)
+## 을 뜻한다 — elite_spawner.gd가 처치 시 farming_sources.json.respawn_seconds로
+## 채우고, 여기서 매 프레임 실제 플레이 시간만큼 깎는다(D-15). to_dict()/from_dict()로
+## 세이브에 포함된다("GameState에 리스폰 타이머 직렬화").
+var elite_respawn_remaining_sec: Dictionary = {}
+
 
 func _ready() -> void:
 	Events.player_died.connect(_on_player_died)
 	Events.player_spawned.connect(_on_player_spawned)
+
+
+## 실제 플레이 시간 누적 + 정예 리스폰 카운트다운 감소(D-15). 일시정지 중에는 엔진이
+## 이 함수 자체를 호출하지 않는다(기본 process_mode=INHERIT + SceneTree.paused).
+func _process(delta: float) -> void:
+	play_time_sec += delta
+	for source_id in elite_respawn_remaining_sec.keys():
+		elite_respawn_remaining_sec[source_id] = maxf(
+			0.0, float(elite_respawn_remaining_sec[source_id]) - delta)
 
 
 ## 비석과 상호작용했을 때 호출(Waystone.activate()). 워프 목적지 선택 UI는 M2 범위 —
@@ -137,6 +161,8 @@ func to_dict() -> Dictionary:
 		"mailbox": mailbox.duplicate(true),
 		"inventory": inventory.to_dict(),
 		"equipment": equipment.to_dict(),
+		"play_time_sec": play_time_sec,
+		"elite_respawn_remaining_sec": elite_respawn_remaining_sec.duplicate(true),
 	}
 
 
@@ -145,6 +171,8 @@ func from_dict(data: Dictionary) -> void:
 	mailbox = (data.get("mailbox", []) as Array).duplicate(true)
 	inventory.from_dict(data.get("inventory", {}))
 	equipment.from_dict(data.get("equipment", {}))
+	play_time_sec = float(data.get("play_time_sec", 0.0))
+	elite_respawn_remaining_sec = (data.get("elite_respawn_remaining_sec", {}) as Dictionary).duplicate(true)
 	_apply_equipment_stats_to_player()
 
 
