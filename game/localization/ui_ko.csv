@@ -1,6 +1,7 @@
 keys,ko
 ui.hud.level_prefix,레벨
 ui.hud.gold_unit,골드
+ui.hud.save_icon,저장됨
 ui.inv.tab.inventory,가방
 ui.inv.tab.skill,스킬
 ui.inv.tab.codex,도감

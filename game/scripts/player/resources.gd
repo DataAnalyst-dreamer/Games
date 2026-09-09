@@ -75,3 +75,18 @@ func is_dead() -> bool:
 ## 실제 DEX 값을 전달하도록 교체할 것, godot-engineer TODO).
 static func roll_cost_with_dex(base_cost: float, dex: float) -> float:
 	return base_cost * (1.0 - minf(0.5, dex / 300.0))
+
+
+## M2-6(F8-1) 세이브 직렬화. max_hp/max_stamina/회복 관련 필드는 combat.json + 장비
+## 스탯(Equipment.compute_stats())로 매 로드마다 다시 계산되는 파생값이라 저장하지
+## 않는다 — "현재값"만 담아 로드 후 재계산된 상한에 clamp해서 되돌린다(from_dict).
+func to_dict() -> Dictionary:
+	return {"hp": hp, "stamina": stamina}
+
+
+## data가 비어 있으면(구버전 세이브 등) 현재 값을 그대로 둔다. 상한(max_hp/max_stamina)은
+## 이 시점에 이미 장비 스탯 반영이 끝나 있어야 정확히 clamp된다 — 호출 순서는 GameState.
+## from_dict()(장비 재계산 포함)를 먼저 실행한 뒤 이 함수를 호출할 것(save_manager.gd 참고).
+func from_dict(data: Dictionary) -> void:
+	hp = clampi(int(data.get("hp", hp)), 0, max_hp)
+	stamina = clampf(float(data.get("stamina", stamina)), 0.0, max_stamina)

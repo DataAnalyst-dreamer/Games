@@ -20,6 +20,9 @@ var _player_inside: Player = null
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
+	# M2-6(F8-1): 세이브 로드 시 GameState.activated_waystone_ids로 이 비석을 다시 찾아
+	# is_active를 복원하기 위한 조회용 그룹(save_manager.gd:_restore_waystones() 참고).
+	add_to_group(&"waystones")
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -32,7 +35,19 @@ func activate() -> void:
 		return
 	is_active = true
 	GameState.set_last_waystone(self)
+	Events.waystone_activated.emit(waystone_id) # M2-6: 오토세이브 트리거(F8-1).
 	_play_activation_feedback()
+
+
+## 세이브 로드 복원 전용(M2-6, F8-1). activate()와 달리 GameState 갱신·오토세이브
+## 트리거·연출을 다시 일으키지 않고 시각 상태만 "활성화됨"으로 맞춘다(로드 직후 색만
+## 밝게 유지 — Waystone1을 이미 여러 번 활성화한 것처럼 재생하면 안 됨).
+func restore_active_silently() -> void:
+	if is_active:
+		return
+	is_active = true
+	if _visual != null:
+		_visual.modulate = Color(1.3, 1.25, 0.6, 1.0)
 
 
 func _on_body_entered(body: Node) -> void:

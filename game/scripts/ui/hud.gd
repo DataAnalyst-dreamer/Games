@@ -53,6 +53,12 @@ const STAMINA_FLASH_CYCLE_SEC := 0.08
 @onready var debug_status_label: Label = $DebugPanel/DebugVBox/StatusLabel
 @onready var debug_death_label: Label = $DebugPanel/DebugVBox/DeathLabel
 
+## M2-6(F8-1 "저장 완료 시 우하단 아이콘 1초"). 텍스트는 로컬라이징 key
+## (ui.hud.save_icon)만 쓴다 — 실제 아이콘 그래픽은 pixel-artist TODO(완료 보고 참고),
+## 지금은 텍스트 라벨을 아이콘 자리에 그대로 쓴다.
+@onready var save_icon: Label = $BottomRight/SaveIcon
+const SAVE_ICON_DURATION_SEC := 1.0
+
 var _player: Player
 
 var _hp_current: int = 0
@@ -90,6 +96,8 @@ func _ready() -> void:
 	hp_text.text = "-- / --"
 	boss_bar_container.visible = false
 	debug_panel.visible = false
+	save_icon.visible = false
+	save_icon.text = tr(&"ui.hud.save_icon")
 
 	Events.player_hp_changed.connect(_on_hp_changed)
 	Events.player_stamina_changed.connect(_on_stamina_changed)
@@ -103,6 +111,7 @@ func _ready() -> void:
 	Events.boss_started.connect(_on_boss_started)
 	Events.boss_defeated.connect(_on_boss_defeated)
 	Events.settings_changed.connect(_on_settings_changed)
+	Events.save_completed.connect(_on_save_completed)
 
 	# Player._ready()가 Hud보다 먼저(트리 순서상) 초기 시그널을 이미 쏜 뒤일 수 있어
 	# (DebugHud와 같은 한계), 현재 값을 한 번 직접 끌어와 초기 표시를 맞춘다.
@@ -124,6 +133,14 @@ func _process(_delta: float) -> void:
 	# F4: 인벤토리 텍스트 덤프(M2-1). 정식 인벤토리 UI는 M2-2 — 지금은 콘솔 출력만.
 	if Input.is_action_just_pressed(&"debug_inventory_dump"):
 		GameState.dump_inventory_debug()
+	# M2-6(F8-1) 디버그 입력: F5 수동 저장(슬롯 1=index 0), F9 로드(같은 슬롯).
+	# 정식 저장/불러오기 UI(여관 카운터, 슬롯 선택 화면)는 다음 단계 범위.
+	if Input.is_action_just_pressed(&"debug_save"):
+		var result: Dictionary = SaveManager.save(0, "manual")
+		print("[SaveManager] F5 수동 저장(슬롯1): %s" % str(result))
+	if Input.is_action_just_pressed(&"debug_load"):
+		var result: Dictionary = SaveManager.load(0, "manual")
+		print("[SaveManager] F9 로드(슬롯1): %s" % str(result))
 
 
 # --- 테마 적용 ---
@@ -315,6 +332,19 @@ func _on_boss_started(boss_id: StringName) -> void:
 
 func _on_boss_defeated(_boss_id: StringName) -> void:
 	boss_bar_container.visible = false
+
+
+# --- 저장 완료 아이콘 (우하단, M2-6/F8-1) ---
+
+func _on_save_completed(_slot: int, _kind: StringName, ok: bool) -> void:
+	if not ok:
+		return # 실패(전투 중 등)는 별도 안내가 있을 때까지 조용히 무시(호출부가 print 로그로 확인).
+	save_icon.visible = true
+	var timer := get_tree().create_timer(SAVE_ICON_DURATION_SEC)
+	timer.timeout.connect(func() -> void:
+		if is_instance_valid(save_icon):
+			save_icon.visible = false
+	)
 
 
 # --- 설정 반영 ---
