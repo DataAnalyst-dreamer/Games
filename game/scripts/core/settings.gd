@@ -24,6 +24,10 @@ var sfx_volume: float = 1.0
 
 
 func _ready() -> void:
+	# M2-2(F7-2): 한국어 단일 로컬라이징(`localization/ui_ko.csv`)만 있고 다른 로케일
+	# 번역이 없어, OS/CI 환경 로케일(예: 헤드리스 테스트의 "en")로 뒀다간 tr()이 매번
+	# 키 문자열 그대로를 반환한다 — 언어 선택 옵션이 생기기 전까지는 "ko" 고정.
+	TranslationServer.set_locale("ko")
 	load_settings()
 
 

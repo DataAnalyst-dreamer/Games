@@ -24,7 +24,7 @@ func _ready() -> void:
 	add_child(_main)
 
 	_player = _main.get_node("Player") as Player
-	_hud = _main.get_node("Hud/Root") as Hud
+	_hud = _main.get_node("UiRoot/Hud/Root") as Hud
 
 	# 몬스터가 개입하지 않도록 치운다 — HP 변화는 이 스모크가 직접 유발한다.
 	for monster_name in ["Slime1", "Slime2", "Slime3", "HornRabbit1", "HornRabbit2", "Mushroom1"]:
