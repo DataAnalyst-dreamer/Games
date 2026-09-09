@@ -1,0 +1,166 @@
+{
+  "_comment": "랜덤 옵션 풀(F3-1, GDD 6.3 '20종'). 근거: docs/specs/items-and-drops-m2.md §3. 등급은 옵션 값 자체에 영향을 주지 않고 개수만 늘린다(F3-1: 고급1/희귀2/영웅3+.../전설 고유스킬/유물 세트) - value_min/max는 grade 무관 단일 범위. pct 계열은 비율(0.05=5%), flat 계열은 정수. applicable_categories는 items.json.category 중 장비 7종(weapon/sub/head/armor/boots/ring/amulet)만 대상 - 치장/소모품/재료엔 옵션이 붙지 않는다.",
+
+  "atk_pct": {
+    "affix_id": "atk_pct",
+    "stat_type": "atk_pct",
+    "value_min": 0.03,
+    "value_max": 0.08,
+    "applicable_categories": ["weapon", "sub", "ring", "amulet"],
+    "weight": 10
+  },
+  "crit_chance": {
+    "affix_id": "crit_chance",
+    "stat_type": "crit_chance",
+    "value_min": 0.02,
+    "value_max": 0.05,
+    "applicable_categories": ["weapon", "ring", "amulet"],
+    "weight": 8
+  },
+  "crit_damage_pct": {
+    "affix_id": "crit_damage_pct",
+    "stat_type": "crit_damage_pct",
+    "value_min": 0.05,
+    "value_max": 0.15,
+    "applicable_categories": ["weapon", "ring"],
+    "weight": 6
+  },
+  "move_speed_pct": {
+    "affix_id": "move_speed_pct",
+    "stat_type": "move_speed_pct",
+    "value_min": 0.02,
+    "value_max": 0.05,
+    "applicable_categories": ["boots", "ring"],
+    "weight": 5
+  },
+  "gold_find_pct": {
+    "affix_id": "gold_find_pct",
+    "stat_type": "gold_find_pct",
+    "value_min": 0.05,
+    "value_max": 0.15,
+    "applicable_categories": ["ring", "amulet", "armor"],
+    "weight": 6
+  },
+  "cooldown_reduction_pct": {
+    "affix_id": "cooldown_reduction_pct",
+    "stat_type": "cooldown_reduction_pct",
+    "value_min": 0.02,
+    "value_max": 0.06,
+    "applicable_categories": ["amulet", "ring", "head"],
+    "weight": 5
+  },
+  "life_steal_pct": {
+    "affix_id": "life_steal_pct",
+    "stat_type": "life_steal_pct",
+    "value_min": 0.01,
+    "value_max": 0.03,
+    "applicable_categories": ["weapon", "ring"],
+    "weight": 4
+  },
+  "elemental_dmg_fire_pct": {
+    "affix_id": "elemental_dmg_fire_pct",
+    "stat_type": "elemental_dmg_fire_pct",
+    "value_min": 0.04,
+    "value_max": 0.10,
+    "applicable_categories": ["weapon", "amulet"],
+    "weight": 4
+  },
+  "elemental_dmg_wind_pct": {
+    "affix_id": "elemental_dmg_wind_pct",
+    "stat_type": "elemental_dmg_wind_pct",
+    "value_min": 0.04,
+    "value_max": 0.10,
+    "applicable_categories": ["weapon", "amulet"],
+    "weight": 4
+  },
+  "elemental_dmg_thunder_pct": {
+    "affix_id": "elemental_dmg_thunder_pct",
+    "stat_type": "elemental_dmg_thunder_pct",
+    "value_min": 0.04,
+    "value_max": 0.10,
+    "applicable_categories": ["weapon", "amulet"],
+    "weight": 4
+  },
+  "elemental_dmg_water_pct": {
+    "affix_id": "elemental_dmg_water_pct",
+    "stat_type": "elemental_dmg_water_pct",
+    "value_min": 0.04,
+    "value_max": 0.10,
+    "applicable_categories": ["weapon", "amulet"],
+    "weight": 4
+  },
+  "elemental_dmg_holy_pct": {
+    "affix_id": "elemental_dmg_holy_pct",
+    "stat_type": "elemental_dmg_holy_pct",
+    "value_min": 0.03,
+    "value_max": 0.08,
+    "applicable_categories": ["weapon", "amulet"],
+    "weight": 2,
+    "_comment": "holy는 elements.json.holy_bonus_vs_tags(demon) 전용 상성이라 하틀랜드(demon 태그 없음)에서는 체감 효과가 낮음 - 의도적으로 가중치를 낮게 잡아 등장 빈도를 줄임"
+  },
+  "max_hp_flat": {
+    "affix_id": "max_hp_flat",
+    "stat_type": "max_hp_flat",
+    "value_min": 8,
+    "value_max": 20,
+    "applicable_categories": ["armor", "head", "boots", "sub", "amulet"],
+    "weight": 9
+  },
+  "max_stamina_flat": {
+    "affix_id": "max_stamina_flat",
+    "stat_type": "max_stamina_flat",
+    "value_min": 5,
+    "value_max": 15,
+    "applicable_categories": ["armor", "boots", "sub"],
+    "weight": 7
+  },
+  "stamina_cost_reduction_pct": {
+    "affix_id": "stamina_cost_reduction_pct",
+    "stat_type": "stamina_cost_reduction_pct",
+    "value_min": 0.03,
+    "value_max": 0.08,
+    "applicable_categories": ["boots", "sub"],
+    "weight": 5
+  },
+  "defense_flat": {
+    "affix_id": "defense_flat",
+    "stat_type": "defense_flat",
+    "value_min": 2,
+    "value_max": 6,
+    "applicable_categories": ["armor", "head", "boots", "sub"],
+    "weight": 9
+  },
+  "item_find_pct": {
+    "affix_id": "item_find_pct",
+    "stat_type": "item_find_pct",
+    "value_min": 0.03,
+    "value_max": 0.08,
+    "applicable_categories": ["ring", "amulet"],
+    "weight": 5,
+    "_comment": "LUK 스탯(등급 가중치 곱연산)과는 별도 가산 보너스. drop_tables.json의 최종 확률 계산 이후 아이템 발견 총량에 곱해지는 2차 배율(엔지니어 요청 참고)"
+  },
+  "exp_gain_pct": {
+    "affix_id": "exp_gain_pct",
+    "stat_type": "exp_gain_pct",
+    "value_min": 0.03,
+    "value_max": 0.08,
+    "applicable_categories": ["amulet", "ring"],
+    "weight": 4
+  },
+  "attack_speed_pct": {
+    "affix_id": "attack_speed_pct",
+    "stat_type": "attack_speed_pct",
+    "value_min": 0.02,
+    "value_max": 0.05,
+    "applicable_categories": ["weapon", "ring"],
+    "weight": 6
+  },
+  "damage_reduction_pct": {
+    "affix_id": "damage_reduction_pct",
+    "stat_type": "damage_reduction_pct",
+    "value_min": 0.02,
+    "value_max": 0.05,
+    "applicable_categories": ["armor", "head", "sub"],
+    "weight": 5
+  }
+}

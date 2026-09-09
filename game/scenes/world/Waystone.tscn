@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/waystone.gd" id="1_script"]
+
+[sub_resource type="RectangleShape2D" id="area_shape"]
+size = Vector2(20, 24)
+
+[node name="Waystone" type="Area2D"]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("1_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -4)
+shape = SubResource("area_shape")
+
+[node name="Placeholder" type="Polygon2D" parent="."]
+color = Color(0.5, 0.55, 0.62, 1)
+polygon = PackedVector2Array(-6, 8, -6, -4, -3, -12, 3, -12, 6, -4, 6, 8)

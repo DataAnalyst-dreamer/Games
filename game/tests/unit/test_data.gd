@@ -72,6 +72,50 @@ func test_movement_and_stamina_ranges() -> void:
 	assert_lte(roll_cost, stamina_max, "구르기 1회 비용은 최대치 이하")
 
 
+func test_hurt_stun_and_iframes_match_addendum() -> void:
+	# addendum §2 확정: 경직 0.25s < 무적 0.5s (스턴락 방지).
+	assert_almost_eq(float(_data.get_value("combat", "hurt.stun_sec")), 0.25, 0.0001)
+	assert_almost_eq(float(_data.get_value("combat", "hurt.iframes_sec")), 0.5, 0.0001)
+	assert_lte(float(_data.get_value("combat", "hurt.stun_sec")), float(_data.get_value("combat", "hurt.iframes_sec")))
+
+
+func test_hurt_stun_greater_than_iframes_is_rejected() -> void:
+	var probe := DataScript.new()
+	add_child_autofree(probe)
+	probe.tables["combat"] = {"hurt": {"stun_sec": 0.6, "iframes_sec": 0.5}}
+	probe.validation_errors.clear()
+	probe._validate_value_rules()
+	assert_gt(probe.validation_errors.size(), 0, "stun_sec > iframes_sec는 에러여야 한다(스턴락 방지)")
+
+
+func test_knockback_duration_matches_addendum() -> void:
+	assert_almost_eq(float(_data.get_value("combat", "knockback.duration_sec")), 0.12, 0.0001)
+
+
+func test_camera_shake_tiers_present() -> void:
+	# addendum §3-2: normal은 진폭 0(GDD 4.2 그대로 셰이크 없음), 나머지 3단계는 양수.
+	assert_almost_eq(float(_data.get_value("combat", "camera_shake.normal.amplitude_px")), 0.0, 0.0001)
+	for tier: String in ["heavy", "crit", "hit"]:
+		var amp: float = float(_data.get_value("combat", "camera_shake.%s.amplitude_px" % tier))
+		var dur: float = float(_data.get_value("combat", "camera_shake.%s.duration_sec" % tier))
+		assert_gt(amp, 0.0, "camera_shake.%s.amplitude_px > 0" % tier)
+		assert_gt(dur, 0.0, "camera_shake.%s.duration_sec > 0" % tier)
+	# 강공격 < 크리티컬 진폭·지속(addendum §3-2 표: 크리는 강공격보다 한 단계 더 강함).
+	assert_lt(float(_data.get_value("combat", "camera_shake.heavy.amplitude_px")),
+		float(_data.get_value("combat", "camera_shake.crit.amplitude_px")))
+
+
+func test_guard_and_stamina_multipliers_confirmed_not_balance_todo() -> void:
+	# 결정 요청 8 승인(D-68 예정): guard.move_speed_multiplier / stamina.guard_regen_multiplier
+	# 는 확정 전환되어 더 이상 _balance_todo 목록에 있으면 안 된다.
+	var guard_todo: Array = _data.get_value("combat", "guard._balance_todo", [])
+	var stamina_todo: Array = _data.get_value("combat", "stamina._balance_todo", [])
+	assert_false(guard_todo.has("move_speed_multiplier"), "move_speed_multiplier는 확정 전환됨")
+	assert_false(stamina_todo.has("guard_regen_multiplier"), "guard_regen_multiplier는 확정 전환됨")
+	assert_almost_eq(float(_data.get_value("combat", "guard.move_speed_multiplier")), 0.5, 0.0001)
+	assert_almost_eq(float(_data.get_value("combat", "stamina.guard_regen_multiplier")), 0.5, 0.0001)
+
+
 func test_get_value_default_for_missing_key() -> void:
 	assert_eq(_data.get_value("combat", "does.not.exist", 42), 42)
 	assert_eq(_data.get_value("no_such_table", "x", "fallback"), "fallback")

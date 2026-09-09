@@ -1,0 +1,107 @@
+{
+  "_comment": "파밍 소스 리스폰·보상 테이블(F3-5, F6-3). 스키마: docs/specs/data_tables.md §11 (여기서는 상위호환 확장 필드 repeat_reward_table_ids/first_clear_reward_table_ids — 복수형 배열 — 를 사용한다. 사유·검증 로직 전문은 docs/specs/elite-and-farming-m2.md §2 참고, data_tables.md §11 자체 갱신은 이번 세션 범위 밖이라 문서 §4에 엔지니어/스키마 갱신 요청으로 남긴다). GDD 6.5 7종 카테고리(type) 그대로이나, 정예(elite)는 개체별 리스폰 타이머가 독립적이라(F6-3 '표시: 정예는 이름표+등급 테두리 전용 HP바', 월드맵 아이콘도 개체별) source_id를 2개로 분리했다 - 그래서 이 파일은 8행이지만 GDD/BRD가 말하는 '7종'은 카테고리 수를 뜻한다(elite-and-farming-m2.md §2-1 표 참고). 모든 respawn_seconds는 실제 플레이 시간 기준(D-15, 오프라인 시간 미포함). reward_table_ids가 가리키는 값은 drop_tables.json의 실존 source_id여야 하며(field_hartland의 goblin_scout 몫은 D-80으로 goblin_scout_common이 신설되어 이제 채워짐), 비어있는 배열/필드는 M2 시점에 정의 불가능한 항목(주로 epic+ 없음)임을 뜻한다(_balance_todo로 표시).",
+
+  "field_hartland": {
+    "source_id": "field_hartland",
+    "type": "field",
+    "region_id": "hartland",
+    "respawn_seconds": 0,
+    "respawn_trigger": "always",
+    "first_clear_reward_table_ids": [],
+    "repeat_reward_table_ids": ["slime_common", "horn_rabbit_common", "mushroom_common", "goblin_scout_common"],
+    "show_respawn_icon_on_map": false,
+    "_comment": "GDD 6.5 '필드 사냥터 | 상시'. 하틀랜드 필드 4종(방울슬라임/뿔토끼/버섯돌이/고블린 정찰병) 개별 drop_tables 참조를 배열로 묶었다. goblin_scout_common은 D-80으로 drop_tables.json에 신설되어 monsters.json.goblin_scout.drop_table_id 갱신과 함께 이 배열에도 반영했다(이전 '전용 테이블 없어 제외' 상태 해소)."
+  },
+
+  "elite_goblin_captain": {
+    "source_id": "elite_goblin_captain",
+    "type": "elite",
+    "region_id": "hartland",
+    "respawn_seconds": 1800,
+    "respawn_trigger": "on_kill",
+    "first_clear_reward_table_ids": [],
+    "repeat_reward_table_ids": ["elite_goblin_captain"],
+    "show_respawn_icon_on_map": true,
+    "location": { "chunk_id": "HL_C5R3", "pos_global_tile": [296, 152], "landmark": "부서진 마차(L12)" },
+    "_comment": "docs/levels/hartland.md ⑤. F6-3 '정예: 스탯 배율 강화 + 패턴 1개'. 몬스터 스탯 상세는 elite-and-farming-m2.md §1-2(D-75 예정)."
+  },
+
+  "elite_bunchi_spawn": {
+    "source_id": "elite_bunchi_spawn",
+    "type": "elite",
+    "region_id": "hartland",
+    "respawn_seconds": 1800,
+    "respawn_trigger": "on_kill",
+    "first_clear_reward_table_ids": [],
+    "repeat_reward_table_ids": ["elite_bunchi_spawn"],
+    "show_respawn_icon_on_map": true,
+    "location": { "chunk_id": "HL_C1R5", "pos_global_tile": [24, 272], "landmark": "습지" },
+    "_comment": "docs/levels/hartland.md ⑤. 2막 스토리 개체 재사용 + 필드 상시 정예. 강화 패턴=분열(처치 시 slime 2마리 스폰) - elite-and-farming-m2.md §1-3(D-75 예정)."
+  },
+
+  "mini_dungeon_echo_cave": {
+    "source_id": "mini_dungeon_echo_cave",
+    "type": "mini_dungeon",
+    "region_id": "hartland",
+    "respawn_seconds": 86400,
+    "respawn_trigger": "on_completion",
+    "first_clear_reward_table_ids": ["field_treasure_chest"],
+    "repeat_reward_table_ids": ["field_treasure_chest"],
+    "first_clear_bonus_item_id": "spirit_shard",
+    "show_respawn_icon_on_map": false,
+    "location": { "quest_id": "main_a1_s06", "landmark": "메아리 굴" },
+    "_comment": "docs/levels/hartland.md ⑦(메아리 굴, 5~10분, 3구간). GDD 6.5 '미니 던전 | 1일 | 보물상자, 정령 조각'. 보물상자는 drop_tables.json.field_treasure_chest(그 파일 자체의 _comment가 이 용도를 명시)를 그대로 재사용. 정령 조각은 확률 드랍이 아니라 고정 수집물(GDD 5.3 '4개 모으면 HP/스태미나 +1칸')이라 drop_tables 확률 구조 밖 - first_clear_bonus_item_id로 별도 고정 지급(엔지니어 요청, §4). 첫 클리어와 반복 보상이 같은 테이블을 쓰는 이유: M2 시점에 legendary/epic 전용 '첫 클리어 확정' 테이블을 만들 수 없음(§4 참고) - first_clear는 정령 조각 고정 지급으로만 차별화."
+  },
+
+  "region_dungeon_hartland": {
+    "source_id": "region_dungeon_hartland",
+    "type": "region_dungeon",
+    "region_id": "hartland",
+    "respawn_seconds": 0,
+    "respawn_trigger": "always",
+    "first_clear_reward_table_ids": [],
+    "repeat_reward_table_ids": [],
+    "show_respawn_icon_on_map": false,
+    "location": { "landmark": "미정 - 지역 보스 '거대 슬라임 킹'(GDD 7.2) 던전, 레벨 디자인 상세 명세 대기" },
+    "_comment": "GDD 6.5 '지역 던전 | 재입장 자유 | 영웅~전설, 성물 파편'. hartland.md는 이번 패스에서 메아리 굴(미니던전)만 상세화했고 정식 지역 던전 배치는 아직 없음 - respawn_seconds=0(재입장 자유)만 GDD 값대로 선반영, reward_table_ids는 비워둠(epic+ 아이템 부재 + 던전 레벨 디자인 미착수, _balance_todo). GDD 13장 로드맵상 M2 목표 '던전 1개·보스 1종'이 이 지역 던전을 가리키는지 세계 보스 제단인지 확인 필요 - §5 결정 요청."
+  },
+
+  "world_boss_hartland": {
+    "source_id": "world_boss_hartland",
+    "type": "world_boss",
+    "region_id": "hartland",
+    "respawn_seconds": 259200,
+    "respawn_trigger": "on_kill",
+    "first_clear_reward_table_ids": [],
+    "repeat_reward_table_ids": [],
+    "show_respawn_icon_on_map": true,
+    "location": { "chunk_id": "HL_C4R5", "pos_global_tile": [256, 288], "landmark": "방목장 유적(L11)", "candidate_monster_id": "corrupted_ox_deumjigi" },
+    "_comment": "docs/levels/hartland.md ⑤ 월드 보스 제단 후보('듬직이'). GDD 6.5 '월드 보스 | 3일 | 전설 확정'. reward_table_ids를 비운 이유: F6-3 '전설 1점 확정'을 만족하려면 legendary 등급 아이템이 최소 1개 있어야 하는데 items.json은 M2 범위에서 epic 이상을 만들지 않았다(items-and-drops-m2.md 결정 요청 C) - 몬스터 본체(corrupted_ox_deumjigi)도 monsters.json에 아직 없다. 제단 위치·리스폰 주기만 레벨 디자인 연속성을 위해 선반영하고, 몬스터 스탯·확정 전설 아이템은 M3 결정 대상(§5 결정 요청)."
+  },
+
+  "gathering_hartland": {
+    "source_id": "gathering_hartland",
+    "type": "gathering",
+    "region_id": "hartland",
+    "respawn_seconds": 0,
+    "respawn_trigger": "always",
+    "first_clear_reward_table_ids": [],
+    "repeat_reward_table_ids": [],
+    "show_respawn_icon_on_map": false,
+    "location": { "landmark": "hartland.md ⑥ 낚시 포인트·채집 포인트" },
+    "_comment": "GDD 6.5 '낚시·채광·채집 | 상시 | 요리 재료, 광석, 희귀 수집물'. drop_tables.json 확률 롤 구조가 아니라 spawns.json(레벨 디자인 소유, D-51)의 gathering_nodes가 정의하는 고정 item_id 목록에서 직접 획득 - 이 파일에서 reward_table_id를 채우지 않는 것이 올바른 상태다(엔지니어 요청: data_tables.md §11 검증 규칙에 'type=gathering/treasure_map은 reward_table_ids가 비어 있어도 오류 아님' 예외 추가 필요, §4)."
+  },
+
+  "treasure_map_hartland": {
+    "source_id": "treasure_map_hartland",
+    "type": "treasure_map",
+    "region_id": "hartland",
+    "respawn_seconds": 0,
+    "respawn_trigger": "on_map_use",
+    "first_clear_reward_table_ids": [],
+    "repeat_reward_table_ids": ["field_treasure_chest"],
+    "show_respawn_icon_on_map": false,
+    "location": { "landmark": "hartland.md ⑤ 보물 지도 목표 지점(몬스터 드랍으로 지도 획득 -> X 지점을 판다)" },
+    "_comment": "GDD 6.5 '보물 지도 | - | 지도의 X 지점을 찾아 파면 보물'. respawn_seconds=0은 쿨다운이 아니라 '지도를 갖고 있으면 언제든 사용 가능'을 의미(D-15 리스폰 개념과 무관, respawn_trigger=on_map_use로 구분). 실제 몬스터 드랍표에 지도 아이템 자체를 추가하는 것은 이 파일 범위 밖(drop_tables.json 갱신 필요, M3 검토)."
+  }
+}

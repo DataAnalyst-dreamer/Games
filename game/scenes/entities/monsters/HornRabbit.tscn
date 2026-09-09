@@ -1,0 +1,88 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/third_party/ninja_adventure/Actor/Monster/Racoon/SpriteSheet.png" id="1_racoon"]
+[ext_resource type="Script" path="res://scripts/entities/monster_base.gd" id="2_base"]
+[ext_resource type="Script" path="res://scripts/systems/hurtbox.gd" id="3_hurtbox"]
+[ext_resource type="Script" path="res://scripts/systems/hitbox.gd" id="4_hitbox"]
+
+[sub_resource type="AtlasTexture" id="at_0"]
+atlas = ExtResource("1_racoon")
+region = Rect2(0, 0, 16, 16)
+[sub_resource type="AtlasTexture" id="at_1"]
+atlas = ExtResource("1_racoon")
+region = Rect2(0, 16, 16, 16)
+[sub_resource type="AtlasTexture" id="at_2"]
+atlas = ExtResource("1_racoon")
+region = Rect2(0, 32, 16, 16)
+[sub_resource type="AtlasTexture" id="at_3"]
+atlas = ExtResource("1_racoon")
+region = Rect2(0, 48, 16, 16)
+
+[sub_resource type="SpriteFrames" id="sprite_frames"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("at_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("at_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("at_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("at_3")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 6.0
+}]
+
+[sub_resource type="RectangleShape2D" id="body_shape"]
+size = Vector2(10, 8)
+
+[sub_resource type="CircleShape2D" id="detection_shape"]
+radius = 80.0
+
+[node name="HornRabbit" type="CharacterBody2D" groups=["monster"]]
+collision_layer = 4
+collision_mask = 1
+motion_mode = 1
+script = ExtResource("2_base")
+monster_id = "horn_rabbit"
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -4)
+sprite_frames = SubResource("sprite_frames")
+animation = &"idle"
+autoplay = "idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("body_shape")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 16
+collision_mask = 0
+script = ExtResource("3_hurtbox")
+team = &"enemy"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+position = Vector2(0, -4)
+shape = SubResource("body_shape")
+
+[node name="Hitbox" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 16
+script = ExtResource("4_hitbox")
+team = &"enemy"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+position = Vector2(0, -4)
+shape = SubResource("body_shape")
+
+[node name="DetectionArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DetectionArea"]
+shape = SubResource("detection_shape")

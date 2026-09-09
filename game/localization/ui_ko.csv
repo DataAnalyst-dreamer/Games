@@ -1,0 +1,203 @@
+keys,ko
+ui.hud.level_prefix,레벨
+ui.hud.gold_unit,골드
+ui.hud.save_icon,저장됨
+ui.hud.quest_progress_fmt,%s (%d/%d)
+npc.teo.greeting,"짐부터 챙기고 움직이자."
+npc.meru.greeting,"왔으면 밥부터 먹어. 국 데워줄게."
+npc.pinto.greeting,"어이, 이 망치 좀 봐! 나 요즘 늘고 있다니까."
+npc.rozel.greeting,"오늘도 목초지 순찰 중이야. 별일 없지?"
+npc.dami.greeting,"저기... 몽실이 못 봤어요? 갑자기 사라졌어요."
+ui.inv.tab.inventory,가방
+ui.inv.tab.skill,스킬
+ui.inv.tab.codex,도감
+ui.inv.tab.quest,퀘스트
+ui.inv.gold_label,골드
+ui.inv.filter.all,전체
+ui.inv.filter.common,일반
+ui.inv.filter.uncommon,고급
+ui.inv.filter.rare,희귀
+ui.inv.filter.epic,영웅
+ui.inv.filter.legendary,전설
+ui.inv.filter.relic,유물
+ui.inv.slot.weapon,무기
+ui.inv.slot.sub,보조
+ui.inv.slot.head,투구
+ui.inv.slot.armor,갑옷
+ui.inv.slot.boots,신발
+ui.inv.slot.ring,반지
+ui.inv.slot.amulet,부적
+ui.inv.slot.costume_hat,모자
+ui.inv.slot.costume_outfit,의상
+ui.inv.slot.costume_backpack,백팩
+ui.inv.slot.empty,비어있음
+ui.inv.costume_header,치장 (준비중)
+ui.inv.sort_button,정렬
+ui.inv.placeholder_tab,준비 중인 화면입니다
+ui.inv.empty_grid,가방이 비어 있어요. 모험을 떠나 볼까요?
+ui.inv.filter_empty,이 등급의 아이템이 없어요
+ui.inv.locked_marked,잠김(분해 방지)
+ui.inv.compare.header,장착 중과 비교
+ui.inv.compare.enhance,강화
+ui.inv.compare.refine,재련
+ui.inv.compare.no_affix,옵션 없음
+ui.inv.compare.new_affix,신규
+ui.inv.qty_prefix,수량
+ui.inv.guide.confirm,결정
+ui.inv.guide.close,닫기
+ui.inv.guide.tab,탭
+ui.inv.guide.filter,필터
+ui.inv.guide.sort,정렬
+ui.inv.guide.mark,잠금토글
+ui.inv.stat.attack,공격
+ui.inv.stat.defense,방어
+ui.inv.stat.max_hp,최대 체력
+ui.inv.stat.speed_pct,이동속도
+ui.inv.stat.atk_pct,공격력 %
+ui.inv.stat.crit_chance,치명타 확률
+ui.inv.stat.crit_damage_pct,치명타 피해
+ui.inv.stat.move_speed_pct,이동속도
+ui.inv.stat.gold_find_pct,골드 획득량
+ui.inv.stat.item_find_pct,아이템 획득률
+ui.inv.stat.exp_gain_pct,경험치 획득량
+ui.inv.stat.life_steal_pct,생명력 흡수
+ui.inv.stat.damage_reduction_pct,피해 감소
+ui.inv.stat.cooldown_reduction_pct,쿨타임 감소
+ui.inv.stat.attack_speed_pct,공격 속도
+ui.inv.stat.stamina_cost_reduction_pct,스태미나 소모 감소
+ui.inv.stat.max_stamina_flat,최대 스태미나
+ui.inv.stat.defense_flat,방어력
+ui.inv.stat.max_hp_flat,최대 체력
+ui.inv.stat.elemental_dmg_fire_pct,화속성 피해
+ui.inv.stat.elemental_dmg_water_pct,수속성 피해
+ui.inv.stat.elemental_dmg_wind_pct,풍속성 피해
+ui.inv.stat.elemental_dmg_thunder_pct,뇌속성 피해
+ui.inv.stat.elemental_dmg_holy_pct,빛속성 피해
+item_weapon_common_1_name,낡은 검
+item_weapon_common_2_name,무쇠 검
+item_weapon_uncommon_1_name,정련된 장검
+item_weapon_uncommon_2_name,은빛 세검
+item_weapon_rare_1_name,서리 인챈트 검
+item_weapon_rare_2_name,화염 인챈트 검
+item_sub_common_1_name,나무 방패
+item_sub_common_2_name,철제 방패
+item_sub_uncommon_1_name,정련된 방패
+item_sub_uncommon_2_name,은빛 방패
+item_sub_rare_1_name,서리의 방패
+item_sub_rare_2_name,화염의 방패
+item_head_common_1_name,천 두건
+item_head_common_2_name,가죽 모자
+item_head_uncommon_1_name,사슬 투구
+item_head_uncommon_2_name,강철 투구
+item_head_rare_1_name,서리 투구
+item_head_rare_2_name,화염 투구
+item_armor_common_1_name,천 옷
+item_armor_common_2_name,가죽 갑옷
+item_armor_uncommon_1_name,사슬 갑옷
+item_armor_uncommon_2_name,강철 갑옷
+item_armor_rare_1_name,서리 갑옷
+item_armor_rare_2_name,화염 갑옷
+item_boots_common_1_name,천 신발
+item_boots_common_2_name,가죽 장화
+item_boots_uncommon_1_name,사슬 장화
+item_boots_uncommon_2_name,강철 장화
+item_boots_rare_1_name,서리 장화
+item_boots_rare_2_name,화염 장화
+item_ring_common_1_name,구리 반지
+item_ring_common_2_name,철 반지
+item_ring_uncommon_1_name,은 반지
+item_ring_uncommon_2_name,옥 반지
+item_ring_rare_1_name,서리 반지
+item_ring_rare_2_name,화염 반지
+item_amulet_common_1_name,나무 부적
+item_amulet_common_2_name,뼈 부적
+item_amulet_uncommon_1_name,은 부적
+item_amulet_uncommon_2_name,흑요석 부적
+item_amulet_rare_1_name,서리 부적
+item_amulet_rare_2_name,화염 부적
+item_potion_hp_small_name,소형 체력 물약
+item_potion_hp_medium_name,중형 체력 물약
+item_food_spicy_mushroom_skewer_name,매운 버섯 꼬치
+item_food_honey_berry_tart_name,꿀베리 타르트
+item_enhance_stone_name,강화석
+item_slime_jelly_name,슬라임 젤리
+item_rabbit_horn_name,토끼 뿔
+item_mushroom_cap_name,버섯 갓
+item_iron_ore_name,철광석
+item_goblin_fang_name,고블린 송곳니
+item_marsh_moss_name,늪 이끼
+item_salvage_scrap_name,고철 조각
+item_backpack_small_name,작은 배낭
+item_backpack_medium_name,중간 배낭
+item_backpack_large_name,큰 배낭
+ui.smith.tab.enhance,강화
+ui.smith.tab.refine,재련
+ui.smith.tab.salvage,분해
+ui.smith.tab.craft,제작
+ui.smith.gold_label,골드
+ui.smith.have_label,보유
+ui.smith.equip_list.empty,대상 장비가 없어요
+ui.smith.npc_pinto_greeting,어서 와요! 뭘 도와드릴까요?
+ui.smith.enhance.success_rate_label,성공률
+ui.smith.enhance.cost_label,필요 재료
+ui.smith.enhance.stone_unit,강화석
+ui.smith.enhance.warning_no_ceiling,+7부터는 실패해도 강화석만 사라져요. 장비는 절대 부서지지 않아요
+ui.smith.enhance.button,강화한다!
+ui.smith.enhance.button_max,최대 강화!
+ui.smith.enhance.insufficient,재료가 부족해요
+ui.smith.enhance.confirm_high_risk_title,실패할 수도 있어요
+ui.smith.enhance.confirm_high_risk_body,실패하면 강화석만 사라지고 단계는 그대로예요. 계속할까요?
+ui.smith.enhance.result_success_title,강화 성공!
+ui.smith.enhance.result_fail_title,강화 실패...
+ui.smith.enhance.result_fail_body,강화석만 사라졌어요. 단계는 그대로예요
+ui.smith.refine.remaining_label,재련 잔여
+ui.smith.refine.locked_hint,더 이상 재련할 수 없어요
+ui.smith.refine.no_affix_hint,재련할 옵션이 없어요
+ui.smith.refine.button,재련한다
+ui.smith.refine.choice_title,어떤 옵션을 쓸까요?
+ui.smith.refine.choice_old,기존 옵션
+ui.smith.refine.choice_new,새 옵션
+ui.smith.refine.confirm_button,이 옵션으로 확정
+ui.smith.salvage.select_all,전체 선택
+ui.smith.salvage.selected_count_label,선택됨
+ui.smith.salvage.yield_preview_label,예상 획득
+ui.smith.salvage.button,분해한다
+ui.smith.salvage.hold_hint,홀드해서 분해 확정
+ui.smith.salvage.locked_excluded_hint,잠금된 장비는 목록에서 제외돼요
+ui.smith.salvage.equipped_excluded_hint,장착 중인 장비는 분해할 수 없어요
+ui.smith.salvage.confirm_epic_title,정말 분해할까요?
+ui.smith.salvage.confirm_epic_body,영웅 등급 이상 장비가 포함되어 있어요
+ui.smith.salvage.empty,분해할 장비가 없어요
+ui.smith.salvage.result_title,분해 완료
+ui.smith.craft.blueprint_list_empty,보유한 도면이 없어요
+ui.smith.craft.blueprint_unknown,???
+ui.smith.craft.blueprint_unknown_hint,어딘가에서 도면을 구하면 제작할 수 있어요
+ui.smith.craft.materials_label,필요 재료
+ui.smith.craft.grade_note_stable,제작품 — 기본 스탯이 안정적이에요
+ui.smith.craft.button,제작한다
+ui.smith.craft.result_title,제작 완료!
+ui.smith.craft.field_mode_hint,필드 간이 제작 — 소모품·재료 가공만 가능해요
+ui.smith.guide.execute,실행
+ui.smith.guide.select_all,전체선택
+ui.smith.guide.toggle_select,체크
+ui.smith.guide.hold_salvage,홀드0.8s 분해
+ui.mail.title,우편함
+ui.mail.empty,도착한 우편이 없어요
+ui.mail.claim_one,받기
+ui.mail.claim_all,전체 받기
+ui.mail.no_time_limit_hint,가방이 가득 차면 우편함에 그대로 남아 있어요
+ui.mail.inventory_full_partial_result,%d개 수령 · %d개는 가방이 가득 차 남겨뒀어요
+ui.mail.claimed_toast,받았어요!
+ui.mail.claim_failed_full,가방이 가득 찼어요
+blueprint_iron_sword_name,정련된 장검 도면
+blueprint_iron_sword_desc,철광석과 슬라임 젤리로 정련된 장검을 만드는 도면
+blueprint_iron_greatsword_name,은빛 세검 도면
+blueprint_iron_greatsword_desc,철광석과 고블린 송곳니로 은빛 세검을 만드는 도면
+blueprint_leather_cap_name,사슬 투구 도면
+blueprint_leather_cap_desc,토끼 뿔과 고블린 귀로 사슬 투구를 만드는 도면
+blueprint_leather_vest_name,사슬 갑옷 도면
+blueprint_leather_vest_desc,버섯 갓과 철광석으로 사슬 갑옷을 만드는 도면
+blueprint_iron_plate_name,강철 갑옷 도면
+blueprint_iron_plate_desc,철광석과 늪 이끼로 강철 갑옷을 만드는 도면
+blueprint_iron_greaves_name,사슬 장화 도면
+blueprint_iron_greaves_desc,철광석과 슬라임 젤리로 사슬 장화를 만드는 도면

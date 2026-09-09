@@ -1,56 +1,64 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene load_steps=32 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/third_party/ninja_adventure/Actor/Character/Knight/SpriteSheet.png" id="1_knight"]
 [ext_resource type="Script" path="res://scripts/player/player.gd" id="2_player"]
 [ext_resource type="Script" path="res://scripts/player/state_machine.gd" id="3_state_machine"]
 [ext_resource type="Script" path="res://scripts/player/states/idle.gd" id="4_idle"]
 [ext_resource type="Script" path="res://scripts/player/states/move.gd" id="5_move"]
+[ext_resource type="Script" path="res://scripts/player/states/attack.gd" id="6_attack"]
+[ext_resource type="Script" path="res://scripts/player/states/hurt.gd" id="7_hurt"]
+[ext_resource type="Script" path="res://scripts/player/states/dead.gd" id="8_dead"]
+[ext_resource type="Script" path="res://scripts/player/states/roll.gd" id="12_roll"]
+[ext_resource type="Script" path="res://scripts/player/states/guard.gd" id="13_guard"]
+[ext_resource type="Script" path="res://scripts/systems/hitbox.gd" id="9_hitbox"]
+[ext_resource type="Script" path="res://scripts/systems/hurtbox.gd" id="10_hurtbox"]
+[ext_resource type="Texture2D" path="res://assets/third_party/ninja_adventure/Items/Weapons/Sword/Sprite.png" id="11_sword"]
 
 [sub_resource type="AtlasTexture" id="at_down_0"]
 atlas = ExtResource("1_knight")
 region = Rect2(0, 0, 16, 16)
 [sub_resource type="AtlasTexture" id="at_down_1"]
 atlas = ExtResource("1_knight")
-region = Rect2(0, 16, 16, 16)
+region = Rect2(16, 0, 16, 16)
 [sub_resource type="AtlasTexture" id="at_down_2"]
 atlas = ExtResource("1_knight")
-region = Rect2(0, 32, 16, 16)
+region = Rect2(32, 0, 16, 16)
 [sub_resource type="AtlasTexture" id="at_down_3"]
 atlas = ExtResource("1_knight")
-region = Rect2(0, 48, 16, 16)
-[sub_resource type="AtlasTexture" id="at_up_0"]
-atlas = ExtResource("1_knight")
-region = Rect2(16, 0, 16, 16)
-[sub_resource type="AtlasTexture" id="at_up_1"]
-atlas = ExtResource("1_knight")
-region = Rect2(16, 16, 16, 16)
-[sub_resource type="AtlasTexture" id="at_up_2"]
-atlas = ExtResource("1_knight")
-region = Rect2(16, 32, 16, 16)
-[sub_resource type="AtlasTexture" id="at_up_3"]
-atlas = ExtResource("1_knight")
-region = Rect2(16, 48, 16, 16)
+region = Rect2(48, 0, 16, 16)
 [sub_resource type="AtlasTexture" id="at_left_0"]
 atlas = ExtResource("1_knight")
-region = Rect2(32, 0, 16, 16)
+region = Rect2(0, 16, 16, 16)
 [sub_resource type="AtlasTexture" id="at_left_1"]
 atlas = ExtResource("1_knight")
-region = Rect2(32, 16, 16, 16)
+region = Rect2(16, 16, 16, 16)
 [sub_resource type="AtlasTexture" id="at_left_2"]
 atlas = ExtResource("1_knight")
-region = Rect2(32, 32, 16, 16)
+region = Rect2(32, 16, 16, 16)
 [sub_resource type="AtlasTexture" id="at_left_3"]
 atlas = ExtResource("1_knight")
-region = Rect2(32, 48, 16, 16)
-[sub_resource type="AtlasTexture" id="at_right_0"]
-atlas = ExtResource("1_knight")
-region = Rect2(48, 0, 16, 16)
-[sub_resource type="AtlasTexture" id="at_right_1"]
-atlas = ExtResource("1_knight")
 region = Rect2(48, 16, 16, 16)
-[sub_resource type="AtlasTexture" id="at_right_2"]
+[sub_resource type="AtlasTexture" id="at_up_0"]
+atlas = ExtResource("1_knight")
+region = Rect2(0, 32, 16, 16)
+[sub_resource type="AtlasTexture" id="at_up_1"]
+atlas = ExtResource("1_knight")
+region = Rect2(16, 32, 16, 16)
+[sub_resource type="AtlasTexture" id="at_up_2"]
+atlas = ExtResource("1_knight")
+region = Rect2(32, 32, 16, 16)
+[sub_resource type="AtlasTexture" id="at_up_3"]
 atlas = ExtResource("1_knight")
 region = Rect2(48, 32, 16, 16)
+[sub_resource type="AtlasTexture" id="at_right_0"]
+atlas = ExtResource("1_knight")
+region = Rect2(0, 48, 16, 16)
+[sub_resource type="AtlasTexture" id="at_right_1"]
+atlas = ExtResource("1_knight")
+region = Rect2(16, 48, 16, 16)
+[sub_resource type="AtlasTexture" id="at_right_2"]
+atlas = ExtResource("1_knight")
+region = Rect2(32, 48, 16, 16)
 [sub_resource type="AtlasTexture" id="at_right_3"]
 atlas = ExtResource("1_knight")
 region = Rect2(48, 48, 16, 16)
@@ -161,6 +169,12 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="body_shape"]
 size = Vector2(10, 8)
 
+[sub_resource type="RectangleShape2D" id="hurtbox_shape"]
+size = Vector2(10, 8)
+
+[sub_resource type="CircleShape2D" id="hitbox_shape"]
+radius = 8.0
+
 [node name="Player" type="CharacterBody2D"]
 collision_layer = 2
 motion_mode = 1
@@ -175,6 +189,34 @@ autoplay = "idle_down"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("body_shape")
 
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 16
+collision_mask = 0
+script = ExtResource("10_hurtbox")
+team = &"player"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+position = Vector2(0, -4)
+shape = SubResource("hurtbox_shape")
+
+[node name="Hitbox" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 16
+script = ExtResource("9_hitbox")
+team = &"player"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+position = Vector2(0, -4)
+shape = SubResource("hitbox_shape")
+
+[node name="WeaponPivot" type="Node2D" parent="."]
+position = Vector2(0, -4)
+visible = false
+
+[node name="WeaponSprite" type="Sprite2D" parent="WeaponPivot"]
+position = Vector2(0, -8)
+texture = ExtResource("11_sword")
+
 [node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
 script = ExtResource("3_state_machine")
 initial_state = NodePath("Idle")
@@ -184,3 +226,18 @@ script = ExtResource("4_idle")
 
 [node name="Move" type="Node" parent="StateMachine"]
 script = ExtResource("5_move")
+
+[node name="Attack" type="Node" parent="StateMachine"]
+script = ExtResource("6_attack")
+
+[node name="Hurt" type="Node" parent="StateMachine"]
+script = ExtResource("7_hurt")
+
+[node name="Dead" type="Node" parent="StateMachine"]
+script = ExtResource("8_dead")
+
+[node name="Roll" type="Node" parent="StateMachine"]
+script = ExtResource("12_roll")
+
+[node name="Guard" type="Node" parent="StateMachine"]
+script = ExtResource("13_guard")

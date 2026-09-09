@@ -36,3 +36,20 @@ func update(_delta: float) -> void:
 ## Player._physics_process 에서 위임된다. move_and_slide 호출은 각 상태 책임.
 func physics_update(_delta: float) -> void:
 	pass
+
+
+## 구르기 발동 공용 헬퍼(S2-1b 예외: "스태미나 부족 시 미발동 + 바 빨간색 깜박임").
+## Idle/Move/Guard/Attack(캔슬 가능 시점) 등 구르기를 트리거할 수 있는 모든 상태가
+## 공유한다 — 비용 계산은 Player.get_roll_cost()(DEX 경감 훅 포함)에 위임.
+func try_enter_roll() -> void:
+	if player.has_stamina_for_roll():
+		finished.emit(&"Roll", {})
+	else:
+		Events.player_stamina_insufficient.emit(&"roll")
+
+
+## 이 상태에서 적용할 스태미나 회복 배율(기본 1.0 = 정상 회복 속도). Guard처럼 회복이
+## 느려지는 상태가 오버라이드한다(M1-2 제안값, combat.json stamina.guard_regen_
+## multiplier).
+func get_stamina_regen_multiplier() -> float:
+	return 1.0

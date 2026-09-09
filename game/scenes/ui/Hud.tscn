@@ -1,0 +1,377 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud_script"]
+[ext_resource type="Theme" path="res://ui/theme.tres" id="2_theme"]
+[ext_resource type="Script" path="res://scripts/ui/vignette_overlay.gd" id="3_vignette_script"]
+
+[node name="Hud" type="CanvasLayer"]
+
+[node name="Root" type="Control" parent="."]
+theme = ExtResource("2_theme")
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("1_hud_script")
+
+[node name="TopLeft" type="Control" parent="Root"]
+layout_mode = 1
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 160.0
+offset_bottom = 64.0
+mouse_filter = 2
+
+[node name="Portrait" type="ColorRect" parent="Root/TopLeft"]
+layout_mode = 0
+offset_right = 16.0
+offset_bottom = 16.0
+color = Color(0.352941, 0.227451, 0.133333, 1)
+
+[node name="LevelLabel" type="Label" parent="Root/TopLeft"]
+layout_mode = 0
+offset_top = 18.0
+offset_right = 40.0
+offset_bottom = 30.0
+mouse_filter = 2
+
+[node name="HPBar" type="ProgressBar" parent="Root/TopLeft"]
+layout_mode = 0
+offset_left = 20.0
+offset_right = 150.0
+offset_bottom = 10.0
+custom_minimum_size = Vector2(130, 10)
+min_value = 0.0
+max_value = 100.0
+value = 100.0
+show_percentage = false
+mouse_filter = 2
+
+[node name="HPText" type="Label" parent="Root/TopLeft"]
+layout_mode = 0
+offset_left = 20.0
+offset_right = 150.0
+offset_bottom = 10.0
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StaminaBar" type="ProgressBar" parent="Root/TopLeft"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 13.0
+offset_right = 130.0
+offset_bottom = 19.0
+custom_minimum_size = Vector2(110, 6)
+min_value = 0.0
+max_value = 100.0
+value = 100.0
+show_percentage = false
+mouse_filter = 2
+
+[node name="BuffRow" type="HBoxContainer" parent="Root/TopLeft"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 22.0
+offset_right = 154.0
+offset_bottom = 38.0
+mouse_filter = 2
+
+[node name="TopCenter" type="Control" parent="Root"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -160.0
+offset_top = 6.0
+offset_right = 160.0
+offset_bottom = 20.0
+mouse_filter = 2
+
+[node name="QuestLine" type="Label" parent="Root/TopCenter"]
+layout_mode = 0
+offset_right = 320.0
+offset_bottom = 14.0
+mouse_filter = 2
+horizontal_alignment = 1
+
+[node name="TopRight" type="Control" parent="Root"]
+layout_mode = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -70.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = 46.0
+mouse_filter = 2
+
+[node name="MinimapFrame" type="Panel" parent="Root/TopRight"]
+layout_mode = 0
+offset_right = 64.0
+offset_bottom = 40.0
+mouse_filter = 2
+
+[node name="MinimapPlaceholder" type="ColorRect" parent="Root/TopRight/MinimapFrame"]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 60.0
+offset_bottom = 36.0
+color = Color(0.145098, 0.235294, 0.152941, 1)
+mouse_filter = 2
+
+[node name="BossBar" type="Control" parent="Root"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -90.0
+offset_top = -96.0
+offset_right = 90.0
+offset_bottom = -72.0
+mouse_filter = 2
+visible = false
+
+[node name="BossFrame" type="Panel" parent="Root/BossBar"]
+layout_mode = 0
+offset_right = 180.0
+offset_bottom = 24.0
+mouse_filter = 2
+
+[node name="BossVBox" type="VBoxContainer" parent="Root/BossBar/BossFrame"]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 2.0
+offset_right = 176.0
+offset_bottom = 22.0
+mouse_filter = 2
+
+[node name="BossName" type="Label" parent="Root/BossBar/BossFrame/BossVBox"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+
+[node name="BossHPBar" type="ProgressBar" parent="Root/BossBar/BossFrame/BossVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(168, 8)
+min_value = 0.0
+max_value = 100.0
+value = 100.0
+show_percentage = false
+mouse_filter = 2
+
+[node name="BossPhase" type="Label" parent="Root/BossBar/BossFrame/BossVBox"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+
+[node name="BottomCenter" type="Control" parent="Root"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -110.0
+offset_top = -64.0
+offset_right = 110.0
+offset_bottom = -6.0
+mouse_filter = 2
+
+[node name="SkillSlot1" type="Panel" parent="Root/BottomCenter"]
+layout_mode = 0
+offset_top = 20.0
+offset_right = 18.0
+offset_bottom = 38.0
+mouse_filter = 2
+
+[node name="SkillSlot1Label" type="Label" parent="Root/BottomCenter/SkillSlot1"]
+layout_mode = 0
+offset_right = 18.0
+offset_bottom = 18.0
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "Q"
+
+[node name="SkillSlot2" type="Panel" parent="Root/BottomCenter"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 38.0
+offset_bottom = 38.0
+mouse_filter = 2
+
+[node name="SkillSlot2Label" type="Label" parent="Root/BottomCenter/SkillSlot2"]
+layout_mode = 0
+offset_right = 18.0
+offset_bottom = 18.0
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "E"
+
+[node name="QuickCross" type="Control" parent="Root/BottomCenter"]
+layout_mode = 0
+offset_left = 80.0
+offset_top = 5.0
+offset_right = 128.0
+offset_bottom = 53.0
+mouse_filter = 2
+
+[node name="SlotUp" type="Panel" parent="Root/BottomCenter/QuickCross"]
+layout_mode = 0
+offset_left = 16.0
+offset_right = 32.0
+offset_bottom = 16.0
+mouse_filter = 2
+
+[node name="SlotUpLabel" type="Label" parent="Root/BottomCenter/QuickCross/SlotUp"]
+layout_mode = 0
+offset_right = 16.0
+offset_bottom = 16.0
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "1"
+
+[node name="SlotRight" type="Panel" parent="Root/BottomCenter/QuickCross"]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 16.0
+offset_right = 48.0
+offset_bottom = 32.0
+mouse_filter = 2
+
+[node name="SlotRightLabel" type="Label" parent="Root/BottomCenter/QuickCross/SlotRight"]
+layout_mode = 0
+offset_right = 16.0
+offset_bottom = 16.0
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "2"
+
+[node name="SlotDown" type="Panel" parent="Root/BottomCenter/QuickCross"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 32.0
+offset_right = 32.0
+offset_bottom = 48.0
+mouse_filter = 2
+
+[node name="SlotDownLabel" type="Label" parent="Root/BottomCenter/QuickCross/SlotDown"]
+layout_mode = 0
+offset_right = 16.0
+offset_bottom = 16.0
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "3"
+
+[node name="SlotLeft" type="Panel" parent="Root/BottomCenter/QuickCross"]
+layout_mode = 0
+offset_top = 16.0
+offset_right = 16.0
+offset_bottom = 32.0
+mouse_filter = 2
+
+[node name="SlotLeftLabel" type="Label" parent="Root/BottomCenter/QuickCross/SlotLeft"]
+layout_mode = 0
+offset_right = 16.0
+offset_bottom = 16.0
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "4"
+
+[node name="BottomLeft" type="Control" parent="Root"]
+layout_mode = 1
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_top = -70.0
+offset_right = 160.0
+offset_bottom = -6.0
+mouse_filter = 2
+
+[node name="LogList" type="VBoxContainer" parent="Root/BottomLeft"]
+layout_mode = 0
+offset_right = 154.0
+offset_bottom = 64.0
+mouse_filter = 2
+alignment = 2
+
+[node name="BottomRight" type="Control" parent="Root"]
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -70.0
+offset_top = -20.0
+offset_right = -6.0
+offset_bottom = -6.0
+mouse_filter = 2
+
+[node name="SaveIcon" type="Label" parent="Root/BottomRight"]
+layout_mode = 0
+offset_right = 64.0
+offset_bottom = 14.0
+mouse_filter = 2
+horizontal_alignment = 2
+vertical_alignment = 1
+visible = false
+
+[node name="VignetteOverlay" type="Control" parent="Root"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("3_vignette_script")
+
+[node name="DebugPanel" type="Control" parent="Root"]
+layout_mode = 1
+offset_left = 6.0
+offset_top = 68.0
+offset_right = 210.0
+offset_bottom = 180.0
+mouse_filter = 2
+visible = false
+
+[node name="DebugBg" type="Panel" parent="Root/DebugPanel"]
+layout_mode = 0
+offset_right = 204.0
+offset_bottom = 112.0
+mouse_filter = 2
+
+[node name="DebugVBox" type="VBoxContainer" parent="Root/DebugPanel"]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 198.0
+offset_bottom = 106.0
+mouse_filter = 2
+
+[node name="HPLabel" type="Label" parent="Root/DebugPanel/DebugVBox"]
+layout_mode = 2
+mouse_filter = 2
+text = "HP: -- / --"
+
+[node name="StaminaLabel" type="Label" parent="Root/DebugPanel/DebugVBox"]
+layout_mode = 2
+mouse_filter = 2
+text = "STAMINA: -- / --"
+
+[node name="ComboLabel" type="Label" parent="Root/DebugPanel/DebugVBox"]
+layout_mode = 2
+mouse_filter = 2
+text = "COMBO: -"
+
+[node name="StatusLabel" type="Label" parent="Root/DebugPanel/DebugVBox"]
+layout_mode = 2
+mouse_filter = 2
+text = "STATUS: -"
+
+[node name="DeathLabel" type="Label" parent="Root/DebugPanel/DebugVBox"]
+layout_mode = 2
+mouse_filter = 2
+text = "DEATHS: 0"

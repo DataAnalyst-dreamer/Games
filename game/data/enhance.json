@@ -1,0 +1,61 @@
+{
+  "_comment": "강화/재련/분해(F3-3, S3-3a~c). 근거: docs/specs/items-and-drops-m2.md §5. success_rate +1~+6=1.0(무실패), +7~+10=0.70/0.55/0.40/0.25는 D-14 하드 고정값(밸런싱 조정 시 이 문서와 D-14를 함께 갱신할 것 - 임의 변경 금지). 실패 천장 없음(D-32) - success_rate는 시행마다 독립.",
+
+  "enhance_levels": {
+    "+1": { "success_rate": 1.0, "cost_gold": 20, "cost_stone_qty": 1, "stat_multiplier": 1.08 },
+    "+2": { "success_rate": 1.0, "cost_gold": 35, "cost_stone_qty": 1, "stat_multiplier": 1.16 },
+    "+3": { "success_rate": 1.0, "cost_gold": 55, "cost_stone_qty": 2, "stat_multiplier": 1.24 },
+    "+4": { "success_rate": 1.0, "cost_gold": 80, "cost_stone_qty": 2, "stat_multiplier": 1.32 },
+    "+5": { "success_rate": 1.0, "cost_gold": 110, "cost_stone_qty": 3, "stat_multiplier": 1.40 },
+    "+6": { "success_rate": 1.0, "cost_gold": 150, "cost_stone_qty": 3, "stat_multiplier": 1.48 },
+    "+7": { "success_rate": 0.70, "cost_gold": 200, "cost_stone_qty": 4, "stat_multiplier": 1.56 },
+    "+8": { "success_rate": 0.55, "cost_gold": 260, "cost_stone_qty": 5, "stat_multiplier": 1.64 },
+    "+9": { "success_rate": 0.40, "cost_gold": 330, "cost_stone_qty": 6, "stat_multiplier": 1.72 },
+    "+10": { "success_rate": 0.25, "cost_gold": 420, "cost_stone_qty": 8, "stat_multiplier": 1.80 }
+  },
+
+  "refine": {
+    "_comment": "S3-3b, D-13(신·구 택1, 확정 시 횟수 차감). max_attempts=3은 장비 인스턴스당 카운터(items.json이 아니라 드랍된 개체 상태로 관리 - 엔지니어 요청 참고). common 등급(affix_slot_count=0)은 재련 대상에서 제외(재굴림할 옵션 줄이 없음) - cost_by_grade_and_attempt에 common 키를 두지 않는다.",
+    "max_attempts": 3,
+    "cost_material_id": "enhance_stone",
+    "cost_by_grade_and_attempt": {
+      "uncommon": {
+        "attempt_1": { "cost_gold": 100, "cost_material_qty": 2 },
+        "attempt_2": { "cost_gold": 150, "cost_material_qty": 3 },
+        "attempt_3": { "cost_gold": 220, "cost_material_qty": 4 }
+      },
+      "rare": {
+        "attempt_1": { "cost_gold": 200, "cost_material_qty": 4 },
+        "attempt_2": { "cost_gold": 300, "cost_material_qty": 6 },
+        "attempt_3": { "cost_gold": 450, "cost_material_qty": 8 }
+      },
+      "epic": {
+        "attempt_1": { "cost_gold": 400, "cost_material_qty": 8 },
+        "attempt_2": { "cost_gold": 600, "cost_material_qty": 12 },
+        "attempt_3": { "cost_gold": 900, "cost_material_qty": 16 }
+      },
+      "legendary": {
+        "attempt_1": { "cost_gold": 800, "cost_material_qty": 15 },
+        "attempt_2": { "cost_gold": 1200, "cost_material_qty": 22 },
+        "attempt_3": { "cost_gold": 1800, "cost_material_qty": 30 }
+      },
+      "relic": {
+        "attempt_1": { "cost_gold": 1500, "cost_material_qty": 25 },
+        "attempt_2": { "cost_gold": 2200, "cost_material_qty": 35 },
+        "attempt_3": { "cost_gold": 3300, "cost_material_qty": 50 }
+      }
+    }
+  },
+
+  "disassemble": {
+    "_comment": "S3-3c. 산출은 등급 단조증가. stone_qty=enhance_stone 산출, material_qty=salvage_scrap 산출(범용 분해 재료 - 몬스터별 전용 재료(iron_ore 등)는 분해로 나오지 않는다).",
+    "yield_by_grade": {
+      "common": { "stone_qty": 1, "material_qty": 1 },
+      "uncommon": { "stone_qty": 2, "material_qty": 2 },
+      "rare": { "stone_qty": 4, "material_qty": 3 },
+      "epic": { "stone_qty": 7, "material_qty": 5 },
+      "legendary": { "stone_qty": 12, "material_qty": 8 },
+      "relic": { "stone_qty": 20, "material_qty": 13 }
+    }
+  }
+}

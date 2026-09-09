@@ -1,0 +1,856 @@
+{
+  "_comment": "아이템 정의 테이블(F3-1/F3-2). 근거: docs/specs/items-and-drops-m2.md. M2 범위: 하틀랜드(초원) 장비 7슬롯 카테고리(weapon/sub/head/armor/boots/ring/amulet, 반지는 2슬롯 공유) x 등급(common/uncommon/rare) x 레벨티어(1,2) = 42종 + 소모품 4 + 재료 9 + 백팩 3 = 58개. level_min/base_stats/element/inventory_slot_bonus/effect_* 필드는 이 M2 패스에서 신규 추가 (기존 data_tables.md §7 스키마에 없던 필드 - 문서 갱신 완료, 엔지니어 요청 참고). affix(랜덤 옵션 실값)는 드랍 시점에 affixes.json에서 별도로 굴려 붙는다 - 이 테이블은 affix_slot_count(칸 수)만 갖는다. epic/legendary/relic 등급 아이템은 M2 범위 밖(M3에서 추가 예정, drop_tables.json 해당 등급 가중치는 0으로 잠금). D-80: goblin_ear(재료) 신규 추가 — goblin_scout 전용 드랍 테이블(drop_tables.json.goblin_scout_common) 재료, 재료 8종→9종(items-and-drops-m2.md §1/§5 갱신).",
+  "weapon_common_1": {
+    "item_id": "weapon_common_1",
+    "name_key": "item_weapon_common_1_name",
+    "desc_key": "item_weapon_common_1_desc",
+    "category": "weapon",
+    "grade": "common",
+    "level_min": 1,
+    "affix_slot_count": 0,
+    "sell_price": 15,
+    "base_stats": {
+      "atk_min": 3,
+      "atk_max": 4
+    }
+  },
+  "weapon_common_2": {
+    "item_id": "weapon_common_2",
+    "name_key": "item_weapon_common_2_name",
+    "desc_key": "item_weapon_common_2_desc",
+    "category": "weapon",
+    "grade": "common",
+    "level_min": 5,
+    "affix_slot_count": 0,
+    "sell_price": 22,
+    "base_stats": {
+      "atk_min": 4,
+      "atk_max": 5
+    }
+  },
+  "weapon_uncommon_1": {
+    "item_id": "weapon_uncommon_1",
+    "name_key": "item_weapon_uncommon_1_name",
+    "desc_key": "item_weapon_uncommon_1_desc",
+    "category": "weapon",
+    "grade": "uncommon",
+    "level_min": 6,
+    "affix_slot_count": 1,
+    "sell_price": 36,
+    "base_stats": {
+      "atk_min": 6,
+      "atk_max": 8
+    }
+  },
+  "weapon_uncommon_2": {
+    "item_id": "weapon_uncommon_2",
+    "name_key": "item_weapon_uncommon_2_name",
+    "desc_key": "item_weapon_uncommon_2_desc",
+    "category": "weapon",
+    "grade": "uncommon",
+    "level_min": 10,
+    "affix_slot_count": 1,
+    "sell_price": 47,
+    "base_stats": {
+      "atk_min": 8,
+      "atk_max": 11
+    }
+  },
+  "weapon_rare_1": {
+    "item_id": "weapon_rare_1",
+    "name_key": "item_weapon_rare_1_name",
+    "desc_key": "item_weapon_rare_1_desc",
+    "category": "weapon",
+    "grade": "rare",
+    "level_min": 10,
+    "affix_slot_count": 2,
+    "sell_price": 69,
+    "base_stats": {
+      "atk_min": 12,
+      "atk_max": 16
+    },
+    "str_requirement": 8,
+    "unique_skill_id": null,
+    "set_id": null
+  },
+  "weapon_rare_2": {
+    "item_id": "weapon_rare_2",
+    "name_key": "item_weapon_rare_2_name",
+    "desc_key": "item_weapon_rare_2_desc",
+    "category": "weapon",
+    "grade": "rare",
+    "level_min": 14,
+    "affix_slot_count": 2,
+    "sell_price": 84,
+    "base_stats": {
+      "atk_min": 14,
+      "atk_max": 19
+    },
+    "str_requirement": 12,
+    "unique_skill_id": null,
+    "set_id": null
+  },
+  "sub_common_1": {
+    "item_id": "sub_common_1",
+    "name_key": "item_sub_common_1_name",
+    "desc_key": "item_sub_common_1_desc",
+    "category": "sub",
+    "grade": "common",
+    "level_min": 1,
+    "affix_slot_count": 0,
+    "sell_price": 10,
+    "base_stats": {
+      "defense_min": 2,
+      "defense_max": 3
+    }
+  },
+  "sub_common_2": {
+    "item_id": "sub_common_2",
+    "name_key": "item_sub_common_2_name",
+    "desc_key": "item_sub_common_2_desc",
+    "category": "sub",
+    "grade": "common",
+    "level_min": 5,
+    "affix_slot_count": 0,
+    "sell_price": 15,
+    "base_stats": {
+      "defense_min": 3,
+      "defense_max": 4
+    }
+  },
+  "sub_uncommon_1": {
+    "item_id": "sub_uncommon_1",
+    "name_key": "item_sub_uncommon_1_name",
+    "desc_key": "item_sub_uncommon_1_desc",
+    "category": "sub",
+    "grade": "uncommon",
+    "level_min": 6,
+    "affix_slot_count": 1,
+    "sell_price": 24,
+    "base_stats": {
+      "defense_min": 4,
+      "defense_max": 6
+    }
+  },
+  "sub_uncommon_2": {
+    "item_id": "sub_uncommon_2",
+    "name_key": "item_sub_uncommon_2_name",
+    "desc_key": "item_sub_uncommon_2_desc",
+    "category": "sub",
+    "grade": "uncommon",
+    "level_min": 10,
+    "affix_slot_count": 1,
+    "sell_price": 31,
+    "base_stats": {
+      "defense_min": 5,
+      "defense_max": 7
+    }
+  },
+  "sub_rare_1": {
+    "item_id": "sub_rare_1",
+    "name_key": "item_sub_rare_1_name",
+    "desc_key": "item_sub_rare_1_desc",
+    "category": "sub",
+    "grade": "rare",
+    "level_min": 10,
+    "affix_slot_count": 2,
+    "sell_price": 46,
+    "base_stats": {
+      "defense_min": 8,
+      "defense_max": 11
+    },
+    "unique_skill_id": null,
+    "set_id": null
+  },
+  "sub_rare_2": {
+    "item_id": "sub_rare_2",
+    "name_key": "item_sub_rare_2_name",
+    "desc_key": "item_sub_rare_2_desc",
+    "category": "sub",
+    "grade": "rare",
+    "level_min": 14,
+    "affix_slot_count": 2,
+    "sell_price": 56,
+    "base_stats": {
+      "defense_min": 10,
+      "defense_max": 13
+    },
+    "unique_skill_id": null,
+    "set_id": null
+  },
+  "head_common_1": {
+    "item_id": "head_common_1",
+    "name_key": "item_head_common_1_name",
+    "desc_key": "item_head_common_1_desc",
+    "category": "head",
+    "grade": "common",
+    "level_min": 1,
+    "affix_slot_count": 0,
+    "sell_price": 8,
+    "base_stats": {
+      "defense_min": 1,
+      "defense_max": 2
+    }
+  },
+  "head_common_2": {
+    "item_id": "head_common_2",
+    "name_key": "item_head_common_2_name",
+    "desc_key": "item_head_common_2_desc",
+    "category": "head",
+    "grade": "common",
+    "level_min": 5,
+    "affix_slot_count": 0,
+    "sell_price": 12,
+    "base_stats": {
+      "defense_min": 2,
+      "defense_max": 3
+    }
+  },
+  "head_uncommon_1": {
+    "item_id": "head_uncommon_1",
+    "name_key": "item_head_uncommon_1_name",
+    "desc_key": "item_head_uncommon_1_desc",
+    "category": "head",
+    "grade": "uncommon",
+    "level_min": 6,
+    "affix_slot_count": 1,
+    "sell_price": 19,
+    "base_stats": {
+      "defense_min": 3,
+      "defense_max": 4
+    }
+  },
+  "head_uncommon_2": {
+    "item_id": "head_uncommon_2",
+    "name_key": "item_head_uncommon_2_name",
+    "desc_key": "item_head_uncommon_2_desc",
+    "category": "head",
+    "grade": "uncommon",
+    "level_min": 10,
+    "affix_slot_count": 1,
+    "sell_price": 25,
+    "base_stats": {
+      "defense_min": 4,
+      "defense_max": 5
+    }
+  },
+  "head_rare_1": {
+    "item_id": "head_rare_1",
+    "name_key": "item_head_rare_1_name",
+    "desc_key": "item_head_rare_1_desc",
+    "category": "head",
+    "grade": "rare",
+    "level_min": 10,
+    "affix_slot_count": 2,
+    "sell_price": 37,
+    "base_stats": {
+      "defense_min": 6,
+      "defense_max": 8
+    },
+    "unique_skill_id": null,
+    "set_id": null
+  },
+  "head_rare_2": {
+    "item_id": "head_rare_2",
+    "name_key": "item_head_rare_2_name",
+    "desc_key": "item_head_rare_2_desc",
+    "category": "head",
+    "grade": "rare",
+    "level_min": 14,
+    "affix_slot_count": 2,
+    "sell_price": 45,
+    "base_stats": {
+      "defense_min": 7,
+      "defense_max": 10
+    },
+    "unique_skill_id": null,
+    "set_id": null
+  },
+  "armor_common_1": {
+    "item_id": "armor_common_1",
+    "name_key": "item_armor_common_1_name",
+    "desc_key": "item_armor_common_1_desc",
+    "category": "armor",
+    "grade": "common",
+    "level_min": 1,
+    "affix_slot_count": 0,
+    "sell_price": 12,
+    "base_stats": {
+      "defense_min": 2,
+      "defense_max": 3
+    }
+  },
+  "armor_common_2": {
+    "item_id": "armor_common_2",
+    "name_key": "item_armor_common_2_name",
+    "desc_key": "item_armor_common_2_desc",
+    "category": "armor",
+    "grade": "common",
+    "level_min": 5,
+    "affix_slot_count": 0,
+    "sell_price": 18,
+    "base_stats": {
+      "defense_min": 3,
+      "defense_max": 4
+    }
+  },
+  "armor_uncommon_1": {
+    "item_id": "armor_uncommon_1",
+    "name_key": "item_armor_uncommon_1_name",
+    "desc_key": "item_armor_uncommon_1_desc",
+    "category": "armor",
+    "grade": "uncommon",
+    "level_min": 6,
+    "affix_slot_count": 1,
+    "sell_price": 29,
+    "base_stats": {
+      "defense_min": 5,
+      "defense_max": 7
+    }
+  },
+  "armor_uncommon_2": {
+    "item_id": "armor_uncommon_2",
+    "name_key": "item_armor_uncommon_2_name",
+    "desc_key": "item_armor_uncommon_2_desc",
+    "category": "armor",
+    "grade": "uncommon",
+    "level_min": 10,
+    "affix_slot_count": 1,
+    "sell_price": 37,
+    "base_stats": {
+      "defense_min": 7,
+      "defense_max": 9
+    }
+  },
+  "armor_rare_1": {
+    "item_id": "armor_rare_1",
+    "name_key": "item_armor_rare_1_name",
+    "desc_key": "item_armor_rare_1_desc",
+    "category": "armor",
+    "grade": "rare",
+    "level_min": 10,
+    "affix_slot_count": 2,
+    "sell_price": 55,
+    "base_stats": {
+      "defense_min": 10,
+      "defense_max": 13
+    },
+    "unique_skill_id": null,
+    "set_id": null
+  },
+  "armor_rare_2": {
+    "item_id": "armor_rare_2",
+    "name_key": "item_armor_rare_2_name",
+    "desc_key": "item_armor_rare_2_desc",
+    "category": "armor",
+    "grade": "rare",
+    "level_min": 14,
+    "affix_slot_count": 2,
+    "sell_price": 68,
+    "base_stats": {
+      "defense_min": 12,
+      "defense_max": 16
+    },
+    "unique_skill_id": null,
+    "set_id": null
+  },
+  "boots_common_1": {
+    "item_id": "boots_common_1",
+    "name_key": "item_boots_common_1_name",
+    "desc_key": "item_boots_common_1_desc",
+    "category": "boots",
+    "grade": "common",
+    "level_min": 1,
+    "affix_slot_count": 0,
+    "sell_price": 8,
+    "base_stats": {
+      "defense_min": 1,
+      "defense_max": 2
+    }
+  },
+  "boots_common_2": {
+    "item_id": "boots_common_2",
+    "name_key": "item_boots_common_2_name",
+    "desc_key": "item_boots_common_2_desc",
+    "category": "boots",
+    "grade": "common",
+    "level_min": 5,
+    "affix_slot_count": 0,
+    "sell_price": 12,
+    "base_stats": {
+      "defense_min": 2,
+      "defense_max": 3
+    }
+  },
+  "boots_uncommon_1": {
+    "item_id": "boots_uncommon_1",
+    "name_key": "item_boots_uncommon_1_name",
+    "desc_key": "item_boots_uncommon_1_desc",
+    "category": "boots",
+    "grade": "uncommon",
+    "level_min": 6,
+    "affix_slot_count": 1,
+    "sell_price": 19,
+    "base_stats": {
+      "defense_min": 3,
+      "defense_max": 4
+    }
+  },
+  "boots_uncommon_2": {
+    "item_id": "boots_uncommon_2",
+    "name_key": "item_boots_uncommon_2_name",
+    "desc_key": "item_boots_uncommon_2_desc",
+    "category": "boots",
+    "grade": "uncommon",
+    "level_min": 10,
+    "affix_slot_count": 1,
+    "sell_price": 25,
+    "base_stats": {
+      "defense_min": 4,
+      "defense_max": 5
+    }
+  },
+  "boots_rare_1": {
+    "item_id": "boots_rare_1",
+    "name_key": "item_boots_rare_1_name",
+    "desc_key": "item_boots_rare_1_desc",
+    "category": "boots",
+    "grade": "rare",
+    "level_min": 10,
+    "affix_slot_count": 2,
+    "sell_price": 37,
+    "base_stats": {
+      "defense_min": 6,
+      "defense_max": 8
+    },
+    "unique_skill_id": null,
+    "set_id": null
+  },
+  "boots_rare_2": {
+    "item_id": "boots_rare_2",
+    "name_key": "item_boots_rare_2_name",
+    "desc_key": "item_boots_rare_2_desc",
+    "category": "boots",
+    "grade": "rare",
+    "level_min": 14,
+    "affix_slot_count": 2,
+    "sell_price": 45,
+    "base_stats": {
+      "defense_min": 7,
+      "defense_max": 10
+    },
+    "unique_skill_id": null,
+    "set_id": null
+  },
+  "ring_common_1": {
+    "item_id": "ring_common_1",
+    "name_key": "item_ring_common_1_name",
+    "desc_key": "item_ring_common_1_desc",
+    "category": "ring",
+    "grade": "common",
+    "level_min": 1,
+    "affix_slot_count": 0,
+    "sell_price": 10,
+    "base_stats": {
+      "str": 2
+    }
+  },
+  "ring_common_2": {
+    "item_id": "ring_common_2",
+    "name_key": "item_ring_common_2_name",
+    "desc_key": "item_ring_common_2_desc",
+    "category": "ring",
+    "grade": "common",
+    "level_min": 5,
+    "affix_slot_count": 0,
+    "sell_price": 15,
+    "base_stats": {
+      "dex": 2
+    }
+  },
+  "ring_uncommon_1": {
+    "item_id": "ring_uncommon_1",
+    "name_key": "item_ring_uncommon_1_name",
+    "desc_key": "item_ring_uncommon_1_desc",
+    "category": "ring",
+    "grade": "uncommon",
+    "level_min": 6,
+    "affix_slot_count": 1,
+    "sell_price": 24,
+    "base_stats": {
+      "int": 4
+    }
+  },
+  "ring_uncommon_2": {
+    "item_id": "ring_uncommon_2",
+    "name_key": "item_ring_uncommon_2_name",
+    "desc_key": "item_ring_uncommon_2_desc",
+    "category": "ring",
+    "grade": "uncommon",
+    "level_min": 10,
+    "affix_slot_count": 1,
+    "sell_price": 31,
+    "base_stats": {
+      "vit": 5
+    }
+  },
+  "ring_rare_1": {
+    "item_id": "ring_rare_1",
+    "name_key": "item_ring_rare_1_name",
+    "desc_key": "item_ring_rare_1_desc",
+    "category": "ring",
+    "grade": "rare",
+    "level_min": 10,
+    "affix_slot_count": 2,
+    "sell_price": 46,
+    "base_stats": {
+      "str": 7
+    },
+    "unique_skill_id": null,
+    "set_id": null
+  },
+  "ring_rare_2": {
+    "item_id": "ring_rare_2",
+    "name_key": "item_ring_rare_2_name",
+    "desc_key": "item_ring_rare_2_desc",
+    "category": "ring",
+    "grade": "rare",
+    "level_min": 14,
+    "affix_slot_count": 2,
+    "sell_price": 56,
+    "base_stats": {
+      "dex": 8
+    },
+    "unique_skill_id": null,
+    "set_id": null
+  },
+  "amulet_common_1": {
+    "item_id": "amulet_common_1",
+    "name_key": "item_amulet_common_1_name",
+    "desc_key": "item_amulet_common_1_desc",
+    "category": "amulet",
+    "grade": "common",
+    "level_min": 1,
+    "affix_slot_count": 0,
+    "sell_price": 12,
+    "element": null,
+    "base_stats": {
+      "elemental_damage_pct": 0.03
+    }
+  },
+  "amulet_common_2": {
+    "item_id": "amulet_common_2",
+    "name_key": "item_amulet_common_2_name",
+    "desc_key": "item_amulet_common_2_desc",
+    "category": "amulet",
+    "grade": "common",
+    "level_min": 5,
+    "affix_slot_count": 0,
+    "sell_price": 18,
+    "element": "fire",
+    "base_stats": {
+      "elemental_damage_pct": 0.03
+    }
+  },
+  "amulet_uncommon_1": {
+    "item_id": "amulet_uncommon_1",
+    "name_key": "item_amulet_uncommon_1_name",
+    "desc_key": "item_amulet_uncommon_1_desc",
+    "category": "amulet",
+    "grade": "uncommon",
+    "level_min": 6,
+    "affix_slot_count": 1,
+    "sell_price": 29,
+    "element": "wind",
+    "base_stats": {
+      "elemental_damage_pct": 0.05
+    }
+  },
+  "amulet_uncommon_2": {
+    "item_id": "amulet_uncommon_2",
+    "name_key": "item_amulet_uncommon_2_name",
+    "desc_key": "item_amulet_uncommon_2_desc",
+    "category": "amulet",
+    "grade": "uncommon",
+    "level_min": 10,
+    "affix_slot_count": 1,
+    "sell_price": 37,
+    "element": "thunder",
+    "base_stats": {
+      "elemental_damage_pct": 0.05
+    }
+  },
+  "amulet_rare_1": {
+    "item_id": "amulet_rare_1",
+    "name_key": "item_amulet_rare_1_name",
+    "desc_key": "item_amulet_rare_1_desc",
+    "category": "amulet",
+    "grade": "rare",
+    "level_min": 10,
+    "affix_slot_count": 2,
+    "sell_price": 55,
+    "element": "water",
+    "base_stats": {
+      "elemental_damage_pct": 0.08
+    },
+    "unique_skill_id": null,
+    "set_id": null
+  },
+  "amulet_rare_2": {
+    "item_id": "amulet_rare_2",
+    "name_key": "item_amulet_rare_2_name",
+    "desc_key": "item_amulet_rare_2_desc",
+    "category": "amulet",
+    "grade": "rare",
+    "level_min": 14,
+    "affix_slot_count": 2,
+    "sell_price": 68,
+    "element": null,
+    "base_stats": {
+      "elemental_damage_pct": 0.08
+    },
+    "unique_skill_id": null,
+    "set_id": null
+  },
+  "potion_hp_small": {
+    "item_id": "potion_hp_small",
+    "name_key": "item_potion_hp_small_name",
+    "desc_key": "item_potion_hp_small_desc",
+    "category": "consumable",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 20,
+    "stack_max": 5,
+    "effect_type": "heal_hp",
+    "effect_value": 40,
+    "duration_sec": 0
+  },
+  "potion_hp_medium": {
+    "item_id": "potion_hp_medium",
+    "name_key": "item_potion_hp_medium_name",
+    "desc_key": "item_potion_hp_medium_desc",
+    "category": "consumable",
+    "grade": "uncommon",
+    "affix_slot_count": 0,
+    "sell_price": 45,
+    "stack_max": 5,
+    "effect_type": "heal_hp",
+    "effect_value": 90,
+    "duration_sec": 0
+  },
+  "food_spicy_mushroom_skewer": {
+    "item_id": "food_spicy_mushroom_skewer",
+    "name_key": "item_food_spicy_mushroom_skewer_name",
+    "desc_key": "item_food_spicy_mushroom_skewer_desc",
+    "category": "consumable",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 18,
+    "stack_max": 3,
+    "effect_type": "buff_atk_pct",
+    "effect_value": 0.08,
+    "duration_sec": 600
+  },
+  "food_honey_berry_tart": {
+    "item_id": "food_honey_berry_tart",
+    "name_key": "item_food_honey_berry_tart_name",
+    "desc_key": "item_food_honey_berry_tart_desc",
+    "category": "consumable",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 18,
+    "stack_max": 3,
+    "effect_type": "buff_max_hp_flat",
+    "effect_value": 20,
+    "duration_sec": 600
+  },
+  "enhance_stone": {
+    "item_id": "enhance_stone",
+    "name_key": "item_enhance_stone_name",
+    "desc_key": "item_enhance_stone_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 3,
+    "stack_max": 99
+  },
+  "slime_jelly": {
+    "item_id": "slime_jelly",
+    "name_key": "item_slime_jelly_name",
+    "desc_key": "item_slime_jelly_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 2,
+    "stack_max": 99
+  },
+  "rabbit_horn": {
+    "item_id": "rabbit_horn",
+    "name_key": "item_rabbit_horn_name",
+    "desc_key": "item_rabbit_horn_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 3,
+    "stack_max": 99
+  },
+  "mushroom_cap": {
+    "item_id": "mushroom_cap",
+    "name_key": "item_mushroom_cap_name",
+    "desc_key": "item_mushroom_cap_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 3,
+    "stack_max": 99
+  },
+  "iron_ore": {
+    "item_id": "iron_ore",
+    "name_key": "item_iron_ore_name",
+    "desc_key": "item_iron_ore_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 5,
+    "stack_max": 99
+  },
+  "goblin_ear": {
+    "item_id": "goblin_ear",
+    "name_key": "item_goblin_ear_name",
+    "desc_key": "item_goblin_ear_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 3,
+    "stack_max": 99
+  },
+  "goblin_fang": {
+    "item_id": "goblin_fang",
+    "name_key": "item_goblin_fang_name",
+    "desc_key": "item_goblin_fang_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 6,
+    "stack_max": 99
+  },
+  "marsh_moss": {
+    "item_id": "marsh_moss",
+    "name_key": "item_marsh_moss_name",
+    "desc_key": "item_marsh_moss_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 4,
+    "stack_max": 99
+  },
+  "salvage_scrap": {
+    "item_id": "salvage_scrap",
+    "name_key": "item_salvage_scrap_name",
+    "desc_key": "item_salvage_scrap_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 2,
+    "stack_max": 99
+  },
+  "backpack_small": {
+    "item_id": "backpack_small",
+    "name_key": "item_backpack_small_name",
+    "desc_key": "item_backpack_small_desc",
+    "category": "costume_backpack",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 30,
+    "inventory_slot_bonus": 10
+  },
+  "backpack_medium": {
+    "item_id": "backpack_medium",
+    "name_key": "item_backpack_medium_name",
+    "desc_key": "item_backpack_medium_desc",
+    "category": "costume_backpack",
+    "grade": "uncommon",
+    "affix_slot_count": 0,
+    "sell_price": 90,
+    "inventory_slot_bonus": 25
+  },
+  "backpack_large": {
+    "item_id": "backpack_large",
+    "name_key": "item_backpack_large_name",
+    "desc_key": "item_backpack_large_desc",
+    "category": "costume_backpack",
+    "grade": "rare",
+    "affix_slot_count": 0,
+    "sell_price": 220,
+    "inventory_slot_bonus": 40
+  },
+  "wool_soft": {
+    "item_id": "wool_soft",
+    "name_key": "item_wool_soft_name",
+    "desc_key": "item_wool_soft_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 3,
+    "stack_max": 99,
+    "_comment": "M2-7(F5-1/F5-2 퀘스트) 신설. quest_main_a1_05_reclaim 보상 재료 — docs/data/quests/act1_hartland.json _todo_ids.items에서 해소. game-designer 확인 전 sell_price는 동급 재료(mushroom_cap 등) 기준 잠정치."
+  },
+  "herb_common": {
+    "item_id": "herb_common",
+    "name_key": "item_herb_common_name",
+    "desc_key": "item_herb_common_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 2,
+    "stack_max": 99,
+    "_comment": "M2-7 신설. quest_side_heartland_herbrun collect 목표 재료 — act1_hartland.json _todo_ids.items에서 해소."
+  },
+  "ribbon_dandelion": {
+    "item_id": "ribbon_dandelion",
+    "name_key": "item_ribbon_dandelion_name",
+    "desc_key": "item_ribbon_dandelion_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 3,
+    "stack_max": 99,
+    "_comment": "M2-7 신설. quest_side_heartland_festival_prep collect 목표 재료 — act1_hartland.json _todo_ids.items에서 해소."
+  },
+  "stew_basic": {
+    "item_id": "stew_basic",
+    "name_key": "item_stew_basic_name",
+    "desc_key": "item_stew_basic_desc",
+    "category": "consumable",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 15,
+    "stack_max": 5,
+    "effect_type": "heal_hp",
+    "effect_value": 30,
+    "duration_sec": 0,
+    "_comment": "M2-7 신설(_balance_todo). quest_side_heartland_montsil/quest_side_heartland_herbrun 보상 — effect_value=30은 potion_hp_small(40)보다 약한 '집밥' 컨셉 잠정치, game-designer 확인 필요."
+  },
+  "horn_shard": {
+    "item_id": "horn_shard",
+    "name_key": "item_horn_shard_name",
+    "desc_key": "item_horn_shard_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 5,
+    "stack_max": 99,
+    "_comment": "M2-7 신설. quest_main_a1_07_fiveroads 보상 — characters.md 6.2절 기존 플레이버 재사용(narrative-writer). 현재 크래프팅/강화 재료로 소비되지 않는 순수 기념품(flavor) 아이템 — 실제 용처는 game-designer TODO."
+  },
+  "ribbon_charm": {
+    "item_id": "ribbon_charm",
+    "name_key": "item_ribbon_charm_name",
+    "desc_key": "item_ribbon_charm_desc",
+    "category": "material",
+    "grade": "common",
+    "affix_slot_count": 0,
+    "sell_price": 5,
+    "stack_max": 99,
+    "_comment": "M2-7 신설. quest_side_heartland_festival_prep 보상 — 로젤이 엮어준 리본 부적(flavor). horn_shard와 동일하게 현재 용처 없는 기념품 아이템, game-designer TODO."
+  }
+}

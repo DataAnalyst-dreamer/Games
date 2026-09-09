@@ -1,0 +1,205 @@
+{
+  "_schema_version": "0.1",
+  "_source_doc": "docs/levels/hartland.md 10절 퀘스트 배치 (M2-8)",
+  "_comment": "level-designer가 관리. quest_layout_spawner.gd(Main.tscn의 HartlandQuestLayer 노드)가 이 파일을 읽어 kind별 공통 씬(kind=location -> QuestTrigger.tscn의 location_id, kind=object -> QuestObject.tscn의 object_id, kind=npc -> QuestNpc.tscn의 npc_id)으로 인스턴스화한다. position은 game/scenes/main/Main.tscn 계층(프로토타입 단일 청크, 월드 원점 기준 px) 좌표다 - hartland.md의 384x384 타일 전체 그리드 좌표와는 별개의 축소 매핑이다(해당 문서 10절 매핑표 참고).",
+  "bridgeport_dock": {
+    "id": "bridgeport_dock",
+    "kind": "location",
+    "scene": "res://scenes/world/QuestTrigger.tscn",
+    "position": [
+      -380,
+      160
+    ],
+    "one_shot": true,
+    "region_id": "bridgeport"
+  },
+  "heartland_dandelion_village": {
+    "id": "heartland_dandelion_village",
+    "kind": "location",
+    "scene": "res://scenes/world/QuestTrigger.tscn",
+    "position": [
+      -160,
+      -20
+    ],
+    "one_shot": true,
+    "region_id": "heartland"
+  },
+  "heartland_dandelion_village_square": {
+    "id": "heartland_dandelion_village_square",
+    "kind": "location",
+    "scene": "res://scenes/world/QuestTrigger.tscn",
+    "position": [
+      -30,
+      -90
+    ],
+    "one_shot": false,
+    "region_id": "heartland",
+    "_comment": "one_shot=false(재진입 옵션 예시, 지시사항 1 참고) — 광장은 1막 이후에도 계속 드나드는 허브라 매번 다시 들어와도 무해하다."
+  },
+  "heartland_ward_stone": {
+    "id": "heartland_ward_stone",
+    "kind": "location",
+    "scene": "res://scenes/world/QuestTrigger.tscn",
+    "position": [
+      -40,
+      -100
+    ],
+    "one_shot": true,
+    "region_id": "heartland",
+    "_comment": "기존 Waystone1(Main.tscn, -40,-100)과 동일 좌표 — D-28 결계석=워프 비석과 같은 물리적 위치."
+  },
+  "heartland_echo_cave_entrance": {
+    "id": "heartland_echo_cave_entrance",
+    "kind": "location",
+    "scene": "res://scenes/world/QuestTrigger.tscn",
+    "position": [
+      280,
+      -180
+    ],
+    "one_shot": true,
+    "region_id": "heartland"
+  },
+  "heartland_pasture_boundary": {
+    "id": "heartland_pasture_boundary",
+    "kind": "location",
+    "scene": "res://scenes/world/QuestTrigger.tscn",
+    "position": [
+      260,
+      60
+    ],
+    "one_shot": true,
+    "region_id": "heartland"
+  },
+  "heartland_hilltop_waypoint": {
+    "id": "heartland_hilltop_waypoint",
+    "kind": "location",
+    "scene": "res://scenes/world/QuestTrigger.tscn",
+    "position": [
+      60,
+      -260
+    ],
+    "one_shot": true,
+    "region_id": "heartland"
+  },
+  "cargo_pile": {
+    "id": "cargo_pile",
+    "kind": "object",
+    "scene": "res://scenes/world/QuestObject.tscn",
+    "position": [
+      -390,
+      175
+    ],
+    "one_shot": true,
+    "region_id": "bridgeport"
+  },
+  "ward_stone_dandelion": {
+    "id": "ward_stone_dandelion",
+    "kind": "object",
+    "scene": "res://scenes/world/QuestObject.tscn",
+    "position": [
+      -42,
+      -96
+    ],
+    "one_shot": false,
+    "region_id": "heartland"
+  },
+  "echo_cave_puzzle_01": {
+    "id": "echo_cave_puzzle_01",
+    "kind": "object",
+    "scene": "res://scenes/world/QuestObject.tscn",
+    "position": [
+      290,
+      -190
+    ],
+    "one_shot": true,
+    "region_id": "heartland",
+    "_comment": "placeholder - 실제 퍼즐(빛무리 징검다리)은 던전 단계(hartland.md 8절)에서 별도 제작."
+  },
+  "montsil_rabbit": {
+    "id": "montsil_rabbit",
+    "kind": "object",
+    "scene": "res://scenes/world/QuestObject.tscn",
+    "position": [
+      300,
+      90
+    ],
+    "one_shot": true,
+    "vanish_on_complete": true,
+    "branch_quest_id": "quest_side_heartland_montsil",
+    "branch_choice_id": "release",
+    "region_id": "heartland",
+    "_comment": "상호작용 즉시 queue_free (D-94: 선택 UI 없음 → 첫 상호작용=release 고정, 문서화)."
+  },
+  "waypoint_stone_01": {
+    "id": "waypoint_stone_01",
+    "kind": "object",
+    "scene": "res://scenes/world/QuestObject.tscn",
+    "position": [
+      65,
+      -265
+    ],
+    "one_shot": false,
+    "region_id": "heartland"
+  },
+  "teo": {
+    "id": "teo",
+    "kind": "npc",
+    "scene": "res://scenes/world/QuestNpc.tscn",
+    "position": [
+      -360,
+      140
+    ],
+    "one_shot": false,
+    "region_id": "bridgeport",
+    "sprite": "res://assets/third_party/ninja_adventure/Actor/Character/Inspector/SpriteSheet.png",
+    "_comment": "유물 조사단 안내역 - MQ01(브릿지포트 부두, 첫 인상이 가장 중요한 튜토리얼) 위치를 우선해 부두 근처에 배치. MQ06/MQ07에서도 동일 위치의 teo에게 다시 말을 걸어야 해(장면마다 재배치하지 않는 단일 정적 NPC 프로토타입 한계) 그 두 시점에는 약간의 지리적 비약이 있다 - hartland.md 10절 결정 필요 항목(D-115) 참고."
+  },
+  "meru": {
+    "id": "meru",
+    "kind": "npc",
+    "scene": "res://scenes/world/QuestNpc.tscn",
+    "position": [
+      -40,
+      -150
+    ],
+    "one_shot": false,
+    "region_id": "heartland",
+    "sprite": "res://assets/third_party/ninja_adventure/Actor/Character/OldWoman/SpriteSheet.png"
+  },
+  "pinto": {
+    "id": "pinto",
+    "kind": "npc",
+    "scene": "res://scenes/world/QuestNpc.tscn",
+    "position": [
+      -95,
+      -85
+    ],
+    "one_shot": false,
+    "region_id": "heartland",
+    "sprite": "res://assets/third_party/ninja_adventure/Actor/Character/Boy/SpriteSheet.png"
+  },
+  "rozel": {
+    "id": "rozel",
+    "kind": "npc",
+    "scene": "res://scenes/world/QuestNpc.tscn",
+    "position": [
+      140,
+      -20
+    ],
+    "one_shot": false,
+    "region_id": "heartland",
+    "sprite": "res://assets/third_party/ninja_adventure/Actor/Character/Villager2/SpriteSheet.png"
+  },
+  "dami": {
+    "id": "dami",
+    "kind": "npc",
+    "scene": "res://scenes/world/QuestNpc.tscn",
+    "position": [
+      230,
+      40
+    ],
+    "one_shot": false,
+    "region_id": "heartland",
+    "sprite": "res://assets/third_party/ninja_adventure/Actor/Character/Child/SpriteSheet.png"
+  }
+}

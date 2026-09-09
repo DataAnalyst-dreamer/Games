@@ -1,7 +1,107 @@
-[gd_resource type="Theme" load_steps=2 format=3]
+[gd_resource type="Theme" load_steps=11 format=3]
 
 [ext_resource type="FontFile" path="res://assets/fonts/galmuri/Galmuri11.ttf" id="1_galmuri11"]
+[ext_resource type="Texture2D" path="res://assets/third_party/ninja_adventure/Ui/Theme/Theme Wood/nine_path_panel.png" id="2_wood_panel"]
+[ext_resource type="Texture2D" path="res://assets/third_party/ninja_adventure/Ui/Theme/Theme Wood/inventory_cell.png" id="3_slot_cell"]
+[ext_resource type="Texture2D" path="res://assets/third_party/parchment_gui/panels.png" id="4_parchment_sheet"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_parchment_panel"]
+atlas = ExtResource("4_parchment_sheet")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_wood_frame"]
+texture = ExtResource("2_wood_panel")
+texture_margin_left = 4.0
+texture_margin_top = 4.0
+texture_margin_right = 4.0
+texture_margin_bottom = 4.0
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_parchment_fill"]
+texture = SubResource("AtlasTexture_parchment_panel")
+texture_margin_left = 10.0
+texture_margin_top = 10.0
+texture_margin_right = 10.0
+texture_margin_bottom = 10.0
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_slot_cell"]
+texture = ExtResource("3_slot_cell")
+texture_margin_left = 3.0
+texture_margin_top = 3.0
+texture_margin_right = 3.0
+texture_margin_bottom = 3.0
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_focus_highlight"]
+; 포커스 하이라이트(와이어프레임 §0.1 "나무 프레임 하이라이트"의 placeholder 버전 —
+; 실제 나인패치 발광 프레임은 pixel-artist 리뷰 후 StyleBoxTexture로 교체).
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.901961, 0.792157, 0.396078, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_backdrop"]
+bg_color = Color(0.043137, 0.035294, 0.023529, 0.72)
 
 [resource]
 default_font = ExtResource("1_galmuri11")
 default_font_size = 11
+
+; --- 등급 색상 6종 (docs/art/art-bible.md §6, GDD 6.1과 1:1) ---
+; 색약 대체 아이콘(●▲◆★✦❖)은 색이 아니라 game/scripts/ui/rarity.gd 에서 관리한다.
+Rarity/colors/common = Color(1, 1, 1, 1)
+Rarity/colors/uncommon = Color(0.290196, 0.498039, 0.294118, 1)
+Rarity/colors/rare = Color(0.231373, 0.498039, 0.847059, 1)
+Rarity/colors/epic = Color(0.545098, 0.372549, 0.74902, 1)
+Rarity/colors/legendary = Color(0.901961, 0.415686, 0.227451, 1)
+Rarity/colors/relic = Color(0.788235, 0.576471, 0.184314, 1)
+Rarity/colors/relic_border = Color(0.478431, 0.180392, 0.180392, 1)
+
+; --- HUD 전용 색상 (F7-1). HP/스태미나 바 내부는 장식 없이 색만 사용(와이어프레임 §0.3). ---
+HUD/colors/hp_fill = Color(0.760784, 0.231373, 0.231373, 1)
+HUD/colors/hp_bg = Color(0.121569, 0.101961, 0.078431, 0.85)
+HUD/colors/hp_warning = Color(1, 0.196078, 0.196078, 1)
+HUD/colors/stamina_fill = Color(0.847059, 0.698039, 0.231373, 1)
+HUD/colors/stamina_bg = Color(0.121569, 0.101961, 0.078431, 0.85)
+HUD/colors/stamina_empty = Color(1, 0.196078, 0.196078, 1)
+HUD/colors/boss_fill = Color(0.647059, 0.164706, 0.164706, 1)
+HUD/colors/text_default = Color(1, 1, 1, 1)
+HUD/colors/text_muted = Color(0.8, 0.8, 0.8, 1)
+HUD/colors/vignette = Color(0.7, 0, 0, 0.35)
+
+; --- 폰트 크기 2단계 (접근성, wireframes 화면10) ---
+HUD/font_sizes/default = 11
+HUD/font_sizes/large = 15
+
+; --- 나인패치 스타일(양피지·나무 프레임, docs/ui/wireframes.md §0.3) ---
+HUD/styles/wood_frame = SubResource("StyleBoxTexture_wood_frame")
+HUD/styles/parchment_fill = SubResource("StyleBoxTexture_parchment_fill")
+HUD/styles/slot_cell = SubResource("StyleBoxTexture_slot_cell")
+
+; --- 인벤토리·장비 화면 전용 (F7-2, M2-2). 등급 색은 위 Rarity/colors/* 를 그대로
+; 재사용하고(중복 정의 금지), 여기는 비교 툴팁의 증감·포커스·비활성 표시색만 추가한다. ---
+Inventory/colors/positive = Color(0.415686, 0.760784, 0.415686, 1)
+Inventory/colors/negative = Color(0.847059, 0.294118, 0.294118, 1)
+Inventory/colors/neutral = Color(0.72, 0.72, 0.72, 1)
+Inventory/colors/focus = Color(0.901961, 0.792157, 0.396078, 1)
+Inventory/colors/disabled = Color(0.45, 0.45, 0.45, 0.55)
+Inventory/colors/locked_mark = Color(0.290196, 0.4, 0.564706, 0.5)
+Inventory/colors/tab_active = Color(1, 1, 1, 1)
+Inventory/colors/tab_inactive = Color(0.62, 0.62, 0.62, 1)
+Inventory/styles/focus_highlight = SubResource("StyleBoxFlat_focus_highlight")
+Inventory/styles/backdrop = SubResource("StyleBoxFlat_backdrop")
+
+; --- 대장간·우편함 화면 전용 (F3-3·F3-4, M2-5). 등급 색·포커스·비활성·긍정/부정 색은
+; 위 Inventory/colors/* 를 그대로 재사용한다(중복 정의 금지) — 여기는 D-90 "+7부터
+; 실패 가능"이라는 상시 경고 문구를 강조할 색 하나만 추가한다. ---
+Inventory/colors/warning = Color(0.886275, 0.694118, 0.243137, 1)
