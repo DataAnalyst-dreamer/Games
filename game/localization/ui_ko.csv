@@ -3,6 +3,11 @@ ui.hud.level_prefix,레벨
 ui.hud.gold_unit,골드
 ui.hud.save_icon,저장됨
 ui.hud.quest_progress_fmt,%s (%d/%d)
+npc.teo.greeting,"짐부터 챙기고 움직이자."
+npc.meru.greeting,"왔으면 밥부터 먹어. 국 데워줄게."
+npc.pinto.greeting,"어이, 이 망치 좀 봐! 나 요즘 늘고 있다니까."
+npc.rozel.greeting,"오늘도 목초지 순찰 중이야. 별일 없지?"
+npc.dami.greeting,"저기... 몽실이 못 봤어요? 갑자기 사라졌어요."
 ui.inv.tab.inventory,가방
 ui.inv.tab.skill,스킬
 ui.inv.tab.codex,도감

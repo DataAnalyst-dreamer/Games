@@ -374,13 +374,52 @@ def load_quests(data_dir: Path, report: Report) -> tuple[Dict[str, Any], Dict[st
     return quests, todo_ids
 
 
+def validate_world_objects(world_objects: Dict[str, Any], report: Report) -> Dict[str, Any]:
+    """world_objects.json 검증(F5-1/F5-2, M2-8 신설, level-designer 소유) —
+    Data._validate_world_objects()와 동일 규칙."""
+    data = entries(world_objects)
+    valid_kinds = ("location", "object", "npc")
+    for object_id, obj in data.items():
+        if obj.get("id") != object_id:
+            report.error(f"world_objects.{object_id}: id 필드값이 키와 불일치")
+        if obj.get("kind") not in valid_kinds:
+            report.error(f"world_objects.{object_id}: kind '{obj.get('kind')}' 는 'location'|'object'|'npc' 중 하나여야 함")
+        if not obj.get("scene"):
+            report.error(f"world_objects.{object_id}: scene 경로 누락")
+        if not obj.get("region_id"):
+            report.error(f"world_objects.{object_id}: region_id 누락")
+        position = obj.get("position")
+        if not isinstance(position, list) or len(position) != 2:
+            report.error(f"world_objects.{object_id}: position이 [x, y] 2요소 배열이 아님")
+    return data
+
+
+def _check_world_object_ref(report: Report, quest_id: str, target_label: str, ref_id: str,
+                             expected_kind: str, world_objects: Dict[str, Any],
+                             todo_ids: list, todo_field_label: str) -> None:
+    """quests.<id>의 location:/object:/npc: 참조 1건을 world_objects.json과 대조한다
+    (Data._check_world_object_ref()와 동일 규칙)."""
+    if ref_id in world_objects:
+        kind = world_objects[ref_id].get("kind")
+        if kind != expected_kind:
+            report.error(f"quests.{quest_id}: '{target_label}' 가 world_objects.{ref_id}인데 "
+                         f"kind='{kind}'(기대값 '{expected_kind}')")
+        return
+    if ref_id not in todo_ids:
+        report.error(f"quests.{quest_id}: '{target_label}' 가 world_objects.json/{todo_field_label} 어디에도 없음")
+
+
 def validate_quests(quests: Dict[str, Any], todo_ids: Dict[str, list], monsters: Dict[str, Any],
-                     item_ids: Dict[str, Any], pools: Dict[str, Any], report: Report) -> None:
+                     item_ids: Dict[str, Any], pools: Dict[str, Any], world_objects: Dict[str, Any],
+                     report: Report) -> None:
     """docs/specs/quest-data-schema.md §3 검증 체크리스트 이식(Data._validate_quests()와
     동일 규칙 — 두 곳은 항상 같이 갱신할 것)."""
     todo_monsters = todo_ids.get("monsters", [])
     todo_items = todo_ids.get("items", [])
     todo_pools = todo_ids.get("pools", [])
+    todo_locations = todo_ids.get("locations", [])
+    todo_objects = todo_ids.get("objects", [])
+    todo_npcs = todo_ids.get("npcs", [])
 
     for quest_id, quest in quests.items():
         if quest.get("id") != quest_id:
@@ -413,11 +452,25 @@ def validate_quests(quests: Dict[str, Any], todo_ids: Dict[str, list], monsters:
                 ref = target[len("pool:"):]
                 if ref not in entries(pools) and ref not in todo_pools:
                     report.error(f"quests.{quest_id}: objective target '{target}' 가 pools.json/_todo_ids.pools 어디에도 없음")
+            elif target.startswith("location:"):
+                _check_world_object_ref(report, quest_id, target, target[len("location:"):],
+                                         "location", world_objects, todo_locations, "_todo_ids.locations")
+            elif target.startswith("object:"):
+                _check_world_object_ref(report, quest_id, target, target[len("object:"):],
+                                         "object", world_objects, todo_objects, "_todo_ids.objects")
+            elif target.startswith("npc:"):
+                _check_world_object_ref(report, quest_id, target, target[len("npc:"):],
+                                         "npc", world_objects, todo_npcs, "_todo_ids.npcs")
 
         for reward_item in quest.get("rewards", {}).get("items", []):
             ref = reward_item.get("id")
             if ref not in item_ids and ref not in todo_items:
                 report.error(f"quests.{quest_id}: rewards.items의 '{ref}' 가 items.json/_todo_ids.items 어디에도 없음")
+
+        giver = quest.get("giver", "")
+        if giver and giver != "system":
+            _check_world_object_ref(report, quest_id, f"giver:{giver}", giver,
+                                     "npc", world_objects, todo_npcs, "_todo_ids.npcs")
 
 
 def validate_pools(pools: Dict[str, Any], monsters: Dict[str, Any], item_ids: Dict[str, Any], report: Report) -> Dict[str, Any]:
@@ -480,6 +533,7 @@ def main() -> int:
     stats = load_json(data_dir / "stats.json", report)
     blueprints = load_json(data_dir / "blueprints.json", report)
     pools = load_json(data_dir / "pools.json", report)
+    world_objects_raw = load_json(data_dir / "world_objects.json", report)
     quests, quest_todo_ids = load_quests(data_dir, report)
 
     item_ids = validate_items(items, report)
@@ -491,12 +545,13 @@ def main() -> int:
     validate_farming_sources(farming_sources, drop_table_ids, monsters, report)
     blueprint_ids = validate_blueprints(blueprints, item_ids, report)
     pool_ids = validate_pools(pools, monsters, item_ids, report)
-    validate_quests(quests, quest_todo_ids, monsters, item_ids, pool_ids, report)
+    world_object_ids = validate_world_objects(world_objects_raw, report)
+    validate_quests(quests, quest_todo_ids, monsters, item_ids, pool_ids, world_object_ids, report)
 
     print(f"[validate_tables] items={len(item_ids)} affixes={len(entries(affixes))} "
           f"drop_tables={len(drop_table_ids)} monsters={len(entries(monsters))} "
           f"farming_sources={len(entries(farming_sources))} blueprints={len(blueprint_ids)} "
-          f"pools={len(pool_ids)} quests={len(quests)}")
+          f"pools={len(pool_ids)} world_objects={len(world_object_ids)} quests={len(quests)}")
 
     if report.warnings:
         print(f"\n경고 {len(report.warnings)}건:")

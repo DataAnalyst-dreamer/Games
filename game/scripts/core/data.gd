@@ -141,6 +141,13 @@ const REQUIRED_SCHEMA := {
 	# pools.json(F5-2 게시판 일일 의뢰 풀, D-97 신설) — pool_id 키의 동적 딕셔너리.
 	# _validate_pools()에 위임.
 	"pools": [],
+	# world_objects.json(F5-1/F5-2, M2-8 신설, level-designer 소유) — object_id 키의
+	# 동적 딕셔너리(kind: location|object|npc). "테이블 존재"만 여기 등록하고 필드 단위
+	# 검증은 _validate_world_objects()에 위임(pools/blueprints와 동일 패턴). quests의
+	# npc:/location:/object: 목표 참조가 이 테이블과 대조된다(_validate_quests() 확장,
+	# quest-system-m2.md §10에서 "형식만 두고 값은 검사하지 않는다"고 했던 부분을 M2-8이
+	# 실제 레벨 배치가 생기면서 채운다).
+	"world_objects": [],
 }
 
 ## monsters.json은 monster_id를 키로 하는 동적 딕셔너리라 REQUIRED_SCHEMA(고정 경로)로
@@ -229,6 +236,7 @@ const RELEASE_FALLBACKS := {
 	"blueprints": {},
 	"quests": {},
 	"pools": {},
+	"world_objects": {},
 }
 
 ## 테이블 이름(파일명에서 .json 제거) → Dictionary
@@ -356,6 +364,7 @@ func _validate() -> void:
 	_validate_farming_sources()
 	_validate_blueprints()
 	_validate_pools()
+	_validate_world_objects()
 	_validate_quests()
 	_validate_value_rules()
 
@@ -807,11 +816,42 @@ func _validate_pools() -> void:
 			_report("pools.%s: 전체 weight 합이 0 이하 - 추첨 불가(D-97 가중치 합 검증)" % pool_id)
 
 
-## game/data/quests/*.json 검증(F5-1/F5-2, M2-7 신설 — docs/specs/quest-data-schema.md
-## §3 검증 체크리스트 이식). quest_id 중복은 _load_quests()가 병합 시점에 이미 보고한다
-## (이 함수는 그 이후 필드 단위 규칙만 본다). npc:/location:/object: 접두어 target은
-## 대응하는 실제 데이터 테이블이 엔진에 없어(레벨 디자인 소관, docs/specs/
-## quest-data-schema.md _todo_ids.locations/.objects) 형식만 두고 값은 검증하지 않는다.
+## world_objects.json 검증(F5-1/F5-2, M2-8 신설, level-designer 소유). id 키의 동적
+## 딕셔너리 — kind별 필수 필드(pools/blueprints와 동일 "존재만 REQUIRED_SCHEMA, 필드는
+## 여기" 패턴)와 position이 [x, y] 2요소 배열인지 확인한다. QuestSystem이 참조하는
+## kind 값과 여기 kind 값이 일치하는지는 _validate_quests()가 교차 검증한다.
+func _validate_world_objects() -> void:
+	if not tables.has("world_objects"):
+		return
+	var world_objects: Dictionary = tables["world_objects"]
+	var valid_kinds := ["location", "object", "npc"]
+	for object_id: String in world_objects:
+		if object_id.begins_with("_"):
+			continue
+		if typeof(world_objects[object_id]) != TYPE_DICTIONARY:
+			_report("world_objects.%s 가 객체가 아님" % object_id)
+			continue
+		var entry: Dictionary = world_objects[object_id]
+		if String(entry.get("id", "")) != object_id:
+			_report("world_objects.%s: id 필드값이 키와 불일치" % object_id)
+		var kind: String = String(entry.get("kind", ""))
+		if not valid_kinds.has(kind):
+			_report("world_objects.%s: kind '%s' 는 'location'|'object'|'npc' 중 하나여야 함" % [object_id, kind])
+		if String(entry.get("scene", "")).is_empty():
+			_report("world_objects.%s: scene 경로 누락" % object_id)
+		if not entry.has("region_id") or String(entry.get("region_id", "")).is_empty():
+			_report("world_objects.%s: region_id 누락" % object_id)
+		var position: Variant = entry.get("position")
+		if typeof(position) != TYPE_ARRAY or (position as Array).size() != 2:
+			_report("world_objects.%s: position이 [x, y] 2요소 배열이 아님" % object_id)
+
+
+## game/data/quests/*.json 검증(F5-1/F5-2, M2-7 신설, M2-8에서 npc:/location:/object:
+## 확장 — docs/specs/quest-data-schema.md §3 검증 체크리스트 이식). quest_id 중복은
+## _load_quests()가 병합 시점에 이미 보고한다(이 함수는 그 이후 필드 단위 규칙만 본다).
+## npc:/location:/object: 접두어 target은 world_objects.json(M2-8, level-designer
+## 소유)의 id·kind와 대조한다 — quest-system-m2.md §10이 "형식만 두고 값은 검사하지
+## 않는다"고 적었던 부분을 world_objects.json 도입으로 채운다.
 func _validate_quests() -> void:
 	if not tables.has("quests"):
 		return
@@ -819,9 +859,15 @@ func _validate_quests() -> void:
 	var monsters: Dictionary = tables.get("monsters", {})
 	var items: Dictionary = tables.get("items", {})
 	var pools: Dictionary = tables.get("pools", {})
+	var world_objects: Dictionary = tables.get("world_objects", {})
 	var todo_monsters: Array = quest_todo_ids.get("monsters", [])
 	var todo_items: Array = quest_todo_ids.get("items", [])
 	var todo_pools: Array = quest_todo_ids.get("pools", [])
+	# M2-8: world_objects.json이 생기기 전에 남아있던 미해결 항목 통로(_todo_ids.locations/
+	# .objects/.npcs) — level-designer가 아직 만들지 않은 지역용으로 계속 유효하다.
+	var todo_locations: Array = quest_todo_ids.get("locations", [])
+	var todo_objects: Array = quest_todo_ids.get("objects", [])
+	var todo_npcs: Array = quest_todo_ids.get("npcs", [])
 
 	for quest_id: String in quests:
 		if quest_id.begins_with("_"):
@@ -860,11 +906,42 @@ func _validate_quests() -> void:
 				var pool_ref: String = target.substr(len("pool:"))
 				if not pools.has(pool_ref) and not todo_pools.has(pool_ref):
 					_report("quests.%s: objective target '%s' 가 pools.json/_todo_ids.pools 어디에도 없음" % [quest_id, target])
+			elif target.begins_with("location:"):
+				_check_world_object_ref(quest_id, target, target.substr(len("location:")),
+					"location", world_objects, todo_locations, "_todo_ids.locations")
+			elif target.begins_with("object:"):
+				_check_world_object_ref(quest_id, target, target.substr(len("object:")),
+					"object", world_objects, todo_objects, "_todo_ids.objects")
+			elif target.begins_with("npc:"):
+				_check_world_object_ref(quest_id, target, target.substr(len("npc:")),
+					"npc", world_objects, todo_npcs, "_todo_ids.npcs")
 
 		for reward_item: Dictionary in ((entry.get("rewards", {}) as Dictionary).get("items", []) as Array):
 			var reward_item_id: String = String(reward_item.get("id", ""))
 			if not items.has(reward_item_id) and not todo_items.has(reward_item_id):
 				_report("quests.%s: rewards.items의 '%s' 가 items.json/_todo_ids.items 어디에도 없음" % [quest_id, reward_item_id])
+
+		# giver도 사실상 npc 참조다("system"은 예외 — 자동 발동 퀘스트, giver NPC 없음).
+		var giver: String = String(entry.get("giver", ""))
+		if not giver.is_empty() and giver != "system":
+			_check_world_object_ref(quest_id, "giver:%s" % giver, giver,
+				"npc", world_objects, todo_npcs, "_todo_ids.npcs")
+
+
+## quests.<id>의 location:/object:/npc: 참조 1건을 world_objects.json(M2-8)과 대조한다.
+## world_objects에 있으면 kind가 기대한 값과 일치하는지까지 확인하고, 없으면 아직
+## level-designer가 만들지 않은 지역으로 보고 _todo_ids 목록에 있는지만 확인한다(둘 다
+## 없으면 위반).
+func _check_world_object_ref(quest_id: String, target_label: String, ref_id: String,
+		expected_kind: String, world_objects: Dictionary, todo_ids: Array, todo_field_label: String) -> void:
+	if world_objects.has(ref_id):
+		var kind: String = String((world_objects[ref_id] as Dictionary).get("kind", ""))
+		if kind != expected_kind:
+			_report("quests.%s: '%s' 가 world_objects.%s인데 kind='%s'(기대값 '%s')" \
+				% [quest_id, target_label, ref_id, kind, expected_kind])
+		return
+	if not todo_ids.has(ref_id):
+		_report("quests.%s: '%s' 가 world_objects.json/%s 어디에도 없음" % [quest_id, target_label, todo_field_label])
 
 
 ## 값 간 정합성 규칙(data_tables.md §1 검증 규칙, 단순 존재 확인이 아닌 관계식).
