@@ -31,23 +31,17 @@ static func base_stat_key(category: String) -> String:
 			return ""
 
 
-static func _enhance_multiplier(enhance_level: int, enhance_table: Dictionary) -> float:
-	if enhance_level <= 0:
-		return 1.0
-	var levels: Dictionary = enhance_table.get("enhance_levels", {})
-	var key := "+%d" % enhance_level
-	return float((levels.get(key, {}) as Dictionary).get("stat_multiplier", 1.0))
-
-
 ## 아이템 1개의 "본체 수치"(무기=평균 공격력, 방어구류=평균 방어력) — Equipment.
 ## compute_stats()와 같은 계산 규칙((min+max)/2 * 강화배율)을 개별 아이템에 적용한다
-## (그 함수는 장착 전체 합산이라 아이템 1개 비교엔 그대로 못 쓴다).
+## (그 함수는 장착 전체 합산이라 아이템 1개 비교엔 그대로 못 쓴다). 강화 배율 자체는
+## Equipment.enhance_multiplier()를 그대로 쓴다(디렉터 결정 D-85: 중복 정의 금지 — 이
+## 파일이 예전에 들고 있던 private _enhance_multiplier()는 제거했다).
 static func base_stat_value(item_def: Dictionary, enhance_level: int, enhance_table: Dictionary) -> float:
 	if item_def.is_empty():
 		return 0.0
 	var category := String(item_def.get("category", ""))
 	var base_stats: Dictionary = item_def.get("base_stats", {})
-	var mult := _enhance_multiplier(enhance_level, enhance_table)
+	var mult := Equipment.enhance_multiplier(enhance_level, enhance_table)
 	match category:
 		"weapon":
 			return (float(base_stats.get("atk_min", 0.0)) + float(base_stats.get("atk_max", 0.0))) * 0.5 * mult

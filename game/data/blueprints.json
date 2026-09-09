@@ -1,0 +1,70 @@
+{
+  "_comment": "대장간 제작 도면 테이블(F3-4, docs/brd/03-features/03-아이템-파밍.md F3-4). M2-4 신설 — 이 세션 전까지 blueprints.json이 존재하지 않아 game-designer 협의 없이 초안으로 만든다(완료 보고 질문 목록 참고, 밸런스 확정 전 임시). 범위: 하틀랜드(초원) uncommon 등급 장비 6종(무기 2 + 방어구 4) — F3-4 '드랍 운이 나쁠 때의 보증 수단'이라는 근거에 맞춰 common보다 확실히 낫지만 rare 파밍을 대체하지는 않는 uncommon 티어만 다룬다. result_item_id는 items.json 실제 키를 그대로 참조해 base_stats/affix_slot_count/grade를 이 문서가 다시 정의하지 않는다(중복 소스 방지). materials[].item_id는 전부 기존 items.json 재료(신규 재료 추가 없음, 지시문 '재료는 기존 items 재료로' 준수). cost_gold는 result_item_id.sell_price의 대략 3~4배로 잡아 '제작이 판매보다 확실히 이득이면서도 파밍을 완전히 대체하지 않는' 수준을 노렸다(정식 밸런스는 game-designer 검토 필요 - _balance_todo). 도면 자체는 소모되지 않는다(F3-4 예외 '도면 영구 보유') - Blacksmith.craft()가 blueprints 테이블에서 읽기만 하고 인벤토리에서 도면을 지우지 않는다(애초에 도면을 ItemInstance로 보관하는 시스템 자체가 이번 패스 범위 밖 - 지금은 blueprint_id 문자열만으로 craft()를 호출한다).",
+
+  "blueprint_iron_sword": {
+    "blueprint_id": "blueprint_iron_sword",
+    "name_key": "blueprint_iron_sword_name",
+    "desc_key": "blueprint_iron_sword_desc",
+    "result_item_id": "weapon_uncommon_1",
+    "cost_gold": 140,
+    "materials": [
+      { "item_id": "iron_ore", "qty": 6 },
+      { "item_id": "slime_jelly", "qty": 3 }
+    ]
+  },
+  "blueprint_iron_greatsword": {
+    "blueprint_id": "blueprint_iron_greatsword",
+    "name_key": "blueprint_iron_greatsword_name",
+    "desc_key": "blueprint_iron_greatsword_desc",
+    "result_item_id": "weapon_uncommon_2",
+    "cost_gold": 190,
+    "materials": [
+      { "item_id": "iron_ore", "qty": 9 },
+      { "item_id": "goblin_fang", "qty": 3 }
+    ]
+  },
+  "blueprint_leather_cap": {
+    "blueprint_id": "blueprint_leather_cap",
+    "name_key": "blueprint_leather_cap_name",
+    "desc_key": "blueprint_leather_cap_desc",
+    "result_item_id": "head_uncommon_1",
+    "cost_gold": 75,
+    "materials": [
+      { "item_id": "rabbit_horn", "qty": 4 },
+      { "item_id": "goblin_ear", "qty": 3 }
+    ]
+  },
+  "blueprint_leather_vest": {
+    "blueprint_id": "blueprint_leather_vest",
+    "name_key": "blueprint_leather_vest_name",
+    "desc_key": "blueprint_leather_vest_desc",
+    "result_item_id": "armor_uncommon_1",
+    "cost_gold": 115,
+    "materials": [
+      { "item_id": "mushroom_cap", "qty": 5 },
+      { "item_id": "iron_ore", "qty": 3 }
+    ]
+  },
+  "blueprint_iron_plate": {
+    "blueprint_id": "blueprint_iron_plate",
+    "name_key": "blueprint_iron_plate_name",
+    "desc_key": "blueprint_iron_plate_desc",
+    "result_item_id": "armor_uncommon_2",
+    "cost_gold": 150,
+    "materials": [
+      { "item_id": "iron_ore", "qty": 8 },
+      { "item_id": "marsh_moss", "qty": 4 }
+    ]
+  },
+  "blueprint_iron_greaves": {
+    "blueprint_id": "blueprint_iron_greaves",
+    "name_key": "blueprint_iron_greaves_name",
+    "desc_key": "blueprint_iron_greaves_desc",
+    "result_item_id": "boots_uncommon_1",
+    "cost_gold": 80,
+    "materials": [
+      { "item_id": "iron_ore", "qty": 4 },
+      { "item_id": "slime_jelly", "qty": 2 }
+    ]
+  }
+}

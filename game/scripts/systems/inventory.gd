@@ -78,6 +78,59 @@ func add_item(item_instance: Dictionary, item_def: Dictionary) -> AddResult:
 	return AddResult.ADDED
 
 
+## 인벤토리 오버플로 아이템의 우편함 전송 진입점(M2-4, F3-1 D-10 "보관 기한 없음" 예외
+## 처리를 여기 한 곳으로 모은다 — GameState.pickup_item()을 포함해 아이템을 얻는 모든
+## 경로가 이 함수 하나만 호출하면 D-10 정책이 자동으로 지켜진다). add_item()과 동일하게
+## 시도하되, 자리가 없으면(FULL) 인벤토리를 건드리지 않고 대신 mailbox.push()로 돌린다.
+func add_or_mail(item_instance: Dictionary, item_def: Dictionary, mailbox: Mailbox) -> AddResult:
+	var result: AddResult = add_item(item_instance, item_def)
+	if result == AddResult.FULL:
+		var mail: Dictionary = item_instance.duplicate(true)
+		mail["item_id"] = item_instance.get("item_id", "")
+		mail["count"] = int(item_instance.get("quantity", 1))
+		mail["expires_day"] = null # D-10: 보관 기한 없음.
+		mailbox.push(mail)
+	return result
+
+
+## count개만큼 item_id 스택을 인벤토리에서 제거한다(강화/재련/제작 재료 소모, M2-4).
+## 슬롯 여러 개에 나뉘어 있어도 합쳐서 판단 — 보유량이 count 미만이면 아무것도 바꾸지
+## 않고 false를 반환한다(호출부가 사전에 재료 충분 여부를 확인했어야 하지만, 여기서도
+## 방어적으로 전량 검사 후에만 차감한다).
+func consume_item(item_id: String, count: int) -> bool:
+	if count <= 0:
+		return true
+	var total: int = 0
+	for slot: Dictionary in slots:
+		if String(slot.get("item_id", "")) == item_id:
+			total += int(slot.get("quantity", 1))
+	if total < count:
+		return false
+	var remaining: int = count
+	var i: int = slots.size() - 1
+	while remaining > 0 and i >= 0:
+		var slot: Dictionary = slots[i]
+		if String(slot.get("item_id", "")) == item_id:
+			var have: int = int(slot.get("quantity", 1))
+			var take: int = mini(have, remaining)
+			slot["quantity"] = have - take
+			remaining -= take
+			if int(slot["quantity"]) <= 0:
+				slots.remove_at(i)
+		i -= 1
+	return true
+
+
+## 즐겨찾기 잠금 토글(M2-4 D-85). 잠긴 아이템은 Blacksmith.salvage()가 거부한다. uid를
+## 못 찾으면 false — 인벤토리는 건드리지 않는다.
+func set_locked(uid: String, locked: bool) -> bool:
+	var idx: int = find_by_uid(uid)
+	if idx == -1:
+		return false
+	slots[idx]["locked"] = locked
+	return true
+
+
 func remove_slot(index: int) -> Dictionary:
 	if index < 0 or index >= slots.size():
 		return {}

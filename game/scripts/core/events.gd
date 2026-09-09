@@ -67,6 +67,22 @@ signal item_mailed(item_id: StringName, quantity: int)
 signal inventory_changed()
 signal gold_changed(new_amount: int, delta: int)
 
+# --- 대장간 / 우편함 (F3-3·F3-4, M2-4) ---
+## 대장간 NPC와 상호작용해 UI를 열어야 할 때(대장간 UI 자체는 다음 단계, F3-3 표
+## "전제: 마을 대장간 NPC"). scripts/world/blacksmith_npc.gd가 interact 입력 시 emit.
+signal blacksmith_opened()
+## 우편함 NPC와 상호작용해 UI를 열어야 할 때(우편함 UI 자체는 다음 단계).
+signal mailbox_opened()
+## Blacksmith(scripts/systems/blacksmith.gd) 4개 동작(enhance/refine/refine_commit/
+## salvage/craft) 결과를 GameState 래퍼가 호출 직후 그대로 실어 발신 — result는 각
+## 함수의 반환 Dictionary(ok/reason 또는 성공 필드) 그대로다. action은 "enhance"/
+## "refine"/"refine_commit"/"salvage"/"craft" 중 하나.
+signal blacksmith_result(action: StringName, result: Dictionary)
+## Mailbox.push()로 새 우편이 큐에 들어왔을 때(인벤토리 오버플로 자동 전송 포함).
+signal mail_received(mail_id: String, item_id: StringName, count: int)
+## GameState.claim_mail()이 성공했을 때 — result는 Mailbox.claim()의 반환 Dictionary.
+signal mail_claimed(mail_id: String, result: Dictionary)
+
 # --- 월드 ---
 signal chunk_loaded(chunk_coord: Vector2i)
 signal chunk_unloaded(chunk_coord: Vector2i)

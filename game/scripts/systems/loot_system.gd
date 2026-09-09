@@ -14,6 +14,8 @@
 ##   affixes: Array[Dictionary]  [{affix_id, stat_type, value}] — 장비만, 옵션 없으면 []
 ##   enhance_level: int      0 (드랍 직후는 항상 +0)
 ##   refine_left: int        재련 가능 횟수(D-13: 3) — affix_slot_count==0(common 등급)이면 0
+##   locked: bool            즐겨찾기 잠금(M2-4 D-85 신설, 기본 false) — true면 분해 거부
+##                           (Blacksmith.salvage) 대상. Inventory.set_locked()로 토글.
 class_name LootSystem
 extends RefCounted
 
@@ -170,6 +172,7 @@ static func make_item_instance(item_id: String, item_def: Dictionary, affixes_ta
 		"affixes": affixes,
 		"enhance_level": 0,
 		"refine_left": refine_max_attempts if (is_equip and slot_count > 0) else 0,
+		"locked": false,
 	}
 
 
