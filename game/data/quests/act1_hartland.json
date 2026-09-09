@@ -2,17 +2,9 @@
   "_schema_version": "0.1",
   "_source_doc": "docs/story/quests-act1-hartland.md",
   "_todo_ids": {
-    "monsters": [
-      "horn_rabbit_big"
-    ],
-    "items": [
-      "item_material_wool_soft",
-      "item_material_herb_common",
-      "item_material_ribbon_dandelion",
-      "item_food_stew_basic",
-      "item_flavor_horn_shard",
-      "item_flavor_ribbon_charm"
-    ],
+    "monsters": [],
+    "items": [],
+    "_resolved_m2_7": "horn_rabbit_big(monsters.json)·wool_soft/herb_common/ribbon_dandelion/stew_basic/horn_shard/ribbon_charm(items.json)·heartland_field_low/heartland_field_material_low(pools.json)를 M2-7에서 실제 테이블에 채워 monsters/items/pools 목록에서 제거했다. 장소·오브젝트 id는 아직 level-designer 몫이라 아래에 남긴다.",
     "locations": [
       "bridgeport_dock",
       "heartland_dandelion_village",
@@ -29,10 +21,7 @@
       "montsil_rabbit",
       "waypoint_stone_01"
     ],
-    "pools": [
-      "heartland_field_low",
-      "heartland_field_material_low"
-    ]
+    "pools": []
   },
   "quests": [
     {
@@ -257,7 +246,7 @@
         "exp": 30,
         "items": [
           {
-            "id": "item_material_wool_soft",
+            "id": "wool_soft",
             "qty": 2
           }
         ],
@@ -386,7 +375,7 @@
         "exp": 20,
         "items": [
           {
-            "id": "item_flavor_horn_shard",
+            "id": "horn_shard",
             "qty": 1
           }
         ],
@@ -463,7 +452,7 @@
         "exp": 10,
         "items": [
           {
-            "id": "item_food_stew_basic",
+            "id": "stew_basic",
             "qty": 1
           }
         ],
@@ -511,7 +500,7 @@
         {
           "id": "obj_03",
           "type": "collect",
-          "target": "item:item_material_ribbon_dandelion",
+          "target": "item:ribbon_dandelion",
           "count": 5,
           "text_key": "quest_side_heartland_festival_prep_obj_03"
         }
@@ -524,7 +513,7 @@
         "exp": 20,
         "items": [
           {
-            "id": "item_flavor_ribbon_charm",
+            "id": "ribbon_charm",
             "qty": 1
           }
         ],
@@ -638,7 +627,7 @@
         {
           "id": "obj_02",
           "type": "collect",
-          "target": "item:item_material_herb_common",
+          "target": "item:herb_common",
           "count": 4,
           "text_key": "quest_side_heartland_herbrun_obj_02"
         },
@@ -658,7 +647,7 @@
         "exp": 15,
         "items": [
           {
-            "id": "item_food_stew_basic",
+            "id": "stew_basic",
             "qty": 1
           }
         ],

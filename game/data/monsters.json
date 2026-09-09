@@ -45,6 +45,30 @@
     "_comment": "TTK 목표 3타(풀 콤보 1회). 돌진 예고(웅크림) 0.6s. M1-3: Racoon 대역 씬(scenes/entities/monsters/HornRabbit.tscn) 추가 — 예고 후 dash_speed_px/dash_duration_sec으로 돌진, 벽 충돌 시 기절(Tuning.DASH_WALL_STUN_SEC, _balance_todo). AI 5필드는 addendum §4-3: 조기 감지(넓은 aggro)·큰 후딜(반격 기회 보장)·활발한 순찰·먼 추적 거리. drop_table_id=horn_rabbit_common은 drop_tables.json에 실존(M2 F3-1)."
   },
 
+  "horn_rabbit_big": {
+    "monster_id": "horn_rabbit_big",
+    "name_ko": "덩치 뿔토끼",
+    "region_id": "hartland",
+    "tier": "elite",
+    "hp": 41,
+    "atk": 23,
+    "move_speed_px": 50,
+    "dash_speed_px": 200,
+    "dash_duration_sec": 0.3,
+    "telegraph_sec": 0.6,
+    "attack_pattern_id": "charge",
+    "aggro_range_px": 80,
+    "melee_range_px": 16,
+    "attack_recovery_sec": 0.7,
+    "patrol_radius_px": 96,
+    "leash_range_px": 180,
+    "drop_table_id": null,
+    "codex_entry_id": "horn_rabbit_big",
+    "elite_base_monster_id": "horn_rabbit",
+    "tags": [],
+    "_comment": "M2-7(F5-1/F5-2 퀘스트, D-95) 신설. quest_main_a1_05_reclaim(MQ05) 전용 1막 정예 '덩치 뿔토끼' — act1_hartland.json _todo_ids.monsters에서 해소. D-95(1막 정예는 F6-3 '정예 첫 클리어 확정 보상' 규정 예외)에 따라 elite_goblin_captain/elite_bunchi_spawn이 쓰는 §1-0 일반 정예 배율(hp×5.0 등)을 그대로 적용하지 않는다 — 지시받은 대로 horn_rabbit 기준 hp/atk만 1.5배(27→41 반올림, 15→23 반올림), 이동/사거리/예고 등 나머지 필드는 원본과 동일하게 유지했다. drop_table_id=null: 이 개체는 파밍 드랍 룰렛이 아니라 퀘스트 rewards 블록(고정 골드/경험치/wool_soft)으로만 보상하므로 D-67 예외('확정된 드랍 없음')를 그대로 쓴다 — 일반 파밍 대상으로 재사용하게 되면 game-designer가 전용 drop_table_id를 배정해야 한다. 엔티티 씬은 신규 제작 없이 기존 scenes/entities/monsters/HornRabbit.tscn을 재사용하되, 배치하는 쪽(level-designer, heartland_dandelion_village_square 등 _todo_ids.locations 확정 후)이 인스턴스의 monster_id를 'horn_rabbit_big'으로, AnimatedSprite2D scale을 (1.3, 1.3)으로 오버라이드해서 써야 한다(EliteGoblinCaptain.tscn 패턴과 동일한 스케일 관례)."
+  },
+
   "mushroom": {
     "monster_id": "mushroom",
     "name_ko": "버섯돌이",

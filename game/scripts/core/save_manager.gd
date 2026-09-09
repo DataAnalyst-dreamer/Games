@@ -105,7 +105,10 @@ func _finish_save(slot: int, kind: String, result: Dictionary) -> Dictionary:
 
 
 func _build_payload() -> Dictionary:
-	var state: Dictionary = {"game_state": GameState.to_dict()}
+	var state: Dictionary = {
+		"game_state": GameState.to_dict(),
+		"quest_system": QuestSystem.to_dict(), # M2-7(F5-1/F5-2): 활성/완료 퀘스트·일일 의뢰 시드.
+	}
 	var player: Player = GameState.get_player()
 	if player != null:
 		state["player"] = {
@@ -201,6 +204,7 @@ func _read_and_verify(path: String) -> Dictionary:
 func _apply_payload(payload: Dictionary) -> void:
 	var state: Dictionary = payload.get("state", {})
 	GameState.from_dict(state.get("game_state", {}))
+	QuestSystem.from_dict(state.get("quest_system", {})) # M2-7: 옛 세이브(필드 없음)는 빈 상태로 초기화됨.
 
 	var player: Player = GameState.get_player()
 	if player == null:

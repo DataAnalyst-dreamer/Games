@@ -134,6 +134,13 @@ const REQUIRED_SCHEMA := {
 	# 여기 등록하고 필드 단위 검증은 _validate_blueprints()에 위임(items/drop_tables와
 	# 동일 패턴).
 	"blueprints": [],
+	# quests(F5-1/F5-2, M2-7 신설) — game/data/quests/*.json 폴더 병합 결과(quest_id 키의
+	# 동적 딕셔너리, _load_quests() 참고). "테이블 존재"만 여기 등록하고 필드 단위 검증은
+	# _validate_quests()에 위임(items/blueprints와 동일 패턴).
+	"quests": [],
+	# pools.json(F5-2 게시판 일일 의뢰 풀, D-97 신설) — pool_id 키의 동적 딕셔너리.
+	# _validate_pools()에 위임.
+	"pools": [],
 }
 
 ## monsters.json은 monster_id를 키로 하는 동적 딕셔너리라 REQUIRED_SCHEMA(고정 경로)로
@@ -220,6 +227,8 @@ const RELEASE_FALLBACKS := {
 	},
 	"farming_sources": {},
 	"blueprints": {},
+	"quests": {},
+	"pools": {},
 }
 
 ## 테이블 이름(파일명에서 .json 제거) → Dictionary
@@ -227,6 +236,13 @@ var tables: Dictionary = {}
 
 ## 로드/검증 중 발견한 문제 목록(문자열). 테스트·툴에서 확인용.
 var validation_errors: PackedStringArray = PackedStringArray()
+
+## M2-7(F5-1/F5-2 퀘스트) 신설. game/data/quests/*.json 각 파일 상단 _todo_ids를
+## 카테고리별로 합집합해 둔 것("monsters"/"items"/"locations"/"objects"/"pools" ->
+## Array[String], 중복 제거). 실제 참조 무결성 검증(_validate_quests())이 이 목록을
+## "알려진 미해결"로 취급해 경고만 내고 넘어가는 데 쓰고, 완료 보고/툴에서도 그대로
+## 참고할 수 있도록 공개 필드로 노출한다.
+var quest_todo_ids: Dictionary = {}
 
 
 func _ready() -> void:
@@ -237,7 +253,9 @@ func _ready() -> void:
 func reload() -> void:
 	tables.clear()
 	validation_errors.clear()
+	quest_todo_ids.clear()
 	_load_all(DATA_DIR)
+	_load_quests("%s/quests" % DATA_DIR)
 	_validate()
 
 
@@ -256,6 +274,50 @@ func _load_all(dir_path: String) -> void:
 				tables[table_name] = table
 		file_name = dir.get_next()
 	dir.list_dir_end()
+
+
+## game/data/quests/*.json 폴더 병합 로더(M2-7). 각 파일 = 한 막·지방 묶음
+## (docs/specs/quest-data-schema.md §1) — "quests" 배열을 quest_id 키 딕셔너리로 펼쳐
+## tables["quests"]에 합치고, "_todo_ids"는 카테고리별로 합집합해 quest_todo_ids에
+## 쌓는다. 폴더 자체가 없으면(테스트 등) 조용히 넘어간다 — quests는 REQUIRED_SCHEMA에
+## "테이블 존재"만 등록돼 있어 _validate()가 그 시점에 필요하면 보고한다.
+func _load_quests(dir_path: String) -> void:
+	var merged: Dictionary = tables.get("quests", {})
+	var dir := DirAccess.open(dir_path)
+	if dir != null:
+		dir.list_dir_begin()
+		var file_name := dir.get_next()
+		while file_name != "":
+			if not dir.current_is_dir() and file_name.get_extension() == "json":
+				var file_data: Variant = _load_json("%s/%s" % [dir_path, file_name])
+				if file_data != null:
+					_merge_quest_file(file_data, merged, file_name)
+			file_name = dir.get_next()
+		dir.list_dir_end()
+	# 폴더가 없어도(dir == null) 항상 "quests" 테이블을 세팅해 둔다 — REQUIRED_SCHEMA의
+	# "필수 테이블 누락" 오탐(빈 quests={}조차 못 만드는 상황)을 피한다.
+	tables["quests"] = merged
+
+
+func _merge_quest_file(file_data: Dictionary, merged: Dictionary, file_name: String) -> void:
+	for quest: Dictionary in (file_data.get("quests", []) as Array):
+		var quest_id: String = String(quest.get("id", ""))
+		if quest_id.is_empty():
+			_report("quests(%s): id 없는 퀘스트 항목" % file_name)
+			continue
+		if merged.has(quest_id):
+			_report("quests(%s): quest_id 중복 - '%s' (스키마 체크리스트 '모든 id 유일' 위반)" % [file_name, quest_id])
+		merged[quest_id] = quest
+	var todo: Dictionary = file_data.get("_todo_ids", {})
+	for category: String in todo:
+		if category.begins_with("_"):
+			continue # _resolved_m2_7 같은 사람이 읽는 주석 필드는 건너뛴다.
+		var bucket: Array = quest_todo_ids.get(category, [])
+		for id_v: Variant in (todo[category] as Array):
+			var id_str: String = String(id_v)
+			if not bucket.has(id_str):
+				bucket.append(id_str)
+		quest_todo_ids[category] = bucket
 
 
 func _load_json(path: String) -> Variant:
@@ -293,6 +355,8 @@ func _validate() -> void:
 	_validate_stats()
 	_validate_farming_sources()
 	_validate_blueprints()
+	_validate_pools()
+	_validate_quests()
 	_validate_value_rules()
 
 
@@ -650,8 +714,14 @@ func _validate_farming_sources() -> void:
 				if monster_id.begins_with("_"):
 					continue
 				var m: Dictionary = monsters[monster_id]
-				if typeof(m) == TYPE_DICTIONARY and String(m.get("tier", "")) == "elite" \
-						and String(m.get("drop_table_id", "")) == expected_drop_table:
+				if typeof(m) != TYPE_DICTIONARY or String(m.get("tier", "")) != "elite":
+					continue
+				# M2-7: drop_table_id가 null인 정예(예: horn_rabbit_big, D-95 F6-3 예외 —
+				# 확정된 파밍 드랍이 없는 스토리 전용 정예)에 String()을 바로 호출하면
+				# "Invalid call 'String' constructor" 런타임 에러가 난다 — null은 이
+				# 규칙(farming_sources 연동 대상) 자체가 아니므로 조용히 건너뛴다.
+				var m_drop_table_id: Variant = m.get("drop_table_id")
+				if m_drop_table_id != null and String(m_drop_table_id) == expected_drop_table:
 					found = true
 					break
 			if not found:
@@ -696,6 +766,105 @@ func _validate_blueprints() -> void:
 				_report("blueprints.%s: materials의 item_id '%s' 가 items.json에 없음" % [blueprint_id, mat_id])
 			if int(material.get("qty", 0)) <= 0:
 				_report("blueprints.%s: materials[%s].qty는 0보다 커야 함" % [blueprint_id, mat_id])
+
+
+## pools.json 검증(F5-2 게시판 일일 의뢰, D-97 신설) — 구성원 참조 무결성(kind에 따라
+## monsters.json/items.json)과 가중치 합 검증(0보다 커야 추첨 가능).
+func _validate_pools() -> void:
+	if not tables.has("pools"):
+		return
+	var pools: Dictionary = tables["pools"]
+	var monsters: Dictionary = tables.get("monsters", {})
+	var items: Dictionary = tables.get("items", {})
+	for pool_id: String in pools:
+		if pool_id.begins_with("_"):
+			continue
+		if typeof(pools[pool_id]) != TYPE_DICTIONARY:
+			_report("pools.%s 가 객체가 아님" % pool_id)
+			continue
+		var entry: Dictionary = pools[pool_id]
+		if String(entry.get("pool_id", "")) != pool_id:
+			_report("pools.%s: pool_id 필드값이 키와 불일치" % pool_id)
+		var kind: String = String(entry.get("kind", ""))
+		if kind != "monster" and kind != "item":
+			_report("pools.%s: kind '%s' 는 'monster'|'item' 중 하나여야 함" % [pool_id, kind])
+		var members: Variant = entry.get("members")
+		if typeof(members) != TYPE_ARRAY or (members as Array).is_empty():
+			_report("pools.%s: members가 비어있거나 배열이 아님" % pool_id)
+			continue
+		var total_weight := 0.0
+		for member: Dictionary in (members as Array):
+			var member_id: String = String(member.get("id", ""))
+			var weight: float = float(member.get("weight", 0.0))
+			if weight <= 0.0:
+				_report("pools.%s: members '%s'의 weight(%s)는 0보다 커야 함" % [pool_id, member_id, weight])
+			total_weight += weight
+			if kind == "monster" and not monsters.has(member_id):
+				_report("pools.%s: monster 풀 구성원 '%s' 가 monsters.json에 없음" % [pool_id, member_id])
+			elif kind == "item" and not items.has(member_id):
+				_report("pools.%s: item 풀 구성원 '%s' 가 items.json에 없음" % [pool_id, member_id])
+		if total_weight <= 0.0:
+			_report("pools.%s: 전체 weight 합이 0 이하 - 추첨 불가(D-97 가중치 합 검증)" % pool_id)
+
+
+## game/data/quests/*.json 검증(F5-1/F5-2, M2-7 신설 — docs/specs/quest-data-schema.md
+## §3 검증 체크리스트 이식). quest_id 중복은 _load_quests()가 병합 시점에 이미 보고한다
+## (이 함수는 그 이후 필드 단위 규칙만 본다). npc:/location:/object: 접두어 target은
+## 대응하는 실제 데이터 테이블이 엔진에 없어(레벨 디자인 소관, docs/specs/
+## quest-data-schema.md _todo_ids.locations/.objects) 형식만 두고 값은 검증하지 않는다.
+func _validate_quests() -> void:
+	if not tables.has("quests"):
+		return
+	var quests: Dictionary = tables["quests"]
+	var monsters: Dictionary = tables.get("monsters", {})
+	var items: Dictionary = tables.get("items", {})
+	var pools: Dictionary = tables.get("pools", {})
+	var todo_monsters: Array = quest_todo_ids.get("monsters", [])
+	var todo_items: Array = quest_todo_ids.get("items", [])
+	var todo_pools: Array = quest_todo_ids.get("pools", [])
+
+	for quest_id: String in quests:
+		if quest_id.begins_with("_"):
+			continue
+		if typeof(quests[quest_id]) != TYPE_DICTIONARY:
+			_report("quests.%s 가 객체가 아님" % quest_id)
+			continue
+		var entry: Dictionary = quests[quest_id]
+		if String(entry.get("id", "")) != quest_id:
+			_report("quests.%s: id 필드값이 키와 불일치" % quest_id)
+
+		var type: String = String(entry.get("type", ""))
+		if type == "main" and not (entry.get("fail_conditions", []) as Array).is_empty():
+			_report("quests.%s: type=main인데 fail_conditions가 비어있지 않음(F5-1 '메인 포기 불가' 위반)" % quest_id)
+		var repeatable: bool = bool(entry.get("repeatable", false))
+		if type == "daily_template" and not repeatable:
+			_report("quests.%s: type=daily_template인데 repeatable=false (스키마 체크리스트 위반)" % quest_id)
+		elif type != "daily_template" and repeatable:
+			_report("quests.%s: type=%s인데 repeatable=true (daily_template만 가능)" % [quest_id, type])
+
+		for prereq_id: Variant in ((entry.get("prerequisites", {}) as Dictionary).get("quests_completed", []) as Array):
+			if not quests.has(String(prereq_id)):
+				_report("quests.%s: prerequisites.quests_completed의 '%s' 가 존재하지 않는 퀘스트 id" % [quest_id, prereq_id])
+
+		for objective: Dictionary in (entry.get("objectives", []) as Array):
+			var target: String = String(objective.get("target", ""))
+			if target.begins_with("monster:"):
+				var monster_ref: String = target.substr(len("monster:"))
+				if not monsters.has(monster_ref) and not todo_monsters.has(monster_ref):
+					_report("quests.%s: objective target '%s' 가 monsters.json/_todo_ids.monsters 어디에도 없음" % [quest_id, target])
+			elif target.begins_with("item:"):
+				var item_ref: String = target.substr(len("item:"))
+				if not items.has(item_ref) and not todo_items.has(item_ref):
+					_report("quests.%s: objective target '%s' 가 items.json/_todo_ids.items 어디에도 없음" % [quest_id, target])
+			elif target.begins_with("pool:"):
+				var pool_ref: String = target.substr(len("pool:"))
+				if not pools.has(pool_ref) and not todo_pools.has(pool_ref):
+					_report("quests.%s: objective target '%s' 가 pools.json/_todo_ids.pools 어디에도 없음" % [quest_id, target])
+
+		for reward_item: Dictionary in ((entry.get("rewards", {}) as Dictionary).get("items", []) as Array):
+			var reward_item_id: String = String(reward_item.get("id", ""))
+			if not items.has(reward_item_id) and not todo_items.has(reward_item_id):
+				_report("quests.%s: rewards.items의 '%s' 가 items.json/_todo_ids.items 어디에도 없음" % [quest_id, reward_item_id])
 
 
 ## 값 간 정합성 규칙(data_tables.md §1 검증 규칙, 단순 존재 확인이 아닌 관계식).

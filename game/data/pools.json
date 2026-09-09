@@ -1,0 +1,22 @@
+{
+  "_comment": "M2-7(F5-2 일일 의뢰, D-97) 신설. 게시판 daily_template 퀘스트가 target: 'pool:<pool_id>'로 참조하는 가중 추첨 풀 테이블. QuestSystem이 GameState.day_index + quest_id로 시드를 고정한 뒤 이 풀에서 몬스터/아이템 1종을 뽑는다(scripts/systems/quest_system.gd:_daily_pick 참고). kind='monster'는 members[].id가 monsters.json 키, kind='item'은 items.json 키여야 한다(tools/qa/validate_tables.py·Data._validate_pools()가 교차 검증). weight는 상대 가중치일 뿐 합이 1.0일 필요는 없다(0보다 크기만 하면 됨) — 이번 초안은 전부 균등 가중치(1.0)로 둔 잠정치다.",
+  "heartland_field_low": {
+    "pool_id": "heartland_field_low",
+    "kind": "monster",
+    "members": [
+      { "id": "horn_rabbit", "weight": 1.0 },
+      { "id": "mushroom", "weight": 1.0 }
+    ],
+    "_comment": "docs/specs/quest-data-schema.md §2.6 초안(D-97) 그대로 — quest_daily_heartland_01/03(kill)이 참조. 균등 가중치는 game-designer 확인 필요(_balance_todo)."
+  },
+  "heartland_field_material_low": {
+    "pool_id": "heartland_field_material_low",
+    "kind": "item",
+    "members": [
+      { "id": "mushroom_cap", "weight": 1.0 },
+      { "id": "iron_ore", "weight": 1.0 },
+      { "id": "rabbit_horn", "weight": 1.0 }
+    ],
+    "_comment": "D-97 초안 그대로 — quest_daily_heartland_02(collect)가 참조. 균등 가중치는 game-designer 확인 필요(_balance_todo)."
+  }
+}

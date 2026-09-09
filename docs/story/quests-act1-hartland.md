@@ -58,7 +58,7 @@
 ### MQ05 `quest_main_a1_05_reclaim` — "마을을 되찾다"
 - **장소**: 민들레 마을 전역 | **의뢰자**: 시스템 | **선행**: MQ04 완료
 - **목표 단계**: ① kill `monster:horn_rabbit_big` ×1(정예, "덩치 뿔토끼"급) → ② reach `location:heartland_dandelion_village_square`
-- **보상**: 골드 40 / 경험치 30 / 아이템 `item_material_wool_soft` ×2
+- **보상**: 골드 40 / 경험치 30 / 아이템 `wool_soft` ×2
 - **분기·실패**: 없음(정예 패배 시 즉시 재도전, 골드 손실 없음 — D-23 원칙 준용)
 - **완료 시**: `unlock_facility:smith`·`shop`·`inn`·`board`·`mailbox`, `save_checkpoint`, `register_quest: quest_main_a1_06_echocave`
 - **핵심 대사**: `main_a1_s05_heartland_meru_01~02`
@@ -78,7 +78,7 @@
 ### MQ07 `quest_main_a1_07_fiveroads` — "다섯 개의 길"
 - **장소**: 민들레 마을 결계석 앞(MQ04와 동일 장소) | **의뢰자**: 테오 | **선행**: MQ05 완료(D-92, MQ06과 병렬 가능)
 - **목표 단계**: ① reach `location:heartland_ward_stone` → ② talk `npc:teo`
-- **보상**: 골드 20 / 경험치 20 / 아이템 `item_flavor_horn_shard` ×1(목자들이 대대로 물려온 물건의 파편 — characters.md 6.2절 기존 플레이버 재사용)
+- **보상**: 골드 20 / 경험치 20 / 아이템 `horn_shard` ×1(목자들이 대대로 물려온 물건의 파편 — characters.md 6.2절 기존 플레이버 재사용)
 - **분기·실패**: 없음(메인 퀘스트 포기 불가, F5-1)
 - **완료 시**: `unlock_worldmap`, `register_main_act2_regions`(2막 5개 지방 퀘스트 동시 등록 — 실제 quest id는 2막 데이터 작성 시 확정, 이번 파일에서는 추상 이벤트 태그만 남김)
 - **핵심 대사**: `main_a1_s08_heartland_teo_01~03`
@@ -93,7 +93,7 @@
 - **장소**: 마을 외곽 목초지 → 안전지대 경계 | **의뢰자**: 다미(1회성 기능 NPC) | **선행**: MQ06 완료(MQ07 이전 아무 때나, 강제 아님)
 - **목표 단계**: ① talk `npc:dami` → ② reach `location:heartland_pasture_boundary` → ③ interact `object:montsil_rabbit`
 - **분기**: interact 시점에 선택지 — `release`(놓아주기) / `capture_attempt`(붙잡기 시도, 저강도 미니게임 or 대치 후 퇴각). **결과 수렴**: 어느 쪽이든 몽실이는 결국 숲 너머로 사라진다 — 서사 연출만 다르고 보상·이후 진행은 동일(결정 필요 D-94 참고)
-- **보상**: 골드 15 / 경험치 10 / 아이템 `item_food_stew_basic` ×1
+- **보상**: 골드 15 / 경험치 10 / 아이템 `stew_basic` ×1
 - **실패 조건**: 없음(시간제한 없음)
 - **완료 시**: 없음(다음 퀘스트에 영향 없음, 순수 정서 비트)
 - **핵심 대사**: `main_a1_s07_heartland_dami_01~06`(main-storyline.md 소유, 재인용만)
@@ -102,8 +102,8 @@
 
 ### S2 `quest_side_heartland_festival_prep` — "목자 시험: 민들레제 리본"
 - **장소**: 목초지 전역 | **의뢰자**: 로젤 | **선행**: MQ05 완료
-- **목표 단계**: ① talk `npc:rozel`(민들레제 경기 준비 부탁) → ② kill `monster:horn_rabbit` ×3(가축을 겁먹게 하는 들짐승 정리) → ③ collect `item:item_material_ribbon_dandelion` ×5(경기용 리본 재료 채집)
-- **보상**: 골드 35 / 경험치 20 / 아이템 `item_flavor_ribbon_charm` ×1(로젤이 직접 엮어준 서투른 리본 부적) / 호감도 로젤 acq 단계 개방
+- **목표 단계**: ① talk `npc:rozel`(민들레제 경기 준비 부탁) → ② kill `monster:horn_rabbit` ×3(가축을 겁먹게 하는 들짐승 정리) → ③ collect `item:ribbon_dandelion` ×5(경기용 리본 재료 채집)
+- **보상**: 골드 35 / 경험치 20 / 아이템 `ribbon_charm` ×1(로젤이 직접 엮어준 서투른 리본 부적) / 호감도 로젤 acq 단계 개방
 - **분기·실패**: 없음
 - **완료 시**: `affinity_stage:rozel:acq`(characters.md 3.1절 "지인 — 목자 시험" 대사 재생 트리거)
 - **핵심 대사**: 수주 `quest_side_heartland_festival_prep_line_01`(신규) / 완료 `npc_heartland_rozel_acq_01`(characters.md 소유, 재인용)
@@ -122,8 +122,8 @@
 
 ### S4 `quest_side_heartland_herbrun` — "머루 할머니의 특별 손님"
 - **장소**: 마을 근교 초지·숲 가장자리 | **의뢰자**: 머루 할머니 | **선행**: MQ05 완료
-- **목표 단계**: ① talk `npc:meru` → ② collect `item:item_material_herb_common` ×4 → ③ collect `item:mushroom_cap` ×2
-- **보상**: 골드 25 / 경험치 15 / 아이템 `item_food_stew_basic` ×1 / 호감도 머루 acq 단계 개방
+- **목표 단계**: ① talk `npc:meru` → ② collect `item:herb_common` ×4 → ③ collect `item:mushroom_cap` ×2
+- **보상**: 골드 25 / 경험치 15 / 아이템 `stew_basic` ×1 / 호감도 머루 acq 단계 개방
 - **분기·실패**: 없음
 - **완료 시**: `affinity_stage:meru:acq`(characters.md 3.1절 "지인 — 여관집 셈법" 대사 재생 트리거)
 - **핵심 대사**: 수주 `quest_side_heartland_herbrun_line_01`(신규) / 완료 `npc_heartland_meru_acq_01`(characters.md 소유, 재인용)
@@ -153,7 +153,7 @@
 | `quest_daily_heartland_03` | 토벌 | 핀토 | 전투 | `pool:heartland_field_low` | 3~5 |
 
 - 문안(`{몬스터}`/`{수량}` 바인딩)은 characters.md 5.1절 원문 그대로, `quest_ko.csv`에 동일 key로 옮긴다.
-- 몬스터/아이템 풀 태그(`heartland_field_low`, `heartland_field_material_low`)는 실제 풀 구성(어떤 몬스터·아이템이 몇 %로 뽑히는지)이 아직 없다 — 결정 필요 D-97 참고. 잠정적으로 `horn_rabbit`·`mushroom`(몬스터), `item_material_herb_common`·`item_material_wool_soft`(아이템)를 초안 구성원으로 제안한다.
+- 몬스터/아이템 풀 태그(`heartland_field_low`, `heartland_field_material_low`)는 실제 풀 구성(어떤 몬스터·아이템이 몇 %로 뽑히는지)이 아직 없다 — 결정 필요 D-97 참고. 잠정적으로 `horn_rabbit`·`mushroom`(몬스터), `herb_common`·`wool_soft`(아이템)를 초안 구성원으로 제안한다.
 - 보상(`_balance_todo`): 토벌형 골드 15~25/경험치 10, 납품형 골드 10~20 + 재료 소량. 주간 7회 누적 보너스는 F5-2 규정대로 게임 시스템(game-designer) 소관.
 
 ---
@@ -165,16 +165,18 @@
 | 몬스터 | `horn_rabbit` | 뿔토끼, characters.md 6.3절 도감 예시 재사용 |
 | 몬스터 | `mushroom` | 버섯돌이, characters.md 6.3절 도감 예시 재사용 |
 | 몬스터 | `horn_rabbit_big` | 정예 "덩치 뿔토끼"(MQ05 전용, 신규) |
-| 아이템 | `item_material_wool_soft` | 신규(양털류 소재) |
+| 아이템 | `wool_soft` | 신규(양털류 소재) |
 | 아이템 | `iron_ore` | 신규(저급 철광석) |
-| 아이템 | `item_material_herb_common` | 신규(잡초 약초) |
+| 아이템 | `herb_common` | 신규(잡초 약초) |
 | 아이템 | `mushroom_cap` | 신규(야생 버섯) |
-| 아이템 | `item_material_ribbon_dandelion` | 신규(민들레제 리본 재료) |
-| 아이템 | `item_food_stew_basic` | 신규(머루 할머니표 스튜) |
-| 아이템 | `item_flavor_horn_shard` | characters.md 6.2절 기존 플레이버 재사용 |
-| 아이템 | `item_flavor_ribbon_charm` | 신규(로젤이 엮어준 리본 부적) |
+| 아이템 | `ribbon_dandelion` | 신규(민들레제 리본 재료) |
+| 아이템 | `stew_basic` | 신규(머루 할머니표 스튜) |
+| 아이템 | `horn_shard` | characters.md 6.2절 기존 플레이버 재사용 |
+| 아이템 | `ribbon_charm` | 신규(로젤이 엮어준 리본 부적) |
 
 위 목록은 `game/data/quests/act1_hartland.json` 상단 `_todo_ids`와 동일하다. 장소/오브젝트 id(`heartland_ward_stone`, `montsil_rabbit` 등)는 몬스터/아이템 스키마 대상이 아니므로 별도 표로 JSON에 `_todo_ids.locations`/`.objects`로만 남겨 레벨 디자이너 확인을 요청한다.
+
+> **M2-7 갱신(godot-engineer)**: 위 표의 몬스터·아이템 id는 전부 `monsters.json`/`items.json`에 실제 항목으로 채워 `_todo_ids.monsters`/`.items`에서 제거했다(`horn_rabbit_big`은 hp/atk만 1.5배, 나머지는 horn_rabbit과 동일 — D-95 반영). 장소/오브젝트만 `_todo_ids`에 남는다.
 
 ---
 
@@ -187,4 +189,4 @@
 | D-94(안) | S1(몽실이) 분기(놓아주기/붙잡기 시도)의 결과·보상 차등 여부 | 완전 동일(서사 연출만 분기, 파워/보상 개입 금지) — "뭉클함"이 선택 자체보다 결말의 필연성에서 와야 하므로 |
 | D-95(안) | MQ05 정예 몬스터(`horn_rabbit_big`) 첫 처치 확정 보상 여부 — F6-3 "정예 첫 클리어 희귀~영웅 확정" 규정은 2막부터로 보임(1막 정예는 스토리 전용 단일 개체) | 1막 정예는 F6-3 적용 예외로 명문화, 확정 지급 없이 스토리 보상(위 MQ05 보상)만 지급 |
 | D-96(안) | 1막 메인/사이드 보상 골드·경험치 최종 수치 확정(현재 전부 `_balance_todo` 잠정치, 레벨 1~3 가정) | game-designer가 `items-and-drops`/경제 밸런스 스펙 확정 후 이 문서·JSON 일괄 갱신 |
-| D-97(안) | 게시판 일일 의뢰 몬스터/아이템 풀 태그(`heartland_field_low` 등) 정식 스키마·구성원 확정 | game-designer + godot-engineer 협의로 `pools.json`(가칭) 신설 추천, 본 문서 3장 "초안 구성원"을 시작점으로 사용 |
+| D-97(확정, M2-7) | 게시판 일일 의뢰 몬스터/아이템 풀 태그(`heartland_field_low` 등) 정식 스키마·구성원 확정 | `game/data/pools.json` 신설(godot-engineer, M2-7). `heartland_field_low`={horn_rabbit, mushroom}(균등 가중치), `heartland_field_material_low`={mushroom_cap, iron_ore, rabbit_horn}(균등 가중치) — 위 3장 초안 구성원과 다르게 herb_common/wool_soft 대신 기존 파밍 재료(mushroom_cap/iron_ore/rabbit_horn)를 채택했다(신규 퀘스트 전용 재료는 일일 의뢰 풀에서 제외). 가중치 수치 자체는 `_balance_todo`로 game-designer 확인 필요. |

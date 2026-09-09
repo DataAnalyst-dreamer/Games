@@ -10,12 +10,16 @@
 ##     다시 찾아야 한다).
 ##  3) 체크섬 손상 시 .bak 자동 복구(F8-1 예외 규칙).
 ##  4) can_save() 거부(보스방/전투 중/사망 직후) — 이 조건에서는 파일이 쓰이지 않아야 함.
+##  5) M2-7 신설: 퀘스트 수주 + 목표 1단계 진행 상태가 저장/로드 라운드트립에서
+##     그대로 복원되는지(QuestSystem.to_dict()/from_dict()가 save_manager.gd 페이로드에
+##     실제로 실려 있는지) 확인.
 extends Node
 
 const SLOT := 1
 const STONE_ITEM_ID := "enhance_stone"
 const WEAPON_UID := "u_smoke_save_weapon"
 const LETHAL_TEST_DAMAGE := 15
+const QUEST_ID := "quest_main_a1_01_arrival"
 
 var _main: Node
 var _player: Player
@@ -33,6 +37,7 @@ var _snapshot_enhance_level: int = 0
 func _ready() -> void:
 	print("=== SMOKE SAVE/LOAD: 세이브/로드 전체 파이프라인(F8-1) ===")
 	SaveManager.delete(SLOT) # 이전 실행 잔여물 제거.
+	QuestSystem.reset() # M2-7: 퀘스트 라운드트립도 깨끗한 상태에서 시작.
 	_spawn_main()
 
 	await _run_setup_and_save_flow()
@@ -120,6 +125,12 @@ func _run_setup_and_save_flow() -> void:
 
 	_player.global_position = Vector2(321.0, -87.0)
 
+	# M2-7: 퀘스트 수주 + 목표 1단계(talk teo)까지 진행 후 저장 대상에 포함되는지 본다.
+	var accept_result: Dictionary = QuestSystem.accept(QUEST_ID)
+	_check("퀘스트 수주 성공(QUEST_ID)", accept_result.get("ok", false))
+	Events.npc_talked.emit(&"teo")
+	_check("퀘스트 목표 1단계까지 진행됨(저장 전)", QuestSystem.get_active_objective_index(QUEST_ID) == 1)
+
 	_snapshot_gold = GameState.gold
 	_snapshot_hp = _player.resources.hp
 	_snapshot_position = _player.global_position
@@ -139,6 +150,13 @@ func _run_reload_flow() -> void:
 	_check("새 Player는 아직 초기 위치", _player.global_position != _snapshot_position)
 	_check("새 Waystone1은 아직 비활성 상태", not _waystone.is_active)
 
+	# M2-7: QuestSystem은 GameState/Waystone과 달리 씬 재생성으로는 초기화되지 않는
+	# 진짜 프로세스 전역 오토로드라 "앱 재시작 흉내"를 완성하려면 명시적으로 비워야
+	# 한다 — 이렇게 해야 아래 로드 검증이 "메모리에 이미 있던 값"이 아니라 실제로
+	# 파일에서 복원됐음을 증명한다.
+	QuestSystem.reset()
+	_check("reset() 직후엔 퀘스트 상태 없음(로드 전 사전 확인)", QuestSystem.get_state(QUEST_ID) == "available")
+
 	var load_result: Dictionary = SaveManager.load(SLOT, "manual")
 	_check("로드 성공", load_result.get("ok", false))
 
@@ -149,6 +167,8 @@ func _run_reload_flow() -> void:
 	_check("플레이어 HP 복원", _player.resources.hp == _snapshot_hp)
 	_check("새 씬의 비석이 waystone_id로 다시 활성화됨", _waystone.is_active)
 	_check("GameState.last_waystone이 새 비석 노드로 재연결됨", GameState.last_waystone == _waystone)
+	_check("퀘스트 수주 상태 복원됨(QuestSystem.from_dict)", QuestSystem.get_state(QUEST_ID) == "active")
+	_check("퀘스트 목표 진행도(1단계) 복원됨", QuestSystem.get_active_objective_index(QUEST_ID) == 1)
 
 
 # --- 3) 체크섬 손상 -> .bak 자동 복구 ---

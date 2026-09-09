@@ -346,6 +346,109 @@ def validate_blueprints(blueprints: Dict[str, Any], item_ids: Dict[str, Any], re
     return data
 
 
+def load_quests(data_dir: Path, report: Report) -> tuple[Dict[str, Any], Dict[str, list]]:
+    """game/data/quests/*.json 폴더 병합(godot-engineer Data._load_quests()와 동일 규칙,
+    M2-7 신설). quest_id -> Quest 딕셔너리 + 카테고리별 _todo_ids 합집합을 반환한다."""
+    quests: Dict[str, Any] = {}
+    todo_ids: Dict[str, list] = {}
+    quests_dir = data_dir / "quests"
+    if not quests_dir.exists():
+        return quests, todo_ids
+    for path in sorted(quests_dir.glob("*.json")):
+        file_data = load_json(path, report)
+        for quest in file_data.get("quests", []):
+            quest_id = quest.get("id")
+            if not quest_id:
+                report.error(f"quests({path.name}): id 없는 퀘스트 항목")
+                continue
+            if quest_id in quests:
+                report.error(f"quests({path.name}): quest_id 중복 - '{quest_id}'(스키마 체크리스트 '모든 id 유일' 위반)")
+            quests[quest_id] = quest
+        for category, ids in file_data.get("_todo_ids", {}).items():
+            if category.startswith("_"):
+                continue
+            bucket = todo_ids.setdefault(category, [])
+            for id_ in ids:
+                if id_ not in bucket:
+                    bucket.append(id_)
+    return quests, todo_ids
+
+
+def validate_quests(quests: Dict[str, Any], todo_ids: Dict[str, list], monsters: Dict[str, Any],
+                     item_ids: Dict[str, Any], pools: Dict[str, Any], report: Report) -> None:
+    """docs/specs/quest-data-schema.md §3 검증 체크리스트 이식(Data._validate_quests()와
+    동일 규칙 — 두 곳은 항상 같이 갱신할 것)."""
+    todo_monsters = todo_ids.get("monsters", [])
+    todo_items = todo_ids.get("items", [])
+    todo_pools = todo_ids.get("pools", [])
+
+    for quest_id, quest in quests.items():
+        if quest.get("id") != quest_id:
+            report.error(f"quests.{quest_id}: id 필드값이 키와 불일치")
+
+        type_ = quest.get("type")
+        if type_ == "main" and quest.get("fail_conditions"):
+            report.error(f"quests.{quest_id}: type=main인데 fail_conditions가 비어있지 않음(F5-1 위반)")
+        repeatable = bool(quest.get("repeatable", False))
+        if type_ == "daily_template" and not repeatable:
+            report.error(f"quests.{quest_id}: type=daily_template인데 repeatable=false(스키마 체크리스트 위반)")
+        elif type_ != "daily_template" and repeatable:
+            report.error(f"quests.{quest_id}: type={type_}인데 repeatable=true(daily_template만 가능)")
+
+        for prereq_id in quest.get("prerequisites", {}).get("quests_completed", []):
+            if prereq_id not in quests:
+                report.error(f"quests.{quest_id}: prerequisites.quests_completed의 '{prereq_id}' 가 존재하지 않는 퀘스트 id")
+
+        for objective in quest.get("objectives", []):
+            target = objective.get("target", "")
+            if target.startswith("monster:"):
+                ref = target[len("monster:"):]
+                if ref not in entries(monsters) and ref not in todo_monsters:
+                    report.error(f"quests.{quest_id}: objective target '{target}' 가 monsters.json/_todo_ids.monsters 어디에도 없음")
+            elif target.startswith("item:"):
+                ref = target[len("item:"):]
+                if ref not in item_ids and ref not in todo_items:
+                    report.error(f"quests.{quest_id}: objective target '{target}' 가 items.json/_todo_ids.items 어디에도 없음")
+            elif target.startswith("pool:"):
+                ref = target[len("pool:"):]
+                if ref not in entries(pools) and ref not in todo_pools:
+                    report.error(f"quests.{quest_id}: objective target '{target}' 가 pools.json/_todo_ids.pools 어디에도 없음")
+
+        for reward_item in quest.get("rewards", {}).get("items", []):
+            ref = reward_item.get("id")
+            if ref not in item_ids and ref not in todo_items:
+                report.error(f"quests.{quest_id}: rewards.items의 '{ref}' 가 items.json/_todo_ids.items 어디에도 없음")
+
+
+def validate_pools(pools: Dict[str, Any], monsters: Dict[str, Any], item_ids: Dict[str, Any], report: Report) -> Dict[str, Any]:
+    """pools.json 검증(F5-2 게시판 일일 의뢰, D-97 신설) — 구성원 참조 무결성 + 가중치 합."""
+    data = entries(pools)
+    for pool_id, pool in data.items():
+        if pool.get("pool_id") != pool_id:
+            report.error(f"pools.{pool_id}: pool_id 필드값이 키와 불일치")
+        kind = pool.get("kind")
+        if kind not in ("monster", "item"):
+            report.error(f"pools.{pool_id}: kind '{kind}' 는 'monster'|'item' 중 하나여야 함")
+        members = pool.get("members")
+        if not isinstance(members, list) or not members:
+            report.error(f"pools.{pool_id}: members가 비어있거나 배열이 아님")
+            continue
+        total_weight = 0.0
+        for member in members:
+            member_id = member.get("id")
+            weight = member.get("weight", 0.0)
+            if weight <= 0:
+                report.error(f"pools.{pool_id}: members '{member_id}'의 weight({weight})는 0보다 커야 함")
+            total_weight += weight
+            if kind == "monster" and member_id not in entries(monsters):
+                report.error(f"pools.{pool_id}: monster 풀 구성원 '{member_id}' 가 monsters.json에 없음")
+            elif kind == "item" and member_id not in item_ids:
+                report.error(f"pools.{pool_id}: item 풀 구성원 '{member_id}' 가 items.json에 없음")
+        if total_weight <= 0:
+            report.error(f"pools.{pool_id}: 전체 weight 합이 0 이하 - 추첨 불가(D-97 가중치 합 검증)")
+    return data
+
+
 def validate_monsters_cross_ref(monsters: Dict[str, Any], drop_table_ids: Dict[str, Any], report: Report) -> None:
     data = entries(monsters)
     for monster_id, monster in data.items():
@@ -376,6 +479,8 @@ def main() -> int:
     farming_sources = load_json(data_dir / "farming_sources.json", report)
     stats = load_json(data_dir / "stats.json", report)
     blueprints = load_json(data_dir / "blueprints.json", report)
+    pools = load_json(data_dir / "pools.json", report)
+    quests, quest_todo_ids = load_quests(data_dir, report)
 
     item_ids = validate_items(items, report)
     validate_affixes(affixes, item_ids, report)
@@ -385,10 +490,13 @@ def main() -> int:
     validate_stats(stats, report)
     validate_farming_sources(farming_sources, drop_table_ids, monsters, report)
     blueprint_ids = validate_blueprints(blueprints, item_ids, report)
+    pool_ids = validate_pools(pools, monsters, item_ids, report)
+    validate_quests(quests, quest_todo_ids, monsters, item_ids, pool_ids, report)
 
     print(f"[validate_tables] items={len(item_ids)} affixes={len(entries(affixes))} "
           f"drop_tables={len(drop_table_ids)} monsters={len(entries(monsters))} "
-          f"farming_sources={len(entries(farming_sources))} blueprints={len(blueprint_ids)}")
+          f"farming_sources={len(entries(farming_sources))} blueprints={len(blueprint_ids)} "
+          f"pools={len(pool_ids)} quests={len(quests)}")
 
     if report.warnings:
         print(f"\n경고 {len(report.warnings)}건:")

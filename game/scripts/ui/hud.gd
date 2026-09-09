@@ -113,6 +113,13 @@ func _ready() -> void:
 	Events.settings_changed.connect(_on_settings_changed)
 	Events.save_completed.connect(_on_save_completed)
 
+	# M2-7(F5-1/F5-2 퀘스트) 신설. 추적 퀘스트 한 줄 최소 표시 — 퀘스트 로그 UI(다음
+	# 단계) 이전까지는 "가장 우선순위 높은 활성 퀘스트"를 자동으로 계속 갱신만 한다.
+	Events.quest_accepted.connect(_on_quest_progress_changed)
+	Events.quest_objective_updated.connect(_on_quest_progress_changed)
+	Events.quest_completed.connect(_on_quest_progress_changed)
+	_refresh_quest_line()
+
 	# Player._ready()가 Hud보다 먼저(트리 순서상) 초기 시그널을 이미 쏜 뒤일 수 있어
 	# (DebugHud와 같은 한계), 현재 값을 한 번 직접 끌어와 초기 표시를 맞춘다.
 	if _player != null and _player.resources != null:
@@ -401,8 +408,30 @@ func _read_status_text() -> String:
 	return " ".join(flags)
 
 
+# --- 퀘스트(M2-7, F5-1/F5-2) ---
+
+## quest_id가 비어있으면(다른 퀘스트 갱신) 무시하지 않고 항상 "현재 추적 대상"을 다시
+## 계산한다 — 여러 퀘스트가 동시에 활성 상태일 수 있어(D-93 사이드 동시 보유 무제한)
+## 갱신된 그 퀘스트가 추적 대상이 아닐 수도 있기 때문(get_tracked_quest_id() 우선순위
+## 참고: 활성 메인 > 그 외 활성).
+func _on_quest_progress_changed(_quest_id: StringName, _a: Variant = null, _b: Variant = null, _c: Variant = null) -> void:
+	_refresh_quest_line()
+
+
+func _refresh_quest_line() -> void:
+	var progress: Dictionary = QuestSystem.get_tracked_quest_progress()
+	if progress.is_empty():
+		set_quest_line("")
+		return
+	var title: String = tr(StringName(String(progress.get("title_key", ""))))
+	var text: String = tr(&"ui.hud.quest_progress_fmt") % [title, int(progress.get("current", 0)), int(progress.get("target", 0))]
+	set_quest_line(text)
+
+
 # --- 향후 연동용 공개 API (F7-2 등) ---
 
-## 추적 퀘스트 한 줄(현재는 빈 문자열). 퀘스트 시스템이 생기면 이 함수만 호출하면 된다.
+## 추적 퀘스트 한 줄. QuestSystem 갱신 이벤트가 이 함수를 통해 텍스트를 밀어넣는다
+## (위 _refresh_quest_line 참고) — 외부(퀘스트 로그 UI 등)에서 직접 덮어쓰고 싶을 때도
+## 이 함수 하나만 호출하면 된다.
 func set_quest_line(text: String) -> void:
 	quest_line_label.text = text
