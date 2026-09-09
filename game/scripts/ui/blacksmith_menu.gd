@@ -785,10 +785,10 @@ func _execute_enhance() -> void:
 	_play_result_effect(success)
 	if success:
 		_show_toast(tr(&"ui.smith.enhance.result_success_title"), true)
-		AudioManager.play_sfx(&"blacksmith_enhance_success") # _todo: 강화 성공 전용 SFX 미제작(audio_sfx.json 참고).
+		AudioManager.play_sfx(&"blacksmith_enhance_success")
 	else:
 		_show_toast("%s %s" % [tr(&"ui.smith.enhance.result_fail_title"), tr(&"ui.smith.enhance.result_fail_body")], false)
-		AudioManager.play_sfx(&"blacksmith_enhance_fail") # _todo: 강화 실패 전용 SFX 미제작.
+		AudioManager.play_sfx(&"blacksmith_enhance_fail")
 	_rebuild_list()
 
 

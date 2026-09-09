@@ -1,0 +1,23 @@
+{
+  "_comment": "M2-5 대장간 강화 실패 전용 — 둔탁+하강(로우패스로 '연기' 먹먹함), 페널티 최소화 설계를 배신하지 않도록 가벼운 볼륨. sound-map-m1.md §14 참고.",
+  "oldParams": true,
+  "seed": 4002,
+  "wave_type": 0,
+  "p_env_attack": 0.0,
+  "p_env_sustain": 0.08,
+  "p_env_punch": 0.12,
+  "p_env_decay": 0.28,
+  "p_base_freq": 0.3,
+  "p_freq_limit": 0.0,
+  "p_freq_ramp": -0.3,
+  "p_freq_dramp": 0.0,
+  "p_duty": 0.35,
+  "p_duty_ramp": 0.0,
+  "p_repeat_speed": 0.0,
+  "p_lpf_freq": 0.45,
+  "p_lpf_ramp": 0.0,
+  "p_lpf_resonance": 0.1,
+  "p_hpf_freq": 0.0,
+  "p_hpf_ramp": 0.0,
+  "sound_vol": 0.32
+}

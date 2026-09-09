@@ -273,9 +273,27 @@ M1 코드를 읽고 실제 훅 지점을 확인한 결과, 아래는 **Events �
 
 ---
 
-## 13. 요약
+## 13. M2-5 대장간·우편함 SFX (자체 저작 6종 — 제작·매핑 완료)
 
-- **파일로 매핑된 이벤트**: 19건 (§1~§8, UI 3건 포함) + **자체 저작 11건**(§10 sfxr 3건 + §11 등급별 드랍 6종 + 영웅 레이어 1 + `goblin_whistle` 1) = 총 30건
-- **sfxr 자체 저작 완료**: 저스트 가드 성공·스태미나 고갈·전설 드랍 전용 레이어(§10, 기존 임시 대체 파일 교체) + 등급별 드랍 6종(§11, 신규) + 영웅 2번째 레이어(`drop_epic_layer`) + `goblin_whistle`(M2-3 선반영, 훅 없음) — 합성기: `tools/audio/sfxr_synth.py`, 파라미터: `tools/audio/sfxr/*.json`, 검증표는 완료 보고 참고
+`blacksmith_menu.gd`(M2-5)가 이미 5개 id로 `AudioManager.play_sfx()`를 호출 중이었으나 `audio_sfx.json`에 항목이 없어 무음(`entry.is_empty()` → null 반환, 크래시 없이 조용히 no-op)이었다. 기존 CC0 팩(Ninja Adventure/Kenney)에 "모루 타격 + 반짝임", "구슬 굴림/찰칵" 등 의미가 정확히 겹치는 소재가 없어(대장간 전용 UI 톤 요구) `tools/audio/sfxr_synth.py`로 6종 전부 자체 저작했다. 톤 방향: GDD 4.2(타격감) "손맛"과 7.2(지역 정체성) 목가풍에 맞춘 "아기자기한 중세" — 강화 성공은 밝은 2음 상승, 실패는 페널티 최소화 설계를 배신하지 않는 가벼운 둔탁음, 재련은 반짝임 대신 구슬 굴림/찰칵, 분해는 노이즈 파쇄음, 제작은 사인파 완성 팡파레.
+
+| id | 실제 호출부(`blacksmith_menu.gd`) | 파일 | 길이 | 톤 |
+|---|---|---|---|---|
+| `blacksmith_enhance_success` | :788 | `blacksmith_enhance_success.wav` | 0.310s | 모루 타격 펀치 + 아르페지오 2음 상승 + 미세 비브라토("반짝임") |
+| `blacksmith_enhance_fail` | :791 | `blacksmith_enhance_fail.wav` | 0.192s | 로우패스로 먹먹하게 누른 하강 톤, 볼륨도 가장 낮은 축(-8dB) — "페널티 최소화" 설계 의도를 소리로 배신하지 않음 |
+| `blacksmith_refine_roll` | :814 | `blacksmith_refine_roll.wav` | 0.139s | 짧은 스퀘어 블립 + 소폭 아르페지오로 "구슬 굴림 후 찰칵" 질감 |
+| `blacksmith_salvage_complete` | :913 | `blacksmith_salvage_complete.wav` | 0.255s | 노이즈 파형 + 로우패스 레조넌스로 "바스러짐" |
+| `blacksmith_craft_complete` | :936 | `blacksmith_craft_complete.wav` | 0.445s | 사인파 + 상승 아르페지오 + 비브라토, 5종 중 가장 길고 밝은 완성 팡파레 |
+
+**버스/우선순위**: 5종 전부 `UI` 버스, 우선순위 티어 3(`audio-spec.md` §3-2 "UI, 비석, 드랍 사운드 등 비전투 원샷" — 전투 이벤트가 아니고 메뉴 상호작용 결과음이라 기존 `ui_confirm`/`ui_cancel`과 동일 분류가 합당). 볼륨은 관례대로 사건의 무게에 비례(성공 -5dB > 제작완성 -4dB > 분해 -6dB > 실패 -8dB > 재련굴림 -10dB, 재련은 반복 조작이라 스팸 방지 목적으로 가장 낮음).
+
+**우편함(`mailbox_popup.gd`) — 코드 확인 결과 미배선**: grep 결과 `mailbox_popup.gd`는 아직 `AudioManager.play_sfx()`를 전혀 호출하지 않는다(`_claim_focused()`/`_claim_all()`이 `GameState.claim_mail()`/`claim_all_mail()` 호출과 토스트만 처리, `Events.mail_claimed`는 구독만 함). 요청서의 "우편 수령 = 짧은 종이/벨" 톤을 `goblin_whistle`과 동일한 선반영 방식(자산만 미리 제작)으로 `mailbox_claim_chime`(`UI` 버스, -6dB, 0.172s, 사인파 벨)을 만들어 두었다 — **godot-engineer 전달**: `_claim_focused()`/`_claim_all()` 성공 분기(또는 `Events.mail_claimed` 구독) 안에서 `AudioManager.play_sfx(&"mailbox_claim_chime")` 호출 추가 필요.
+
+---
+
+## 14. 요약
+
+- **파일로 매핑된 이벤트**: 19건 (§1~§8, UI 3건 포함) + **자체 저작 17건**(§10 sfxr 3건 + §11 등급별 드랍 6종 + 영웅 레이어 1 + `goblin_whistle` 1 + §13 M2-5 대장간·우편함 6종) = 총 36건
+- **sfxr 자체 저작 완료**: 저스트 가드 성공·스태미나 고갈·전설 드랍 전용 레이어(§10, 기존 임시 대체 파일 교체) + 등급별 드랍 6종(§11, 신규) + 영웅 2번째 레이어(`drop_epic_layer`) + `goblin_whistle`(M2-3 선반영, 훅 없음) + 대장간 5종·우편함 1종(§13, 신규) — 합성기: `tools/audio/sfxr_synth.py`, 파라미터: `tools/audio/sfxr/*.json`, 검증표는 완료 보고 참고
 - **BGM 후보**: 4곡 (초원 목가풍 3 + 전투 전환 1)
-- **godot-engineer 전달 사항**: §12 배선 권장표 8건(신규 1건 — 드랍 레이어 2차 호출), §2 코드 네이밍 불일치 1건
+- **godot-engineer 전달 사항**: §12 배선 권장표 8건(드랍 레이어 2차 호출) + §13 우편함 수령 훅 1건(신규), §2 코드 네이밍 불일치 1건

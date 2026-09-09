@@ -38,6 +38,12 @@ jsfxr/sfxr와 동일한 필드명을 쓴다 — `wave_type`(0=square 1=sawtooth 
 | `drop_common.json` ~ `drop_relic.json` | 등급별 드랍 "뽁뽁" 6종(등급이 오를수록 음 높이·길이·비브라토 증가) | sound-map-m1.md §11, audio-spec.md §4 |
 | `drop_epic_layer.json` | 영웅 등급 2번째 레이어(사인 트윙클) | audio-spec.md §4 원칙 2 |
 | `goblin_whistle.json` | 고블린 정찰 호루라기(M2-3 몬스터 확장 예고, M1 코드에 훅 없음) | M2-3 선반영 |
+| `blacksmith_enhance_success.json` | 대장간 강화 성공(모루 타격+밝은 2음 상승) | sound-map-m1.md §13, `blacksmith_menu.gd:788` |
+| `blacksmith_enhance_fail.json` | 대장간 강화 실패(둔탁+하강, 페널티 최소화 톤) | sound-map-m1.md §13, `blacksmith_menu.gd:791` |
+| `blacksmith_refine_roll.json` | 대장간 재련 굴림(구슬 굴림/찰칵) | sound-map-m1.md §13, `blacksmith_menu.gd:814` |
+| `blacksmith_salvage_complete.json` | 대장간 분해 완료(노이즈 파쇄음) | sound-map-m1.md §13, `blacksmith_menu.gd:913` |
+| `blacksmith_craft_complete.json` | 대장간 제작 완료(사인파 완성 팡파레) | sound-map-m1.md §13, `blacksmith_menu.gd:936` |
+| `mailbox_claim_chime.json` | 우편함 수령(짧은 종이/벨) — 선반영, `mailbox_popup.gd` 미배선 | sound-map-m1.md §13 |
 
 ## 재생성 검증
 생성 직후 길이·피크·무음 여부를 확인하려면(표준 라이브러리 `wave` 모듈만 사용):

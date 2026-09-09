@@ -124,6 +124,7 @@ func _claim_focused() -> void:
 	var result: Dictionary = GameState.claim_mail(mail_id)
 	if result.get("ok", false):
 		_show_toast(tr(&"ui.mail.claimed_toast"), true)
+		AudioManager.play_sfx(&"mailbox_claim_chime")
 	else:
 		_show_toast(tr(&"ui.mail.claim_failed_full"), false)
 
@@ -138,6 +139,8 @@ func _claim_all() -> void:
 		_show_toast(tr(&"ui.mail.inventory_full_partial_result") % [claimed, failed], claimed > 0)
 	else:
 		_show_toast(tr(&"ui.mail.claimed_toast"), true)
+	if claimed > 0:
+		AudioManager.play_sfx(&"mailbox_claim_chime")
 
 
 func _on_mail_claimed(_mail_id: String, _result: Dictionary) -> void:
