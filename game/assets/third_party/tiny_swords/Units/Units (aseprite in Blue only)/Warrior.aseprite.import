@@ -1,0 +1,14 @@
+[remap]
+
+importer="aseprite_wizard.plugin.noop"
+type="PackedDataContainer"
+uid="uid://drca32wufo83u"
+path="res://.godot/imported/Warrior.aseprite-11b5ba59cfa0a4befe4e3db083cf96f0.res"
+
+[deps]
+
+source_file="res://assets/third_party/tiny_swords/Units/Units (aseprite in Blue only)/Warrior.aseprite"
+dest_files=["res://.godot/imported/Warrior.aseprite-11b5ba59cfa0a4befe4e3db083cf96f0.res"]
+
+[params]
+

@@ -4,7 +4,6 @@ game/assets_local/*
 
 # Godot
 .godot/
-*.import
 export_presets.cfg
 
 # OS / editor

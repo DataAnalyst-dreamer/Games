@@ -1,0 +1,14 @@
+[remap]
+
+importer="aseprite_wizard.plugin.noop"
+type="PackedDataContainer"
+uid="uid://cbdygkhbng8hr"
+path="res://.godot/imported/Bushes.aseprite-75a44a29de6c64c402b4803263c7de41.res"
+
+[deps]
+
+source_file="res://assets/third_party/tiny_swords/Terrain/Decorations/Bushes/Bushes.aseprite"
+dest_files=["res://.godot/imported/Bushes.aseprite-75a44a29de6c64c402b4803263c7de41.res"]
+
+[params]
+

@@ -1,0 +1,68 @@
+{
+  "_comment": "전투 밸런스 테이블. 출처: GDD 4.1/4.2, 의사결정 D-05(저스트 가드 6프레임). 프레임 수치는 60fps 기준(frame_rate_reference), 코드는 delta 기반으로 사용한다. '_balance_todo' 항목은 game-designer가 밸런싱 예정인 제안값.",
+  "frame_rate_reference": 60,
+
+  "roll": {
+    "_comment": "GDD 4.1: 구르기 무적 0.3초, 스태미나 소모. 나머지는 제안값.",
+    "iframes_sec": 0.3,
+    "duration_sec": 0.45,
+    "distance_px": 48,
+    "_balance_todo": ["duration_sec", "distance_px"]
+  },
+
+  "guard": {
+    "_comment": "D-05: 적중 직전 6프레임(0.1초) 내 입력 시 저스트 가드.",
+    "just_guard_window_frames": 6,
+    "just_guard_window_sec": 0.1,
+    "chip_damage_ratio": 0.2,
+    "_balance_todo": ["chip_damage_ratio"]
+  },
+
+  "hitstop": {
+    "_comment": "GDD 4.2: 히트스톱 0.05~0.1초. 접근성 옵션 배율(0~1)을 곱해 적용.",
+    "min_sec": 0.05,
+    "max_sec": 0.1
+  },
+
+  "telegraph": {
+    "_comment": "GDD 4.2: 몬스터 공격 예고 최소 0.5초.",
+    "min_sec": 0.5
+  },
+
+  "combo": {
+    "_comment": "GDD 4.1: 기본 공격 3타 콤보. 타별 배율 1.0/1.0/1.5는 제안값.",
+    "hits": 3,
+    "damage_multipliers": [1.0, 1.0, 1.5],
+    "input_buffer_sec": 0.2,
+    "reset_after_sec": 0.6,
+    "_balance_todo": ["damage_multipliers", "input_buffer_sec", "reset_after_sec"]
+  },
+
+  "movement": {
+    "_comment": "픽셀/초. 프로토타입은 16px 타일(Ninja Adventure) 기준 — 원작 아트(32px 타일) 전환 시 재조정.",
+    "walk_speed_px": 80.0,
+    "roll_speed_px": 160.0,
+    "_balance_todo": ["walk_speed_px", "roll_speed_px"]
+  },
+
+  "stamina": {
+    "_comment": "GDD 4.2-3: 구르기·강공격·가드는 스태미나 소모, 완전 고갈 시 회복 딜레이 페널티. 전부 제안값.",
+    "max": 100.0,
+    "regen_per_sec": 25.0,
+    "regen_delay_sec": 0.5,
+    "exhausted_penalty_sec": 1.5,
+    "costs": {
+      "roll": 20.0,
+      "heavy_attack": 25.0,
+      "guard_hit": 10.0
+    },
+    "_balance_todo": ["max", "regen_per_sec", "regen_delay_sec", "exhausted_penalty_sec", "costs"]
+  },
+
+  "elements": {
+    "_comment": "D-08: 순환형 상성 화→풍→뇌→수→화 (앞이 뒤에 강함), 성(holy)은 마물(demon) 특효. 상성 적중 시 1.5배.",
+    "advantage_multiplier": 1.5,
+    "cycle": ["fire", "wind", "thunder", "water"],
+    "holy_bonus_vs_tags": ["demon"]
+  }
+}

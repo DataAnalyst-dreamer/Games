@@ -1,0 +1,14 @@
+[remap]
+
+importer="aseprite_wizard.plugin.noop"
+type="PackedDataContainer"
+uid="uid://bhb6ckwyst2gd"
+path="res://.godot/imported/Water Rocks_03.aseprite-0e87141b72f1c273a1f098aa6227cb89.res"
+
+[deps]
+
+source_file="res://assets/third_party/tiny_swords/Terrain/Decorations/Rocks in the Water/Water Rocks_03.aseprite"
+dest_files=["res://.godot/imported/Water Rocks_03.aseprite-0e87141b72f1c273a1f098aa6227cb89.res"]
+
+[params]
+

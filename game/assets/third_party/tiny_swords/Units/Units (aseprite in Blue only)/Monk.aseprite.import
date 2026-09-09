@@ -1,0 +1,14 @@
+[remap]
+
+importer="aseprite_wizard.plugin.noop"
+type="PackedDataContainer"
+uid="uid://b3uq5io2n51r1"
+path="res://.godot/imported/Monk.aseprite-eab030ad7da6d236abc03cd9fbed1c19.res"
+
+[deps]
+
+source_file="res://assets/third_party/tiny_swords/Units/Units (aseprite in Blue only)/Monk.aseprite"
+dest_files=["res://.godot/imported/Monk.aseprite-eab030ad7da6d236abc03cd9fbed1c19.res"]
+
+[params]
+
