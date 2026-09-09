@@ -145,6 +145,8 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 | D-80 | goblin_scout 드랍 테이블 | **game-designer가 M2-2에서 추가**. 그때까지 `drop_table_id: null`(D-67 규칙) | 요청B | drop_tables.json |
 | D-81 | 기존 몬스터 `region_id` 마이그레이션 | **M2-1에서** 슬라임·뿔토끼·버섯돌이의 `region_id`를 `hartland`로 갱신 | 요청C | monsters.json |
 | D-82 | 수식 문자열 표기 | 데이터·코드에 쓰는 수식 문자열은 **ASCII 연산자**(`*`, `-`, `/`)로 통일. 문서의 유니코드 연산자(×, −)는 서술용이며 정본은 `stats.json`·`drop_tables.json`의 ASCII 문자열 | M2-1 질문1 | stats.json, combat.json `_comment`, combat-tuning-m1.md |
+| D-83 | M2-3 정예·투사체 제안값 | 다트 속도 220px/s·생존 1.2s, 스폰 최소 이격 20px, 정예 시각 구분은 스프라이트만 1.3배(콜리전 불변) — **임시 승인 + `_balance_todo`**, M2 플레이테스트에서 실측 | M2-3 엔지니어 제안 | tuning.gd → monsters.json 이관 예정 |
+| D-84 | 고블린 대역 스프라이트 | Ninja Adventure에 고블린이 없어 `Cyclope`(정찰병)·`Cyclope2`(정찰대장) 대역 채택. 원작 고블린 도트는 M3 아트 교체 목록에 등재 | M2-3 | docs/art/sprite-layouts-m1.md 후속 |
 
 ## 변경 이력
 - 2026-09-08: 37건 최초 확정 (추천안 일괄 채택). GDD v1.0 → v1.1 개정.
@@ -159,3 +161,4 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 - 2026-09-08: M2-0 아이템·드랍 테이블 결정 5건(D-74~D-78) 확정.
 - 2026-09-08: 정예·파밍 명세 결정 3건(D-79~D-81) 확정.
 - 2026-09-08: 수식 문자열 ASCII 통일(D-82).
+- 2026-09-09: M2-3 제안값·고블린 대역(D-83·D-84).
