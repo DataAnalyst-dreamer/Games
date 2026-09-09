@@ -1,0 +1,13 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/ui_root.gd" id="1_ui_root_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/Hud.tscn" id="2_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/InventoryMenu.tscn" id="3_inventory_menu"]
+
+[node name="UiRoot" type="CanvasLayer"]
+process_mode = 3
+script = ExtResource("1_ui_root_script")
+
+[node name="Hud" parent="." instance=ExtResource("2_hud")]
+
+[node name="InventoryMenu" parent="." instance=ExtResource("3_inventory_menu")]
