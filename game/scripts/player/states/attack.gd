@@ -23,6 +23,9 @@ func exit() -> void:
 	if player.hitbox != null:
 		player.hitbox.deactivate()
 	combo.reset()
+	# D-127: 콤보 피니셔 종료·구르기 캔슬·피격(Hurt 전이) 등 Attack을 벗어나는 모든
+	# 경로가 여기를 지나므로, tween 완료 여부와 무관하게 무기 오버레이를 즉시 숨긴다.
+	player.hide_weapon_overlay()
 
 
 func handle_input(event: InputEvent) -> void:

@@ -26,6 +26,13 @@ func _ready() -> void:
 
 	for dir_name: String in dirs:
 		var input_dir: Vector2 = dirs[dir_name]
+		# D-128: 축 전환에 최소 유지 시간(Tuning.FACING_AXIS_SWITCH_MIN_INTERVAL_SEC)이
+		# 생겼다 — 이 테스트는 스프라이트 축 매핑(방향→애니메이션/region)만 확인하는
+		# 목적이라, 방향을 바꾸기 전 물리 프레임을 충분히 흘려보내 디바운스 구간을
+		# 벗어난 뒤 set_facing()을 호출한다(실제 플레이에서도 방향 전환 사이엔 여러
+		# 프레임이 지난다 — 여기서는 디바운스 자체를 검증하지 않는다).
+		for _i in range(10):
+			player._physics_process(1.0 / 60.0)
 		player.set_facing(input_dir)
 		player.play_anim("walk")
 		var anim_name: StringName = player.sprite.animation
