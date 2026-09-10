@@ -273,14 +273,13 @@ func get_move_input() -> Vector2:
 	return v
 
 
-## 입력 벡터를 4방향 facing 으로 환산한다. 대각선은 수평 우선.
+## 입력 벡터를 4방향 facing 으로 환산한다. D-121(walk-animation-diagnosis.md §3):
+## FacingCalc.resolve_facing()이 현재 축(수평/수직) 유지 완충(hysteresis)을 적용해,
+## 대각선 45도 부근에서 입력이 미세하게 흔들려도 facing이 프레임마다 토글되지 않는다.
 func set_facing(input_dir: Vector2) -> void:
 	if input_dir == Vector2.ZERO:
 		return
-	if absf(input_dir.x) >= absf(input_dir.y):
-		facing = Vector2.RIGHT if input_dir.x > 0.0 else Vector2.LEFT
-	else:
-		facing = Vector2.DOWN if input_dir.y > 0.0 else Vector2.UP
+	facing = FacingCalc.resolve_facing(facing, input_dir, Tuning.FACING_AXIS_SWITCH_BIAS)
 
 
 func facing_name() -> String:

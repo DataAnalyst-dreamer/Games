@@ -55,6 +55,29 @@ const ATTACK_STARTUP_SEC: float = float(ATTACK_STARTUP_FRAMES) / 60.0
 const ATTACK_RECOVER_TO_IDLE_FRAMES: int = 6
 const ATTACK_RECOVER_TO_IDLE_SEC: float = float(ATTACK_RECOVER_TO_IDLE_FRAMES) / 60.0
 
+## 대각선 부근 입력 흔들림에 대한 facing 축 전환 완충 배율(D-121,
+## docs/qa/walk-animation-diagnosis.md §3). 반대 축 성분이 현재 축보다 이 배율 이상
+## 크지 않으면 현재 축(수평/수직)을 유지한다 — 1.3 = 약 30% 여유. game-designer 확인
+## 필요(완료 보고 질문 목록 참고), `_balance_todo` 취급.
+const FACING_AXIS_SWITCH_BIAS: float = 1.3
+
+## 공격 상태 중 이동 입력 블렌딩 비율(D-124). 타격당 짧은 전진(lunge) 속도가 감쇠되는
+## 동안 이동 입력이 있으면 완전한 정지 대신 `walk_speed * 이 비율`로 수렴시켜, lunge
+## 종료 후 저속 이동으로 자연스럽게 이어지게 한다. 콤보 판정·히트박스 타이밍과는 무관.
+const ATTACK_MOVE_INPUT_BLEND_RATIO: float = 0.35
+
+## 몬스터 머리 위 소형 체력바(D-123)가 마지막 피격 후 노출을 유지하는 시간(초).
+## 이 시간이 지나면 페이드아웃을 시작해 완전히 숨긴다.
+const MONSTER_HP_BAR_FADE_DELAY_SEC: float = 2.5
+## 페이드아웃 자체에 걸리는 시간(초, 위 지연 이후).
+const MONSTER_HP_BAR_FADE_DURATION_SEC: float = 0.4
+
+## 몬스터 공격 이펙트(히트박스/투사체) 스폰 오프셋 계산에 쓰는 여유값(px, D-122,
+## docs/specs/monster-attack-anchor.md §4). monsters.json에 attack_vfx_offset_px가 없는
+## (아직 값을 배정받지 않은) 신규 몬스터의 폴백 계산에만 쓰인다 — 실제 대상 7종은
+## monsters.json에 종별 확정값을 직접 넣었으므로 이 상수를 거치지 않는다.
+const MONSTER_ATTACK_VFX_MARGIN_PX: float = 2.0
+
 ## 사망 판정 직후 텔레포트(부활)까지의 순수 UX 지연(초, F8-2). 밸런스와 무관한 연출
 ## 값이라 combat.json이 아닌 여기 둔다 — docs/specs/combat-tuning-m1-addendum.md §7-3
 ## 제안값(DEATH_RESPAWN_DELAY_SEC=1.0)과 동일한 이름/값으로 맞췄다.

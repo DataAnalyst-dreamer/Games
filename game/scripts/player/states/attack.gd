@@ -50,7 +50,13 @@ func physics_update(delta: float) -> void:
 	if result.advanced:
 		_start_current_hit()
 	# 타별 짧은 전진의 잔여 속도를 감쇠시키며 소화(S2-1a: "짧은 전진 이동 포함").
-	player.velocity = player.velocity.move_toward(Vector2.ZERO, 900.0 * delta)
+	# D-124: 이동 입력이 있으면 완전 정지 대신 저속 이동(walk_speed의
+	# ATTACK_MOVE_INPUT_BLEND_RATIO배)으로 수렴시킨다 — lunge와 입력을 단순 합산하지
+	# 않고, lunge 감쇠가 끝나면 자연스럽게 그 저속 이동으로 이어지도록 move_toward의
+	# 목표 자체를 바꾼다. 콤보 판정·히트박스 타이밍에는 영향 없음(속도 블렌딩만).
+	var move_input: Vector2 = player.get_move_input()
+	var blended_target: Vector2 = move_input * player.walk_speed * Tuning.ATTACK_MOVE_INPUT_BLEND_RATIO
+	player.velocity = player.velocity.move_toward(blended_target, 900.0 * delta)
 	player.move_and_slide()
 
 
@@ -67,7 +73,7 @@ func _start_current_hit() -> void:
 		# M1-4 계측(Metrics.gd): "3타 완주" = 입력 체이닝으로 피니셔가 실제로 시작된 횟수
 		# (적중 여부와 무관). enter()/handle_input()을 거쳐 여기 정확히 한 곳에서만 호출됨.
 		Events.combo_finisher_reached.emit(player)
-	player.play_anim("idle")
+	player.play_anim("attack")
 	player.play_attack_swing(hit_index, combo.hit_duration_sec)
 	_play_swing_sfx(hit_index)
 	var lunge_speed: float = Tuning.ATTACK_LUNGE_PX / maxf(combo.hit_duration_sec, 0.01)

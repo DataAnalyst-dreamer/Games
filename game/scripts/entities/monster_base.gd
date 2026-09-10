@@ -49,8 +49,11 @@
 ##     on_death_split_monster_id를 on_death_split_count마리 스폰한다(재귀 없음 — 스폰된
 ##     개체는 on_death_split_* 필드가 없는 일반 몬스터 데이터를 그대로 쓰므로 데이터
 ##     상으로 안전, §1-3).
-##   - 정예(tier=="elite") 공통: 이름표+등급 테두리 HP바(디버그 수준)를 자동 표시하고,
-##     처치 시 Events.enemy_died와 별도로 Events.elite_died를 추가로 emit한다.
+##   - 정예(tier=="elite") 공통: 이름표(디버그 수준)를 자동 표시하고, 처치 시
+##     Events.enemy_died와 별도로 Events.elite_died를 추가로 emit한다.
+##   - 모든 티어 공통(D-123): 머리 위 소형 체력바 — 평소 숨김 → 피격 시 노출 → 마지막
+##     피격 후 Tuning.MONSTER_HP_BAR_FADE_DELAY_SEC 뒤 페이드아웃. 정예는 기존 골드
+##     테두리 스타일(더 큰 크기)을, 일반 몬스터는 더 작은 크기를 쓴다.
 class_name MonsterBase
 extends CharacterBody2D
 
@@ -85,6 +88,13 @@ var leash_range_px: float = 140.0
 ## 돌진형(charge) 전용, monsters.json 확장 필드(뿔토끼).
 var dash_speed_px: float = 0.0
 var dash_duration_sec: float = 0.0
+
+## 공격 이펙트(히트박스/투사체) 스폰 오프셋(px, D-122, docs/specs/monster-attack-anchor.md).
+## `melee_range_px`(밸런스 값)에서 분리된 시각 전용 값 — monsters.json에 종별로 직접
+## 배정한다(권장식 visual_radius_px(8) x 배치 scale + reach_margin_px로 미리 계산해 둔
+## 확정값). 0이면(필드 미지정) `_attack_vfx_offset_px()`가 기존 계산식으로 폴백한다 —
+## 신규 몬스터를 데이터만 추가해 만들 때 이 필드를 깜빡해도 완전히 깨지지는 않는다.
+var attack_vfx_offset_px: float = 0.0
 
 ## 장판형(spore_patch) 전용, monsters.json 확장 필드(버섯돌이).
 var atk_tick_per_sec: float = 0.0
@@ -124,12 +134,21 @@ var suppress_loot_drop: bool = false
 var _whistle_cooldown_remaining: float = 0.0
 var _wave_triggered: bool = false
 
-## 정예 전용 디버그 표시(이름표 + 등급 테두리 HP바). tier=="elite"일 때만 생성된다.
+## 정예 전용 이름표(등급 테두리 HP바와 별개). tier=="elite"일 때만 생성된다.
 var _elite_nameplate: Label = null
-var _elite_hp_bar_bg: ColorRect = null
-var _elite_hp_bar_fill: ColorRect = null
+
+## 머리 위 소형 체력바(D-123, 모든 티어 공통). 평소 숨김 → 피격 시 노출 → 마지막 피격
+## 후 Tuning.MONSTER_HP_BAR_FADE_DELAY_SEC 뒤 페이드아웃(Tuning.MONSTER_HP_BAR_FADE_DURATION_SEC).
+## 정예는 기존 스타일(골드 테두리, 큰 크기)을 유지하고, 일반 몬스터는 더 작은 크기를 쓴다.
+var _hp_bar_bg: ColorRect = null
+var _hp_bar_fill: ColorRect = null
+var _hp_bar_hide_timer: float = 0.0
+var _hp_bar_fade_tween: Tween = null
+var _hp_bar_fill_full_width: float = 0.0
 const _ELITE_HP_BAR_WIDTH_PX: float = 24.0
 const _ELITE_HP_BAR_HEIGHT_PX: float = 3.0
+const _HP_BAR_WIDTH_PX: float = 14.0
+const _HP_BAR_HEIGHT_PX: float = 2.0
 
 const _PROJECTILE_SCENE: PackedScene = preload("res://scenes/effects/Projectile.tscn")
 
@@ -176,8 +195,9 @@ func _ready() -> void:
 		(detection_shape.shape as CircleShape2D).radius = aggro_range_px
 	if attack_pattern_id == "spore_patch" and aoe_radius_px > 0.0:
 		_create_spore_hitbox()
+	_setup_hp_bar()
 	if tier == "elite":
-		_setup_elite_display()
+		_setup_nameplate()
 	_rng.randomize()
 	_enter_state(State.IDLE)
 
@@ -202,6 +222,7 @@ func _load_stats() -> void:
 	leash_range_px = float(entry.get("leash_range_px", 140.0))
 	dash_speed_px = float(entry.get("dash_speed_px", 0.0))
 	dash_duration_sec = float(entry.get("dash_duration_sec", 0.0))
+	attack_vfx_offset_px = float(entry.get("attack_vfx_offset_px", 0.0))
 	atk_tick_per_sec = float(entry.get("atk_tick_per_sec", 0.0))
 	aoe_radius_px = float(entry.get("aoe_radius_px", 0.0))
 	tier = String(entry.get("tier", "normal"))
@@ -226,6 +247,10 @@ func _physics_process(delta: float) -> void:
 	_state_timer -= delta
 	_whistle_cooldown_remaining = maxf(0.0, _whistle_cooldown_remaining - delta)
 	_maybe_start_whistle()
+	if _hp_bar_hide_timer > 0.0:
+		_hp_bar_hide_timer -= delta
+		if _hp_bar_hide_timer <= 0.0:
+			_start_hp_bar_fade_out()
 	match state:
 		State.IDLE:
 			_process_idle()
@@ -503,7 +528,7 @@ func _fire_projectile() -> void:
 	var proj: Projectile = _PROJECTILE_SCENE.instantiate()
 	var parent: Node = get_parent() if get_parent() != null else self
 	parent.add_child(proj)
-	proj.global_position = global_position + _attack_dir * melee_range_px * 0.6
+	proj.global_position = global_position + _attack_dir * _attack_vfx_offset_px()
 	proj.hitbox.damage = atk
 	proj.hitbox.knockback_px = float(Data.get_value("combat", "knockback.normal_px", 8.0))
 	proj.hitbox.hitstop_sec = float(Data.get_value("combat", "hitstop.normal_sec", 0.05))
@@ -513,10 +538,10 @@ func _fire_projectile() -> void:
 	AudioManager.play_sfx(StringName("%s_attack" % monster_id), global_position)
 
 
-## 정예 디버그 표시(§F6-3 "정예는 이름표 + 등급 테두리 전용 HP바") — 전용 아트 없이
-## Label + ColorRect 두 장(테두리색 배경 + 채움)으로 구성한 최소 구현. pixel-artist가
-## 정식 UI를 만들면 이 함수만 교체하면 된다(완료 보고 TODO).
-func _setup_elite_display() -> void:
+## 정예 전용 이름표(§F6-3 "정예는 이름표 + 등급 테두리 전용 HP바") — 전용 아트 없이
+## Label로 구성한 최소 구현. pixel-artist가 정식 UI를 만들면 이 함수만 교체하면 된다
+## (완료 보고 TODO).
+func _setup_nameplate() -> void:
 	_elite_nameplate = Label.new()
 	_elite_nameplate.text = name_ko
 	_elite_nameplate.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
@@ -526,24 +551,70 @@ func _setup_elite_display() -> void:
 	_elite_nameplate.custom_minimum_size = Vector2(_ELITE_HP_BAR_WIDTH_PX, 10.0)
 	add_child(_elite_nameplate)
 
-	_elite_hp_bar_bg = ColorRect.new()
-	_elite_hp_bar_bg.color = Color(1.0, 0.85, 0.2) # 등급 테두리색(골드) — 배경째로 테두리처럼 보이게.
-	_elite_hp_bar_bg.position = Vector2(-_ELITE_HP_BAR_WIDTH_PX * 0.5, -12.0)
-	_elite_hp_bar_bg.size = Vector2(_ELITE_HP_BAR_WIDTH_PX, _ELITE_HP_BAR_HEIGHT_PX)
-	add_child(_elite_hp_bar_bg)
 
-	_elite_hp_bar_fill = ColorRect.new()
-	_elite_hp_bar_fill.color = Color(0.85, 0.15, 0.15)
-	_elite_hp_bar_fill.position = _elite_hp_bar_bg.position + Vector2(1.0, 1.0)
-	_elite_hp_bar_fill.size = Vector2(_ELITE_HP_BAR_WIDTH_PX - 2.0, _ELITE_HP_BAR_HEIGHT_PX - 2.0)
-	add_child(_elite_hp_bar_fill)
+## 머리 위 소형 체력바(D-123). 모든 티어에 생성하되 정예는 기존 스타일(골드 테두리,
+## 큰 크기)을 그대로 쓰고 일반 몬스터는 더 작은 크기를 쓴다. 평소 숨김 상태로 시작해
+## _show_hp_bar()가 피격 시점에 드러낸다. 전용 아트 없이 ColorRect 두 장(테두리색 배경 +
+## 채움)으로 구성한 최소 구현(pixel-artist TODO — 완료 보고 참고).
+func _setup_hp_bar() -> void:
+	var is_elite: bool = tier == "elite"
+	var width: float = _ELITE_HP_BAR_WIDTH_PX if is_elite else _HP_BAR_WIDTH_PX
+	var height: float = _ELITE_HP_BAR_HEIGHT_PX if is_elite else _HP_BAR_HEIGHT_PX
+	var bg_color: Color = Color(1.0, 0.85, 0.2) if is_elite else Color(0.05, 0.05, 0.05, 0.85)
+	var y_pos: float = -12.0 if is_elite else -10.0
+	var inset: float = 1.0 if is_elite else 0.5
+
+	_hp_bar_bg = ColorRect.new()
+	_hp_bar_bg.color = bg_color # 정예는 등급 테두리색(골드) — 배경째로 테두리처럼 보이게.
+	_hp_bar_bg.position = Vector2(-width * 0.5, y_pos)
+	_hp_bar_bg.size = Vector2(width, height)
+	_hp_bar_bg.visible = false
+	add_child(_hp_bar_bg)
+
+	_hp_bar_fill_full_width = width - inset * 2.0
+	_hp_bar_fill = ColorRect.new()
+	_hp_bar_fill.color = Color(0.85, 0.15, 0.15)
+	_hp_bar_fill.position = _hp_bar_bg.position + Vector2(inset, inset)
+	_hp_bar_fill.size = Vector2(_hp_bar_fill_full_width, height - inset * 2.0)
+	_hp_bar_fill.visible = false
+	add_child(_hp_bar_fill)
 
 
-func _update_elite_hp_bar() -> void:
-	if _elite_hp_bar_fill == null or max_hp <= 0:
+func _update_hp_bar() -> void:
+	if _hp_bar_fill == null or max_hp <= 0:
 		return
 	var ratio: float = clampf(float(hp) / float(max_hp), 0.0, 1.0)
-	_elite_hp_bar_fill.size.x = (_ELITE_HP_BAR_WIDTH_PX - 2.0) * ratio
+	_hp_bar_fill.size.x = _hp_bar_fill_full_width * ratio
+
+
+## 피격 시 체력바를 즉시 노출하고 페이드 타이머를 리셋한다(D-123 "피격 시 노출").
+## 진행 중이던 페이드아웃 트윈이 있으면 취소하고 완전 불투명으로 되돌린다.
+func _show_hp_bar() -> void:
+	if _hp_bar_bg == null or _hp_bar_fill == null:
+		return
+	if _hp_bar_fade_tween != null and _hp_bar_fade_tween.is_valid():
+		_hp_bar_fade_tween.kill()
+	_hp_bar_bg.visible = true
+	_hp_bar_fill.visible = true
+	_hp_bar_bg.modulate.a = 1.0
+	_hp_bar_fill.modulate.a = 1.0
+	_hp_bar_hide_timer = Tuning.MONSTER_HP_BAR_FADE_DELAY_SEC
+
+
+## 마지막 피격 후 Tuning.MONSTER_HP_BAR_FADE_DELAY_SEC가 지나면 호출된다(D-123
+## "마지막 피격 후 2~3초 뒤 페이드아웃"). 알파를 0으로 트윈한 뒤 완전히 숨긴다.
+func _start_hp_bar_fade_out() -> void:
+	if _hp_bar_bg == null or _hp_bar_fill == null or not _hp_bar_bg.visible:
+		return
+	_hp_bar_fade_tween = create_tween()
+	_hp_bar_fade_tween.tween_property(_hp_bar_bg, "modulate:a", 0.0, Tuning.MONSTER_HP_BAR_FADE_DURATION_SEC)
+	_hp_bar_fade_tween.parallel().tween_property(_hp_bar_fill, "modulate:a", 0.0, Tuning.MONSTER_HP_BAR_FADE_DURATION_SEC)
+	_hp_bar_fade_tween.tween_callback(func() -> void:
+		if is_instance_valid(_hp_bar_bg):
+			_hp_bar_bg.visible = false
+		if is_instance_valid(_hp_bar_fill):
+			_hp_bar_fill.visible = false
+	)
 
 
 ## 호루라기/웨이브 시전 중 표시(붉은 예고 점멸과 구분되는 유틸 액션 색, Tuning 참고).
@@ -615,10 +686,23 @@ func _fire_hitbox(duration_sec: float = -1.0) -> void:
 	hitbox.ignores_iframes = false
 	hitbox.element = StringName(element)
 	hitbox.source = self
-	hitbox.position = _attack_dir * melee_range_px * 0.6
+	hitbox.position = _attack_dir * _attack_vfx_offset_px()
 	var active_duration: float = duration_sec if duration_sec > 0.0 else Tuning.MONSTER_ATTACK_ACTIVE_SEC
 	hitbox.activate(active_duration)
 	AudioManager.play_sfx(StringName("%s_attack" % monster_id), global_position)
+
+
+## 접촉 히트박스/투사체 스폰 오프셋(px, D-122). monsters.json.attack_vfx_offset_px가
+## 배정돼 있으면 그 확정값을 그대로 쓰고(권장식으로 미리 계산해 둔 값), 없으면
+## visual_radius_px(8) x 스프라이트 스케일 + margin 공식으로 폴백한다 — 신규 몬스터가
+## 이 필드를 아직 배정받지 못했어도 최소한 스프라이트 크기에 비례한 합리적 위치에서
+## 이펙트가 나온다(예전처럼 melee_range_px에서 파생되어 사거리 스탯에 따라 허공에서
+## 튀어나오는 문제는 재발하지 않는다).
+func _attack_vfx_offset_px() -> float:
+	if attack_vfx_offset_px > 0.0:
+		return attack_vfx_offset_px
+	var sprite_scale: float = sprite.scale.x if sprite != null else 1.0
+	return 8.0 * sprite_scale + Tuning.MONSTER_ATTACK_VFX_MARGIN_PX
 
 
 ## 포자 장판(spore_patch) 지속 피해 시작 — 트리거 지점(멜리 접촉 위치)을 중심으로
@@ -706,7 +790,8 @@ func _on_hurtbox_hurt(source_hitbox: Hitbox) -> void:
 		_deactivate_spore_patch()
 	var damage: int = HitFeel.apply(self, sprite, source_hitbox, element, tags)
 	hp = maxi(hp - damage, 0)
-	_update_elite_hp_bar()
+	_update_hp_bar()
+	_show_hp_bar()
 	if hp <= 0:
 		_enter_state(State.DEAD)
 		Events.enemy_died.emit(self, source_hitbox.source)
