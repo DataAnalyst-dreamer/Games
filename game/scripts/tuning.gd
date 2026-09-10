@@ -61,6 +61,13 @@ const ATTACK_RECOVER_TO_IDLE_SEC: float = float(ATTACK_RECOVER_TO_IDLE_FRAMES) /
 ## 필요(완료 보고 질문 목록 참고), `_balance_todo` 취급.
 const FACING_AXIS_SWITCH_BIAS: float = 1.3
 
+## D-128(M1-7 2차 재테스트): 위 크기 기반 완충만으로는 실제 키보드 입력(대각선 두 키가
+## 정확히 같은 프레임에 눌리지 않는 경우)에서 잔여 흔들림이 남는다는 재현 보고에 따라
+## 추가한 시간 기반 디바운스 상수 - 마지막 축 전환 후 이 시간(초) 이내에는 크기 조건을
+## 만족해도 축을 바꾸지 않는다(FacingCalc.resolve_facing 참고). 제안값 0.08~0.12초 중
+## 중간값 - game-designer 확인 필요(완료 보고 질문 목록 참고), `_balance_todo`.
+const FACING_AXIS_SWITCH_MIN_INTERVAL_SEC: float = 0.1
+
 ## 공격 상태 중 이동 입력 블렌딩 비율(D-124). 타격당 짧은 전진(lunge) 속도가 감쇠되는
 ## 동안 이동 입력이 있으면 완전한 정지 대신 `walk_speed * 이 비율`로 수렴시켜, lunge
 ## 종료 후 저속 이동으로 자연스럽게 이어지게 한다. 콤보 판정·히트박스 타이밍과는 무관.

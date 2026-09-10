@@ -44,6 +44,19 @@ var equip_attack_bonus: float = 0.0
 var equip_defense: float = 0.0
 var _base_walk_speed: float = 0.0
 
+## D-128: 마지막 facing 축(수평/수직) 전환 이후 흐른 시간(초). FacingCalc.resolve_facing()의
+## 시간 기반 디바운스에 넘기는 값 — _physics_process에서 델타를 누적하고, set_facing()이
+## 실제로 축을 바꿀 때만 0으로 리셋한다. 초기값을 크게 잡아 최초 입력 시 디바운스가
+## 걸리지 않게 한다.
+var _facing_axis_switch_elapsed: float = 1e9
+
+## D-127(재현: 콤보 3타를 빠르게 잇거나 구르기 캔슬/피격으로 Attack 상태가 tween 완료
+## 전에 exit()되면, 숨김 콜백이 실행되기 전에 다음 상태로 넘어가 무기가 계속 보이는
+## 상태로 남았다) — play_attack_swing()이 만든 tween을 보관해, 같은 노드에 여러 tween이
+## 동시에 걸리는 상황 자체를 없애고(hide_weapon_overlay에서 kill), 숨김을 tween 콜백에만
+## 의존하지 않고 상태 exit() 시점에 명시적으로 강제할 수 있게 한다.
+var _weapon_tween: Tween = null
+
 
 func _ready() -> void:
 	# QA 리뷰 Minor-2(docs/qa/review-m1-1-m1-2.md): fallback을 80.0(RELEASE_FALLBACKS와
@@ -102,6 +115,9 @@ func start_iframes(duration_sec: float) -> void:
 func _physics_process(delta: float) -> void:
 	if is_dead:
 		return
+	# D-128: 마지막 축 전환 후 흐른 시간을 누적한다(set_facing이 사용). 축이 전환되는
+	# 프레임에 set_facing() 안에서 0으로 리셋된다.
+	_facing_axis_switch_elapsed += delta
 	state_machine.physics_update(delta)
 
 
@@ -258,13 +274,28 @@ func play_attack_swing(hit_index: int, duration: float) -> void:
 	weapon_pivot.position = facing * 8.0
 	weapon_pivot.rotation = start_angle
 	weapon_pivot.visible = true
-	var tween := weapon_pivot.create_tween()
-	tween.tween_property(weapon_pivot, "rotation", end_angle, duration) \
+	# D-127: 이전 타의 tween이 아직 실행 중이면 kill 해서(콤보 2·3타 빠른 입력 시) 같은
+	# 노드에 tween이 겹쳐 걸리는 상황 자체를 없앤다.
+	if _weapon_tween != null and _weapon_tween.is_valid():
+		_weapon_tween.kill()
+	_weapon_tween = weapon_pivot.create_tween()
+	_weapon_tween.tween_property(weapon_pivot, "rotation", end_angle, duration) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	tween.tween_callback(func() -> void:
+	_weapon_tween.tween_callback(func() -> void:
 		if is_instance_valid(weapon_pivot):
 			weapon_pivot.visible = false
 	)
+
+
+## D-127: tween 콜백에만 의존하지 않고 무기 오버레이를 즉시 숨긴다. Attack 상태
+## exit()에서 호출한다(콤보 중간에 구르기 캔슬·피격 등으로 Attack을 벗어나는 모든
+## 경로가 PlayerStateMachine.transition_to()를 거치며 반드시 exit()를 호출하므로,
+## 이 한 곳만으로 "공격 중이 아닌데 무기가 남아있는" 상태를 방지할 수 있다).
+func hide_weapon_overlay() -> void:
+	if _weapon_tween != null and _weapon_tween.is_valid():
+		_weapon_tween.kill()
+	if weapon_pivot != null:
+		weapon_pivot.visible = false
 
 
 ## 8방향 이동 입력(정규화). 스틱 데드존은 project.godot 액션 deadzone 이 처리한다.
@@ -276,10 +307,21 @@ func get_move_input() -> Vector2:
 ## 입력 벡터를 4방향 facing 으로 환산한다. D-121(walk-animation-diagnosis.md §3):
 ## FacingCalc.resolve_facing()이 현재 축(수평/수직) 유지 완충(hysteresis)을 적용해,
 ## 대각선 45도 부근에서 입력이 미세하게 흔들려도 facing이 프레임마다 토글되지 않는다.
+## D-128: 크기 기반 완충만으로는 실제 키보드 입력(대각선 두 키가 정확히 같은 프레임에
+## 안 눌리는 경우)에서 잔여 흔들림이 남아, 마지막 축 전환 후 최소 유지 시간
+## (Tuning.FACING_AXIS_SWITCH_MIN_INTERVAL_SEC) 동안은 크기 조건을 만족해도 축을
+## 유지하는 시간 기반 디바운스를 더한다.
 func set_facing(input_dir: Vector2) -> void:
 	if input_dir == Vector2.ZERO:
 		return
-	facing = FacingCalc.resolve_facing(facing, input_dir, Tuning.FACING_AXIS_SWITCH_BIAS)
+	var was_horizontal: bool = facing == Vector2.LEFT or facing == Vector2.RIGHT
+	var new_facing: Vector2 = FacingCalc.resolve_facing(
+		facing, input_dir, Tuning.FACING_AXIS_SWITCH_BIAS,
+		_facing_axis_switch_elapsed, Tuning.FACING_AXIS_SWITCH_MIN_INTERVAL_SEC)
+	var is_horizontal: bool = new_facing == Vector2.LEFT or new_facing == Vector2.RIGHT
+	if is_horizontal != was_horizontal:
+		_facing_axis_switch_elapsed = 0.0
+	facing = new_facing
 
 
 func facing_name() -> String:

@@ -30,6 +30,11 @@ var _scenario_a_done: bool = false
 ## 1타조차 시작 안 함.
 var _target_hit: int = 0
 
+## D-127 회귀 확인: 시나리오 B(3타 콤보 완주) 종료 후 공격 상태를 실제로 벗어날
+## 때까지(또는 타임아웃까지) weapon_pivot.visible을 폴링한다.
+var _b_combo_checked: bool = false
+var _weapon_check_deadline: float = -1.0
+
 const OFFSET := Vector2(12, 0) ## 플레이어 기준 대상 위치(오른쪽, 사거리 안).
 
 
@@ -85,15 +90,28 @@ func _process(delta: float) -> void:
 		print("[A][FAIL] 3초 경과에도 사망 신호 없음 (HP=%d) — 예상: 2타 사망" % _slime_a.hp)
 		_start_scenario_b()
 
-	if _scenario == "b" and _target_hit > 3 and _elapsed > 0.5:
+	if _scenario == "b" and _target_hit > 3 and _elapsed > 0.5 and not _b_combo_checked:
 		var combo: ComboState = attack_state.combo if attack_state != null else null
 		if combo != null and (combo.in_finisher_recovery or combo.hit_index == 0):
+			_b_combo_checked = true
 			print("[B] 3타 콤보 종료 시점 HP=%d (기대: 999-10-10-15=964)" % _slime_b.hp)
 			print("[B] 피니셔 후딜 진입 확인=%s" % str(combo.in_finisher_recovery))
 			if _slime_b.hp == 964:
 				print("[B][PASS] 3타 배율(1.0/1.0/1.5) 데미지 정확히 적용됨")
 			else:
 				print("[B][FAIL] 기대 HP=964, 실제 HP=%d" % _slime_b.hp)
+			# D-127: 여기서 바로 끝내지 않고, Attack 상태를 실제로 벗어날 때까지(최대 1초)
+			# weapon_pivot.visible을 폴링한다 - "공격 종료 후 N프레임 내
+			# weapon_pivot.visible == false"를 실제 플레이 경로로 확인한다.
+			_weapon_check_deadline = _elapsed + 1.0
+
+	if _weapon_check_deadline > 0.0:
+		var still_attacking: bool = attack_state != null and _player.state_machine.current_state == attack_state
+		if not still_attacking or _elapsed >= _weapon_check_deadline:
+			if not _player.weapon_pivot.visible:
+				print("[D-127][PASS] 공격 종료 후 t=%.3f 시점 weapon_pivot.visible=false" % _elapsed)
+			else:
+				print("[D-127][FAIL] 공격 종료 후에도 weapon_pivot.visible=true로 남아있음(t=%.3f, still_attacking=%s)" % [_elapsed, still_attacking])
 			_finish()
 			return
 
