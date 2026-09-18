@@ -42,6 +42,16 @@ var activated_waystone_ids: Array[String] = []
 ## 사망 횟수(디버그 HUD 표시용). 세이브 파일에 영구 기록할지는 F8-3(세이브) 범위.
 var death_count: int = 0
 
+## M3-1(F1-2) 신설 — 저장값만 여기 두고 실제 계산(경험치 필요량·레벨업 판정)은
+## Progression 오토로드(progression_service.gd)가 전담한다(game_state.gd 500줄 상한
+## 유지, D-150(d)). level_stat_bonus는 exp_curve.csv의 레벨업 자동 상승분 누적치 —
+## _apply_equipment_stats_to_player()가 장비 스탯과 합산해 매번 재적용한다.
+var level: int = 1
+var exp: int = 0
+var stat_points: int = 0
+var skill_points: int = 0
+var level_stat_bonus: Dictionary = {"max_hp": 0, "attack": 0.0}
+
 ## M2-7(F5-2 게시판 일일 의뢰) 신설. "게임 내 날짜" 정수 카운터 — QuestSystem이 일일
 ## 의뢰 재추첨 시드로 쓴다. 새 게임은 0에서 시작. D-111(확정, M2-7 후속): 게임플레이
 ## 내부 시간(낮/밤 사이클 등)이 아니라 **실제 달력 날짜**를 기준으로 증가한다 — 유일한
@@ -301,7 +311,16 @@ func _apply_equipment_stats_to_player() -> void:
 	if _player == null or not is_instance_valid(_player):
 		return
 	var stats: Dictionary = Equipment.compute_stats(equipment.slots, Data.table("items"), Data.table("enhance"))
+	# M3-1: 레벨업 자동 HP 상승분(level_stat_bonus)을 장비 max_hp 보너스에 합산한다 —
+	# 그렇지 않으면 장착/해제·로드마다 이 함수가 다시 불릴 때 레벨 성장분이 사라진다.
+	stats["max_hp"] = float(stats.get("max_hp", 0.0)) + float(level_stat_bonus.get("max_hp", 0))
 	_player.apply_equipment_stats(stats)
+
+
+## Progression 오토로드처럼 GameState 밖에서 장비+레벨 보너스 재계산을 트리거해야 할 때
+## 쓰는 공개 진입점(위 _apply_equipment_stats_to_player()는 내부 전용 명명 관례 유지).
+func recompute_player_stats() -> void:
+	_apply_equipment_stats_to_player()
 
 
 # --- 대장간 (F3-3·F3-4, M2-4) ---
@@ -511,6 +530,11 @@ func to_dict() -> Dictionary:
 		"last_waystone_id": String(last_waystone_id),
 		"activated_waystone_ids": activated_waystone_ids.duplicate(),
 		"day_index": day_index,
+		"level": level,
+		"exp": exp,
+		"stat_points": stat_points,
+		"skill_points": skill_points,
+		"level_stat_bonus": level_stat_bonus.duplicate(),
 	}
 
 
@@ -528,6 +552,11 @@ func from_dict(data: Dictionary) -> void:
 		ids.append(String(id_v))
 	activated_waystone_ids = ids
 	day_index = int(data.get("day_index", 0))
+	level = int(data.get("level", 1))
+	exp = int(data.get("exp", 0))
+	stat_points = int(data.get("stat_points", 0))
+	skill_points = int(data.get("skill_points", 0))
+	level_stat_bonus = (data.get("level_stat_bonus", {"max_hp": 0, "attack": 0.0}) as Dictionary).duplicate()
 	_apply_equipment_stats_to_player()
 	_restore_waystones()
 

@@ -385,6 +385,7 @@ final_probability[grade] = raw_weight[grade] / Σ raw_weight[all grades]
 | `tier` | string enum | `normal`/`elite` | ● | 보스는 `bosses.json`에서 별도 관리 |
 | `hp` | number | >0 | ● | 체력 (`combat-tuning-m1.md` §8 예시: 슬라임18/뿔토끼27/버섯돌이45) |
 | `atk` | number | >0 | ● | 공격력 |
+| `exp_reward` | int | >0 | ● (M3-1 신설, D-147 잠정값) | 처치 시 지급 경험치(F1-2). `Progression.exp_reward_for_monster()` 조회 대상 — 값 자체는 `_balance_todo`(game-designer 확정 전) |
 | `move_speed_px` | number | ≥0 | ● | 이동속도(px/s, 16px 프로토타입 기준) |
 | `telegraph_sec` | number | **≥0.5** | ● | 공격 예고시간 (GDD 4.2 최소값 강제) |
 | `attack_pattern_id` | string | 패턴 테이블 참조 | ● | 행동 패턴 |
@@ -419,6 +420,7 @@ final_probability[grade] = raw_weight[grade] / Σ raw_weight[all grades]
 5. `aoe_radius_px`가 존재하면 `aoe_radius_px ≥ melee_range_px`
 6. 방어력 필드는 아직 없음 — M1은 단순 모델(`combat-tuning-m1.md` §0), 도입 시점은 D-49(M2) 유지
 7. `whistle_summon_pool`/`wave_summon_pool`/`on_death_split_monster_id`/`elite_base_monster_id`의 각 값이 `monsters.json`에 실존하는 `monster_id`여야 함(정예 신규 필드, `elite-and-farming-m2.md` §1 참고 — 코드 검증 미구현, `tools/qa/validate_tables.py` 범위 밖)
+8. `exp_reward`가 모든 엔트리에 존재하고 양수여야 함(M3-1, D-147 — `tools/qa/validate_tables.py:validate_monsters_exp_reward()`가 오프라인으로 검증, `data.gd`는 아직 `MONSTER_REQUIRED_FIELDS`에 등록하지 않음)
 
 ---
 

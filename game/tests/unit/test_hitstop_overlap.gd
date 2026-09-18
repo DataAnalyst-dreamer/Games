@@ -4,12 +4,22 @@
 extends GutTest
 
 
+## set_deferred("process_mode", ...)는 프레임 끝에 반영되고, 부하에 따라 한두 프레임 더 늦을 수
+## 있다. 고정 2프레임 대기는 간헐 실패(기대 4, 실제 0)를 냈으므로 반영될 때까지(상한 20프레임)
+## 폴링한다 — 로직이 아니라 테스트 타이밍의 문제였다.
+func _wait_until_mode(node: Node, mode: int, max_frames: int = 20) -> void:
+	for i in max_frames:
+		if node.process_mode == mode:
+			return
+		await wait_frames(1)
+
+
 func test_overlapping_hitstop_restores_original_mode() -> void:
 	var node := Node2D.new()
 	add_child_autofree(node)
 	assert_eq(node.process_mode, Node.PROCESS_MODE_INHERIT)
 	Hitstop.apply_to([node], 0.05)
-	await wait_frames(2) # set_deferred 반영 → DISABLED
+	await _wait_until_mode(node, Node.PROCESS_MODE_DISABLED)
 	assert_eq(node.process_mode, Node.PROCESS_MODE_DISABLED, "첫 히트스톱으로 정지")
 	# 정지 중에 두 번째 히트스톱(트레이드) — 예전엔 여기서 DISABLED를 원래 값으로 기억했다.
 	Hitstop.apply_to([node], 0.05)
@@ -22,7 +32,7 @@ func test_later_hitstop_extends_freeze_and_earlier_timer_does_not_unfreeze_early
 	var node := Node2D.new()
 	add_child_autofree(node)
 	Hitstop.apply_to([node], 0.05)
-	await wait_frames(2)
+	await _wait_until_mode(node, Node.PROCESS_MODE_DISABLED)
 	Hitstop.apply_to([node], 0.4)
 	await wait_seconds(0.15) # 첫 타이머(0.05)는 지났지만 두 번째(0.4)는 진행 중
 	assert_eq(node.process_mode, Node.PROCESS_MODE_DISABLED, "늦게 걸린 히트스톱이 끝나기 전엔 계속 정지")
