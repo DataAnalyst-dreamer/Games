@@ -18,8 +18,10 @@
 [ext_resource type="PackedScene" path="res://scenes/world/BlacksmithNpc.tscn" id="16_blacksmith_npc"]
 [ext_resource type="PackedScene" path="res://scenes/world/MailboxNpc.tscn" id="17_mailbox_npc"]
 [ext_resource type="Script" path="res://scripts/world/quest_layout_spawner.gd" id="18_quest_layout_spawner"]
+[ext_resource type="Script" path="res://scripts/world/main_bootstrap.gd" id="19_main_bootstrap"]
 
 [node name="Main" type="Node2D"]
+script = ExtResource("19_main_bootstrap")
 
 [node name="World" parent="." instance=ExtResource("1_world")]
 

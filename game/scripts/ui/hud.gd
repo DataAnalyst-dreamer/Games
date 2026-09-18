@@ -19,7 +19,6 @@ var _npc_visit_lines: Dictionary = {} # Presentation only; not quest/save progre
 
 @export var player_path: NodePath
 
-@onready var level_label: Label = $TopLeft/LevelLabel
 @onready var hp_bar: ProgressBar = $TopLeft/HPBar
 @onready var hp_text: Label = $TopLeft/HPText
 @onready var stamina_bar: ProgressBar = $TopLeft/StaminaBar
@@ -93,7 +92,6 @@ func _ready() -> void:
 	_build_bar_styles()
 	_apply_font_size()
 
-	level_label.text = tr(&"ui.hud.level_prefix") + " 1"
 	quest_line_label.text = ""
 	hp_text.text = "-- / --"
 	boss_bar_container.visible = false

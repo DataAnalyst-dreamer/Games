@@ -17,7 +17,15 @@ signal player_stamina_changed(current: float, max_value: float)
 ## 바를 빨간색으로 깜박이는 트리거로 쓴다.
 signal player_stamina_insufficient(action: StringName)
 signal player_hp_changed(current: int, max_value: int)
-signal player_level_up(new_level: int)
+## M3-1(F1-2) 신설. player_level_up(new_level만 있던 미사용 placeholder, 리스너 0개
+## 확인 후 교체)을 UI팀(stage/m3-2-progress-ui)과 합의한 시그니처로 대체했다. stat_gains
+## 예: {"max_hp": 8, "attack": 1} — exp_curve.csv 해당 레벨 행의 자동 상승분(레벨업 1회당
+## 1번씩 발신, 여러 레벨 동시 상승 시 이 신호가 그만큼 반복된다).
+signal level_up(new_level: int, stat_gains: Dictionary)
+## M3-1(F1-2) 신설. 경험치가 바뀔 때마다(몬스터 처치·퀘스트 보상·세이브 로드 직후 포함)
+## 발신 — HUD 경험치 바가 이 값만으로 항상 최신 상태를 그릴 수 있다. 만렙 캡 상태에서는
+## exp_changed(0, 0, max_level)로 발신된다(D-152).
+signal exp_changed(current_exp: int, exp_to_next: int, level: int)
 
 # --- 전투 ---
 ## is_advantage: 원소 상성 적중 여부(ElementCalc.get_multiplier() > 1.0). is_critical:
@@ -118,6 +126,10 @@ signal quest_objective_updated(quest_id: StringName, objective_id: StringName, c
 ## 사이드/일일 의뢰 전부 포함 — 메인 퀘스트 완료는 main_quest_stage_completed(아래
 ## 월드 섹션, M2-6 기존 신호)도 함께 emit해 SaveManager 오토세이브를 건다.
 signal quest_completed(quest_id: StringName)
+## QuestSystem.set_tracked()로 HUD 추적 대상이 "목표 진행 없이" 수동으로 바뀌었을 때만
+## emit(D-156, 퀘스트 로그의 추적 토글). 진행도 변화 자체는 quest_objective_updated가
+## 이미 커버한다.
+signal quest_tracked_changed(quest_id: StringName)
 
 # --- 월드 ---
 signal chunk_loaded(chunk_coord: Vector2i)

@@ -13,6 +13,10 @@
 class_name QuestNpc
 extends Area2D
 
+## 색·폰트는 game/ui/theme.tres 한 곳에서만 관리한다(README 규칙) — 이 노드는 Control
+## 트리 밖(월드 2D 트리)이라 테마 상속을 받지 못해 직접 preload해서 읽는다.
+const HUD_THEME: Theme = preload("res://ui/theme.tres")
+
 @export var npc_id: StringName = &""
 ## 비워두면 "npc.<npc_id>.greeting"을 사용한다(quest_layout_spawner.gd가 기본값을
 ## 대입하지만, 씬 단독 배치 시에도 동작하도록 _ready()에서 한 번 더 보정한다).
@@ -26,8 +30,16 @@ extends Area2D
 		_apply_sprite_texture()
 
 @onready var _sprite: Sprite2D = $Sprite2D
+@onready var _marker: Label = $MarkerLabel
 
 var _player_inside: Player = null
+
+## D-155(M3-2): 스프라이트 없이 폰트 라벨(! 수주 가능/? 완료 보고 가능)로 시작.
+## 위아래 바운스 6px, 0.8초 주기 — 색약 대비는 모양 자체가 다르므로 별도 대체 없음.
+const MARKER_BOUNCE_PX := 6.0
+const MARKER_BOUNCE_SEC := 0.8
+var _marker_base_y: float = 0.0
+var _marker_tween: Tween
 
 
 func _ready() -> void:
@@ -36,6 +48,15 @@ func _ready() -> void:
 	if greeting_key.is_empty() and not npc_id.is_empty():
 		greeting_key = StringName("npc.%s.greeting" % npc_id)
 	_apply_sprite_texture()
+
+	_marker_base_y = _marker.position.y
+	_marker.visible = false
+	# 이 NPC가 giver인 퀘스트 중 하나라도 상태가 바뀔 만한 신호를 모두 구독해
+	# 표식을 갱신한다(폴링 대신 이벤트 기반 — 다른 QuestSystem 연동부와 동일한 관례).
+	Events.quest_accepted.connect(_on_any_quest_signal)
+	Events.quest_objective_updated.connect(_on_any_quest_signal)
+	Events.quest_completed.connect(_on_any_quest_signal)
+	_refresh_marker()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -68,3 +89,73 @@ func _on_body_entered(body: Node) -> void:
 func _on_body_exited(body: Node) -> void:
 	if body == _player_inside:
 		_player_inside = null
+
+
+# --- 테스트 보조용 (스모크에서 표식 상태를 직접 확인) ---
+
+func marker_text() -> String:
+	return _marker.text
+
+
+func marker_visible() -> bool:
+	return _marker.visible
+
+
+# --- 머리 위 퀘스트 표식 (D-155, M3-2) ---
+
+func _on_any_quest_signal(_a: Variant = null, _b: Variant = null, _c: Variant = null, _d: Variant = null) -> void:
+	_refresh_marker()
+
+
+## 이 npc_id가 giver인 퀘스트를 전부 스캔해 완료 보고(?) > 수주 가능(!) 우선순위로
+## 표식을 정한다(quest_npc_panel.gd가 giver 매칭에 쓰는 것과 같은 방식이지만, 그쪽처럼
+## 특정 퀘스트 id 목록을 하드코딩하지 않고 데이터 테이블 전체를 스캔한다 — NPC 쪽은
+## 신규 퀘스트가 추가될 때마다 코드를 고칠 필요가 없어야 하기 때문).
+func _refresh_marker() -> void:
+	if npc_id.is_empty():
+		_marker.visible = false
+		_stop_bounce()
+		return
+	var has_complete_ready := false
+	var has_available := false
+	var quests: Dictionary = Data.table("quests")
+	for quest_id: String in quests.keys():
+		if String((quests[quest_id] as Dictionary).get("giver", "")) != String(npc_id):
+			continue
+		match QuestSystem.get_state(quest_id):
+			"complete_ready": has_complete_ready = true
+			"available": has_available = true
+	if has_complete_ready:
+		_show_marker("?", HUD_THEME.get_color(&"quest_marker_complete", &"HUD"))
+	elif has_available:
+		_show_marker("!", HUD_THEME.get_color(&"quest_marker_available", &"HUD"))
+	else:
+		_marker.visible = false
+		_stop_bounce()
+
+
+func _show_marker(text: String, color: Color) -> void:
+	_marker.text = text
+	_marker.add_theme_color_override("font_color", color)
+	_marker.add_theme_font_override("font", HUD_THEME.default_font)
+	_marker.add_theme_font_size_override("font_size", HUD_THEME.get_font_size(&"large", &"HUD"))
+	_marker.visible = true
+	_start_bounce()
+
+
+func _start_bounce() -> void:
+	if _marker_tween != null and _marker_tween.is_valid():
+		return # 이미 재생 중이면 그대로 둔다(재시작하면 값이 튐).
+	_marker_tween = create_tween()
+	_marker_tween.set_loops()
+	_marker_tween.tween_property(_marker, "position:y", _marker_base_y - MARKER_BOUNCE_PX, MARKER_BOUNCE_SEC * 0.5)\
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_marker_tween.tween_property(_marker, "position:y", _marker_base_y, MARKER_BOUNCE_SEC * 0.5)\
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+
+func _stop_bounce() -> void:
+	if _marker_tween != null and _marker_tween.is_valid():
+		_marker_tween.kill()
+	_marker_tween = null
+	_marker.position.y = _marker_base_y
