@@ -17,14 +17,15 @@ signal player_stamina_changed(current: float, max_value: float)
 ## 바를 빨간색으로 깜박이는 트리거로 쓴다.
 signal player_stamina_insufficient(action: StringName)
 signal player_hp_changed(current: int, max_value: int)
-signal player_level_up(new_level: int)
-## M3-1(로직, godot-engineer)/M3-2(UI, 이 스테이지) 합의 인터페이스. 경험치/레벨
-## 시스템 브랜치가 아직 없어 이 UI 스테이지가 먼저 선언해 스모크로 검증한다 —
-## 시그니처는 두 담당이 사전 합의한 값 그대로라 브랜치 병합 시 충돌해도 정리만 하면 된다.
-## exp_changed: 경험치 변동마다(획득/레벨업 직후 초과분 재계산 등). level_up: 레벨이
-## 오를 때 1회, stat_gains는 {stat_key: 증가량} 형태(예: {"max_hp": 10, "attack": 2}).
-signal exp_changed(current_exp: int, exp_to_next: int, level: int)
+## M3-1(F1-2) 신설. player_level_up(new_level만 있던 미사용 placeholder, 리스너 0개
+## 확인 후 교체)을 UI팀(stage/m3-2-progress-ui)과 합의한 시그니처로 대체했다. stat_gains
+## 예: {"max_hp": 8, "attack": 1} — exp_curve.csv 해당 레벨 행의 자동 상승분(레벨업 1회당
+## 1번씩 발신, 여러 레벨 동시 상승 시 이 신호가 그만큼 반복된다).
 signal level_up(new_level: int, stat_gains: Dictionary)
+## M3-1(F1-2) 신설. 경험치가 바뀔 때마다(몬스터 처치·퀘스트 보상·세이브 로드 직후 포함)
+## 발신 — HUD 경험치 바가 이 값만으로 항상 최신 상태를 그릴 수 있다. 만렙 캡 상태에서는
+## exp_changed(0, 0, max_level)로 발신된다(D-152).
+signal exp_changed(current_exp: int, exp_to_next: int, level: int)
 
 # --- 전투 ---
 ## is_advantage: 원소 상성 적중 여부(ElementCalc.get_multiplier() > 1.0). is_critical:

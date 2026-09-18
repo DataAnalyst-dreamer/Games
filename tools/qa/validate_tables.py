@@ -69,6 +69,42 @@ def entries(table: Dict[str, Any]) -> Dict[str, Any]:
     return {k: v for k, v in table.items() if not k.startswith("_")}
 
 
+def load_csv(path: Path, report: Report) -> Dict[str, Dict[str, Any]]:
+    """exp_curve.csv 전용 최소 CSV 로더(M3-1) — game/scripts/core/data.gd:_load_csv()와
+    동일 규칙: 첫 줄=헤더, '#' 시작/빈 줄은 건너뛰고, 첫 컬럼(level) 값을 키로 한다.
+    두 로더는 항상 같이 갱신할 것(파일 상단 주석 원칙)."""
+    if not path.exists():
+        report.error(f"파일 없음: {path}")
+        return {}
+    rows: Dict[str, Dict[str, Any]] = {}
+    header: List[str] = []
+    with path.open(encoding="utf-8") as f:
+        for line_no, raw_line in enumerate(f, start=1):
+            line = raw_line.strip()
+            if not line or line.startswith("#"):
+                continue
+            cols = line.split(",")
+            if not header:
+                header = [c.strip() for c in cols]
+                continue
+            if len(cols) != len(header):
+                report.error(f"{path}:{line_no}: CSV 컬럼 수 불일치(헤더 {len(header)}개, 이 줄 {len(cols)}개)")
+                continue
+            row: Dict[str, Any] = {}
+            for key, raw_value in zip(header, cols):
+                value = raw_value.strip()
+                try:
+                    row[key] = int(value)
+                except ValueError:
+                    try:
+                        row[key] = float(value)
+                    except ValueError:
+                        row[key] = value
+            row_key = str(row.get(header[0], line_no))
+            rows[row_key] = row
+    return rows
+
+
 def validate_items(items: Dict[str, Any], report: Report) -> Dict[str, Any]:
     data = entries(items)
     for item_id, item in data.items():
@@ -512,6 +548,52 @@ def validate_monsters_cross_ref(monsters: Dict[str, Any], drop_table_ids: Dict[s
             report.error(f"monsters.{monster_id}: drop_table_id '{dt_id}' 가 drop_tables.json에 없음 (D-67 위반)")
 
 
+def validate_monsters_exp_reward(monsters: Dict[str, Any], report: Report) -> None:
+    """M3-1(F1-2, D-147) — 모든 몬스터가 exp_reward를 가져야 한다(양수)."""
+    data = entries(monsters)
+    for monster_id, monster in data.items():
+        if "exp_reward" not in monster:
+            report.error(f"monsters.{monster_id}: 필수 키 누락 'exp_reward'(M3-1/D-147)")
+            continue
+        exp_reward = monster["exp_reward"]
+        if not isinstance(exp_reward, (int, float)) or exp_reward <= 0:
+            report.error(f"monsters.{monster_id}: exp_reward={exp_reward!r} 는 양수여야 한다")
+
+
+def validate_exp_curve(exp_curve: Dict[str, Any], stats: Dict[str, Any], report: Report) -> None:
+    """exp_curve.csv 검증(M3-1, F1-2. data_tables.md §4 검증 규칙 1~3)."""
+    max_level = int(stats.get("max_level", 50))
+    prev_exp_to_next = 0
+    for level in range(1, max_level + 1):
+        row = exp_curve.get(str(level))
+        if row is None:
+            report.error(f"exp_curve: level {level} 행 누락(1~{max_level} 연속이어야 함)")
+            continue
+        if "exp_to_next" not in row:
+            report.error(f"exp_curve.{level}: 필수 키 누락 'exp_to_next'")
+            continue
+        exp_to_next = int(row["exp_to_next"])
+        # 단조 비감소·">0" 규칙은 "성장 중" 구간(레벨 1~max_level-1)에만 적용한다.
+        # max_level 행의 exp_to_next=0은 "더 오를 곳 없음" 종료 표식이라 그 앞 레벨(예:
+        # 49의 6860)보다 작아도 규칙 위반이 아니다(data_tables.md §4 "레벨50은 0 또는
+        # 공란" 예외 그대로).
+        if level < max_level:
+            if exp_to_next <= 0:
+                report.error(f"exp_curve.{level}: exp_to_next({exp_to_next})는 만렙({max_level}) 미만 레벨에서 반드시 >0")
+            if exp_to_next < prev_exp_to_next:
+                report.error(
+                    f"exp_curve.{level}: exp_to_next({exp_to_next})가 이전 레벨({prev_exp_to_next})보다 작음 "
+                    "— 단조 비감소 위반"
+                )
+            prev_exp_to_next = exp_to_next
+        for required_col in ("hp_bonus", "atk_bonus"):
+            if required_col not in row:
+                report.error(f"exp_curve.{level}: 필수 키 누락 '{required_col}'")
+    row_count = len(entries(exp_curve))
+    if row_count != max_level:
+        report.error(f"exp_curve: 행 수={row_count}, max_level({max_level})과 달라야 할 이유 없음(정확히 일치해야 함)")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-dir", default=None, help="game/data 경로 (기본: 이 스크립트 기준 ../../game/data)")
@@ -535,12 +617,15 @@ def main() -> int:
     pools = load_json(data_dir / "pools.json", report)
     world_objects_raw = load_json(data_dir / "world_objects.json", report)
     quests, quest_todo_ids = load_quests(data_dir, report)
+    exp_curve = load_csv(data_dir / "exp_curve.csv", report)
 
     item_ids = validate_items(items, report)
     validate_affixes(affixes, item_ids, report)
     drop_table_ids = validate_drop_tables(drop_tables, item_ids, report)
     validate_enhance(enhance, report)
     validate_monsters_cross_ref(monsters, drop_table_ids, report)
+    validate_monsters_exp_reward(monsters, report)
+    validate_exp_curve(exp_curve, stats, report)
     validate_stats(stats, report)
     validate_farming_sources(farming_sources, drop_table_ids, monsters, report)
     blueprint_ids = validate_blueprints(blueprints, item_ids, report)
@@ -551,7 +636,8 @@ def main() -> int:
     print(f"[validate_tables] items={len(item_ids)} affixes={len(entries(affixes))} "
           f"drop_tables={len(drop_table_ids)} monsters={len(entries(monsters))} "
           f"farming_sources={len(entries(farming_sources))} blueprints={len(blueprint_ids)} "
-          f"pools={len(pool_ids)} world_objects={len(world_object_ids)} quests={len(quests)}")
+          f"pools={len(pool_ids)} world_objects={len(world_object_ids)} quests={len(quests)} "
+          f"exp_curve={len(entries(exp_curve))}")
 
     if report.warnings:
         print(f"\n경고 {len(report.warnings)}건:")

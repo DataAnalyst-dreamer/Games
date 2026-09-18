@@ -45,8 +45,9 @@ var _registered: Dictionary = {}
 ## 시드 기반 순수 함수라 저장할 필요 없음 — _daily_pick() 참고).
 var _daily: Dictionary = {"day_index": -1, "completed_ids": []}
 
-## exp 보상 placeholder 누적치. 레벨/EXP 시스템(stats.json 확정 이후)이 아직 없어 실제
-## 레벨업에는 연결되지 않는다 — game-designer/godot-engineer TODO(완료 보고 참고).
+## exp 보상 통계 누적치(플레이 기록용, HUD/도감 등에서 "누적 획득 경험치" 표시에 쓸 수
+## 있음). M3-1부터 실제 레벨업은 Progression.grant_exp()가 별도로 처리하며, 이 값은
+## 그와 무관하게 계속 누적만 한다(이중 지급이 아니라 "총합 기록"이라는 뜻).
 var total_exp_earned: int = 0
 ## grant_skill_point:<n> on_complete 태그 placeholder 누적치. 스킬 포인트 지급 UI/시스템
 ## 미구현 — 위와 동일 사유의 TODO.
@@ -407,7 +408,8 @@ func _grant_rewards(rewards: Dictionary) -> void:
 
 	var exp: int = int(rewards.get("exp", 0))
 	if exp > 0:
-		total_exp_earned += exp # placeholder — 레벨/EXP 시스템 미도입(위 total_exp_earned 주석 참고).
+		total_exp_earned += exp # 통계 누적(위 주석 참고) — 아래가 실제 레벨업 지급.
+		Progression.grant_exp(exp)
 
 	for item: Dictionary in (rewards.get("items", []) as Array):
 		var item_id: String = String(item.get("id", ""))
