@@ -267,6 +267,21 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 |---|---|---|---|---|
 | D-146 | 게이트 2차 판정과 다음 우선순위 | 타격감 **통과**. 성장·목표는 **체감 안 됨** — "경험치바가 있어야 성장이 보이고, 퀘스트가 보여야 목표가 생긴다". 개발 순서(D-145) ② 경험치·레벨업(경험치바·레벨업 팝업 포함)과 ④ 퀘스트 로그 UI(수락·추적·진행이 화면에 보이게)를 **즉시 병렬 착수**. ①③⑤⑥은 그 뒤 | 사용자 플레이 소감 | stage/m3-1-exp-level, stage/m3-2-progress-ui |
 
+## Z. M3-1 경험치·레벨업 / M3-2 성장·목표 UI 계획 승인 (2026-09-18, 계획 회신 검토 결과)
+
+| ID | 항목 | 결정 | 출처 | 반영 |
+|---|---|---|---|---|
+| D-147 | 몬스터 경험치 잠정치 | slime 5 / horn_rabbit 8 / mushroom 10 / goblin_scout 12 / horn_rabbit_big 40 / elite_goblin_captain 60 / elite_bunchi_spawn 15 (`_balance_todo`). 설계 의도: 첫 1분 안에 첫 레벨업(슬라임 4마리 = 레벨 2) | M3-1 계획 결정1 | monsters.json `exp_reward` |
+| D-148 | 레벨 곡선 | `exp_curve.csv`(data_tables §4 스펙) — `exp_to_next = round(20 * level^1.5)`, 레벨 50 = 0, 전부 provisional | M3-1 결정2 | exp_curve.csv |
+| D-149 | 레벨업 자동 상승분 | 캐릭터 공통 max_hp +8 / attack +1 (`_balance_todo`), `characters.json` 도입 시 캐릭터별 이관. 스탯 3·스킬 1 포인트는 카운터만 누적(분배 UI는 후속 단계) | M3-1 결정3·4 | stats.json `level_auto_gain`, GameState |
+| D-150 | 레벨업 회복 | HP **전량 + 스태미나 전량** 회복(GDD 5.1의 HP 회복에 스태미나 추가 — 보상 순간 체감) | M3-1 결정5 | progression_service.gd |
+| D-151 | 만렙 처리 | 50에서 초과 경험치 버림(캡). 캡 상태 `exp_changed(0, 0, 50)` | M3-1 결정6 | progression.gd |
+| D-152 | 경험치 지급 조건 | `enemy_died`의 killer가 플레이어(또는 플레이어가 source인 투사체)일 때만. 로드 직후 `exp_changed` 1회 발신으로 HUD 동기화 | M3-1 추가 요구 | progression_service.gd |
+| D-153 | 퀘스트 로그 진입 | InventoryMenu의 기존 "quest" 탭을 전용 구현으로 교체(신규 화면 없음). J 키 `quest_log` 액션으로 해당 탭 직행(가능하면) | M3-2 결정1 | inventory_menu.gd, project.godot |
+| D-154 | MQ01 자동 수락 | 새 게임 시작 시 `quest_main_a1_01` 자동 수락 + 추적 지정(`QuestSystem.ensure_onboarding_quest()`, Main에서 1회). 로드 시엔 저장 상태 우선. 데모에서 "목표가 없다"고 느낀 직접 원인(퀘스트 존재를 알릴 장치 부재) 해소 | M3-2 결정2 | quest_system.gd, Main |
+| D-155 | NPC 퀘스트 표식 | 폰트 라벨 `!`(노랑, 수락 가능) / `?`(하늘색, 완료 보고) + 6px·0.8s 바운스. 색약 대체는 모양 차이로 갈음 | M3-2 결정3 | quest_npc.gd |
+| D-156 | 추적 수동 설정 API | `QuestSystem.set_tracked/get_tracked`, `tracked_quest_id` 세이브 포함, 기본값 = 가장 최근 수락한 메인 퀘스트 | M3-2 결정4 | quest_system.gd |
+
 ## 변경 이력(계속)
 - 2026-09-13 **D-143 후속 플레이 피드백:** 사용자가 샘플의 조작·공간감은 좋으나 공격 모션이 어색하고 타격이 늦다고 평가했다. 같은 독립 샘플의 공격 반응·검 표현을 조정한다. 준비50ms/타격85ms/회수140ms는 이 피드백에 대한 구현 조정안이며 본편 수치의 사용자 확정이 아니다. 이동·맵·배경과 본편/저장은 유지하고, 새 핀 원화·본편 시점 이관 승인은 여전히 별개다. 후속 검증: `docs/qa/quarter-view-attack-feedback-20260913.md`.
 - 2026-09-13 **D-143 — 쿼터뷰 비교 샘플 제작 승인:** 사용자 “너의 추천대로 해보자”에 따라 기존 본편·저장을 보존하고 별도 2D 고정 쿼터뷰 마을 입구/이동/기본 공격/슬라임/가림 샘플을 제작한다. FHD·승인 핀 외형/몸체64×96 목표를 유지한다. 새 핀 방향별 완성 모션 확보와 시점 시험의 성공은 별개다. 본편 전체 이관·3D·회전 카메라·정확한 등각 타일 구조를 확정한 것은 아니다. 범위: `docs/plans/quarter-view-pilot-20260913.md`.
@@ -314,3 +329,4 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 - 2026-09-18(병합 정리): D-144 확정 — D-139/D-140 반영에 따라 D-130(960×540)·D-131(32×48) 폐기, D-133·D-135 유지, D-132·D-134는 T05에서 재검토. `docs/art/ai-sprite-pipeline.md`·`brief-fin-pixellab.md`·`character-fin-spec.md`·`tools/art/normalize_ai_sheet.py`를 64×96/96×128/(48,112) 기준으로 정합.
 - 2026-09-18: 개발 순서 재배치(D-145) 확정.
 - 2026-09-18: 게임성 게이트 2차 결과·우선순위(D-146) 확정.
+- 2026-09-18: M3-1/M3-2 계획 승인 결정 10건(D-147~D-156) 확정.
