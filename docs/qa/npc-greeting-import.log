@@ -1,0 +1,45 @@
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2289)
+first_scan_filesystem: begin: 프로젝트 초기화 steps: 5
+	first_scan_filesystem: step 0: 파일 구조 탐색 중...
+	first_scan_filesystem: step 1: 전역 클래스 이름을 불러오는 중...
+	first_scan_filesystem: step 2: GDExtensions 검증 중...
+	first_scan_filesystem: step 3: 자동 로드 스크립트를 생성하는 중...
+	first_scan_filesystem: step 4: 플러그인을 초기화중...
+█ Godot-LDtk-Importer █ 2.0 | [url=https://gleeson.dev]@gleeson.dev | [url=https://github.com/heygleeson/godot-ldtk-importer]View on Github
+	first_scan_filesystem: step 5: 파일 탐색 시작 중...
+first_scan_filesystem: end
+SCRIPT ERROR: Cannot call method 'store_string' on a null value.
+   at: save_user_config (res://addons/dialogue_manager/settings.gd:262)
+update_scripts_classes: begin: Registering global classes... steps: 3
+	update_scripts_classes: step 0: Hud
+	update_scripts_classes: step 1: 
+	update_scripts_classes: step 2: 
+update_scripts_classes: end
+reimport: begin: 애셋 (다시) 가져오는 중 steps: 1
+	reimport: step 0: Preparing files to reimport...
+	reimport: step 0: 다시 가져오기 전 작업을 실행 중...
+	reimport: step 0: ui_ko.csv
+	reimport: step 1: 에셋 불러오기 마무리 중...
+reimport: end
+update_script_paths_documentation: begin: Updating scripts documentation steps: 3
+	update_script_paths_documentation: step 0: hud.gd
+	update_script_paths_documentation: step 1: smoke_quest_save_slice.gd
+	update_script_paths_documentation: step 2: test_npc_greeting.gd
+update_script_paths_documentation: end
+reimport: begin: 애셋 (다시) 가져오는 중 steps: 1
+	reimport: step 0: Executing post-reimport operations...
+reimport: end
+loading_editor_layout: begin: Loading editor steps: 5
+	loading_editor_layout: step 0: Loading editor layout...
+loading_editor_layout: end
+SCRIPT ERROR: Cannot call method 'store_string' on a null value.
+   at: save_user_config (res://addons/dialogue_manager/settings.gd:262)
+SCRIPT ERROR: Cannot call method 'store_string' on a null value.
+   at: save_user_config (res://addons/dialogue_manager/settings.gd:262)
+ERROR: Cannot save file 'C:/Users/freer/AppData/Roaming/Godot/editor_settings-4.4.tres'.
+   at: save (scene/resources/resource_format_text.cpp:1719)
+ERROR: Error saving editor settings to C:/Users/freer/AppData/Roaming/Godot/editor_settings-4.4.tres
+   at: save (editor/editor_settings.cpp:1321)

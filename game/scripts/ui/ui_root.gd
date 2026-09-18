@@ -14,22 +14,28 @@ extends CanvasLayer
 @onready var inventory_menu: InventoryMenu = $InventoryMenu/Root
 @onready var blacksmith_menu: BlacksmithMenu = $BlacksmithMenu/Root
 @onready var mailbox_popup: MailboxPopup = $MailboxPopup/Root
+var quest_npc_panel: QuestNpcPanel
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	add_to_group("quest_npc_ui")
+	quest_npc_panel = QuestNpcPanel.new()
+	quest_npc_panel.theme = hud.theme
+	add_child(quest_npc_panel)
 	inventory_menu.close_requested.connect(close_menu)
 	blacksmith_menu.close_requested.connect(close_blacksmith)
 	mailbox_popup.close_requested.connect(close_mailbox)
 	Events.blacksmith_opened.connect(open_blacksmith)
 	Events.mailbox_opened.connect(open_mailbox)
+	quest_npc_panel.close_requested.connect(close_quest_npc)
 
 
 func _unhandled_input(_event: InputEvent) -> void:
 	if Input.is_action_just_pressed(&"menu"):
 		# 대장간/우편함이 이미 열려 있으면 인벤토리 메뉴를 겹쳐 열지 않는다(전체화면 UI는
 		# 한 번에 하나만 — D-91과 같은 원칙의 연장).
-		if is_blacksmith_open() or is_mailbox_open():
+		if is_blacksmith_open() or is_mailbox_open() or is_quest_npc_open():
 			return
 		toggle_menu()
 
@@ -56,6 +62,7 @@ func toggle_menu() -> void:
 
 
 func open_menu() -> void:
+	if is_quest_npc_open() or is_blacksmith_open() or is_mailbox_open(): return
 	inventory_menu.open_menu()
 	_recompute_paused()
 
@@ -66,7 +73,7 @@ func close_menu() -> void:
 
 
 func open_blacksmith() -> void:
-	if is_menu_open() or is_mailbox_open():
+	if is_menu_open() or is_mailbox_open() or is_quest_npc_open():
 		return
 	blacksmith_menu.open_menu()
 	_recompute_paused()
@@ -78,7 +85,7 @@ func close_blacksmith() -> void:
 
 
 func open_mailbox() -> void:
-	if is_menu_open() or is_blacksmith_open():
+	if is_menu_open() or is_blacksmith_open() or is_quest_npc_open():
 		return
 	mailbox_popup.open_popup()
 	_recompute_paused()
@@ -90,4 +97,18 @@ func close_mailbox() -> void:
 
 
 func _recompute_paused() -> void:
-	get_tree().paused = is_menu_open() or is_blacksmith_open() or is_mailbox_open()
+	get_tree().paused = is_menu_open() or is_blacksmith_open() or is_mailbox_open() or is_quest_npc_open()
+
+
+func is_quest_npc_open() -> bool:
+	return is_instance_valid(quest_npc_panel) and quest_npc_panel.visible
+
+
+func open_quest_npc(npc_id: StringName) -> void:
+	if is_menu_open() or is_blacksmith_open() or is_mailbox_open() or is_quest_npc_open(): return
+	if quest_npc_panel.open_for_npc(npc_id): _recompute_paused()
+
+
+func close_quest_npc() -> void:
+	quest_npc_panel.visible = false
+	_recompute_paused()

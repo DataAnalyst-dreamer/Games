@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="ko"><meta charset="utf-8"><title>핀 · PixelLab 걷기 1차 검수</title>
+<style>body{font:16px system-ui;background:#172b26;color:#e8eadf;margin:32px}button,input{font:inherit;margin:8px}section{display:flex;gap:48px;align-items:end;flex-wrap:wrap}.sprite{width:264px;height:384px;image-rendering:pixelated}#strip{display:flex;flex-wrap:wrap;gap:12px}#strip img{width:132px;height:192px;image-rendering:pixelated}figure{margin:12px}figcaption{padding:8px}p{max-width:900px;line-height:1.6}</style>
+<h1>핀 · 정면 걷기 1차 시험</h1>
+<p>PixelLab 생성 결과를 수정 없이 재생합니다. 원본 포함 9장 / 생성 8장 / 66×96px. 게임에는 미적용입니다. 발 디딤, 다리 연결, 검의 과도한 흔들림과 몸 방향 변화를 확인해 주세요.</p>
+<section><figure><img class="sprite" src="frame-0.png"><figcaption>입력 원본 · 4배</figcaption></figure><figure><img class="sprite" id="motion" src="frame-0.png"><figcaption id="counter">프레임 0 · 4배</figcaption></figure></section>
+<button id="toggle">일시정지</button><button id="next">한 프레임씩</button><label>속도 <input id="fps" type="range" min="4" max="16" value="10"><span id="rate">10</span> fps</label><label><input id="original" type="checkbox" checked>원본 프레임 포함</label>
+<h2>프레임 비교 · 2배</h2><div id="strip"></div>
+<script>
+const frames=Array.from({length:9},(_,i)=>`frame-${i}.png`); frames.forEach((src,i)=>{const f=document.createElement('figure');const im=new Image();im.src=src;im.alt=`프레임 ${i}`;const c=document.createElement('figcaption');c.textContent=i===0?'0 · 원본':`${i} · 생성`;f.append(im,c);document.querySelector('#strip').append(f)});
+let index=0,playing=true,last=0;const motion=document.querySelector('#motion'),counter=document.querySelector('#counter'),toggle=document.querySelector('#toggle'),fps=document.querySelector('#fps'),original=document.querySelector('#original');
+function step(){index=(index+1)%9;if(!original.checked&&index===0)index=1;motion.src=frames[index];counter.textContent=`프레임 ${index} · 4배`}
+toggle.onclick=()=>{playing=!playing;toggle.textContent=playing?'일시정지':'재생'};document.querySelector('#next').onclick=()=>{playing=false;toggle.textContent='재생';step()};fps.oninput=()=>document.querySelector('#rate').textContent=fps.value;
+function tick(t){if(playing&&t-last>=1000/Number(fps.value)){step();last=t}requestAnimationFrame(tick)}requestAnimationFrame(tick);
+</script></html>

@@ -1,0 +1,224 @@
+class_name QuarterActor
+extends CharacterBody2D
+## Sample actor. Knight 16px atlas x4 is a labelled proxy, NOT finished 64x96 Fin.
+## Combat owns the single simulation/animation clock, including hitstop.
+
+var kind: String = "player"
+var hp: int = 100
+var max_hp: int = 100
+var is_dead: bool = false
+var facing: Vector2 = Vector2.DOWN
+var attack_facing: Vector2 = Vector2.DOWN
+var phase: String = "idle"
+var phase_elapsed: float = 0.0
+var phase_duration: float = 0.0
+var animation_time: float = 0.0
+var moving: bool = false
+var spawn_position: Vector2
+var knockback_velocity := Vector2.ZERO
+var knockback_remaining: float = 0.0
+var invulnerable_remaining: float = 0.0
+var flash_remaining: float = 0.0
+var hit_targets: Dictionary = {}
+var enemy_hit_done: bool = false
+var blade_inner: float = 12.0
+var blade_outer: float = 74.0
+var sweep_radians: float = deg_to_rad(110.0)
+var sweep_ease_out_power: float = 3.0
+var weapon_visual: Dictionary = {"startup_length_ratio": 0.58, "recovery_length_ratio": 0.32, "recovery_pose_hold_ratio": 0.30, "trail_sec": 0.032}
+var actor_radius: float = 17.0
+var _combat: Node
+var _sprite: Sprite2D
+var _label: Label
+var _strings: Dictionary = {}
+
+func configure(actor_kind: String, spawn: Vector2) -> void:
+	kind = actor_kind
+	spawn_position = spawn
+	position = spawn
+	if is_node_ready():
+		_load_proxy()
+
+func set_combat(controller: Node) -> void:
+	_combat = controller
+
+func _ready() -> void:
+	_strings = JSON.parse_string(FileAccess.get_file_as_string("res://combat_strings_ko.json"))
+	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
+	collision_layer = 2
+	collision_mask = 1
+	var shape := CollisionShape2D.new()
+	var circle := CircleShape2D.new()
+	circle.radius = 14.0
+	shape.shape = circle
+	add_child(shape)
+	_sprite = Sprite2D.new()
+	_sprite.region_enabled = true
+	_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_sprite.scale = Vector2(4, 4)
+	_sprite.position = Vector2(0, -24)
+	add_child(_sprite)
+	_label = Label.new()
+	_label.position = Vector2(-92, -98)
+	_label.size = Vector2(184, 25)
+	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_label.add_theme_font_size_override("font_size", 14)
+	if ResourceLoader.exists("res://assets/Galmuri11.ttf"):
+		_label.add_theme_font_override("font", load("res://assets/Galmuri11.ttf"))
+	add_child(_label)
+	_load_proxy()
+
+func _load_proxy() -> void:
+	var path := "res://assets/proxy-knight.png" if kind == "player" else "res://assets/proxy-slime.png"
+	if ResourceLoader.exists(path):
+		_sprite.texture = load(path)
+	_label.text = String(_strings.actor_player if kind == "player" else _strings.actor_slime)
+	if _sprite.texture == null:
+		_label.text = String(_strings.asset_missing)
+	_refresh_visual()
+
+func reset_actor(new_max_hp: int) -> void:
+	max_hp = new_max_hp
+	hp = max_hp
+	is_dead = false
+	global_position = spawn_position
+	velocity = Vector2.ZERO
+	knockback_velocity = Vector2.ZERO
+	knockback_remaining = 0.0
+	invulnerable_remaining = 0.0
+	flash_remaining = 0.0
+	animation_time = 0.0
+	facing = Vector2.RIGHT if kind == "player" else Vector2.LEFT
+	attack_facing = facing
+	hit_targets.clear()
+	enemy_hit_done = false
+	set_phase("idle")
+	_refresh_visual()
+
+func set_phase(next: String, duration: float = 0.0) -> void:
+	phase = next
+	phase_elapsed = 0.0
+	phase_duration = duration
+	_refresh_visual()
+
+func tick_clock(delta: float) -> void:
+	phase_elapsed += delta
+	animation_time += delta
+	invulnerable_remaining = maxf(0.0, invulnerable_remaining - delta)
+	flash_remaining = maxf(0.0, flash_remaining - delta)
+	_refresh_visual()
+
+func move_body(delta: float, desired: Vector2) -> void:
+	if is_dead:
+		return
+	var displacement: Vector2
+	if knockback_remaining > 0.0:
+		var consumed := minf(delta, knockback_remaining)
+		displacement = knockback_velocity * consumed
+		knockback_remaining -= consumed
+	else:
+		displacement = desired * delta
+	velocity = desired
+	moving = displacement.length_squared() > 0.01
+	# Both locomotion and knockback use collision-aware motion; never tween position.
+	var collision := move_and_collide(displacement)
+	if collision != null:
+		if knockback_remaining > 0.0:
+			knockback_remaining = 0.0
+		else:
+			move_and_collide(collision.get_remainder().slide(collision.get_normal()))
+	_refresh_visual()
+
+func apply_damage(amount: int, direction: Vector2, distance: float, duration: float, hurt_duration: float) -> void:
+	hp = maxi(0, hp - amount)
+	is_dead = hp == 0
+	flash_remaining = 0.12
+	knockback_velocity = direction.normalized() * distance / maxf(duration, 0.001)
+	knockback_remaining = duration
+	set_phase("dead" if is_dead else "hurt", hurt_duration)
+	_refresh_visual()
+
+func attack_origin() -> Vector2:
+	return global_position + Vector2(0, -20)
+
+func hurt_center() -> Vector2:
+	return global_position + Vector2(0, -20)
+
+func blade_angle(progress: float) -> float:
+	var fraction := 1.0 - pow(1.0 - clampf(progress, 0.0, 1.0), sweep_ease_out_power)
+	return attack_facing.angle() + lerpf(-sweep_radians * 0.5, sweep_radians * 0.5, fraction)
+
+func progress_for_blade_angle(angle: float) -> float:
+	var fraction := clampf((angle - attack_facing.angle()) / sweep_radians + 0.5, 0.0, 1.0)
+	return 1.0 - pow(1.0 - fraction, 1.0 / sweep_ease_out_power)
+
+func blade_visual() -> Dictionary:
+	# Only the weapon/effect changes silhouette. The bitmap never rotates or stretches.
+	var t := clampf(phase_elapsed / maxf(phase_duration, 0.001), 0.0, 1.0)
+	var eased := t * t * (3.0 - 2.0 * t)
+	var angle := blade_angle(t)
+	var reach := blade_outer
+	var alpha := 1.0
+	if phase == "startup":
+		angle = lerpf(attack_facing.angle() - deg_to_rad(30.0), blade_angle(0.0), eased)
+		reach *= lerpf(0.40, float(weapon_visual.startup_length_ratio), eased)
+		alpha = lerpf(0.45, 0.85, eased)
+	elif phase == "recovery":
+		angle = blade_angle(1.0) + deg_to_rad(30.0) * eased
+		reach *= lerpf(1.0, float(weapon_visual.recovery_length_ratio), eased)
+		alpha = 1.0 - eased
+	return {"angle": angle, "reach": reach, "alpha": alpha,
+		"trail_angle": blade_angle(maxf(0.0, (phase_elapsed - float(weapon_visual.trail_sec)) / maxf(phase_duration, 0.001)))}
+
+func _refresh_visual() -> void:
+	if _sprite == null:
+		return
+	var column: int = 0
+	if kind == "player":
+		# Eight-direction aim/movement, explicitly separate four-direction proxy art.
+		if absf(facing.x) >= absf(facing.y):
+			column = 3 if facing.x > 0.0 else 2
+		else:
+			column = 0 if facing.y > 0.0 else 1
+	var row := int(animation_time * (9.0 if kind == "player" else 5.0)) % 4 if moving else 0
+	if kind == "player" and phase in ["startup", "active", "recovery"]:
+		row = 0
+		if phase == "active" or (phase == "recovery" and phase_elapsed < phase_duration * float(weapon_visual.recovery_pose_hold_ratio)):
+			row = 4 # genuine legacy contact pose; return to idle early, no fake body tween
+	_sprite.region_rect = Rect2(column * 16, row * 16, 16, 16)
+	_sprite.modulate = Color(2.4, 2.4, 2.4) if flash_remaining > 0.0 else Color.WHITE
+	_sprite.modulate.a = 0.28 if is_dead else 1.0
+	queue_redraw()
+
+func _draw() -> void:
+	draw_set_transform(Vector2.ZERO, 0, Vector2(1, 0.42))
+	draw_circle(Vector2.ZERO, 24, Color(0.05, 0.08, 0.09, 0.3))
+	draw_set_transform(Vector2.ZERO)
+	if is_dead:
+		return
+	draw_rect(Rect2(-28, -68, 56, 5), Color(0.12, 0.13, 0.18))
+	draw_rect(Rect2(-28, -68, 56 * float(hp) / max_hp, 5), Color(0.4, 0.85, 0.58))
+	var origin := Vector2(0, -20)
+	if kind == "slime" and phase == "telegraph":
+		draw_arc(origin, 37, 0, TAU * clampf(phase_elapsed / phase_duration, 0, 1), 32, Color(1, 0.4, 0.22), 3)
+	if kind != "player" or phase not in ["startup", "active", "recovery"]:
+		return
+	var visual := blade_visual()
+	var angle: float = visual.angle
+	var direction := Vector2.from_angle(angle)
+	var alpha: float = visual.alpha
+	var reach: float = visual.reach
+	if phase == "active":
+		# Short moving tail rather than an ever-growing stationary fan.
+		draw_arc(origin, blade_outer - 3, float(visual.trail_angle), angle, 28, Color(1, 0.88, 0.48, 0.42), 6)
+		for lag in [0.012, 0.025]:
+			var previous := blade_angle(maxf(0.0, (phase_elapsed - lag) / phase_duration))
+			var echo := Vector2.from_angle(previous)
+			draw_line(origin + echo * blade_inner, origin + echo * blade_outer, Color(1, 0.90, 0.62, 0.14), 3)
+	# The visible blade segment is also the collision-test segment in combat.gd.
+	var cross := direction.orthogonal()
+	var hand := origin + direction * blade_inner
+	var tip := origin + direction * reach
+	draw_colored_polygon(PackedVector2Array([hand + cross * 3, tip - direction * 8 + cross * 3, tip, tip - direction * 8 - cross * 3, hand - cross * 3]), Color(0.88, 0.96, 1.0, alpha))
+	draw_line(hand, tip, Color(1, 1, 0.87, alpha), 2)
+	draw_circle(origin + direction * blade_inner, 5, Color(0.73, 0.43, 0.16, alpha))

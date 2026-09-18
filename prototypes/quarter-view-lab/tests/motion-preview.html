@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ko"><meta charset="utf-8"><title>손–검 결합 · 공격 루프 검수</title>
+<style>
+body{margin:0;background:#111c1b;color:#f7edcd;font:16px system-ui,sans-serif}header{padding:14px 24px}h1{font-size:21px;margin:0 0 6px}p{margin:6px 0;color:#c0cebf}button,select{font:inherit;padding:6px 12px;margin-right:8px;background:#263d36;color:#fff4ce;border:1px solid #628b74;border-radius:4px}img{display:block;width:min(100%,1920px);height:auto;margin:auto}#status{font-variant-numeric:tabular-nums}input{width:280px;vertical-align:middle}small{display:block;margin-top:8px;color:#adc0b1}
+</style>
+<header><h1>손–검 결합 · 한 번의 공격 루프</h1>
+<p>실제 Main 입력 · 임시 기사 · 검수 카메라 3배 확대 · 원본 PNG 무편집</p>
+<button id="play">일시 정지</button><button id="restart">처음부터</button>
+<select id="speed"><option value="1">1× 시뮬레이션</option><option value="0.5">0.5×</option><option value="0.25">0.25×</option></select>
+<input id="seek" type="range" min="0" value="0"><span id="status"></span>
+<small>고정 60Hz 엔진 프레임 재생입니다. 실제 벽시계 속도·장치 입력 지연 측정이 아닙니다. 위치와 적 예고 동작은 검수에서 고정했습니다. 루프 끝의 잠깐 멈춤은 재생기 동작입니다.</small>
+</header><img id="frame" alt="실제 엔진 공격 검수 프레임">
+<script>
+const frames=__FRAME_DATA__;
+let index=0,playing=false,last=0,wait=0,loaded=false;
+const picture=document.getElementById('frame'),status=document.getElementById('status'),seek=document.getElementById('seek'),play=document.getElementById('play');
+seek.max=frames.length-1;
+play.disabled=true;seek.disabled=true;status.textContent=' 이미지 불러오는 중…';
+const preload=frames.map(f=>new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(new Error(f.file));i.src=f.file;}));
+function show(){const f=frames[index];picture.src=f.file;seek.value=index;status.textContent=` ${index+1}/${frames.length} · 물리 프레임 ${f.physics_frame_after_input} · ${f.phase}`;}
+play.onclick=()=>{playing=!playing;play.textContent=playing?'일시 정지':'재생';last=0;};
+document.getElementById('restart').onclick=()=>{if(!loaded)return;index=0;wait=0;last=0;show();};
+seek.oninput=()=>{index=Number(seek.value);wait=0;playing=false;play.textContent='재생';show();};
+function durationAt(i){return i+1<frames.length?Math.max(1,frames[i+1].physics_frame_after_input-frames[i].physics_frame_after_input)*1000/60/Number(document.getElementById('speed').value):650;}
+function tick(now){if(loaded&&playing&&last){wait+=Math.min(1000,now-last);let steps=0;
+while(wait>=durationAt(index)&&steps<120){wait-=durationAt(index);index=(index+1)%frames.length;steps++;}
+if(steps)show();}last=now;requestAnimationFrame(tick);}
+Promise.all(preload).then(()=>{loaded=true;playing=true;play.disabled=false;seek.disabled=false;last=0;show();requestAnimationFrame(tick);}).catch(error=>{status.textContent=' 이미지 읽기 실패: '+error.message;});
+</script></html>

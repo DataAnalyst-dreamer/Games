@@ -1,0 +1,1312 @@
+{
+  "status": "design_draft_not_runtime",
+  "version": 1,
+  "date": "2026-09-13",
+  "scope": "초반 지역을 테스트 무대로 쓰는 향후 성장 빌드 fixture; 초반에 전부 학습/전직 가능하다는 뜻 아님",
+  "source_files": [
+    "mastery-nodes-v3.json",
+    "hybrid-classes-v3.json",
+    "class-progression-v3.md",
+    "retraining-policy-v1.md",
+    "monsters-items-v2.md",
+    "story-quests-v2.md"
+  ],
+  "policy_boundary": {
+    "user_confirmed": [
+      "넓은 직업/스킬 트리와 조합 전직 방향",
+      "D-142 높은 골드+수집 아이템+가벼운 레벨다운의 재전직 부담"
+    ],
+    "draft_assumptions": {
+      "active_masteries": 2,
+      "active_slots": 2,
+      "max_modifiers_per_active": 1,
+      "identity_traits": 1
+    },
+    "unresolved": [
+      "SP 비용·투자량·단계 레벨·피해·시간·범위·회복분배",
+      "조합 특성과 행동 변형의 최종 충돌 우선순위",
+      "장비 호환 레지스트리·세이브 이관"
+    ],
+    "runtime_changes": false
+  },
+  "global_checks": [
+    {
+      "id": "GLOBAL_BASIC_ROUTE",
+      "check": "어떤 클래스도 퀘스트 필수 열쇠가 아니며 기본 이동/회피/상호작용 대체 경로를 유지한다."
+    },
+    {
+      "id": "GLOBAL_NO_RECURSION",
+      "check": "파생 피해·회복·잔향은 자기/다른 특성의 재귀 발동 조건으로 집계하지 않는다."
+    },
+    {
+      "id": "GLOBAL_LOADOUT",
+      "check": "학습/슬롯 변경은 선행과 활성 계열·장비를 재검증하고 타이밍/횟수 리셋을 만들지 않는다."
+    },
+    {
+      "id": "GLOBAL_VISUAL",
+      "check": "FHD·핀 본체64x96 방향을 유지하되 새 시전/장치 모션과 VFX는 미제작이다. 예고는 낮은 효과설정에서도 남긴다."
+    },
+    {
+      "id": "GLOBAL_EVIDENCE",
+      "check": "다음 로그명은 향후 계측 요구이며 현재 런타임 이벤트명이 아니다. 정적검사는 전투 통과를 주장하지 않는다."
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "BSV1_blade_guard",
+      "title": "핀 우선: 울타리 앞에서 받기와 물러서기",
+      "status": "design_draft_not_runtime",
+      "priority": "P1",
+      "class_id": "v3_class_blade_guard",
+      "class_name": "철위기사",
+      "active_masteries": [
+        "blade",
+        "guard"
+      ],
+      "learning_order": [
+        "v3_blade_measured_cut",
+        "v3_guard_low_brace",
+        "v3_blade_edge_stop",
+        "v3_guard_yield_brace"
+      ],
+      "active_slots": [
+        {
+          "active": "v3_blade_measured_cut",
+          "modifier": "v3_blade_edge_stop"
+        },
+        {
+          "active": "v3_guard_low_brace",
+          "modifier": "v3_guard_yield_brace"
+        }
+      ],
+      "identity_trait": "v3_bridge_blade_guard",
+      "equipment_tags": [
+        "검",
+        "방패"
+      ],
+      "equipment_note": "검·방패 조합 권장. 방패 없는 장비는 가드 조건 사용 불가.",
+      "qualification": {
+        "node_prerequisites": "must_pass_static_validation",
+        "tier_point_budget": "unresolved_not_validated",
+        "advancement_task": "assumed_completed_in_future_test_fixture_not_implemented"
+      },
+      "context": {
+        "monster_ids": [
+          "horn_rabbit"
+        ],
+        "location_ids": [
+          "heartland_pasture_boundary"
+        ],
+        "material_ids": [
+          "rabbit_horn"
+        ],
+        "placement_status": "proposed_test_arrangement_not_current_spawn_claim",
+        "material_role": "observation_or_inventory_reference_only_not_skill_cost",
+        "draft_refs": [
+          "draft_encounter_rabbit_fence",
+          "SQH-V2-06"
+        ]
+      },
+      "weakness": "끝선 멈춤은 후퇴를 없애며 충격 흘리기는 뒤 공간을 내준다. 방패 없이 가드 토큰을 만들 수 없다.",
+      "basic_alternative": "넓은 흙길로 돌아가거나 기본 회피 후 기본 공격한다.",
+      "implementation_needed": [
+        "가드 성공 토큰과 직접 근접 기술 연결",
+        "변형별 후퇴/접지 모션",
+        "벽 뒤 이동 충돌"
+      ],
+      "checklist": [
+        {
+          "id": "BSV1_blade_guard_C1",
+          "given": "방패 장착, 뿔토끼 정면 예고가 보임",
+          "action": "기본 가드 성공 후 슬롯1을 직접 누른다",
+          "expected": "받아낸 틈이 다음 근접 기술에만 소비된다",
+          "reject": "빈 가드·후방 피격으로 토큰 획득",
+          "evidence": "가드성공/토큰생성/소비 로그와 정면 녹화"
+        },
+        {
+          "id": "BSV1_blade_guard_C2",
+          "given": "슬롯1에 끝선 멈춤 연결",
+          "action": "같은 위치에서 미연결과 연결 공격을 비교한다",
+          "expected": "변형은 후퇴를 없애며 칼끝 거리 선택이 필요하다",
+          "reject": "추가 액티브 슬롯 또는 후퇴와 고정 보너스 동시 적용",
+          "evidence": "프레임별 발 원점·공격 영역 비교"
+        },
+        {
+          "id": "BSV1_blade_guard_C3",
+          "given": "등 뒤가 울타리인 제안 배치",
+          "action": "충격 흘리기 중 정면 공격을 받는다",
+          "expected": "후퇴 충돌이 멈추고 지형을 통과하지 않는다",
+          "reject": "낭떠러지 자동 안전/벽 관통을 이미 확정한 것으로 처리",
+          "evidence": "이동 벡터·충돌 결과 로그"
+        },
+        {
+          "id": "BSV1_blade_guard_C4",
+          "given": "같은 예고에 방패만 해제한 비교 fixture",
+          "action": "슬롯2 유지 후 슬롯1을 시도한다",
+          "expected": "무방패 버팀은 피해 감소·가드 성공이 없고 유지 중 공격 불가",
+          "reject": "넉백 억제를 일반 가드 성공으로 집계",
+          "evidence": "HP/가드이벤트/슬롯 거부 원인"
+        },
+        {
+          "id": "BSV1_blade_guard_C5",
+          "given": "주요 통과 길과 기본 옆길 모두 열림",
+          "action": "빌드 노드를 비활성화하고 목초지 경계를 지난다",
+          "expected": "기본 이동·회피·상호작용만으로 탐험 가능",
+          "reject": "rabbit_horn 소비나 해당 전직을 길 해금 조건으로 추가",
+          "evidence": "기본 조작 대체 경로 녹화"
+        }
+      ]
+    },
+    {
+      "id": "BSV1_blade_trick",
+      "title": "결투가: 측면 회피와 후퇴 보행을 구분하기",
+      "status": "design_draft_not_runtime",
+      "priority": "P2",
+      "class_id": "v3_class_blade_trick",
+      "class_name": "결투가",
+      "active_masteries": [
+        "blade",
+        "trick"
+      ],
+      "learning_order": [
+        "v3_blade_measured_cut",
+        "v3_trick_side_feint",
+        "v3_blade_edge_stop",
+        "v3_trick_back_feint"
+      ],
+      "active_slots": [
+        {
+          "active": "v3_blade_measured_cut",
+          "modifier": "v3_blade_edge_stop"
+        },
+        {
+          "active": "v3_trick_side_feint",
+          "modifier": "v3_trick_back_feint"
+        }
+      ],
+      "identity_trait": "v3_bridge_blade_trick",
+      "equipment_tags": [
+        "검"
+      ],
+      "equipment_note": "검 또는 단검. 측후면 판정은 신규 검증 필요.",
+      "qualification": {
+        "node_prerequisites": "must_pass_static_validation",
+        "tier_point_budget": "unresolved_not_validated",
+        "advancement_task": "assumed_completed_in_future_test_fixture_not_implemented"
+      },
+      "context": {
+        "monster_ids": [
+          "slime"
+        ],
+        "location_ids": [
+          "bridgeport_dock"
+        ],
+        "material_ids": [
+          "slime_jelly"
+        ],
+        "placement_status": "proposed_test_arrangement_not_current_spawn_claim",
+        "material_role": "observation_or_inventory_reference_only_not_skill_cost",
+        "draft_refs": [
+          "draft_encounter_slime_gutter",
+          "SQH-V2-02"
+        ]
+      },
+      "weakness": "좁은 후퇴는 무적이 아니며 광역 대응을 포기한다.",
+      "basic_alternative": "슬라임을 피해서 넓은 길로 걷거나 기본 구르기 뒤 기본 공격한다.",
+      "implementation_needed": [
+        "공격 방향과 상대 측면 관계 판정",
+        "기본 회피 성공 이벤트 구분",
+        "변형과 조합 특성 우선순위 결정 전 fixture"
+      ],
+      "checklist": [
+        {
+          "id": "BSV1_blade_trick_C1",
+          "given": "슬라임 공격선 옆에 빈 공간",
+          "action": "기본 회피로 실제 유효 공격을 벗어난 뒤 측면 슬롯1 입력",
+          "expected": "빈자리 찌르기 조건을 만족한 직접 기술만 좁게 변한다",
+          "reject": "공격이 없는 허공 구르기로 특성 준비",
+          "evidence": "공격영역/회피판정/특성 소비 로그"
+        },
+        {
+          "id": "BSV1_blade_trick_C2",
+          "given": "같은 공격을 앞에 둠",
+          "action": "뒤로 비키기 변형 슬롯2만 사용한다",
+          "expected": "무적 회피 성공이 아니며 특성이 자동 준비되지 않는다",
+          "reject": "기교 보행을 기본 구르기로 혼동",
+          "evidence": "무적플래그·HP 기록"
+        },
+        {
+          "id": "BSV1_blade_trick_C3",
+          "given": "등 뒤 물받이 벽",
+          "action": "슬롯2 후퇴 입력",
+          "expected": "벽 앞에서 멈추고 자동 옆이동하지 않는다",
+          "reject": "벽 관통 또는 자동 뒤잡기",
+          "evidence": "좌표/충돌 로그"
+        },
+        {
+          "id": "BSV1_blade_trick_C4",
+          "given": "끝선 멈춤과 조합 특성이 둘 다 선택된 fixture",
+          "action": "조건부 슬롯1 발동",
+          "expected": "행동 변형과 특성 결합 순서를 명시한 구현안으로만 비교 가능",
+          "reject": "서로 다른 판정 두 개를 몰래 동시 발동",
+          "evidence": "최종 판정 형상·원천 노드 목록"
+        },
+        {
+          "id": "BSV1_blade_trick_C5",
+          "given": "식탁보 제안이 같은 동선에 있음",
+          "action": "전투 없이 기본 큰길로 접근",
+          "expected": "SQH-V2-02 기본 매듭 상호작용을 유지한다",
+          "reject": "검으로 천 베기가 필수 정답",
+          "evidence": "노드 없는 해결 경로"
+        }
+      ]
+    },
+    {
+      "id": "BSV1_blade_element",
+      "title": "마검사: 잔향과 물리 피해를 중복 합산하지 않기",
+      "status": "design_draft_not_runtime",
+      "priority": "P2",
+      "class_id": "v3_class_blade_element",
+      "class_name": "마검사",
+      "active_masteries": [
+        "blade",
+        "element"
+      ],
+      "learning_order": [
+        "v3_blade_measured_cut",
+        "v3_element_ember_stroke",
+        "v3_blade_edge_stop",
+        "v3_element_ember_point"
+      ],
+      "active_slots": [
+        {
+          "active": "v3_blade_measured_cut",
+          "modifier": "v3_blade_edge_stop"
+        },
+        {
+          "active": "v3_element_ember_stroke",
+          "modifier": "v3_element_ember_point"
+        }
+      ],
+      "identity_trait": "v3_bridge_blade_element",
+      "equipment_tags": [
+        "검",
+        "초점도구"
+      ],
+      "equipment_note": "검으로 시전 가능한 모션/태그가 필요한 후보. 스태프 강제 교체 없음.",
+      "qualification": {
+        "node_prerequisites": "must_pass_static_validation",
+        "tier_point_budget": "unresolved_not_validated",
+        "advancement_task": "assumed_completed_in_future_test_fixture_not_implemented"
+      },
+      "context": {
+        "monster_ids": [
+          "slime"
+        ],
+        "location_ids": [
+          "heartland_dandelion_village"
+        ],
+        "material_ids": [
+          "slime_jelly"
+        ],
+        "placement_status": "proposed_test_arrangement_not_current_spawn_claim",
+        "material_role": "observation_or_inventory_reference_only_not_skill_cost",
+        "draft_refs": [
+          "draft_encounter_slime_tally",
+          "SQH-V2-01"
+        ]
+      },
+      "weakness": "물리 이득 일부를 속성으로 바꾸며 좁은 투사체는 벽에 막힌다.",
+      "basic_alternative": "기본 근접 공격과 회피, 관찰 후 표지 상호작용을 쓴다.",
+      "implementation_needed": [
+        "속성 전환 원천 표시",
+        "검 장착 촉매 시전 포즈",
+        "잔향 파생 이벤트 재귀 차단"
+      ],
+      "checklist": [
+        {
+          "id": "BSV1_blade_element_C1",
+          "given": "검과 휴대 촉매 장착",
+          "action": "모은 잔불을 시전한 뒤 슬롯1을 직접 입력",
+          "expected": "다음 근접 기술에 준비된 속성 잔향이 소비된다",
+          "reject": "원소만 반복했는데 근접 후속이 자동 발사",
+          "evidence": "직접입력/잔향 토큰 로그"
+        },
+        {
+          "id": "BSV1_blade_element_C2",
+          "given": "벽 뒤의 슬라임",
+          "action": "모은 잔불 투사체를 발사",
+          "expected": "벽에서 차단되고 적중 이력이 생기지 않는다",
+          "reject": "넓은 근접 획과 투사체를 동시에 적중",
+          "evidence": "벽충돌/피해원천 기록"
+        },
+        {
+          "id": "BSV1_blade_element_C3",
+          "given": "물리 기본판과 속성전환 fixture",
+          "action": "동일 공격을 비교",
+          "expected": "전환된 부분과 남은 물리 부분을 분리해 기록한다",
+          "reject": "원래 물리 전량에 잔향 전량을 추가",
+          "evidence": "피해구성 로그; 계수는 미확정"
+        },
+        {
+          "id": "BSV1_blade_element_C4",
+          "given": "잔향이 실제로 적중",
+          "action": "추가 입력 없이 기다린다",
+          "expected": "잔향이 자신이나 다음 특성을 다시 준비하지 않는다",
+          "reject": "파생 적중 무한 재발동",
+          "evidence": "이벤트 부모ID 그래프"
+        },
+        {
+          "id": "BSV1_blade_element_C5",
+          "given": "표지 제안의 기본 경로",
+          "action": "원소 없이 방향을 관찰해 표지를 맞춘다",
+          "expected": "일반 상호작용 대안이 유지된다",
+          "reject": "불로 표지 태우기/속성 퍼즐 필수화",
+          "evidence": "기본 경로 성공 기록"
+        }
+      ]
+    },
+    {
+      "id": "BSV1_guard_bow",
+      "title": "보루궁수: 활의 버팀은 방패가 아니다",
+      "status": "design_draft_not_runtime",
+      "priority": "P2",
+      "class_id": "v3_class_guard_bow",
+      "class_name": "보루궁수",
+      "active_masteries": [
+        "guard",
+        "bow"
+      ],
+      "learning_order": [
+        "v3_guard_low_brace",
+        "v3_bow_still_string",
+        "v3_guard_yield_brace",
+        "v3_bow_quick_string"
+      ],
+      "active_slots": [
+        {
+          "active": "v3_guard_low_brace",
+          "modifier": "v3_guard_yield_brace"
+        },
+        {
+          "active": "v3_bow_still_string",
+          "modifier": "v3_bow_quick_string"
+        }
+      ],
+      "identity_trait": "v3_bridge_guard_bow",
+      "equipment_tags": [
+        "활"
+      ],
+      "equipment_note": "양손 활 허용. 방패 필수 수호 액티브와 동시 장착 불가.",
+      "qualification": {
+        "node_prerequisites": "must_pass_static_validation",
+        "tier_point_budget": "unresolved_not_validated",
+        "advancement_task": "assumed_completed_in_future_test_fixture_not_implemented"
+      },
+      "context": {
+        "monster_ids": [
+          "horn_rabbit"
+        ],
+        "location_ids": [
+          "heartland_pasture_boundary"
+        ],
+        "material_ids": [
+          "wool_soft"
+        ],
+        "placement_status": "proposed_test_arrangement_not_current_spawn_claim",
+        "material_role": "observation_or_inventory_reference_only_not_skill_cost",
+        "draft_refs": [
+          "draft_encounter_rabbit_brush",
+          "SQH-V2-06"
+        ]
+      },
+      "weakness": "양손 활은 피해를 받으며 버팀 유지와 공격은 병행하지 못한다.",
+      "basic_alternative": "돌진을 기본 회피로 피하고 넓은 길을 이용한다.",
+      "implementation_needed": [
+        "무방패 버팀",
+        "정지조준 완료/첫 넉백 토큰",
+        "활 동작과 버팀 배타 상태"
+      ],
+      "checklist": [
+        {
+          "id": "BSV1_guard_bow_C1",
+          "given": "활만 장착, 방패 없음",
+          "action": "슬롯1 유지 중 돌진 피해를 받는다",
+          "expected": "받는 피해는 유지하며 충격 흘리기 변형에 따라 정면 피격 때 짧게 후퇴한다. 뒤가 벽이면 충돌에서 멈추며, 고정 버팀의 넉백 억제를 동시에 부여하지 않는다",
+          "reject": "방패 가드·저스트 가드 이벤트 생성",
+          "evidence": "HP/넉백/가드 이벤트"
+        },
+        {
+          "id": "BSV1_guard_bow_C2",
+          "given": "버팀 유지 상태",
+          "action": "슬롯2 조준 입력",
+          "expected": "버팀 종료 전 사격을 시작하지 않는다",
+          "reject": "두 상태 동시 유지",
+          "evidence": "행동상태 전이 로그"
+        },
+        {
+          "id": "BSV1_guard_bow_C3",
+          "given": "버팀을 내리고 자리 확보",
+          "action": "짧은 당김 변형으로 정지 준비 후 사격",
+          "expected": "접지 사격은 준비 완료 뒤 첫 넉백에만 작동한다",
+          "reject": "영구 슈퍼아머나 이동 조준 보너스",
+          "evidence": "준비완료/토큰소비 기록"
+        },
+        {
+          "id": "BSV1_guard_bow_C4",
+          "given": "먼 목표와 가까운 목표 비교",
+          "action": "기본 시위와 짧은 당김을 비교",
+          "expected": "변형은 신속성을 얻는 대신 장거리 정밀 효율을 잃는다",
+          "reject": "양쪽 이점을 동시에 유지",
+          "evidence": "사거리/발사 타이밍; 수치미확정"
+        },
+        {
+          "id": "BSV1_guard_bow_C5",
+          "given": "덤불 옆의 넓은 길",
+          "action": "활 스킬 없이 기본 이동으로 우회",
+          "expected": "귀·뿔·예고와 안전길이 가려지지 않는다",
+          "reject": "울타리 파괴나 wool_soft 제출을 통행조건으로 추가",
+          "evidence": "예고 가독성/대체 동선"
+        }
+      ]
+    },
+    {
+      "id": "BSV1_bow_trick",
+      "title": "그늘사냥꾼: 미끼가 전투를 초기화하지 않기",
+      "status": "design_draft_not_runtime",
+      "priority": "P3",
+      "class_id": "v3_class_bow_trick",
+      "class_name": "그늘사냥꾼",
+      "active_masteries": [
+        "bow",
+        "trick"
+      ],
+      "learning_order": [
+        "v3_bow_still_string",
+        "v3_trick_dry_twig",
+        "v3_bow_quick_string",
+        "v3_trick_close_rattle"
+      ],
+      "active_slots": [
+        {
+          "active": "v3_bow_still_string",
+          "modifier": "v3_bow_quick_string"
+        },
+        {
+          "active": "v3_trick_dry_twig",
+          "modifier": "v3_trick_close_rattle"
+        }
+      ],
+      "identity_trait": "v3_bridge_bow_trick",
+      "equipment_tags": [
+        "활"
+      ],
+      "equipment_note": "활+도구. 적 인지 상태 구현을 전제로 하는 후속 후보.",
+      "qualification": {
+        "node_prerequisites": "must_pass_static_validation",
+        "tier_point_budget": "unresolved_not_validated",
+        "advancement_task": "assumed_completed_in_future_test_fixture_not_implemented"
+      },
+      "context": {
+        "monster_ids": [
+          "horn_rabbit"
+        ],
+        "location_ids": [
+          "heartland_pasture_boundary"
+        ],
+        "material_ids": [
+          "rabbit_horn"
+        ],
+        "placement_status": "proposed_test_arrangement_not_current_spawn_claim",
+        "material_role": "observation_or_inventory_reference_only_not_skill_cost",
+        "draft_refs": [
+          "draft_encounter_rabbit_brush",
+          "SQH-V2-02"
+        ]
+      },
+      "weakness": "새 조사 AI가 없으면 성립하지 않는 후속 빌드다. 가까운 소란은 자신 근처로 적을 끌 수 있다.",
+      "basic_alternative": "현재는 미끼 없이 기본 회피와 큰길 우회를 쓴다.",
+      "implementation_needed": [
+        "비전투 적 조사 AI 신규",
+        "인지 상태/관찰한 미끼 ID",
+        "첫발과 다른 사선의 관계"
+      ],
+      "checklist": [
+        {
+          "id": "BSV1_bow_trick_C1",
+          "given": "비전투·반응 가능 뿔토끼 fixture; 새 AI 구현 필요",
+          "action": "발밑 소란을 던지고 사격각을 바꾼다",
+          "expected": "소리를 관찰한 적의 첫 직접 화살만 조건 충족",
+          "reject": "기존 AI가 이미 조사행동을 지원한다고 표시",
+          "evidence": "적 인지상태/미끼ID 로그"
+        },
+        {
+          "id": "BSV1_bow_trick_C2",
+          "given": "적이 플레이어를 발견한 전투 상태",
+          "action": "같은 소리를 반복 사용",
+          "expected": "어그로가 삭제되지 않고 첫발 조건이 재생성되지 않는다",
+          "reject": "전투상태 초기화·영구 은신",
+          "evidence": "인지상태 전이 기록"
+        },
+        {
+          "id": "BSV1_bow_trick_C3",
+          "given": "미끼 관찰 후 같은 각도로 남아 있음",
+          "action": "슬롯1 사격",
+          "expected": "다른 각도 조건 미충족을 표시한다",
+          "reject": "아무 방향 사격에도 특성 부여",
+          "evidence": "사격각과 조건판정"
+        },
+        {
+          "id": "BSV1_bow_trick_C4",
+          "given": "발밑 소란과 기본 투척 비교",
+          "action": "미끼 위치를 확인한다",
+          "expected": "변형은 거리를 줄여 위험을 늘린다",
+          "reject": "원거리 안전투척과 근거리 효과 동시 적용",
+          "evidence": "투척 궤적/착지 좌표"
+        },
+        {
+          "id": "BSV1_bow_trick_C5",
+          "given": "식탁보 회수 기본 큰길",
+          "action": "조사 AI·스킬 모두 비활성화",
+          "expected": "대체 경로로 회수할 수 있다",
+          "reject": "미끼 관찰을 필수 퀘스트 조건으로 추가",
+          "evidence": "노드 없는 탐험 성공"
+        }
+      ]
+    },
+    {
+      "id": "BSV1_bow_element",
+      "title": "원소궁수: 시전과 사격의 순서",
+      "status": "design_draft_not_runtime",
+      "priority": "P2",
+      "class_id": "v3_class_bow_element",
+      "class_name": "원소궁수",
+      "active_masteries": [
+        "bow",
+        "element"
+      ],
+      "learning_order": [
+        "v3_bow_still_string",
+        "v3_element_ember_stroke",
+        "v3_bow_quick_string",
+        "v3_element_ember_point"
+      ],
+      "active_slots": [
+        {
+          "active": "v3_bow_still_string",
+          "modifier": "v3_bow_quick_string"
+        },
+        {
+          "active": "v3_element_ember_stroke",
+          "modifier": "v3_element_ember_point"
+        }
+      ],
+      "identity_trait": "v3_bridge_bow_element",
+      "equipment_tags": [
+        "활",
+        "초점도구"
+      ],
+      "equipment_note": "활을 이용한 원소 시전 모션 필요. 보이지 않는 지팡이 사용 금지.",
+      "qualification": {
+        "node_prerequisites": "must_pass_static_validation",
+        "tier_point_budget": "unresolved_not_validated",
+        "advancement_task": "assumed_completed_in_future_test_fixture_not_implemented"
+      },
+      "context": {
+        "monster_ids": [
+          "mushroom"
+        ],
+        "location_ids": [
+          "heartland_echo_cave_entrance"
+        ],
+        "material_ids": [
+          "mushroom_cap"
+        ],
+        "placement_status": "proposed_test_arrangement_not_current_spawn_claim",
+        "material_role": "observation_or_inventory_reference_only_not_skill_cost",
+        "draft_refs": [
+          "draft_encounter_mushroom_steps",
+          "SQH-V2-04"
+        ]
+      },
+      "weakness": "가까운 속성 준비와 정지 사격 때문에 장판 재배치 압박을 받는다.",
+      "basic_alternative": "장판을 기본 이동으로 우회하고 나무판을 일반 상호작용한다.",
+      "implementation_needed": [
+        "활 촉매 시전 자세",
+        "시전회수와 사격 준비 배타",
+        "원소전환/착지선형 판정"
+      ],
+      "checklist": [
+        {
+          "id": "BSV1_bow_element_C1",
+          "given": "장판 밖 안전 자리",
+          "action": "슬롯2 직접 시전 후 슬롯1 준비·발사",
+          "expected": "다음 화살이 준비 속성으로 전환된다",
+          "reject": "자동 지팡이 교체 또는 동시 시전사격",
+          "evidence": "장비/행동상태 녹화"
+        },
+        {
+          "id": "BSV1_bow_element_C2",
+          "given": "원소 전에 먼저 활을 쏨",
+          "action": "순서를 뒤집어 입력",
+          "expected": "전환 조건을 얻지 못한다",
+          "reject": "순서 무관 특성 발동",
+          "evidence": "입력순서/특성 원천 로그"
+        },
+        {
+          "id": "BSV1_bow_element_C3",
+          "given": "좁은 투사체 경로에 벽",
+          "action": "모은 잔불과 후속 화살 발사",
+          "expected": "벽 차폐를 모두 유지한다",
+          "reject": "착지선이 벽 뒤 적을 타격",
+          "evidence": "물리 충돌·피해대상 목록"
+        },
+        {
+          "id": "BSV1_bow_element_C4",
+          "given": "포자 장판 예고가 시작됨",
+          "action": "조준 취소 후 기본 이동을 선택",
+          "expected": "정지 준비 이득은 잃어도 위험을 피할 수 있다",
+          "reject": "스킬 강제 유지로 피격 고정",
+          "evidence": "취소상태/예고 가독성"
+        },
+        {
+          "id": "BSV1_bow_element_C5",
+          "given": "메아리 조사 제안",
+          "action": "소리 음소거·원소 없이 판의 움직임 관찰",
+          "expected": "시각 단서와 상호작용 대안이 유지된다",
+          "reject": "불속성으로 판을 파괴해야 완료",
+          "evidence": "무스킬·음소거 해결 기록"
+        }
+      ]
+    },
+    {
+      "id": "BSV1_bow_life",
+      "title": "숲길순찰자: 회수 동선에 남는 위험",
+      "status": "design_draft_not_runtime",
+      "priority": "P2",
+      "class_id": "v3_class_bow_life",
+      "class_name": "숲길순찰자",
+      "active_masteries": [
+        "bow",
+        "life"
+      ],
+      "learning_order": [
+        "v3_bow_still_string",
+        "v3_life_leaf_dressing",
+        "v3_bow_quick_string",
+        "v3_life_slow_dressing"
+      ],
+      "active_slots": [
+        {
+          "active": "v3_bow_still_string",
+          "modifier": "v3_bow_quick_string"
+        },
+        {
+          "active": "v3_life_leaf_dressing",
+          "modifier": "v3_life_slow_dressing"
+        }
+      ],
+      "identity_trait": "v3_bridge_bow_life",
+      "equipment_tags": [
+        "활",
+        "초점도구"
+      ],
+      "equipment_note": "활/공통 생명 시전. 씨앗은 판매·축적 아이템이 아니다.",
+      "qualification": {
+        "node_prerequisites": "must_pass_static_validation",
+        "tier_point_budget": "unresolved_not_validated",
+        "advancement_task": "assumed_completed_in_future_test_fixture_not_implemented"
+      },
+      "context": {
+        "monster_ids": [
+          "mushroom"
+        ],
+        "location_ids": [
+          "heartland_hilltop_waypoint"
+        ],
+        "material_ids": [
+          "herb_common"
+        ],
+        "placement_status": "proposed_test_arrangement_not_current_spawn_claim",
+        "material_role": "observation_or_inventory_reference_only_not_skill_cost",
+        "draft_refs": [
+          "draft_encounter_mushroom_steps",
+          "SQH-V2-01"
+        ]
+      },
+      "weakness": "씨앗 회복은 원래 사격지점으로 돌아와야 하며 그 자리에 장판이 깔릴 수 있다.",
+      "basic_alternative": "씨앗을 포기하고 기본 우회 또는 기존 허용 회복 수단을 사용한다.",
+      "implementation_needed": [
+        "판매불가 씨앗 흔적 상태",
+        "사격 원점/회수/만료",
+        "지속회복 피격중단"
+      ],
+      "checklist": [
+        {
+          "id": "BSV1_bow_life_C1",
+          "given": "손상 상태에서 안전하게 원거리 적중",
+          "action": "사격지점을 떠난 뒤 안전할 때 되돌아온다",
+          "expected": "한정된 씨앗 흔적을 회수하며 직접 회복 경로와 구분한다",
+          "reject": "화살마다 무제한 씨앗 저장",
+          "evidence": "흔적 생성/회수/상한 로그"
+        },
+        {
+          "id": "BSV1_bow_life_C2",
+          "given": "씨앗 지점에 포자 위험이 생김",
+          "action": "되돌아가지 않고 옆길을 택한다",
+          "expected": "회복을 포기할 수 있고 진행은 계속된다",
+          "reject": "씨앗 회수를 진행 필수로 강요",
+          "evidence": "우회 동선·퀘스트 상태"
+        },
+        {
+          "id": "BSV1_bow_life_C3",
+          "given": "천천히 스미기 적용 후 전투 진입",
+          "action": "피격 없이 이동했다가 별도 비교에서 피격",
+          "expected": "전투 진입만으론 유지, 피격 시 남은 회복 중단",
+          "reject": "피격 후 무한 지속회복",
+          "evidence": "회복틱/중단 원인"
+        },
+        {
+          "id": "BSV1_bow_life_C4",
+          "given": "만료 또는 전투 종료 상태",
+          "action": "이전 지점을 다시 지난다",
+          "expected": "오래된 준비 흔적이 무상 회복을 만들지 않는다",
+          "reject": "세이브/장비교체로 씨앗 복제",
+          "evidence": "흔적 수명/복원 정책 테스트TODO"
+        },
+        {
+          "id": "BSV1_bow_life_C5",
+          "given": "표지 기본 경로와 herb_common 관찰",
+          "action": "스킬 없이 길을 확인한다",
+          "expected": "약초는 관찰 참조이며 회수·전직 필수 재료로 소비하지 않는다",
+          "reject": "신규 소비량·레시피 확정",
+          "evidence": "아이템 수량 전후 비교"
+        }
+      ]
+    },
+    {
+      "id": "BSV1_trick_life",
+      "title": "약초추적자: 무적 보행 없이 되밟기",
+      "status": "design_draft_not_runtime",
+      "priority": "P3",
+      "class_id": "v3_class_trick_life",
+      "class_name": "약초추적자",
+      "active_masteries": [
+        "trick",
+        "life"
+      ],
+      "learning_order": [
+        "v3_trick_side_feint",
+        "v3_life_thorn_thread",
+        "v3_life_branching_thorn",
+        "v3_life_resting_patch",
+        "v3_trick_back_feint"
+      ],
+      "active_slots": [
+        {
+          "active": "v3_trick_side_feint",
+          "modifier": "v3_trick_back_feint"
+        },
+        {
+          "active": "v3_life_resting_patch",
+          "modifier": null
+        }
+      ],
+      "identity_trait": "v3_bridge_trick_life",
+      "equipment_tags": [
+        "초점도구"
+      ],
+      "equipment_note": "공통 도구. 희귀 약초 실물 소비가 전직 조건은 아니다.",
+      "qualification": {
+        "node_prerequisites": "must_pass_static_validation",
+        "tier_point_budget": "unresolved_not_validated",
+        "advancement_task": "assumed_completed_in_future_test_fixture_not_implemented"
+      },
+      "context": {
+        "monster_ids": [
+          "horn_rabbit"
+        ],
+        "location_ids": [
+          "heartland_pasture_boundary"
+        ],
+        "material_ids": [
+          "herb_common"
+        ],
+        "placement_status": "proposed_test_arrangement_not_current_spawn_claim",
+        "material_role": "observation_or_inventory_reference_only_not_skill_cost",
+        "draft_refs": [
+          "draft_encounter_rabbit_fence",
+          "SQH-V2-03"
+        ]
+      },
+      "weakness": "왕복 동선이 돌진과 겹칠 수 있다. 후퇴 보행은 회피 성공이 아니다.",
+      "basic_alternative": "회복 구역을 떠나 기본 이동·구르기로 안전을 우선한다.",
+      "implementation_needed": [
+        "생명 구역 단일 인스턴스",
+        "구역 통과 후 기본회피 방향 기록",
+        "되밟기 회복 한도/중복 금지"
+      ],
+      "checklist": [
+        {
+          "id": "BSV1_trick_life_C1",
+          "given": "쉬어가는 풀을 준비해 생성",
+          "action": "구역 통과 후 다른 방향 기본 회피, 이후 통과점 복귀",
+          "expected": "되밟는 약초 조건을 만족한 흔적만 회복에 사용한다",
+          "reject": "즉시 회복과 흔적 보상을 전량 중복",
+          "evidence": "구역ID/방향/회수 로그"
+        },
+        {
+          "id": "BSV1_trick_life_C2",
+          "given": "같은 구역 통과",
+          "action": "뒤로 비키기 슬롯1만 사용",
+          "expected": "기본 회피와 동일시하지 않아 회피 조건이 준비되지 않는다",
+          "reject": "보행에 무적·회피 이벤트 부여",
+          "evidence": "행동종류 로그"
+        },
+        {
+          "id": "BSV1_trick_life_C3",
+          "given": "구역 설치 준비 중 토끼 피격",
+          "action": "설치 시도를 끝까지 유지",
+          "expected": "설치 취소; 불완전 구역이나 회복을 남기지 않는다",
+          "reject": "피격 후 설치완료/자원환급 확정",
+          "evidence": "설치상태/취소 사유"
+        },
+        {
+          "id": "BSV1_trick_life_C4",
+          "given": "구역 밖 또는 피격 상태",
+          "action": "회복 상태를 관찰",
+          "expected": "구역 이탈·피격에 회복이 중단된다",
+          "reject": "지속 회복·재진입으로 무한 복제",
+          "evidence": "회복원천/중단 로그"
+        },
+        {
+          "id": "BSV1_trick_life_C5",
+          "given": "장화 찾기 제안 동선",
+          "action": "약초 기술 없이 주민에게 확인하거나 흔적을 본다",
+          "expected": "두 기본 정보 경로가 유지된다",
+          "reject": "치유 기술로 소유자 판별 필수화",
+          "evidence": "기본 대화/관찰 성공"
+        }
+      ]
+    },
+    {
+      "id": "BSV1_element_life",
+      "title": "계절술사: 치료 자리를 방해 자리로 바꾸기",
+      "status": "design_draft_not_runtime",
+      "priority": "P3",
+      "class_id": "v3_class_element_life",
+      "class_name": "계절술사",
+      "active_masteries": [
+        "element",
+        "life"
+      ],
+      "learning_order": [
+        "v3_element_ember_stroke",
+        "v3_life_thorn_thread",
+        "v3_life_branching_thorn",
+        "v3_life_resting_patch",
+        "v3_element_ember_point"
+      ],
+      "active_slots": [
+        {
+          "active": "v3_element_ember_stroke",
+          "modifier": "v3_element_ember_point"
+        },
+        {
+          "active": "v3_life_resting_patch",
+          "modifier": null
+        }
+      ],
+      "identity_trait": "v3_bridge_element_life",
+      "equipment_tags": [
+        "초점도구"
+      ],
+      "equipment_note": "초점도구. 원소 융합의 기존 규칙과 별도 중복 발동 점검.",
+      "qualification": {
+        "node_prerequisites": "must_pass_static_validation",
+        "tier_point_budget": "unresolved_not_validated",
+        "advancement_task": "assumed_completed_in_future_test_fixture_not_implemented"
+      },
+      "context": {
+        "monster_ids": [
+          "mushroom"
+        ],
+        "location_ids": [
+          "heartland_echo_cave_entrance"
+        ],
+        "material_ids": [
+          "herb_common"
+        ],
+        "placement_status": "proposed_test_arrangement_not_current_spawn_claim",
+        "material_role": "observation_or_inventory_reference_only_not_skill_cost",
+        "draft_refs": [
+          "draft_encounter_mushroom_steps",
+          "SQH-V2-04"
+        ]
+      },
+      "weakness": "회복 구역을 전환하면 그 회복 기회를 잃는다. 적 장판과 자신의 구역을 구분해야 한다.",
+      "basic_alternative": "기본 이동으로 장판을 우회하고 일반 관찰로 동굴 입구를 조사한다.",
+      "implementation_needed": [
+        "회복구역 소모와 방해구역 전환 원자처리",
+        "구역 소유/원천",
+        "원소 융합과 조합특성 중복방지"
+      ],
+      "checklist": [
+        {
+          "id": "BSV1_element_life_C1",
+          "given": "손상 상태, 생명 구역 하나 생성",
+          "action": "구역에 원소 슬롯1을 직접 연결",
+          "expected": "원본 회복 구역을 소모해 방해 구역 후보로 전환한다",
+          "reject": "회복 구역이 남은 채 공격 구역 복제",
+          "evidence": "구역 생성/제거 트랜잭션"
+        },
+        {
+          "id": "BSV1_element_life_C2",
+          "given": "전환된 구역",
+          "action": "원소 또는 회복 파생 효과를 다시 넣는다",
+          "expected": "같은 구역을 되돌려 중첩하지 않는다",
+          "reject": "전환 왕복으로 토큰·자원 농사",
+          "evidence": "구역계보/발동 원천"
+        },
+        {
+          "id": "BSV1_element_life_C3",
+          "given": "아직 전환하지 않은 상태",
+          "action": "시전하지 않고 구역에 머문다",
+          "expected": "회복 유지 선택이 가능하다",
+          "reject": "원소 선택만으로 자동 전환",
+          "evidence": "입력 없는 상태 검증"
+        },
+        {
+          "id": "BSV1_element_life_C4",
+          "given": "적 포자와 아군 구역이 겹침",
+          "action": "효과 옵션을 낮추고 경계를 본다",
+          "expected": "위험·회복·전환 예고 정보를 구별한다",
+          "reject": "색만으로 판정 또는 장식이 예고 가림",
+          "evidence": "FHD 가독성 캡처; 아트미제작"
+        },
+        {
+          "id": "BSV1_element_life_C5",
+          "given": "메아리 조사 제안",
+          "action": "회복/원소 없이 관찰과 판 고정",
+          "expected": "일반 경로로 완료 가능",
+          "reject": "구역 전환을 퍼즐 열쇠로 강제",
+          "evidence": "무스킬 진행 체크"
+        }
+      ]
+    },
+    {
+      "id": "BSV1_element_forge",
+      "title": "마도공학자: 저장된 한 발을 직접 방출하기",
+      "status": "design_draft_not_runtime",
+      "priority": "P3",
+      "class_id": "v3_class_element_forge",
+      "class_name": "마도공학자",
+      "active_masteries": [
+        "element",
+        "forge"
+      ],
+      "learning_order": [
+        "v3_element_ember_stroke",
+        "v3_forge_split_line",
+        "v3_forge_wide_line",
+        "v3_forge_field_emplacement",
+        "v3_element_ember_point"
+      ],
+      "active_slots": [
+        {
+          "active": "v3_element_ember_stroke",
+          "modifier": "v3_element_ember_point"
+        },
+        {
+          "active": "v3_forge_field_emplacement",
+          "modifier": null
+        }
+      ],
+      "identity_trait": "v3_bridge_element_forge",
+      "equipment_tags": [
+        "초점도구"
+      ],
+      "equipment_note": "초점도구+장치. 자율 포탑 AI 대신 명시적 방출 입력 후보.",
+      "qualification": {
+        "node_prerequisites": "must_pass_static_validation",
+        "tier_point_budget": "unresolved_not_validated",
+        "advancement_task": "assumed_completed_in_future_test_fixture_not_implemented"
+      },
+      "context": {
+        "monster_ids": [
+          "slime"
+        ],
+        "location_ids": [
+          "heartland_dandelion_village_square"
+        ],
+        "material_ids": [
+          "salvage_scrap"
+        ],
+        "placement_status": "proposed_test_arrangement_not_current_spawn_claim",
+        "material_role": "observation_or_inventory_reference_only_not_skill_cost",
+        "draft_refs": [
+          "draft_encounter_slime_tally",
+          "SQH-V2-05"
+        ]
+      },
+      "weakness": "설치·저장 동안 즉시 피해를 포기하고 파괴되면 예약을 잃는다.",
+      "basic_alternative": "장치를 쓰지 않고 기본 공격·회피 또는 통과 동선을 택한다.",
+      "implementation_needed": [
+        "설치물 신규 상태/감지",
+        "저장후 문맥방출 입력",
+        "회수/파괴 시 예약 제거"
+      ],
+      "checklist": [
+        {
+          "id": "BSV1_element_forge_C1",
+          "given": "받침 설치가 완료됨",
+          "action": "직접 원소를 연결한다",
+          "expected": "방향성 발사 하나를 저장하며 연결 순간 즉시 피해를 내지 않는다",
+          "reject": "저장과 즉발 피해 동시 지급",
+          "evidence": "장치상태/예약/피해 로그"
+        },
+        {
+          "id": "BSV1_element_forge_C2",
+          "given": "저장 완료된 장치",
+          "action": "설치 슬롯을 다시 눌러 방출한다",
+          "expected": "같은 슬롯의 문맥 행동으로만 한 발을 방출한다",
+          "reject": "숨은 세번째 슬롯 또는 자율 포탑",
+          "evidence": "슬롯입력/문맥표시"
+        },
+        {
+          "id": "BSV1_element_forge_C3",
+          "given": "저장 전 또는 방출 후",
+          "action": "방출 문맥 입력 반복",
+          "expected": "빈 발사·예약 복제 없음",
+          "reject": "동일 예약 무한 발사",
+          "evidence": "상태전이/실발사 수"
+        },
+        {
+          "id": "BSV1_element_forge_C4",
+          "given": "장치에 예약된 발사 존재",
+          "action": "회수 또는 파괴 후 재설치",
+          "expected": "이전 예약은 사라지고 장치 상한을 유지한다",
+          "reject": "회수 후 예약/부품 전액 복제",
+          "evidence": "장치ID·예약소멸 로그"
+        },
+        {
+          "id": "BSV1_element_forge_C5",
+          "given": "반쪽 표찰/빈자리 소품 제안",
+          "action": "장치 없이 기본 상호작용으로 관찰",
+          "expected": "salvage_scrap은 참조 물건이며 설치물 비용/제작식으로 확정하지 않는다",
+          "reject": "새 레시피/길막 장치 필수화",
+          "evidence": "재료 수량 불변·기본 동선"
+        }
+      ]
+    },
+    {
+      "id": "BSV1_life_faith",
+      "title": "치유성직자: 유효 회복을 나누되 복제하지 않기",
+      "status": "design_draft_not_runtime",
+      "priority": "P2",
+      "class_id": "v3_class_life_faith",
+      "class_name": "치유성직자",
+      "active_masteries": [
+        "life",
+        "faith"
+      ],
+      "learning_order": [
+        "v3_life_leaf_dressing",
+        "v3_faith_folded_sign",
+        "v3_faith_fixed_sign",
+        "v3_life_careful_recovery"
+      ],
+      "active_slots": [
+        {
+          "active": "v3_life_leaf_dressing",
+          "modifier": null
+        },
+        {
+          "active": "v3_faith_folded_sign",
+          "modifier": "v3_faith_fixed_sign"
+        }
+      ],
+      "identity_trait": "v3_bridge_life_faith",
+      "equipment_tags": [
+        "초점도구"
+      ],
+      "equipment_note": "공통 시전. 솔로 자기 대상으로 완결, 부활 없음.",
+      "qualification": {
+        "node_prerequisites": "must_pass_static_validation",
+        "tier_point_budget": "unresolved_not_validated",
+        "advancement_task": "assumed_completed_in_future_test_fixture_not_implemented"
+      },
+      "context": {
+        "monster_ids": [
+          "slime"
+        ],
+        "location_ids": [
+          "heartland_dandelion_village"
+        ],
+        "material_ids": [
+          "herb_common"
+        ],
+        "placement_status": "proposed_test_arrangement_not_current_spawn_claim",
+        "material_role": "observation_or_inventory_reference_only_not_skill_cost",
+        "draft_refs": [
+          "draft_encounter_slime_gutter",
+          "SQH-V2-02"
+        ]
+      },
+      "weakness": "회복 일부를 보호로 돌려 당장 되찾는 HP를 포기하며 보호 자세는 움직임·공격을 제한한다.",
+      "basic_alternative": "위험에서 기본 이동으로 벗어나거나 기존 회복 수단을 사용한다.",
+      "implementation_needed": [
+        "유효회복량 먼저계산/원자분배",
+        "보호 원천과방향",
+        "만피/사망/과잉회복 제외"
+      ],
+      "checklist": [
+        {
+          "id": "BSV1_life_faith_C1",
+          "given": "실제 HP 손실이 있음",
+          "action": "슬롯1 직접 회복",
+          "expected": "유효량을 계산한 뒤 HP와 다음 보호로 나눠 적용한다",
+          "reject": "전량 HP회복 뒤 보호를 추가 복제",
+          "evidence": "회복요청/유효량/분배 로그; 비율미정"
+        },
+        {
+          "id": "BSV1_life_faith_C2",
+          "given": "최대 HP 상태",
+          "action": "같은 회복 입력",
+          "expected": "과잉 회복으로 보호가 생성되지 않는다",
+          "reject": "만피 반복으로 보호 축적",
+          "evidence": "HP차이/보호량 로그"
+        },
+        {
+          "id": "BSV1_life_faith_C3",
+          "given": "정면 보호 유지",
+          "action": "후방 공격과 방어 불가 공격을 각각 받는다",
+          "expected": "적용 제외가 유지되며 반사·무적을 얻지 않는다",
+          "reject": "모든 방향 피해 무효",
+          "evidence": "피해방향/가드가능 분류"
+        },
+        {
+          "id": "BSV1_life_faith_C4",
+          "given": "고정 보호문 변형을 연결",
+          "action": "이동·공격 입력 후 상태 확인",
+          "expected": "고정 강화 대가로 이동·공격 제한을 명확히 표시",
+          "reject": "기본형 이동 자유와 변형 강화 동시유지",
+          "evidence": "행동 거부 원인/UI"
+        },
+        {
+          "id": "BSV1_life_faith_C5",
+          "given": "사망 fixture 및 식탁보 기본길",
+          "action": "회복 시도 후 별도 정상상태에서 무스킬 접근",
+          "expected": "부활은 없고 정상 탐험 대안은 유지된다",
+          "reject": "생명/신앙을 부활 또는 스토리 필수조건으로 확장",
+          "evidence": "사망거부/기본길 기록"
+        }
+      ]
+    },
+    {
+      "id": "BSV1_guard_forge",
+      "title": "철벽공병: 길을 막지 않는 접이식 방어",
+      "status": "design_draft_not_runtime",
+      "priority": "P3",
+      "class_id": "v3_class_guard_forge",
+      "class_name": "철벽공병",
+      "active_masteries": [
+        "guard",
+        "forge"
+      ],
+      "learning_order": [
+        "v3_guard_low_brace",
+        "v3_forge_split_line",
+        "v3_forge_wide_line",
+        "v3_forge_field_emplacement",
+        "v3_guard_yield_brace"
+      ],
+      "active_slots": [
+        {
+          "active": "v3_guard_low_brace",
+          "modifier": "v3_guard_yield_brace"
+        },
+        {
+          "active": "v3_forge_field_emplacement",
+          "modifier": null
+        }
+      ],
+      "identity_trait": "v3_bridge_guard_forge",
+      "equipment_tags": [
+        "방패"
+      ],
+      "equipment_note": "방패+도구. 충돌 없는 받침 시각/단발 효과로 설계.",
+      "qualification": {
+        "node_prerequisites": "must_pass_static_validation",
+        "tier_point_budget": "unresolved_not_validated",
+        "advancement_task": "assumed_completed_in_future_test_fixture_not_implemented"
+      },
+      "context": {
+        "monster_ids": [
+          "horn_rabbit"
+        ],
+        "location_ids": [
+          "heartland_pasture_boundary"
+        ],
+        "material_ids": [
+          "iron_ore"
+        ],
+        "placement_status": "proposed_test_arrangement_not_current_spawn_claim",
+        "material_role": "observation_or_inventory_reference_only_not_skill_cost",
+        "draft_refs": [
+          "draft_encounter_rabbit_fence",
+          "SQH-V2-01"
+        ]
+      },
+      "weakness": "설치 시간·위치를 지불하고 첫 충격 뒤 받침을 잃는다.",
+      "basic_alternative": "기본 방패·회피로 대응하고 넓은 길로 우회한다.",
+      "implementation_needed": [
+        "충돌없는 단발받침 효과",
+        "장치뒤 준비자세 조건",
+        "설치중 피격취소"
+      ],
+      "checklist": [
+        {
+          "id": "BSV1_guard_forge_C1",
+          "given": "충돌 없는 받침 설치",
+          "action": "그 뒤에서 준비 자세 후 정면 방어 충격",
+          "expected": "첫 충격 뒤 받침이 접히며 간격 확보 후보가 발동한다",
+          "reject": "영구 벽·적 봉쇄",
+          "evidence": "장치상태/충격/이동 로그"
+        },
+        {
+          "id": "BSV1_guard_forge_C2",
+          "given": "받침 옆 또는 앞",
+          "action": "같은 방어 충격을 받는다",
+          "expected": "뒤에서 준비 조건 미충족을 표시한다",
+          "reject": "위치 무관 효과",
+          "evidence": "장치와플레이어 상대위치"
+        },
+        {
+          "id": "BSV1_guard_forge_C3",
+          "given": "장치 준비 중 피격",
+          "action": "설치를 계속 누른다",
+          "expected": "준비가 중단되고 장치 복제가 없다",
+          "reject": "피격 무시 설치완료",
+          "evidence": "취소원인/생성수"
+        },
+        {
+          "id": "BSV1_guard_forge_C4",
+          "given": "방패를 해제한 비교 fixture",
+          "action": "무방패 버팀으로 충격을 받는다",
+          "expected": "가드 성공 기반 효과를 발동하지 않는다",
+          "reject": "넉백 억제를 방패가드로 분류",
+          "evidence": "가드판정/특성조건"
+        },
+        {
+          "id": "BSV1_guard_forge_C5",
+          "given": "표지 제안과 통로",
+          "action": "받침 없이 기본 상호작용하고 장치주변을 통과",
+          "expected": "기본 탐험 가능, iron_ore 강제 비용 없음",
+          "reject": "설치물을 통로 열쇠/광석 소비 정책으로 확정",
+          "evidence": "충돌/재료/무스킬 완료"
+        }
+      ]
+    }
+  ]
+}

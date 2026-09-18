@@ -1,0 +1,38 @@
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2289)
+[PASS] FHD logical viewport
+[PASS] configured walk atlas frames
+[PASS] legacy asset defaults
+[PASS] alternate cell count pivot timing
+[PASS] reject invalid asset config: { "cell": [0, 48] }
+[PASS] reject invalid asset config: { "cell": [32.5, 48] }
+[PASS] reject invalid asset config: { "foot_anchor": [32, 40] }
+[PASS] reject invalid asset config: { "frame_count": 0 }
+[PASS] reject invalid asset config: { "frame_count": 1.5 }
+[PASS] reject invalid asset config: { "frame_duration_sec": 0 }
+[PASS] reject invalid asset config: { "frame_duration_sec": "fast" }
+[PASS] reject atlas region overflow
+[PASS] reject idle size mismatch
+[PASS] initial idle
+[PASS] forward movement
+[PASS] movement selects walk texture
+[PASS] stop restores idle
+[PASS] foot collision stops at obstacle
+[PASS] paused frame remains fixed
+[PASS] reset restores spawn and playback
+[PASS] Space input toggles pause
+[PASS] period input advances one frame
+[PASS] R input resets motion
+[PASS] arena boundary collision
+[PASS] normalized diagonal speed
+[PASS] timing runtime advances independently of distance setting
+[PASS] timing runtime alternate frame count wraps
+[PASS] timing runtime selects actual atlas texture
+[PASS] timing runtime pause freezes animation not movement
+[PASS] timing runtime paused stop retains held texture
+[PASS] timing runtime unpaused stop restores idle
+[PASS] timing runtime restarts from idle
+[PASS] timing runtime restores prior settings
+FIN_TEST_RESULT: PASS

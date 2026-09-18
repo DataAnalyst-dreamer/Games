@@ -1,0 +1,87 @@
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2289)
+WARNING: [Data] stats.luk: 만렙 몰빵(147포인트) crit_chance=0.1970 가 상한(0.7500)에 못 미침 — 상한이 사실상 의미 없음
+   at: push_warning (core/variant/variant_utility.cpp:1118)
+WARNING: [Data] stats.int: 만렙 몰빵 cooldown_reduction=0.2940 가 상한(0.3000)에 못 미침 — 상한이 사실상 의미 없음
+   at: push_warning (core/variant/variant_utility.cpp:1118)
+ERROR: Could not create directory: 'user://playtest'.
+   at: make_dir_recursive (core/io/dir_access.cpp:180)
+[Metrics] 세션 시작. tester=anon, 저장 경로=user://playtest/session_1789230682.json
+[AudioManager] (headless) play_bgm id=bgm_grassland_1 fade=1.50
+---  GUT  ---
+[INFO]:  using [C:/Users/freer/AppData/Roaming/Games-QA-npc-greeting-20260913-story] for temporary output.
+Godot version:  4.4.1
+GUT version:  9.4.0
+
+
+res://tests/unit/test_object_observation.gd
+* test_used_cargo_observation_does_not_repeat_quest_signal
+* test_active_cargo_objective_and_outside_input
+* test_ward_state_reactions_and_unlisted_fallback
+* test_observation_width_and_translation
+OBSERVATION_BOUNDS observe.cargo.before width=157.0
+    [Failed]:  [157.0] expected to be <= than [154.0]:  
+      at line -1
+OBSERVATION_BOUNDS observe.cargo.active width=157.0
+    [Failed]:  [157.0] expected to be <= than [154.0]:  
+      at line -1
+OBSERVATION_BOUNDS observe.cargo.used width=141.0
+OBSERVATION_BOUNDS observe.ward.before width=141.0
+OBSERVATION_BOUNDS observe.ward.active width=141.0
+OBSERVATION_BOUNDS observe.ward.after width=129.0
+* test_explore_cargo_before_accepting_does_not_block_later_objective
+    [Failed]:  ["active"] expected to equal ["complete_ready"]:  explicit revisit progresses prior discovered cargo
+      at line -1
+    [Failed]:  [1] expected to equal [2]:  first discovery + one active objective, no repeat farming
+      at line -1
+3/5 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+res://tests/unit/test_object_observation.gd
+- test_observation_width_and_translation
+    [Failed]:  [157.0] expected to be <= than [154.0]:  
+          at line -1
+    [Failed]:  [157.0] expected to be <= than [154.0]:  
+          at line -1
+- test_explore_cargo_before_accepting_does_not_block_later_objective
+    [Failed]:  ["active"] expected to equal ["complete_ready"]:  explicit revisit progresses prior discovered cargo
+          at line -1
+    [Failed]:  [1] expected to equal [2]:  first discovery + one active objective, no repeat farming
+          at line -1
+
+---- Totals ----
+Scripts           1
+Tests             5
+  Passing         3
+  Failing         2
+Asserts           30
+Time              0.813s
+
+
+[Orphans]:  Total orphans in run 1.0
+Note:  This count does not include GUT objects that will be freed upon exit.
+       It also does not include any orphans created by global scripts
+       loaded before tests were ran.
+Total orphans = 2.0
+
+---- 2 failing tests ----
+
+ERROR: Could not create directory: 'user://playtest'.
+   at: make_dir_recursive (core/io/dir_access.cpp:180)
+ERROR: [Metrics] 저장 실패: user://playtest/session_1789230682.json (err=7)
+   at: push_error (core/variant/variant_utility.cpp:1098)
+=== [Metrics] 플레이테스트 요약 (tester=anon) ===
+세션 길이: 1.0s, 사망: 0
+구르기: 시도=0 성공=0 성공률=0% (무적중 피격=0)
+가드: 저스트 시도=0 성공=0 성공률=0%, 일반 가드=0
+콤보 3타 완주: 0회
+플레이어 피격: 0회, 총 피해: 0
+=== [Metrics] 저장: user://playtest/session_1789230682.json ===

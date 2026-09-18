@@ -19,9 +19,9 @@ extends Node
 
 const LETHAL_DAMAGE := 999
 ## "heartland_dandelion_village"는 MQ02의 reach 목표가 실사용하므로 이 목록(일반
-## 순회 검증 대상)에서는 제외한다 — one_shot=true라 여기서 먼저 소모해 버리면
-## MQ02가 영영 진행되지 못한다(둘 다 "실제 물리 판정으로 location_reached가 뜨는지"를
-## 확인하지만, 겹치지 않게 역할을 나눈다). 7개 location 전부는 이 목록(6개) + MQ02(1개)
+## 순회 검증 대상)에서는 제외한다 — 최초 방문 신호 검사와 퀘스트 진행 검사의
+## 책임을 나눈다. 수주 전 방문을 나중의 reach 목표로 오인해 소모하던 문제는
+## SmokeQuestTriggerOrder에서 별도로 회귀 검증한다. 7개 location은 이 목록(6개) + MQ02(1개)
 ## 로 합쳐 커버한다.
 ## "heartland_ward_stone"은 hartland.md 4절/quests-act1-hartland.md 그대로 결계석과
 ## 같은 물리 위치라 world_objects.json에서도 "heartland_dandelion_village_square"와

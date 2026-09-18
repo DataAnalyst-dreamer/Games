@@ -1,0 +1,31 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ko\n"
+
+msgid "item_slime_jelly_desc"
+msgstr "병 안에서 느릿하게 흐르는 젤리. 철검과 철 경갑의 제작 재료다."
+
+msgid "item_rabbit_horn_desc"
+msgstr "뿔토끼에게서 얻는 작은 뿔. 가죽 모자를 만드는 재료로 쓰인다."
+
+msgid "item_mushroom_cap_desc"
+msgstr "갓 아래에 주름이 겹겹이 잡힌 재료. 가죽 조끼 도면에 쓰인다."
+
+msgid "item_iron_ore_desc"
+msgstr "거친 돌 사이로 금속빛이 비친다. 여러 장비 도면에 쓰이는 재료다."
+
+msgid "item_salvage_scrap_desc"
+msgstr "크기도 모양도 제각각인 고철. 한때 어떤 장비였는지는 알 수 없다."
+
+msgid "item_weapon_common_1_desc"
+msgstr "흠집이 남은 낡은 검. 화려한 장식보다 손에 쥐는 감각이 먼저 전해진다."
+
+msgid "item_sub_common_1_desc"
+msgstr "나뭇결이 드러나는 방패. 가장자리에 사용 흔적이 남아 있다."
+
+msgid "item_potion_hp_small_desc"
+msgstr "체력을 회복하는 작은 물약. 남은 수량을 확인하고 필요한 순간에 쓰자."
+
+msgid "item_backpack_small_desc"
+msgstr "소지품을 챙겨 넣는 작은 배낭."

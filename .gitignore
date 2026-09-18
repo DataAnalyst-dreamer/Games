@@ -10,3 +10,8 @@ export_presets.cfg
 .DS_Store
 Thumbs.db
 *.tmp
+
+# Local Python caches and machine-specific prototype preparation
+__pycache__/
+*.pyc
+prototypes/quarter-view-lab/ready.json

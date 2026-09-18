@@ -1,0 +1,46 @@
+[
+  {
+    "body_budget": [
+      48,
+      72
+    ],
+    "source_size": [
+      1254,
+      1254
+    ],
+    "actual_equipment_inclusive_size": [
+      51,
+      72
+    ],
+    "source_bounds": [
+      177,
+      54,
+      971,
+      1176
+    ],
+    "rgb_channels_not_matching_8x_grid_fraction": 0.6126,
+    "status": "new resolution-specific AI draft, then extracted and resampled; not manually pixel-authored"
+  },
+  {
+    "body_budget": [
+      64,
+      96
+    ],
+    "source_size": [
+      1254,
+      1254
+    ],
+    "actual_equipment_inclusive_size": [
+      66,
+      96
+    ],
+    "source_bounds": [
+      167,
+      63,
+      948,
+      1196
+    ],
+    "rgb_channels_not_matching_8x_grid_fraction": 0.6167,
+    "status": "new resolution-specific AI draft, then extracted and resampled; not manually pixel-authored"
+  }
+]

@@ -89,12 +89,41 @@ func get_state(quest_id: String) -> String:
 	return STATE_LOCKED
 
 
+## 장소 트리거용 읽기 전용 조회. 목표별 방문 중복 제거 키만 새 배열로 반환한다.
+## 수주 전 방문은 현재 reach 목표의 완료로 간주하지 않는다.
+func get_active_reach_objective_keys(location_id: StringName) -> Array[String]:
+	var keys: Array[String] = []
+	var target_key := "location:" + String(location_id)
+	for quest_id: String in _active:
+		var objectives: Array = _quest_def(quest_id).get("objectives", [])
+		var index := int((_active[quest_id] as Dictionary).get("objective_index", 0))
+		if index < 0 or index >= objectives.size():
+			continue
+		var objective: Dictionary = objectives[index]
+		if String(objective.get("type", "")) == "reach" and _resolve_objective_target(quest_id, objective) == target_key:
+			keys.append("%s:%d" % [quest_id, index])
+	return keys
+
+
 func _is_completed(quest_id: String) -> bool:
 	var qdef: Dictionary = _quest_def(quest_id)
 	if bool(qdef.get("repeatable", false)):
 		_ensure_daily_bucket(GameState.day_index)
 		return (_daily.get("completed_ids", []) as Array).has(quest_id)
 	return _completed.has(quest_id)
+
+
+## Object interaction is explicit input only: this query emits no events.
+func get_active_interact_objective_keys(object_id: StringName) -> Array[String]:
+	var keys: Array[String] = []
+	for quest_id: String in _active:
+		var objectives: Array = _quest_def(quest_id).get("objectives", [])
+		var index := int((_active[quest_id] as Dictionary).get("objective_index", 0))
+		if index < 0 or index >= objectives.size(): continue
+		var objective: Dictionary = objectives[index]
+		if String(objective.get("type", "")) == "interact" and _resolve_objective_target(quest_id, objective) == "object:" + String(object_id):
+			keys.append("%s:%d" % [quest_id, index])
+	return keys
 
 
 func _prerequisites_met(qdef: Dictionary) -> bool:

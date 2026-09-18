@@ -1,0 +1,2215 @@
+{
+  "status": "design_draft_not_runtime",
+  "version": "v3",
+  "date": "2026-09-13",
+  "policy": {
+    "active_masteries": 2,
+    "active_slots": 2,
+    "max_modifiers_per_active": 1,
+    "numeric_balance": "unresolved",
+    "character_identity": "Fin/Lyra/Mori/Bram are narrative identities, not mastery restrictions",
+    "runtime_changes": false,
+    "notes": [
+      "All mastery titles, nodes, conditions and tradeoffs are proposals.",
+      "Prerequisites require prior acquisition; point costs, ranks and character levels are unresolved.",
+      "All recovery requires bounded resources and cooldown rules before implementation; no resurrection.",
+      "Basic movement/guard/roll remain baseline; nodes do not lock basic controls.",
+      "기본 상태·유효 표식·속성 이력·제작 가능 여부 등 필수 정보 UI는 무료이며 스킬 포인트로 잠그지 않는다.",
+      "초점도구는 허리 부적·무기 장착 촉매 같은 휴대 시전 매개다. 별도의 양손 지팡이 장착을 강제하지 않으며 무기/방패 조합과 병용 가능하다."
+    ]
+  },
+  "masteries": [
+    {
+      "id": "blade",
+      "name": "검술",
+      "pure_class": "검성",
+      "role": "근접 각도·공격 리듬",
+      "branches": [
+        "간격과 응수",
+        "연속과 마무리"
+      ],
+      "nodes": [
+        {
+          "id": "v3_blade_measured_cut",
+          "name": "간격 베기",
+          "type": "active",
+          "tier": 1,
+          "requires_all": [],
+          "tags": [
+            "blade",
+            "melee",
+            "attack",
+            "direct_input"
+          ],
+          "effect": "정면 적이 사거리 안이면 한 차례 벤 뒤 뒤로 물러난다.",
+          "tradeoff": "무적 없이 후퇴하며 뒤가 막히면 이동만 중단한다.",
+          "equipment": [
+            "검"
+          ],
+          "animation": "검 모으기→베기→뒤꿈치 후퇴",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_blade_cross_cut",
+          "name": "엇갈린 칼길",
+          "type": "active",
+          "tier": 1,
+          "requires_all": [],
+          "tags": [
+            "blade",
+            "melee",
+            "attack",
+            "direct_input"
+          ],
+          "effect": "방향을 고정하고 교차하는 두 칼길로 앞쪽 좁은 공간을 공격한다.",
+          "tradeoff": "첫 칼길 뒤 방향을 바꾸지 못해 측후면에 취약하다.",
+          "equipment": [
+            "검"
+          ],
+          "animation": "사선 준비→반대 사선→검 회수",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_blade_edge_stop",
+          "name": "끝선 멈춤",
+          "type": "modifier",
+          "tier": 2,
+          "requires_all": [
+            "v3_blade_measured_cut"
+          ],
+          "tags": [
+            "blade",
+            "behavior_variant"
+          ],
+          "modifies": "v3_blade_measured_cut",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 공격 후 후퇴를 없애고 발을 고정한 채 칼끝 판정에 집중한다.",
+          "tradeoff": "후퇴 안전을 잃고 정밀 거리 조절을 요구한다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "검"
+          ],
+          "animation": "검 모으기→베기→뒤꿈치 후퇴; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_blade_wide_cross",
+          "name": "넓힌 엇선",
+          "type": "modifier",
+          "tier": 2,
+          "requires_all": [
+            "v3_blade_cross_cut"
+          ],
+          "tags": [
+            "blade",
+            "behavior_variant"
+          ],
+          "modifies": "v3_blade_cross_cut",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 교차 칼길을 넓히되 정면 먼 곳까지 닿지 않게 바꾼다.",
+          "tradeoff": "폭을 얻는 대신 사거리를 잃는다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "검"
+          ],
+          "animation": "사선 준비→반대 사선→검 회수; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_blade_read_distance",
+          "name": "간격 읽기",
+          "type": "passive",
+          "tier": 2,
+          "requires_all": [
+            "v3_blade_measured_cut"
+          ],
+          "tags": [
+            "blade",
+            "conditional_passive"
+          ],
+          "effect": "기본 근접 공격이 빗나가면 다음 이동 시작의 회수 부담을 줄이는 후보.",
+          "tradeoff": "적중 보상이 아니고 스킬 후딜 전체를 지우지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_blade_return_cut",
+          "name": "돌아오는 칼끝",
+          "type": "active",
+          "tier": 3,
+          "requires_all": [
+            "v3_blade_edge_stop"
+          ],
+          "tags": [
+            "blade",
+            "melee",
+            "attack",
+            "direct_input"
+          ],
+          "effect": "기본 콤보가 끝난 직후 사용하면 회수 방향으로 추가 일격을 낸다.",
+          "tradeoff": "독립 사용보다 조건부 운용에 집중하며 공격 후 빈틈은 남는다.",
+          "equipment": [
+            "검"
+          ],
+          "animation": "검 회수 직전 멈춤→안쪽 베기",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_blade_point_hold",
+          "name": "한 점 찌르기",
+          "type": "active",
+          "tier": 3,
+          "requires_all": [
+            "v3_blade_wide_cross"
+          ],
+          "tags": [
+            "blade",
+            "melee",
+            "attack",
+            "direct_input"
+          ],
+          "effect": "정지해서 짧게 준비한 뒤 좁고 긴 정면을 찌른다.",
+          "tradeoff": "준비 중 이동 불가, 빗나가도 회수 동작이 필요하다.",
+          "equipment": [
+            "검"
+          ],
+          "animation": "검끝 정렬→몸통 전진→팔 회수",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_blade_clean_sequence",
+          "name": "흐름 지키기",
+          "type": "passive",
+          "tier": 3,
+          "requires_all": [
+            "v3_blade_wide_cross"
+          ],
+          "tags": [
+            "blade",
+            "conditional_passive"
+          ],
+          "effect": "피격 없이 기본 콤보를 끝내면 다음 검술 공격에 안정된 위력을 준다.",
+          "tradeoff": "피격·회피로 연속 조건을 잃으며 영구 중첩되지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_blade_return_step",
+          "name": "돌려 디디기",
+          "type": "modifier",
+          "tier": 4,
+          "requires_all": [
+            "v3_blade_return_cut"
+          ],
+          "tags": [
+            "blade",
+            "behavior_variant"
+          ],
+          "modifies": "v3_blade_return_cut",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 추가 일격 대신 정면을 유지하는 측면 이동으로 콤보를 마무리한다.",
+          "tradeoff": "추가 피해를 포기하며 벽을 통과하지 않는다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "검"
+          ],
+          "animation": "검 회수 직전 멈춤→안쪽 베기; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_blade_held_point",
+          "name": "남겨 둔 칼끝",
+          "type": "modifier",
+          "tier": 4,
+          "requires_all": [
+            "v3_blade_point_hold"
+          ],
+          "tags": [
+            "blade",
+            "behavior_variant"
+          ],
+          "modifies": "v3_blade_point_hold",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 즉시 찌르기를 유지 입력 후 놓는 찌르기로 바꾼다.",
+          "tradeoff": "출발 타이밍 선택 대신 유지 중 노출이 길어진다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "검"
+          ],
+          "animation": "검끝 정렬→몸통 전진→팔 회수; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_blade_single_focus",
+          "name": "한 상대 집중",
+          "type": "passive",
+          "tier": 4,
+          "requires_all": [
+            "v3_blade_return_cut"
+          ],
+          "tags": [
+            "blade",
+            "conditional_passive"
+          ],
+          "effect": "같은 적을 연속 공격하는 동안 검술의 단일 대상 효율을 높인다.",
+          "tradeoff": "대상 변경 시 누적을 잃고 광역 공격에는 확대하지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_blade_committed_edge",
+          "name": "물러서지 않는 칼끝",
+          "type": "keystone",
+          "tier": 4,
+          "requires_all": [
+            "v3_blade_return_cut",
+            "v3_blade_point_hold",
+            "v3_blade_clean_sequence"
+          ],
+          "tags": [
+            "blade",
+            "build_tradeoff"
+          ],
+          "effect": "검술 공격을 시작한 뒤 이동하지 않고 끝내면 다음 검술 공격이 강화된다.",
+          "tradeoff": "이동으로 안전을 고르면 준비 보너스를 포기하며 취소 무적은 없다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "핵심특성 준비/소모를 구별하는 소규모 표시; 보호와 공격 효과 혼동 금지",
+          "implementation_status": "keystone_rule_not_implemented",
+          "numeric_parameters": "미확정"
+        }
+      ]
+    },
+    {
+      "id": "guard",
+      "name": "수호",
+      "pure_class": "성채수호자",
+      "role": "방향 방어·반격 기회",
+      "branches": [
+        "정면 버팀",
+        "성공 후 응수"
+      ],
+      "nodes": [
+        {
+          "id": "v3_guard_low_brace",
+          "name": "낮춘 방패",
+          "type": "active",
+          "tier": 1,
+          "requires_all": [],
+          "tags": [
+            "guard",
+            "guard",
+            "defense",
+            "direct_input"
+          ],
+          "effect": "유지 입력으로 고정 자세를 취해 정면 피격의 넉백을 억제한다. 방패 장착 시에만 기존 일반 가드의 피해 감쇠를 적용하고, 방패가 없으면 받는 피해는 그대로 유지한다.",
+          "tradeoff": "유지 중 이동·공격 불가, 자원 부담 유지. 방패가 없어도 가드 불가 판정이나 기존 피격 위험을 우회하지 않으며 저스트 가드·무적을 추가하지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "무릎 낮춤→방패 버팀→일어남",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_guard_shield_check",
+          "name": "방패 밀치기",
+          "type": "active",
+          "tier": 1,
+          "requires_all": [],
+          "tags": [
+            "guard",
+            "guard",
+            "defense",
+            "direct_input"
+          ],
+          "effect": "근접한 정면 적을 방패로 밀어 공간을 만든다.",
+          "tradeoff": "공격 중 무적 없음, 저항 적과 보스의 밀림은 보장하지 않는다.",
+          "equipment": [
+            "방패"
+          ],
+          "animation": "방패 당김→몸통 밀기→회수",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_guard_yield_brace",
+          "name": "충격 흘리기",
+          "type": "modifier",
+          "tier": 2,
+          "requires_all": [
+            "v3_guard_low_brace"
+          ],
+          "tags": [
+            "guard",
+            "behavior_variant"
+          ],
+          "modifies": "v3_guard_low_brace",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 고정 버팀 대신 정면 피격 때 짧게 뒤로 밀리며 방어 부담을 분산한다.",
+          "tradeoff": "위치를 내주며 낭떠러지·벽 충돌 안전정책이 필요하다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다. 방패 미장착 시 받는 피해는 유지하며 피해 감쇠를 부여하지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "무릎 낮춤→방패 버팀→일어남; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_guard_short_check",
+          "name": "짧은 압박",
+          "type": "modifier",
+          "tier": 2,
+          "requires_all": [
+            "v3_guard_shield_check"
+          ],
+          "tags": [
+            "guard",
+            "behavior_variant"
+          ],
+          "modifies": "v3_guard_shield_check",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 넉백 대신 가까운 적의 현재 공격 준비에 경직 요청을 보낸다.",
+          "tradeoff": "거리 확보를 잃고 경직 저항을 무시하지 않는다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "방패"
+          ],
+          "animation": "방패 당김→몸통 밀기→회수; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_guard_steady_grip",
+          "name": "흔들림 없는 손",
+          "type": "passive",
+          "tier": 2,
+          "requires_all": [
+            "v3_guard_low_brace"
+          ],
+          "tags": [
+            "guard",
+            "conditional_passive"
+          ],
+          "effect": "일반 가드 성공 뒤 다음 방패 공격의 준비를 안정화한다.",
+          "tradeoff": "피격을 실제로 막아야 하며 빈 가드 반복으로 얻지 못한다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_guard_answer_slash",
+          "name": "응수의 날",
+          "type": "active",
+          "tier": 3,
+          "requires_all": [
+            "v3_guard_yield_brace"
+          ],
+          "tags": [
+            "guard",
+            "guard",
+            "defense",
+            "direct_input"
+          ],
+          "effect": "저스트 가드 성공으로 열린 기회에 입력하면 반격 일격을 실행한다.",
+          "tradeoff": "성공 조건이 없으면 발동하지 않으며 자동 반격하지 않는다.",
+          "equipment": [
+            "검+방패"
+          ],
+          "animation": "방패 튕김→검 반격→기본 자세",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_guard_angled_cover",
+          "name": "비스듬한 엄호",
+          "type": "active",
+          "tier": 3,
+          "requires_all": [
+            "v3_guard_short_check"
+          ],
+          "tags": [
+            "guard",
+            "guard",
+            "defense",
+            "direct_input"
+          ],
+          "effect": "방패를 든 채 정면을 유지하는 제한적 측면 이동으로 공격선을 벗어난다.",
+          "tradeoff": "일반 구르기 무적 없음, 이동 중 공격 불가이며 가드 불가 공격은 막지 못한다.",
+          "equipment": [
+            "방패"
+          ],
+          "animation": "방패 기울임→옆걸음→발 정렬",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_guard_guard_breath",
+          "name": "방패 사이 호흡",
+          "type": "passive",
+          "tier": 3,
+          "requires_all": [
+            "v3_guard_short_check"
+          ],
+          "tags": [
+            "guard",
+            "conditional_passive"
+          ],
+          "effect": "가드를 완전히 내리고 공격받지 않는 동안 자원 회복 재개를 돕는다.",
+          "tradeoff": "가드를 유지한 채 무한 회복하는 효과는 아니다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_guard_safe_answer",
+          "name": "방패 뒤 응수",
+          "type": "modifier",
+          "tier": 4,
+          "requires_all": [
+            "v3_guard_answer_slash"
+          ],
+          "tags": [
+            "guard",
+            "behavior_variant"
+          ],
+          "modifies": "v3_guard_answer_slash",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 반격 범위를 좁히고 회수 중 정면 가드 재개를 빠르게 한다.",
+          "tradeoff": "넓은 공격 기회를 포기하며 무적 반격이 아니다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "검+방패"
+          ],
+          "animation": "방패 튕김→검 반격→기본 자세; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_guard_rear_cover",
+          "name": "뒤로 엄호",
+          "type": "modifier",
+          "tier": 4,
+          "requires_all": [
+            "v3_guard_angled_cover"
+          ],
+          "tags": [
+            "guard",
+            "behavior_variant"
+          ],
+          "modifies": "v3_guard_angled_cover",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 측면 이동을 짧은 후퇴로 바꾼다.",
+          "tradeoff": "옆 공격선을 빠져나오기 어렵고 벽 뒤에서는 이동하지 않는다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "방패"
+          ],
+          "animation": "방패 기울임→옆걸음→발 정렬; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_guard_face_threat",
+          "name": "위협 마주보기",
+          "type": "passive",
+          "tier": 4,
+          "requires_all": [
+            "v3_guard_answer_slash"
+          ],
+          "tags": [
+            "guard",
+            "conditional_passive"
+          ],
+          "effect": "같은 방향의 연속 일반 가드를 버티는 효율을 개선한다.",
+          "tradeoff": "방향 전환·가드 해제로 축적이 사라진다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_guard_deliberate_reply",
+          "name": "대답할 틈",
+          "type": "keystone",
+          "tier": 4,
+          "requires_all": [
+            "v3_guard_answer_slash",
+            "v3_guard_angled_cover",
+            "v3_guard_guard_breath"
+          ],
+          "tags": [
+            "guard",
+            "build_tradeoff"
+          ],
+          "effect": "저스트 가드 성공 뒤 공격 대신 방어를 선택하면 다음 일반 가드 부담을 줄인다.",
+          "tradeoff": "반격 기회는 포기하며 가드 불가 공격까지 막지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "핵심특성 준비/소모를 구별하는 소규모 표시; 보호와 공격 효과 혼동 금지",
+          "implementation_status": "keystone_rule_not_implemented",
+          "numeric_parameters": "미확정"
+        }
+      ]
+    },
+    {
+      "id": "bow",
+      "name": "궁술",
+      "pure_class": "명사수",
+      "role": "사선·거리·정밀 명중",
+      "branches": [
+        "고정 사격",
+        "이동 사격"
+      ],
+      "nodes": [
+        {
+          "id": "v3_bow_still_string",
+          "name": "고요한 시위",
+          "type": "active",
+          "tier": 1,
+          "requires_all": [],
+          "tags": [
+            "bow",
+            "ranged",
+            "attack",
+            "direct_input"
+          ],
+          "effect": "유지 입력으로 정지 조준한 뒤 놓으면 정면 단일 화살을 발사한다.",
+          "tradeoff": "준비 중 이동 불가, 벽을 통과하지 않고 피격 시 취소된다.",
+          "equipment": [
+            "활"
+          ],
+          "animation": "활 당김→고정→시위 복귀",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_bow_fan_shot",
+          "name": "벌어진 시위",
+          "type": "active",
+          "tier": 1,
+          "requires_all": [],
+          "tags": [
+            "bow",
+            "ranged",
+            "attack",
+            "direct_input"
+          ],
+          "effect": "정면 좁은 부채꼴에 화살을 흩어 가까운 다수를 견제한다.",
+          "tradeoff": "먼 단일 적에게 모든 화살을 몰아맞히는 효율은 낮다.",
+          "equipment": [
+            "활"
+          ],
+          "animation": "손가락 벌림→다중 발사→회수",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_bow_quick_string",
+          "name": "짧은 당김",
+          "type": "modifier",
+          "tier": 2,
+          "requires_all": [
+            "v3_bow_still_string"
+          ],
+          "tags": [
+            "bow",
+            "behavior_variant"
+          ],
+          "modifies": "v3_bow_still_string",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 정지 조준 단계를 줄이고 짧은 거리의 신속 사격으로 바꾼다.",
+          "tradeoff": "장거리 정밀 효율을 포기한다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "활"
+          ],
+          "animation": "활 당김→고정→시위 복귀; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_bow_narrow_fan",
+          "name": "모인 시위",
+          "type": "modifier",
+          "tier": 2,
+          "requires_all": [
+            "v3_bow_fan_shot"
+          ],
+          "tags": [
+            "bow",
+            "behavior_variant"
+          ],
+          "modifies": "v3_bow_fan_shot",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 부채꼴 폭을 줄여 먼 정면에 집중시킨다.",
+          "tradeoff": "측면 다수 견제 범위를 잃는다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "활"
+          ],
+          "animation": "손가락 벌림→다중 발사→회수; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_bow_range_habit",
+          "name": "거리의 습관",
+          "type": "passive",
+          "tier": 2,
+          "requires_all": [
+            "v3_bow_still_string"
+          ],
+          "tags": [
+            "bow",
+            "conditional_passive"
+          ],
+          "effect": "근접 적 없이 사격을 끝내면 다음 궁술 준비가 안정된다.",
+          "tradeoff": "적이 접근하면 준비 이점이 사라진다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_bow_mark_shot",
+          "name": "흔적 잇기",
+          "type": "active",
+          "tier": 3,
+          "requires_all": [
+            "v3_bow_quick_string"
+          ],
+          "tags": [
+            "bow",
+            "ranged",
+            "attack",
+            "direct_input"
+          ],
+          "effect": "구르기 직후 입력하면 기존 헌터 마크 방향 보정을 받아 화살을 쏜다.",
+          "tradeoff": "고유 조건 밖에서는 자동조준하지 않으며 지형 차폐는 유지한다.",
+          "equipment": [
+            "활"
+          ],
+          "animation": "구르기 착지→활 들기→단일 발사",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_bow_set_arrow",
+          "name": "기다리는 화살",
+          "type": "active",
+          "tier": 3,
+          "requires_all": [
+            "v3_bow_narrow_fan"
+          ],
+          "tags": [
+            "bow",
+            "ranged",
+            "attack",
+            "direct_input"
+          ],
+          "effect": "정면 사격선을 정한 후 유지하고 놓는 순간 그 선으로 발사한다.",
+          "tradeoff": "유지 중 사선 변경과 이동이 제한되고 쏘기 전 피격에 취약하다.",
+          "equipment": [
+            "활"
+          ],
+          "animation": "활높이 고정→호흡 멈춤→놓기",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_bow_loose_shoulders",
+          "name": "풀린 어깨",
+          "type": "passive",
+          "tier": 3,
+          "requires_all": [
+            "v3_bow_narrow_fan"
+          ],
+          "tags": [
+            "bow",
+            "conditional_passive"
+          ],
+          "effect": "사격 뒤 기본 이동을 이어갈 때 정지에서 걷기로 부드럽게 복귀한다.",
+          "tradeoff": "공격 자체의 취소·무적을 제공하지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_bow_manual_mark",
+          "name": "눈으로 좇기",
+          "type": "modifier",
+          "tier": 4,
+          "requires_all": [
+            "v3_bow_mark_shot"
+          ],
+          "tags": [
+            "bow",
+            "behavior_variant"
+          ],
+          "modifies": "v3_bow_mark_shot",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 자동 방향 보정을 없애고 직접 정한 방향으로 후속 사격한다.",
+          "tradeoff": "쉬운 조준을 포기하고 목표를 직접 맞혀야 한다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "활"
+          ],
+          "animation": "구르기 착지→활 들기→단일 발사; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_bow_piercing_line",
+          "name": "이어진 사선",
+          "type": "modifier",
+          "tier": 4,
+          "requires_all": [
+            "v3_bow_set_arrow"
+          ],
+          "tags": [
+            "bow",
+            "behavior_variant"
+          ],
+          "modifies": "v3_bow_set_arrow",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 첫 적에서 끝나는 화살을 적 관통형으로 바꾼다.",
+          "tradeoff": "개별 대상 효율을 낮추고 벽 관통은 허용하지 않는다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "활"
+          ],
+          "animation": "활높이 고정→호흡 멈춤→놓기; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_bow_patient_aim",
+          "name": "놓치지 않는 눈",
+          "type": "passive",
+          "tier": 4,
+          "requires_all": [
+            "v3_bow_mark_shot"
+          ],
+          "tags": [
+            "bow",
+            "conditional_passive"
+          ],
+          "effect": "같은 사격 방향을 유지한 연속 명중에 정밀 보상을 준다.",
+          "tradeoff": "빈 화살·방향 변경 시 유지되지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_bow_distance_pact",
+          "name": "거리와의 약속",
+          "type": "keystone",
+          "tier": 4,
+          "requires_all": [
+            "v3_bow_mark_shot",
+            "v3_bow_set_arrow",
+            "v3_bow_loose_shoulders"
+          ],
+          "tags": [
+            "bow",
+            "build_tradeoff"
+          ],
+          "effect": "먼 거리에서 준비한 궁술은 강해지되 근접 압박 시 준비 보너스가 사라진다.",
+          "tradeoff": "좁은 곳에서의 약점을 수용하며 필수 경로를 장거리로만 공략하게 하지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "핵심특성 준비/소모를 구별하는 소규모 표시; 보호와 공격 효과 혼동 금지",
+          "implementation_status": "keystone_rule_not_implemented",
+          "numeric_parameters": "미확정"
+        }
+      ]
+    },
+    {
+      "id": "trick",
+      "name": "기교",
+      "pure_class": "그림자보행자",
+      "role": "위치·유도·행동 선택",
+      "branches": [
+        "교란과 유도",
+        "기동과 회수"
+      ],
+      "nodes": [
+        {
+          "id": "v3_trick_dry_twig",
+          "name": "마른 가지 소리",
+          "type": "active",
+          "tier": 1,
+          "requires_all": [],
+          "tags": [
+            "trick",
+            "position",
+            "utility",
+            "direct_input"
+          ],
+          "effect": "정면에 소리 소품을 던져 비전투 반응 가능 적이 착지 지점을 조사하게 한다.",
+          "tradeoff": "전투 적 어그로 삭제 없음; 새 조사 AI는 미구현이다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "던짐→착지 신호→적 고개 돌림",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_trick_side_feint",
+          "name": "옆으로 비키기",
+          "type": "active",
+          "tier": 1,
+          "requires_all": [],
+          "tags": [
+            "trick",
+            "position",
+            "utility",
+            "direct_input"
+          ],
+          "effect": "입력 방향의 짧은 측면 보행으로 위치를 바꾼다.",
+          "tradeoff": "무적 없음, 공격 중 사용 불가이며 충돌 통과하지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "발 틀기→체중 옮김→자세 복구",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_trick_close_rattle",
+          "name": "발밑 소란",
+          "type": "modifier",
+          "tier": 2,
+          "requires_all": [
+            "v3_trick_dry_twig"
+          ],
+          "tags": [
+            "trick",
+            "behavior_variant"
+          ],
+          "modifies": "v3_trick_dry_twig",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 멀리 던지는 소리를 발치의 짧은 유인으로 바꾼다.",
+          "tradeoff": "안전 거리 대신 자신 근처로 적을 끌 위험을 진다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "던짐→착지 신호→적 고개 돌림; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_trick_back_feint",
+          "name": "뒤로 비키기",
+          "type": "modifier",
+          "tier": 2,
+          "requires_all": [
+            "v3_trick_side_feint"
+          ],
+          "tags": [
+            "trick",
+            "behavior_variant"
+          ],
+          "modifies": "v3_trick_side_feint",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 측면 보행을 정면 유지 후퇴로 바꾼다.",
+          "tradeoff": "옆 회피를 잃고 막힌 후방에서는 제자리다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "발 틀기→체중 옮김→자세 복구; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_trick_clean_exit",
+          "name": "깔끔한 이탈",
+          "type": "passive",
+          "tier": 2,
+          "requires_all": [
+            "v3_trick_dry_twig"
+          ],
+          "tags": [
+            "trick",
+            "conditional_passive"
+          ],
+          "effect": "교란 성공 뒤 피해 없이 벗어나면 다음 기교 준비를 돕는다.",
+          "tradeoff": "같은 적을 반복 교란해 무한 중첩하지 못한다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_trick_snare_line",
+          "name": "느슨한 올가미",
+          "type": "active",
+          "tier": 3,
+          "requires_all": [
+            "v3_trick_close_rattle"
+          ],
+          "tags": [
+            "trick",
+            "position",
+            "utility",
+            "direct_input"
+          ],
+          "effect": "발치에 드러나는 줄을 놓고 통과하는 반응 가능 적의 이동을 방해한다.",
+          "tradeoff": "설치 중 노출, 보스 구속 보장 없음; 설치물 상태 처리는 신규다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "앉기→줄 펼치기→작은 지면 소품",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_trick_pocket_flash",
+          "name": "주머니 불꽃",
+          "type": "active",
+          "tier": 3,
+          "requires_all": [
+            "v3_trick_back_feint"
+          ],
+          "tags": [
+            "trick",
+            "position",
+            "utility",
+            "direct_input"
+          ],
+          "effect": "정면 짧은 섬광으로 준비 중인 근접 적에게 경직 요청을 보낸다.",
+          "tradeoff": "피해를 주지 않으며 이미 나간 투사체·저항 적에 무효다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "손 가림→짧은 섬광→회수",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_trick_travel_light",
+          "name": "가벼운 채비",
+          "type": "passive",
+          "tier": 3,
+          "requires_all": [
+            "v3_trick_back_feint"
+          ],
+          "tags": [
+            "trick",
+            "conditional_passive"
+          ],
+          "effect": "설치나 투척을 끝내고 기본 이동으로 복귀하는 부담을 줄인다.",
+          "tradeoff": "설치 중 피격 취소는 여전히 가능하다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_trick_warning_line",
+          "name": "흔적 남긴 줄",
+          "type": "modifier",
+          "tier": 4,
+          "requires_all": [
+            "v3_trick_snare_line"
+          ],
+          "tags": [
+            "trick",
+            "behavior_variant"
+          ],
+          "modifies": "v3_trick_snare_line",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 이동 방해 대신 통과 적의 위치를 잠깐 표시하는 줄로 바꾼다.",
+          "tradeoff": "군중제어를 포기하며 미발견 지도는 드러내지 않는다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "앉기→줄 펼치기→작은 지면 소품; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_trick_narrow_flash",
+          "name": "손틈 불꽃",
+          "type": "modifier",
+          "tier": 4,
+          "requires_all": [
+            "v3_trick_pocket_flash"
+          ],
+          "tags": [
+            "trick",
+            "behavior_variant"
+          ],
+          "modifies": "v3_trick_pocket_flash",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 넓은 근접 섬광을 좁고 긴 정면 신호로 바꾼다.",
+          "tradeoff": "범위 내 다수 대응을 포기하고 조준 부담을 얻는다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "손 가림→짧은 섬광→회수; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_trick_read_signs",
+          "name": "흔적을 딛는 걸음",
+          "type": "passive",
+          "tier": 4,
+          "requires_all": [
+            "v3_trick_snare_line"
+          ],
+          "tags": [
+            "trick",
+            "conditional_passive"
+          ],
+          "effect": "자신의 교란이나 설치 효과가 실제 적에게 적용된 뒤 기본 이동으로 이탈하면 다음 기교 공격의 준비를 안정화한다.",
+          "tradeoff": "표식 보기 자체는 무료다. 실제 적 반응과 이동을 모두 요구하며 같은 효과 반복으로 보너스를 중첩하지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_trick_one_opening",
+          "name": "한 번의 빈틈",
+          "type": "keystone",
+          "tier": 4,
+          "requires_all": [
+            "v3_trick_snare_line",
+            "v3_trick_pocket_flash",
+            "v3_trick_travel_light"
+          ],
+          "tags": [
+            "trick",
+            "build_tradeoff"
+          ],
+          "effect": "교란 후 다른 유형의 기교 행동을 이어 쓰면 준비 보상이 생긴다.",
+          "tradeoff": "같은 기술 반복에는 적용되지 않으며 피해 무적을 얻지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "핵심특성 준비/소모를 구별하는 소규모 표시; 보호와 공격 효과 혼동 금지",
+          "implementation_status": "keystone_rule_not_implemented",
+          "numeric_parameters": "미확정"
+        }
+      ]
+    },
+    {
+      "id": "element",
+      "name": "원소",
+      "pure_class": "대원소술사",
+      "role": "속성 순서·사거리·융합",
+      "branches": [
+        "원소 연결",
+        "집중 시전"
+      ],
+      "nodes": [
+        {
+          "id": "v3_element_ember_stroke",
+          "name": "잔불 획",
+          "type": "active",
+          "tier": 1,
+          "requires_all": [],
+          "tags": [
+            "element",
+            "elemental",
+            "attack",
+            "direct_input"
+          ],
+          "effect": "정면에 화속성 짧은 획을 그어 적중 이력에 화를 남긴다.",
+          "tradeoff": "가까운 사거리, 환경 발화·새 융합 조합 없음.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "지팡이 획→불꽃→소멸",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_element_water_thread",
+          "name": "물결 실",
+          "type": "active",
+          "tier": 1,
+          "requires_all": [],
+          "tags": [
+            "element",
+            "elemental",
+            "attack",
+            "direct_input"
+          ],
+          "effect": "정면으로 수속성 가는 흐름을 발사해 적중 이력에 수를 남긴다.",
+          "tradeoff": "폭이 좁아 조준 필요, 자동 빙결을 보장하지 않는다.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "끝점 모음→물줄기→물방울 회수",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_element_ember_point",
+          "name": "모은 잔불",
+          "type": "modifier",
+          "tier": 2,
+          "requires_all": [
+            "v3_element_ember_stroke"
+          ],
+          "tags": [
+            "element",
+            "behavior_variant"
+          ],
+          "modifies": "v3_element_ember_stroke",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 짧은 화속성 획을 좁은 투사체로 바꾼다.",
+          "tradeoff": "근접 폭을 포기하고 벽에 막히는 사격이 된다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "지팡이 획→불꽃→소멸; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_element_water_arc",
+          "name": "벌린 물결",
+          "type": "modifier",
+          "tier": 2,
+          "requires_all": [
+            "v3_element_water_thread"
+          ],
+          "tags": [
+            "element",
+            "behavior_variant"
+          ],
+          "modifies": "v3_element_water_thread",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 가는 흐름을 근접 부채꼴로 바꾼다.",
+          "tradeoff": "긴 사거리를 포기한다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "끝점 모음→물줄기→물방울 회수; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_element_different_note",
+          "name": "다른 음절",
+          "type": "passive",
+          "tier": 2,
+          "requires_all": [
+            "v3_element_ember_stroke"
+          ],
+          "tags": [
+            "element",
+            "conditional_passive"
+          ],
+          "effect": "서로 다른 속성의 실제 연속 적중이 다음 원소 시전을 돕는다.",
+          "tradeoff": "같은 속성 반복·빗나감으로 보상을 만들지 못한다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_element_storm_pin",
+          "name": "번개 매듭",
+          "type": "active",
+          "tier": 3,
+          "requires_all": [
+            "v3_element_ember_point"
+          ],
+          "tags": [
+            "element",
+            "elemental",
+            "attack",
+            "direct_input"
+          ],
+          "effect": "준비 후 정면 가까운 위치에 뇌속성 일격을 모은다.",
+          "tradeoff": "시전 중 노출, 적중하지 않으면 원소 연결을 얻지 못한다.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "전하 모음→뇌격→잔광 종료",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_element_wind_fold",
+          "name": "바람 접기",
+          "type": "active",
+          "tier": 3,
+          "requires_all": [
+            "v3_element_water_arc"
+          ],
+          "tags": [
+            "element",
+            "elemental",
+            "attack",
+            "direct_input"
+          ],
+          "effect": "정면 부채꼴에 풍속성 압력을 내보낸다.",
+          "tradeoff": "넓은 대신 먼 적에게 닿지 않고 절벽 이동·비행을 주지 않는다.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "팔 모음→부채꼴 바람→닫힘",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_element_still_focus",
+          "name": "고정된 초점",
+          "type": "passive",
+          "tier": 3,
+          "requires_all": [
+            "v3_element_water_arc"
+          ],
+          "tags": [
+            "element",
+            "conditional_passive"
+          ],
+          "effect": "움직이지 않고 시전을 마친 경우 다음 준비가 안정된다.",
+          "tradeoff": "이동하면 준비 이점을 포기한다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_element_storm_hold",
+          "name": "붙든 번개",
+          "type": "modifier",
+          "tier": 4,
+          "requires_all": [
+            "v3_element_storm_pin"
+          ],
+          "tags": [
+            "element",
+            "behavior_variant"
+          ],
+          "modifies": "v3_element_storm_pin",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 즉시 마무리 뇌격을 유지 후 놓기 방식으로 바꾼다.",
+          "tradeoff": "타이밍을 고르지만 유지 중 피격 노출이 커진다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "전하 모음→뇌격→잔광 종료; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_element_wind_return",
+          "name": "접어오는 바람",
+          "type": "modifier",
+          "tier": 4,
+          "requires_all": [
+            "v3_element_wind_fold"
+          ],
+          "tags": [
+            "element",
+            "behavior_variant"
+          ],
+          "modifies": "v3_element_wind_fold",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 앞으로 밀어내는 표현을 자신 앞에서 소멸하는 회수형 범위로 바꾼다.",
+          "tradeoff": "먼 거리 제어를 포기하며 강제 끌어오기 효과는 추가하지 않는다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "팔 모음→부채꼴 바람→닫힘; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_element_clear_sequence",
+          "name": "또렷한 순서",
+          "type": "passive",
+          "tier": 4,
+          "requires_all": [
+            "v3_element_storm_pin"
+          ],
+          "tags": [
+            "element",
+            "conditional_passive"
+          ],
+          "effect": "서로 다른 속성의 직접 공격을 번갈아 적중시키고 그 사이 피격되지 않으면 다음 원소 공격의 자원 부담을 줄이는 후보.",
+          "tradeoff": "속성 이력 UI는 무료다. 빗나감·같은 속성 반복·피격으로 준비를 잃고 비용을 없애거나 자원을 순증시키지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_element_woven_elements",
+          "name": "엮은 원소",
+          "type": "keystone",
+          "tier": 4,
+          "requires_all": [
+            "v3_element_storm_pin",
+            "v3_element_wind_fold",
+            "v3_element_still_focus"
+          ],
+          "tags": [
+            "element",
+            "build_tradeoff"
+          ],
+          "effect": "기존 주요 융합 여섯 조합 중 하나를 성립시켜 발동하면 다음 단일 원소 공격을 강화하는 후보.",
+          "tradeoff": "융합이 다시 자신을 재귀 발동시키지 않고 같은 속성 반복은 보상하지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "핵심특성 준비/소모를 구별하는 소규모 표시; 보호와 공격 효과 혼동 금지",
+          "implementation_status": "keystone_rule_not_implemented",
+          "numeric_parameters": "미확정"
+        }
+      ]
+    },
+    {
+      "id": "life",
+      "name": "생명",
+      "pure_class": "생명의지기",
+      "role": "제한적 회복·자연형 공격",
+      "branches": [
+        "돌봄과 준비",
+        "생명력 순환"
+      ],
+      "nodes": [
+        {
+          "id": "v3_life_leaf_dressing",
+          "name": "잎의 덧댐",
+          "type": "active",
+          "tier": 1,
+          "requires_all": [],
+          "tags": [
+            "life",
+            "recovery",
+            "support",
+            "direct_input"
+          ],
+          "effect": "손상된 상태에서 준비 동작을 마치면 자신을 회복한다.",
+          "tradeoff": "재사용 대기·자원 소비가 필요, 피격 시 준비 중단, 부활 불가.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "잎 모음→몸 가까이 감쌈→빛 종료",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_life_thorn_thread",
+          "name": "가시 실",
+          "type": "active",
+          "tier": 1,
+          "requires_all": [],
+          "tags": [
+            "life",
+            "recovery",
+            "support",
+            "direct_input"
+          ],
+          "effect": "정면 좁은 범위에 가시를 뻗어 공격한다.",
+          "tradeoff": "사거리 밖 무효, 영구 뿌리 구속이나 새 지형을 만들지 않는다.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "손 펼침→가시 전진→소멸",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_life_slow_dressing",
+          "name": "천천히 스미기",
+          "type": "modifier",
+          "tier": 2,
+          "requires_all": [
+            "v3_life_leaf_dressing"
+          ],
+          "tags": [
+            "life",
+            "behavior_variant"
+          ],
+          "modifies": "v3_life_leaf_dressing",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면 즉시 마무리 회복을 제한된 시간에 걸친 회복으로 바꾼다. 전투 진입만으로는 사라지지 않지만 피격되면 남은 회복이 중단된다.",
+          "tradeoff": "긴급 회복을 포기하며 자원 소비·재사용 대기·동일 회복 중첩 금지가 유지된다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "잎 모음→몸 가까이 감쌈→빛 종료; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_life_branching_thorn",
+          "name": "갈라진 가시",
+          "type": "modifier",
+          "tier": 2,
+          "requires_all": [
+            "v3_life_thorn_thread"
+          ],
+          "tags": [
+            "life",
+            "behavior_variant"
+          ],
+          "modifies": "v3_life_thorn_thread",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 단일 가시를 가까운 부채꼴로 바꾼다.",
+          "tradeoff": "원거리 단일 효율을 포기한다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "손 펼침→가시 전진→소멸; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_life_careful_recovery",
+          "name": "조심스러운 회복",
+          "type": "passive",
+          "tier": 2,
+          "requires_all": [
+            "v3_life_leaf_dressing"
+          ],
+          "tags": [
+            "life",
+            "conditional_passive"
+          ],
+          "effect": "피해 없이 회복 동작을 끝내면 다음 생명 기술의 준비 부담을 줄인다.",
+          "tradeoff": "회복 자신을 반복해 무한 자원을 생성하지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_life_seed_shell",
+          "name": "씨앗 껍질",
+          "type": "active",
+          "tier": 3,
+          "requires_all": [
+            "v3_life_slow_dressing"
+          ],
+          "tags": [
+            "life",
+            "recovery",
+            "support",
+            "direct_input"
+          ],
+          "effect": "입력 후 임시 보호층을 둘러 다음 방어 가능 피해를 줄인다.",
+          "tradeoff": "보호량·유효기간 한정, 중첩 갱신 무한 유지 불가, 가드 불가 공격 예외.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "껍질 모임→피격 갈라짐→해제",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_life_resting_patch",
+          "name": "쉬어가는 풀",
+          "type": "active",
+          "tier": 3,
+          "requires_all": [
+            "v3_life_branching_thorn"
+          ],
+          "tags": [
+            "life",
+            "recovery",
+            "support",
+            "direct_input"
+          ],
+          "effect": "준비 동작을 마치면 작은 휴식 지점을 만들고 범위 안에 머무는 자신을 제한된 시간 동안 서서히 회복한다. 전투 중에도 설치·이용할 수 있다.",
+          "tradeoff": "준비 중 피격은 설치를 취소하고, 범위 이탈 또는 회복 중 피격은 회복을 중단한다. 자원 소비·재사용 대기·동시 지점 하나 상한·동일 회복 중첩 금지, 부활 없음.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "앉기→작은 풀→회복 상태 표시",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_life_living_rhythm",
+          "name": "살아 있는 박자",
+          "type": "passive",
+          "tier": 3,
+          "requires_all": [
+            "v3_life_branching_thorn"
+          ],
+          "tags": [
+            "life",
+            "conditional_passive"
+          ],
+          "effect": "생명 공격 명중 후 회복 기술에 작은 효율 보상을 준다.",
+          "tradeoff": "유효 적 대상만, 환경/아군 적중으로 보상하지 않으며 무한흡혈 아님.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_life_direction_shell",
+          "name": "앞을 감싼 껍질",
+          "type": "modifier",
+          "tier": 4,
+          "requires_all": [
+            "v3_life_seed_shell"
+          ],
+          "tags": [
+            "life",
+            "behavior_variant"
+          ],
+          "modifies": "v3_life_seed_shell",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 전신 보호층을 정면에 집중된 보호로 바꾼다.",
+          "tradeoff": "측후면 보호를 잃는다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "껍질 모임→피격 갈라짐→해제; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_life_packed_rest",
+          "name": "접어 둔 휴식",
+          "type": "modifier",
+          "tier": 4,
+          "requires_all": [
+            "v3_life_resting_patch"
+          ],
+          "tags": [
+            "life",
+            "behavior_variant"
+          ],
+          "modifies": "v3_life_resting_patch",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면 지면 휴식 대신 전투 중에도 가능한 제자리 개인 회복 준비 동작으로 바꾼다.",
+          "tradeoff": "움직임·피격으로 중단되고 자원 소비·재사용 대기·중복 회복 금지는 유지된다. 휴식 지점은 남지 않는다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "앉기→작은 풀→회복 상태 표시; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_life_spare_roots",
+          "name": "남겨 둔 뿌리",
+          "type": "passive",
+          "tier": 4,
+          "requires_all": [
+            "v3_life_seed_shell"
+          ],
+          "tags": [
+            "life",
+            "conditional_passive"
+          ],
+          "effect": "생명 방어를 소진하지 않고 종료하면 다음 생명 공격을 돕는다.",
+          "tradeoff": "방어를 실제로 소모하면 보너스가 없고 계속 쌓이지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_life_care_before_power",
+          "name": "돌봄의 무게",
+          "type": "keystone",
+          "tier": 4,
+          "requires_all": [
+            "v3_life_seed_shell",
+            "v3_life_resting_patch",
+            "v3_life_living_rhythm"
+          ],
+          "tags": [
+            "life",
+            "build_tradeoff"
+          ],
+          "effect": "생명 기술을 회복 중심으로 운용하면 안전한 준비를 보상하는 대신 생명 공격 효율을 낮춘다.",
+          "tradeoff": "자동 부활·최대HP 초과·무한 회복 없음; 정확한 보상과 상한은 미정.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "핵심특성 준비/소모를 구별하는 소규모 표시; 보호와 공격 효과 혼동 금지",
+          "implementation_status": "keystone_rule_not_implemented",
+          "numeric_parameters": "미확정"
+        }
+      ]
+    },
+    {
+      "id": "faith",
+      "name": "신앙",
+      "pure_class": "서약인도자",
+      "role": "성속성·조건부 보호·자기 서약",
+      "branches": [
+        "결의와 심판",
+        "보호와 절제"
+      ],
+      "nodes": [
+        {
+          "id": "v3_faith_oath_ray",
+          "name": "서약의 빛",
+          "type": "active",
+          "tier": 1,
+          "requires_all": [],
+          "tags": [
+            "faith",
+            "holy",
+            "support",
+            "direct_input"
+          ],
+          "effect": "전방에 좁은 성속성 일격을 보내 마물 상성 체계와 연결한다.",
+          "tradeoff": "조준이 필요하며 성물 스토리 해금이나 새 종교 설정을 강제하지 않는다.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "손 모음→직선 빛→소멸",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_faith_folded_sign",
+          "name": "접힌 보호문",
+          "type": "active",
+          "tier": 1,
+          "requires_all": [],
+          "tags": [
+            "faith",
+            "holy",
+            "support",
+            "direct_input"
+          ],
+          "effect": "정면에 문양을 펴 방어 가능한 피해를 완화한다.",
+          "tradeoff": "유지 중 공격 제한, 후방·가드 불가에 무효, 반사·무적 없음.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "문양 접기→곡면 보호→균열",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_faith_near_ray",
+          "name": "곁의 빛",
+          "type": "modifier",
+          "tier": 2,
+          "requires_all": [
+            "v3_faith_oath_ray"
+          ],
+          "tags": [
+            "faith",
+            "behavior_variant"
+          ],
+          "modifies": "v3_faith_oath_ray",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 직선 일격을 가까운 짧은 원호로 바꾼다.",
+          "tradeoff": "장거리 사격을 포기한다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "손 모음→직선 빛→소멸; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_faith_fixed_sign",
+          "name": "자리에 새긴 문",
+          "type": "modifier",
+          "tier": 2,
+          "requires_all": [
+            "v3_faith_folded_sign"
+          ],
+          "tags": [
+            "faith",
+            "behavior_variant"
+          ],
+          "modifies": "v3_faith_folded_sign",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 개인 정면 보호를 짧은 고정 자세의 강화 보호로 바꾼다.",
+          "tradeoff": "이동과 공격을 포기하며 피해 무효는 아니다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "문양 접기→곡면 보호→균열; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_faith_kept_word",
+          "name": "지킨 말",
+          "type": "passive",
+          "tier": 2,
+          "requires_all": [
+            "v3_faith_oath_ray"
+          ],
+          "tags": [
+            "faith",
+            "conditional_passive"
+          ],
+          "effect": "맹세 효과를 실제로 소모하면 다음 신앙 준비를 돕는다.",
+          "tradeoff": "빈 발동·중복 갱신으로 얻지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_faith_quiet_vow",
+          "name": "고요한 맹세",
+          "type": "active",
+          "tier": 3,
+          "requires_all": [
+            "v3_faith_near_ray"
+          ],
+          "tags": [
+            "faith",
+            "holy",
+            "support",
+            "direct_input"
+          ],
+          "effect": "제자리 준비를 끝내면 다음 직접 공격 하나에 성속성 보조 효과를 준비한다.",
+          "tradeoff": "움직임/피격으로 준비 취소, 준비 반복 중첩 없음.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "숨 고르기→손의 작은 표식→소모",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_faith_unburden",
+          "name": "짐 덜기",
+          "type": "active",
+          "tier": 3,
+          "requires_all": [
+            "v3_faith_fixed_sign"
+          ],
+          "tags": [
+            "faith",
+            "holy",
+            "support",
+            "direct_input"
+          ],
+          "effect": "현재 걸린 정화 가능 상태 중 하나를 해제한다.",
+          "tradeoff": "체력 회복·부활 없음, 해제 가능한 상태 태그가 필요하며 소모/대기 존재.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "몸 주변 매듭→끊김→종료",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_faith_measured_light",
+          "name": "절제된 빛",
+          "type": "passive",
+          "tier": 3,
+          "requires_all": [
+            "v3_faith_fixed_sign"
+          ],
+          "tags": [
+            "faith",
+            "conditional_passive"
+          ],
+          "effect": "성속성 직접 명중 이후 방어 행동을 선택하면 방어 준비가 안정된다.",
+          "tradeoff": "공격 연타 보상은 아니며 자동 보호막 없음.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_faith_patient_vow",
+          "name": "기다리는 맹세",
+          "type": "modifier",
+          "tier": 4,
+          "requires_all": [
+            "v3_faith_quiet_vow"
+          ],
+          "tags": [
+            "faith",
+            "behavior_variant"
+          ],
+          "modifies": "v3_faith_quiet_vow",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 다음 공격 보조를 다음 일반 가드 성공 보조로 바꾼다.",
+          "tradeoff": "공격 강화는 없어지고 가드 장비가 필요하다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "방패"
+          ],
+          "animation": "숨 고르기→손의 작은 표식→소모; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_faith_steady_unburden",
+          "name": "차분한 풀기",
+          "type": "modifier",
+          "tier": 4,
+          "requires_all": [
+            "v3_faith_unburden"
+          ],
+          "tags": [
+            "faith",
+            "behavior_variant"
+          ],
+          "modifies": "v3_faith_unburden",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 빠른 해제 대신 더 긴 준비 후 해제하는 방식으로 부담을 분산한다.",
+          "tradeoff": "긴급 대응을 포기하고 준비 중 새 피격으로 취소될 수 있다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "초점도구"
+          ],
+          "animation": "몸 주변 매듭→끊김→종료; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_faith_clear_conscience",
+          "name": "남기지 않는 매듭",
+          "type": "passive",
+          "tier": 4,
+          "requires_all": [
+            "v3_faith_quiet_vow"
+          ],
+          "tags": [
+            "faith",
+            "conditional_passive"
+          ],
+          "effect": "정화를 성공시켰을 때 해당 상태의 재적용에 잠깐 저항하는 후보.",
+          "tradeoff": "전 상태 영구 면역 아님, 정확한 기간/상한은 미정.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_faith_chosen_oath",
+          "name": "스스로 정한 맹세",
+          "type": "keystone",
+          "tier": 4,
+          "requires_all": [
+            "v3_faith_quiet_vow",
+            "v3_faith_unburden",
+            "v3_faith_measured_light"
+          ],
+          "tags": [
+            "faith",
+            "build_tradeoff"
+          ],
+          "effect": "신앙 보호 효과가 유효한 동안 공격하면 보호를 끝내고 한 번의 공격 보상으로 전환한다.",
+          "tradeoff": "공격과 보호를 동시에 유지하지 못하며 보호-공격 재귀 발동은 금지.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "핵심특성 준비/소모를 구별하는 소규모 표시; 보호와 공격 효과 혼동 금지",
+          "implementation_status": "keystone_rule_not_implemented",
+          "numeric_parameters": "미확정"
+        }
+      ]
+    },
+    {
+      "id": "forge",
+      "name": "제련",
+      "pure_class": "명장",
+      "role": "해머 차지·일시 장비 준비·설치",
+      "branches": [
+        "무게와 마무리",
+        "준비와 장치"
+      ],
+      "nodes": [
+        {
+          "id": "v3_forge_split_line",
+          "name": "갈라놓는 선",
+          "type": "active",
+          "tier": 1,
+          "requires_all": [],
+          "tags": [
+            "forge",
+            "preparation",
+            "utility",
+            "direct_input"
+          ],
+          "effect": "기존 해머 3단 차지를 사용해 전방 좁은 선을 내려친다.",
+          "tradeoff": "차지/회수 중 노출, 지형 파괴와 추가 단계 없음.",
+          "equipment": [
+            "해머"
+          ],
+          "animation": "해머 높임→긴장→내려침→회수",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_forge_set_down",
+          "name": "무게 내려놓기",
+          "type": "active",
+          "tier": 1,
+          "requires_all": [],
+          "tags": [
+            "forge",
+            "preparation",
+            "utility",
+            "cancel"
+          ],
+          "effect": "차지 중 입력하면 타격하지 않고 해머를 내려 이동 준비 상태로 복귀한다.",
+          "tradeoff": "차지 전부 포기, 무적/환급 없음, 유효 타격 중 취소 불가.",
+          "equipment": [
+            "해머"
+          ],
+          "animation": "몸쪽 내려놓기→무릎 펴기",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_forge_wide_line",
+          "name": "넓게 두드리기",
+          "type": "modifier",
+          "tier": 2,
+          "requires_all": [
+            "v3_forge_split_line"
+          ],
+          "tags": [
+            "forge",
+            "behavior_variant"
+          ],
+          "modifies": "v3_forge_split_line",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 선형 해머 타격을 가까운 부채꼴로 바꾼다.",
+          "tradeoff": "먼 정면 사거리와 집중 효율을 포기한다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "해머"
+          ],
+          "animation": "해머 높임→긴장→내려침→회수; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_forge_turn_setdown",
+          "name": "돌려 내려놓기",
+          "type": "modifier",
+          "tier": 2,
+          "requires_all": [
+            "v3_forge_set_down"
+          ],
+          "tags": [
+            "forge",
+            "behavior_variant"
+          ],
+          "modifies": "v3_forge_set_down",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 차지 폐기 뒤 제자리 방향 변경을 허용한다.",
+          "tradeoff": "더 긴 정리 동작을 감수하고 순간 이동/무적은 없다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "해머"
+          ],
+          "animation": "몸쪽 내려놓기→무릎 펴기; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_forge_ordered_tools",
+          "name": "정돈된 전환",
+          "type": "passive",
+          "tier": 2,
+          "requires_all": [
+            "v3_forge_split_line"
+          ],
+          "tags": [
+            "forge",
+            "conditional_passive"
+          ],
+          "effect": "제련 설치나 무기 준비를 완료한 뒤 해머 직접 공격을 적중시키면 다음 다른 제련 행동의 준비를 안정화한다.",
+          "tradeoff": "제작 가능 목록·재료 정보는 무료다. 실제 준비와 적중이 필요하며 소품 설치 취소나 같은 행동 반복으로 보너스를 얻지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_forge_field_emplacement",
+          "name": "접이식 받침",
+          "type": "active",
+          "tier": 3,
+          "requires_all": [
+            "v3_forge_wide_line"
+          ],
+          "tags": [
+            "forge",
+            "preparation",
+            "utility",
+            "direct_input"
+          ],
+          "effect": "준비 동작을 마치면 받침 장치를 설치하고 다가온 반응 가능 적에게 짧은 방해를 제공한다. 전투 중 재설치도 가능하다.",
+          "tradeoff": "준비 중 피격 시 설치 중단, 자원 소비·재사용 대기·동시 설치 하나 상한 유지. 새 설치물 상태/감지 AI 미구현, 통로 봉쇄 금지. 재설치가 남은 장치 효과를 복제하지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "받침 펼침→장치 대기→소진 접힘",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_forge_temper_ready",
+          "name": "날의 준비",
+          "type": "active",
+          "tier": 3,
+          "requires_all": [
+            "v3_forge_turn_setdown"
+          ],
+          "tags": [
+            "forge",
+            "preparation",
+            "utility",
+            "direct_input"
+          ],
+          "effect": "비전투 준비 동작으로 다음 무기 공격 하나의 효율을 높인다.",
+          "tradeoff": "재료 또는 자원 부담은 미정, 영구 강화·내구도 수리·중첩 아님.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "무기 살핌→작은 연마→준비 표시",
+          "implementation_status": "new_runtime_connection_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_forge_honest_weight",
+          "name": "정직한 무게",
+          "type": "passive",
+          "tier": 3,
+          "requires_all": [
+            "v3_forge_turn_setdown"
+          ],
+          "tags": [
+            "forge",
+            "conditional_passive"
+          ],
+          "effect": "최고 차지보다 낮은 단계의 명중을 이어가면 다음 차지 준비가 안정된다.",
+          "tradeoff": "최고 단계 반복에는 보상하지 않고 단계 수는 바꾸지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_forge_signal_emplacement",
+          "name": "신호 받침",
+          "type": "modifier",
+          "tier": 4,
+          "requires_all": [
+            "v3_forge_field_emplacement"
+          ],
+          "tags": [
+            "forge",
+            "behavior_variant"
+          ],
+          "modifies": "v3_forge_field_emplacement",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 적 방해 대신 적 접근 신호만 주는 장치로 바꾼다.",
+          "tradeoff": "제어 효과를 포기하며 미발견 적을 전역 탐지하지 않는다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "받침 펼침→장치 대기→소진 접힘; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_forge_guard_ready",
+          "name": "방패의 준비",
+          "type": "modifier",
+          "tier": 4,
+          "requires_all": [
+            "v3_forge_temper_ready"
+          ],
+          "tags": [
+            "forge",
+            "behavior_variant"
+          ],
+          "modifies": "v3_forge_temper_ready",
+          "effect": "대상 액티브에 이 행동변형을 선택하고 발동하면: 공격 보조를 다음 일반 가드 부담 경감으로 바꾼다.",
+          "tradeoff": "공격 보너스를 잃고 방패가 필요하다. 해당 액티브의 다른 행동변형과 동시 적용하지 않는다.",
+          "equipment": [
+            "방패"
+          ],
+          "animation": "무기 살핌→작은 연마→준비 표시; 변형된 범위·준비·회수에 맞춰 전용 자세/효과 재설계",
+          "implementation_status": "modifier_dispatch_not_implemented",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_forge_recover_parts",
+          "name": "부품 회수",
+          "type": "passive",
+          "tier": 4,
+          "requires_all": [
+            "v3_forge_field_emplacement"
+          ],
+          "tags": [
+            "forge",
+            "conditional_passive"
+          ],
+          "effect": "소진 전 장치를 직접 회수하면 설치 부담 일부를 돌려받는 후보.",
+          "tradeoff": "전투 중 즉시 환급·전액복제 금지, 파괴된 장치는 회수 불가.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "조건 충족/소모 상태만 작은 개인 표시; 기본 행동 실루엣 유지",
+          "implementation_status": "conditional_effect_hook_required",
+          "numeric_parameters": "미확정"
+        },
+        {
+          "id": "v3_forge_prepare_then_commit",
+          "name": "준비하고 책임지기",
+          "type": "keystone",
+          "tier": 4,
+          "requires_all": [
+            "v3_forge_field_emplacement",
+            "v3_forge_temper_ready",
+            "v3_forge_honest_weight"
+          ],
+          "tags": [
+            "forge",
+            "build_tradeoff"
+          ],
+          "effect": "준비 보조를 소모한 해머 타격 또는 설치물 효과가 다음 다른 제련 행동을 강화한다.",
+          "tradeoff": "동일 행동 무한 순환·장치의 자체 재발동 금지, 준비 시간과 자원 대가 유지.",
+          "equipment": [
+            "공통"
+          ],
+          "animation": "핵심특성 준비/소모를 구별하는 소규모 표시; 보호와 공격 효과 혼동 금지",
+          "implementation_status": "keystone_rule_not_implemented",
+          "numeric_parameters": "미확정"
+        }
+      ]
+    }
+  ]
+}

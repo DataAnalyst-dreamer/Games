@@ -1,0 +1,27 @@
+{
+  "viewport": [1920, 1080],
+  "arena": [64, 210, 1232, 792],
+  "spawn": [680, 460],
+  "speed": 64,
+  "pixels_per_frame": 8,
+  "display_scale": 2,
+  "cell": [96, 128],
+  "frame_count": 8,
+  "walk_texture": "res://assets/fin-front-walk.png",
+  "idle_texture": "res://assets/fin-front-idle.png",
+  "foot_anchor": [48, 112],
+  "obstacles": [[350, 640, 176, 96], [864, 596, 184, 96]],
+  "text": {
+    "eyebrow": "ISLELAND / CHARACTER LAB 01",
+    "title": "핀 — 정면 동작 실행 테스트",
+    "subtitle": "FHD 1920 × 1080 · 몸체 기준 64 × 96 · 정면 그래픽 고정 · 기존 게임과 독립 실행",
+    "arena": "01   이동 · 접지 · 충돌",
+    "detail": "02   픽셀 동작 확대",
+    "scope": "이번 테스트 범위\n정면 대기 / 걷기 / 이동 / 발밑 충돌\n후면·측면·공격·저장 기능은 미포함",
+    "keys": "WASD / 방향키   이동\nSpace   모션 일시정지\n.   다음 프레임  /  R   위치 초기화\nG   바닥 격자  /  H   발밑 판정\nF11   전체화면  /  Esc   종료",
+    "auto": "자동 이동",
+    "reset": "위치 초기화",
+    "pause": "모션 정지/재개",
+    "footnote": "원본의 얼굴·투구 픽셀을 공유한 부위 분리 동작 초안입니다. 최종 손그림 애니메이션이나 완성 게임이 아닙니다."
+  }
+}

@@ -39,8 +39,10 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _player_inside != null and event.is_action_pressed("interact"):
+	if not get_tree().paused and _player_inside != null and event.is_action_pressed("interact") and not event.is_echo():
+		get_viewport().set_input_as_handled()
 		talk()
+		get_tree().call_group("quest_npc_ui", "open_quest_npc", npc_id)
 
 
 ## Events 발신을 한 곳에 모은 공개 진입점 — 실제 플레이어 입력뿐 아니라 스모크

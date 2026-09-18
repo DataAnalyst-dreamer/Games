@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "candidates": [
+    {"id":"fin","title_key":"fin_title","target_size":[64,96],"path":"res://assets/design-candidates/unified-v1/fin.png","enabled":false,"sha256":"","image_size":[0,0],"alpha_rect":[0,0,0,0],"core_rect":[0,0,0,0],"status_key":"fin_blocked"},
+    {"id":"slime","title_key":"slime_title","target_size":[64,48],"path":"res://assets/design-candidates/unified-v1/slime.png","enabled":true,"sha256":"56F89BBE036DCAA568E8B5BAB259DAE19398F506ADBCABB0840463834ED167D7","image_size":[1448,1086],"alpha_rect":[71,21,1226,1022],"core_rect":[319,276,809,575],"status_key":"slime_static"},
+    {"id":"sword","title_key":"sword_title","target_size":[28,74],"path":"res://assets/design-candidates/unified-v1/sword.png","enabled":true,"sha256":"9386A2195D077D458D036DE6984CAE46104883B46A0AC4716BE59AB8136D50B5","image_size":[1024,1536],"alpha_rect":[193,39,673,1449],"core_rect":[342,43,344,1443],"status_key":"sword_static"}
+  ]
+}

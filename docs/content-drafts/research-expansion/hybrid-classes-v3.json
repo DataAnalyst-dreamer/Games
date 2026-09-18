@@ -1,0 +1,881 @@
+{
+  "status": "design_draft_not_runtime",
+  "version": 3,
+  "note": "28 unordered mastery pairs; signature rules are proposed identity traits, not implemented active skills. A build equips only one identity trait. Cooldowns, costs, precise ranges and compatibility registry are not finalized.",
+  "classes": [
+    {
+      "id": "v3_class_blade_guard",
+      "name": "철위기사",
+      "masteries": [
+        "blade",
+        "guard"
+      ],
+      "signature": {
+        "id": "v3_bridge_blade_guard",
+        "name": "받아낸 틈",
+        "trigger": "가드 가능한 정면 공격을 막은 뒤",
+        "effect": "다음 직접 근접 기술이 적의 자세를 밀어내고 교전 거리를 확보한다.",
+        "tradeoff": "추가 피해 대신 밀침을 얻으며 후방·가드 불가 공격은 조건이 아니다.",
+        "compatible_tags": [
+          "melee",
+          "guard"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "받기 → 짧은 반격 → 위치 복구",
+      "equipment_note": "검·방패 조합 권장. 방패 없는 장비는 가드 조건 사용 불가.",
+      "example": {
+        "active_slots": [
+          "v3_blade_measured_cut",
+          "v3_guard_low_brace"
+        ],
+        "equipment": "검·방패 조합 권장. 방패 없는 장비는 가드 조건 사용 불가.",
+        "sequence": "받기 → 짧은 반격 → 위치 복구 기본 가드 성공은 방패로 막은 경우만. 무방패 버팀은 넉백 억제일 뿐 가드 성공으로 집계하지 않는다.",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_blade_bow",
+      "name": "유격검사",
+      "masteries": [
+        "blade",
+        "bow"
+      ],
+      "signature": {
+        "id": "v3_bridge_blade_bow",
+        "name": "거리의 교대",
+        "trigger": "원거리 액티브가 적중한 뒤 근접 거리로 직접 이동하면",
+        "effect": "다음 근접 기술의 준비 동작이 짧아지고, 반대 순서는 사격 후 후퇴 여지를 만든다.",
+        "tradeoff": "거리 전환 중 무적·자동 무기 교체가 없고 한 거리 반복으로 발동하지 않는다.",
+        "compatible_tags": [
+          "melee",
+          "projectile"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "사격 견제 → 접근 → 근접 마무리",
+      "equipment_note": "검/활 두 무기 세트의 명시적 수동 전환 필요. 회수 동작 종료 후만 전환하며 두 슬롯과 쿨타임을 유지한다. 이 기능은 현재 미구현.",
+      "example": {
+        "active_slots": [
+          "v3_blade_measured_cut",
+          "v3_bow_still_string"
+        ],
+        "equipment": "검/활 두 무기 세트의 명시적 수동 전환 필요. 회수 동작 종료 후만 전환하며 두 슬롯과 쿨타임을 유지한다. 이 기능은 현재 미구현.",
+        "sequence": "사격 견제 → 접근 → 근접 마무리",
+        "status": "requires_weapon_swap_system"
+      }
+    },
+    {
+      "id": "v3_class_blade_trick",
+      "name": "결투가",
+      "masteries": [
+        "blade",
+        "trick"
+      ],
+      "signature": {
+        "id": "v3_bridge_blade_trick",
+        "name": "빈자리 찌르기",
+        "trigger": "적의 유효 공격을 기본 회피로 벗어난 뒤",
+        "effect": "옆 방향에서 직접 입력한 근접 기술을 좁고 깊은 찌르기로 바꾼다.",
+        "tradeoff": "광역 범위를 포기하며 적을 통과하거나 자동 뒤잡기하지 않는다.",
+        "compatible_tags": [
+          "melee",
+          "dodge"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "유도 → 측면 회피 → 정밀 찌르기",
+      "equipment_note": "검 또는 단검. 측후면 판정은 신규 검증 필요.",
+      "example": {
+        "active_slots": [
+          "v3_blade_measured_cut",
+          "v3_trick_side_feint"
+        ],
+        "equipment": "검 또는 단검. 측후면 판정은 신규 검증 필요.",
+        "sequence": "유도 → 측면 회피 → 정밀 찌르기",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_blade_element",
+      "name": "마검사",
+      "masteries": [
+        "blade",
+        "element"
+      ],
+      "signature": {
+        "id": "v3_bridge_blade_element",
+        "name": "검끝의 잔향",
+        "trigger": "원소 액티브를 직접 시전한 뒤",
+        "effect": "다음 근접 기술에 그 속성의 짧은 검날 잔향을 붙인다.",
+        "tradeoff": "물리 부분 일부를 속성으로 전환하며 추가 타격으로 무조건 중첩하지 않는다.",
+        "compatible_tags": [
+          "melee",
+          "element"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "속성 준비 → 근접 연결 → 재시전",
+      "equipment_note": "검으로 시전 가능한 모션/태그가 필요한 후보. 스태프 강제 교체 없음.",
+      "example": {
+        "active_slots": [
+          "v3_blade_measured_cut",
+          "v3_element_ember_stroke"
+        ],
+        "equipment": "검으로 시전 가능한 모션/태그가 필요한 후보. 스태프 강제 교체 없음. 초점도구는 휴대 매개/장비 촉매이며 양손 스태프를 강제하지 않는다.",
+        "sequence": "속성 준비 → 근접 연결 → 재시전",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_blade_life",
+      "name": "가시검사",
+      "masteries": [
+        "blade",
+        "life"
+      ],
+      "signature": {
+        "id": "v3_bridge_blade_life",
+        "name": "상처를 묶는 칼",
+        "trigger": "회복이 진행 중인 상태에서 근접 공격을 적중시키면",
+        "effect": "남은 회복의 일부를 포기하고 적의 발치에 짧은 생장 방해 구역을 만든다.",
+        "tradeoff": "회복과 공격 이득을 동시에 전부 얻지 않으며 보스의 이동을 봉쇄하지 않는다.",
+        "compatible_tags": [
+          "melee",
+          "heal"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "회복 예비 → 교전 → 구역을 이용한 후퇴",
+      "equipment_note": "근접 무기. 생장 구역은 벽/통행 장애가 아니다.",
+      "example": {
+        "active_slots": [
+          "v3_blade_measured_cut",
+          "v3_life_resting_patch"
+        ],
+        "equipment": "근접 무기. 생장 구역은 벽/통행 장애가 아니다. 초점도구는 휴대 매개/장비 촉매이며 양손 스태프를 강제하지 않는다.",
+        "sequence": "회복 예비 → 교전 → 구역을 이용한 후퇴",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_blade_faith",
+      "name": "성기사",
+      "masteries": [
+        "blade",
+        "faith"
+      ],
+      "signature": {
+        "id": "v3_bridge_blade_faith",
+        "name": "서약의 응수",
+        "trigger": "자기 보호 서약이 정상적으로 종료된 뒤",
+        "effect": "다음 근접 기술이 정면의 좁은 빛 궤적을 남긴다.",
+        "tradeoff": "보호 중 공격하면 예약 효과를 잃고 넓은 전방 무적을 주지 않는다.",
+        "compatible_tags": [
+          "melee",
+          "ward"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "방어 약속 → 종료 확인 → 응수",
+      "equipment_note": "검/공통 신앙 시전. 성물 보유나 특정 종족을 요구하지 않는다.",
+      "example": {
+        "active_slots": [
+          "v3_blade_measured_cut",
+          "v3_faith_folded_sign"
+        ],
+        "equipment": "검/공통 신앙 시전. 성물 보유나 특정 종족을 요구하지 않는다. 초점도구는 휴대 매개/장비 촉매이며 양손 스태프를 강제하지 않는다.",
+        "sequence": "방어 약속 → 종료 확인 → 응수",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_blade_forge",
+      "name": "단조검사",
+      "masteries": [
+        "blade",
+        "forge"
+      ],
+      "signature": {
+        "id": "v3_bridge_blade_forge",
+        "name": "날의 열관리",
+        "trigger": "제련 담금 준비의 다음 한 타 보조를 직접 근접 공격으로 소모해 가열 상태에 들어간 뒤",
+        "effect": "검이 가열되어 밀집 적을 가르는 궤적으로 바뀌고, 공격을 멈춰 식혀 재사용한다.",
+        "tradeoff": "과열 중 다음 기술의 후딜이 길어지며 공격속도 무한 누적은 없다.",
+        "compatible_tags": [
+          "melee",
+          "heat"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "가열 → 짧은 공세 → 냉각",
+      "equipment_note": "검. 실시간 장비 제작/내구도 소비와 분리된 전투 효과.",
+      "example": {
+        "active_slots": [
+          "v3_blade_measured_cut",
+          "v3_forge_temper_ready"
+        ],
+        "equipment": "검. 실시간 장비 제작/내구도 소비와 분리된 전투 효과.",
+        "sequence": "가열 → 짧은 공세 → 냉각",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_guard_bow",
+      "name": "보루궁수",
+      "masteries": [
+        "guard",
+        "bow"
+      ],
+      "signature": {
+        "id": "v3_bridge_guard_bow",
+        "name": "접지 사격",
+        "trigger": "이동하지 않고 활의 준비 동작을 마치면",
+        "effect": "사격 중 첫 넉백을 억제하여 사선을 지킨다.",
+        "tradeoff": "피해는 받으며 방패 가드/저스트 가드 판정을 활에 부여하지 않는다.",
+        "compatible_tags": [
+          "projectile",
+          "brace"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "자리 확보 → 버팀 종료 → 정지 조준 → 이동",
+      "equipment_note": "양손 활 허용. 방패 필수 수호 액티브와 동시 장착 불가.",
+      "example": {
+        "active_slots": [
+          "v3_guard_low_brace",
+          "v3_bow_still_string"
+        ],
+        "equipment": "양손 활 허용. 방패 필수 수호 액티브와 동시 장착 불가.",
+        "sequence": "자리 확보 → 버팀을 해제 → 정지 조준 → 사격 → 이동. 버팀 유지 중에는 공격할 수 없으므로 조준과 동시에 유지하지 않는다. 무방패 버팀은 넉백 억제일 뿐 가드 성공으로 집계하지 않는다.",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_guard_trick",
+      "name": "성문파수꾼",
+      "masteries": [
+        "guard",
+        "trick"
+      ],
+      "signature": {
+        "id": "v3_bridge_guard_trick",
+        "name": "열린 쪽의 미끼",
+        "trigger": "기교 도구를 놓고 그 옆에서 방향 가드를 유지하면",
+        "effect": "미끼를 조사하는 적의 접근을 한 방향으로 읽기 쉽게 표시한다.",
+        "tradeoff": "전투 적의 어그로 초기화나 강제 이동은 없고 측후면은 여전히 취약하다.",
+        "compatible_tags": [
+          "guard",
+          "decoy"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "미끼 → 방향 선택 → 막고 이탈",
+      "equipment_note": "방패+손도구. 미끼 조사 AI는 새 구현이며 첫 단면 제외.",
+      "example": {
+        "active_slots": [
+          "v3_guard_low_brace",
+          "v3_trick_dry_twig"
+        ],
+        "equipment": "방패+손도구. 미끼 조사 AI는 새 구현이며 첫 단면 제외.",
+        "sequence": "미끼 → 방향 선택 → 막고 이탈 기본 가드 성공은 방패로 막은 경우만. 무방패 버팀은 넉백 억제일 뿐 가드 성공으로 집계하지 않는다.",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_guard_element",
+      "name": "결계기사",
+      "masteries": [
+        "guard",
+        "element"
+      ],
+      "signature": {
+        "id": "v3_bridge_guard_element",
+        "name": "받고 바꾸기",
+        "trigger": "가드 가능한 정면 원소 공격을 막으면",
+        "effect": "그 속성을 기록하고 다음 직접 원소 기술의 표현/속성을 해당 속성으로 전환한다.",
+        "tradeoff": "원 공격을 반사하지 않으며 물리 공격·환경 장판에는 조건이 생기지 않는다.",
+        "compatible_tags": [
+          "guard",
+          "element"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "속성 판독 → 방어 → 선택 시전",
+      "equipment_note": "방패와 한손 초점 또는 호환 시전 도구. 지원 속성 목록 필요.",
+      "example": {
+        "active_slots": [
+          "v3_guard_low_brace",
+          "v3_element_ember_stroke"
+        ],
+        "equipment": "방패와 한손 초점 또는 호환 시전 도구. 지원 속성 목록 필요. 초점도구는 휴대 매개/장비 촉매이며 양손 스태프를 강제하지 않는다.",
+        "sequence": "속성 판독 → 방어 → 선택 시전 기본 가드 성공은 방패로 막은 경우만. 무방패 버팀은 넉백 억제일 뿐 가드 성공으로 집계하지 않는다.",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_guard_life",
+      "name": "숲지기",
+      "masteries": [
+        "guard",
+        "life"
+      ],
+      "signature": {
+        "id": "v3_bridge_guard_life",
+        "name": "움직이는 뿌리",
+        "trigger": "생명 구역 안에서 가드를 끝내고 걸어 나오면",
+        "effect": "구역을 소모하고 자기 발치에 약한 회복을 잠시 이어간다.",
+        "tradeoff": "원래 구역은 사라지고 이동 중에는 강한 회복을 잃는다.",
+        "compatible_tags": [
+          "guard",
+          "zone",
+          "heal"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "구역 설치 → 받아내기 → 회복하며 이동",
+      "equipment_note": "방패/공통 생명 시전. 뿌리가 플레이어나 적을 지형에 고정하지 않는다.",
+      "example": {
+        "active_slots": [
+          "v3_guard_low_brace",
+          "v3_life_resting_patch"
+        ],
+        "equipment": "방패/공통 생명 시전. 뿌리가 플레이어나 적을 지형에 고정하지 않는다. 초점도구는 휴대 매개/장비 촉매이며 양손 스태프를 강제하지 않는다.",
+        "sequence": "구역 설치 → 받아내기 → 회복하며 이동 기본 가드 성공은 방패로 막은 경우만. 무방패 버팀은 넉백 억제일 뿐 가드 성공으로 집계하지 않는다.",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_guard_faith",
+      "name": "서약수호자",
+      "masteries": [
+        "guard",
+        "faith"
+      ],
+      "signature": {
+        "id": "v3_bridge_guard_faith",
+        "name": "방향의 약속",
+        "trigger": "전방 보호 서약을 켠 채 같은 방향을 지키면",
+        "effect": "그 방향에서 오는 다음 방어 가능한 공격의 충격을 분산한다.",
+        "tradeoff": "방향을 급히 돌리면 준비가 풀리고 피해 완전 제거·뒷면 보호는 없다.",
+        "compatible_tags": [
+          "guard",
+          "ward"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "방향 읽기 → 준비 → 충격 수용",
+      "equipment_note": "방패 또는 명시된 보호 도구. 보호 범위 VFX와 일치 필수.",
+      "example": {
+        "active_slots": [
+          "v3_guard_low_brace",
+          "v3_faith_folded_sign"
+        ],
+        "equipment": "방패 또는 명시된 보호 도구. 보호 범위 VFX와 일치 필수. 초점도구는 휴대 매개/장비 촉매이며 양손 스태프를 강제하지 않는다.",
+        "sequence": "방향 읽기 → 준비 → 충격 수용 기본 가드 성공은 방패로 막은 경우만. 무방패 버팀은 넉백 억제일 뿐 가드 성공으로 집계하지 않는다.",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_guard_forge",
+      "name": "철벽공병",
+      "masteries": [
+        "guard",
+        "forge"
+      ],
+      "signature": {
+        "id": "v3_bridge_guard_forge",
+        "name": "접이식 보루",
+        "trigger": "전투용 받침을 설치한 뒤 그 뒤에서 준비 자세를 취하면",
+        "effect": "첫 방어 충격 뒤 받침이 접히며 적과의 간격을 만든다.",
+        "tradeoff": "설치 시간과 위치를 쓰고 무한 지속벽·길막으로 적을 봉쇄할 수 없다.",
+        "compatible_tags": [
+          "guard",
+          "device"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "설치 → 유인 → 충격 후 재배치",
+      "equipment_note": "방패+도구. 충돌 없는 받침 시각/단발 효과로 설계.",
+      "example": {
+        "active_slots": [
+          "v3_guard_low_brace",
+          "v3_forge_field_emplacement"
+        ],
+        "equipment": "방패+도구. 충돌 없는 받침 시각/단발 효과로 설계.",
+        "sequence": "설치 → 유인 → 충격 후 재배치 기본 가드 성공은 방패로 막은 경우만. 무방패 버팀은 넉백 억제일 뿐 가드 성공으로 집계하지 않는다.",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_bow_trick",
+      "name": "그늘사냥꾼",
+      "masteries": [
+        "bow",
+        "trick"
+      ],
+      "signature": {
+        "id": "v3_bridge_bow_trick",
+        "name": "빗겨놓은 시선",
+        "trigger": "미끼를 관찰한 적을 다른 각도에서 직접 사격하면",
+        "effect": "첫 화살이 좁은 약점 사격으로 변한다.",
+        "tradeoff": "들킨 전투 적은 새 미끼로 조건을 다시 만들 수 없고 영구 은신은 없다.",
+        "compatible_tags": [
+          "projectile",
+          "decoy"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "미끼 → 사선 변경 → 첫발",
+      "equipment_note": "활+도구. 적 인지 상태 구현을 전제로 하는 후속 후보.",
+      "example": {
+        "active_slots": [
+          "v3_bow_still_string",
+          "v3_trick_dry_twig"
+        ],
+        "equipment": "활+도구. 적 인지 상태 구현을 전제로 하는 후속 후보.",
+        "sequence": "미끼 → 사선 변경 → 첫발",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_bow_element",
+      "name": "원소궁수",
+      "masteries": [
+        "bow",
+        "element"
+      ],
+      "signature": {
+        "id": "v3_bridge_bow_element",
+        "name": "시위의 색",
+        "trigger": "원소 액티브 뒤 활 기술을 준비하면",
+        "effect": "다음 화살을 해당 속성으로 전환하고 착지 형태를 좁은 선으로 바꾼다.",
+        "tradeoff": "기존 물리 이득 일부를 포기하며 속성 효과가 무한 연쇄하지 않는다.",
+        "compatible_tags": [
+          "projectile",
+          "element"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "원소 선택 → 활 준비 → 선형 사격",
+      "equipment_note": "활을 이용한 원소 시전 모션 필요. 보이지 않는 지팡이 사용 금지.",
+      "example": {
+        "active_slots": [
+          "v3_bow_still_string",
+          "v3_element_ember_stroke"
+        ],
+        "equipment": "활을 이용한 원소 시전 모션 필요. 보이지 않는 지팡이 사용 금지. 초점도구는 휴대 매개/장비 촉매이며 양손 스태프를 강제하지 않는다.",
+        "sequence": "원소 선택 → 활 준비 → 선형 사격",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_bow_life",
+      "name": "숲길순찰자",
+      "masteries": [
+        "bow",
+        "life"
+      ],
+      "signature": {
+        "id": "v3_bridge_bow_life",
+        "name": "돌아오는 씨앗",
+        "trigger": "원거리 기술을 적중시킨 뒤 사격 지점을 떠나면",
+        "effect": "그 지점에 회복용 작은 씨앗 흔적이 남아 되돌아왔을 때 회수된다.",
+        "tradeoff": "회복하려면 동선을 되짚어야 하며 화살마다 씨앗을 무한 쌓을 수 없다.",
+        "compatible_tags": [
+          "projectile",
+          "heal"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "사격 → 이동 → 안전한 시점에 회수",
+      "equipment_note": "활/공통 생명 시전. 씨앗은 판매·축적 아이템이 아니다.",
+      "example": {
+        "active_slots": [
+          "v3_bow_still_string",
+          "v3_life_leaf_dressing"
+        ],
+        "equipment": "활/공통 생명 시전. 씨앗은 판매·축적 아이템이 아니다. 초점도구는 휴대 매개/장비 촉매이며 양손 스태프를 강제하지 않는다.",
+        "sequence": "사격 → 이동 → 안전한 시점에 회수",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_bow_faith",
+      "name": "서광사수",
+      "masteries": [
+        "bow",
+        "faith"
+      ],
+      "signature": {
+        "id": "v3_bridge_bow_faith",
+        "name": "기다린 빛",
+        "trigger": "신앙 보호를 공격하지 않고 끝낸 뒤 다음 정지 조준을 완료하면",
+        "effect": "다음 사격은 단일 대상에 집중하는 빛 화살로 바뀐다.",
+        "tradeoff": "보호와 사격을 동시에 유지하지 않으며 조준 중 이동/피격은 예약을 취소한다. 관통/다발 효율을 포기한다.",
+        "compatible_tags": [
+          "projectile",
+          "ward"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "조준 약속 → 기다림 → 정밀 사격",
+      "equipment_note": "활. 빛은 새로운 성물 능력의 증거가 아닌 기술 연출.",
+      "example": {
+        "active_slots": [
+          "v3_bow_still_string",
+          "v3_faith_folded_sign"
+        ],
+        "equipment": "활. 빛은 새로운 성물 능력의 증거가 아닌 기술 연출. 초점도구는 휴대 매개/장비 촉매이며 양손 스태프를 강제하지 않는다.",
+        "sequence": "조준 약속 → 기다림 → 정밀 사격",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_bow_forge",
+      "name": "기계궁수",
+      "masteries": [
+        "bow",
+        "forge"
+      ],
+      "signature": {
+        "id": "v3_bridge_bow_forge",
+        "name": "장력 고정",
+        "trigger": "제련의 담금 준비(temper_ready)를 활의 시위 고정 포즈로 실행한 뒤 직접 사격하면",
+        "effect": "좁은 관통 사격을 얻고 발사 후 수동 정리 동작이 발생한다.",
+        "tradeoff": "연사와 이동 중 발사를 포기하며 지형 관통은 하지 않는다.",
+        "compatible_tags": [
+          "projectile",
+          "device"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "고정 → 관통 한발 → 정리",
+      "equipment_note": "활. 신규 총기/자동 포탑 장비를 추가하지 않는다.",
+      "example": {
+        "active_slots": [
+          "v3_bow_still_string",
+          "v3_forge_temper_ready"
+        ],
+        "equipment": "활. 신규 총기/자동 포탑 장비를 추가하지 않는다.",
+        "sequence": "고정 → 관통 한발 → 정리",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_trick_element",
+      "name": "환영술사",
+      "masteries": [
+        "trick",
+        "element"
+      ],
+      "signature": {
+        "id": "v3_bridge_trick_element",
+        "name": "빈 껍질의 주문",
+        "trigger": "기교의 소리 미끼를 직접 놓고 기본 회피로 사선을 바꾼 뒤",
+        "effect": "미끼가 사라지기 전에 원소 기술을 직접 쓰면 미끼에 장식 잔향을 남기고 실제 시전은 플레이어 위치에서 실행한다.",
+        "tradeoff": "피해는 실제 시전에서만 나오며 분신 복제 공격·자동 시전은 없다.",
+        "compatible_tags": [
+          "dodge",
+          "decoy",
+          "element"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "회피 → 빈자리 유도 → 다른 각도 시전",
+      "equipment_note": "초점도구/기교 도구. 플레이어도 피해 위치를 오인하지 않아야 한다.",
+      "example": {
+        "active_slots": [
+          "v3_trick_dry_twig",
+          "v3_element_ember_stroke"
+        ],
+        "equipment": "초점도구/기교 도구. 플레이어도 피해 위치를 오인하지 않아야 한다. 초점도구는 휴대 매개/장비 촉매이며 양손 스태프를 강제하지 않는다.",
+        "sequence": "회피 → 빈자리 유도 → 다른 각도 시전",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_trick_life",
+      "name": "약초추적자",
+      "masteries": [
+        "trick",
+        "life"
+      ],
+      "signature": {
+        "id": "v3_bridge_trick_life",
+        "name": "되밟는 약초",
+        "trigger": "자기 생명 구역을 통과한 후 다른 방향으로 회피하면",
+        "effect": "통과 지점을 다시 지날 때만 회복하는 얇은 흔적을 남긴다.",
+        "tradeoff": "즉시 회복을 포기하고 좁은 왕복 동선을 요구하며 무적을 연장하지 않는다.",
+        "compatible_tags": [
+          "dodge",
+          "zone",
+          "heal"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "흔적 마련 → 적 유도 → 되밟기",
+      "equipment_note": "공통 도구. 희귀 약초 실물 소비가 전직 조건은 아니다.",
+      "example": {
+        "active_slots": [
+          "v3_trick_side_feint",
+          "v3_life_resting_patch"
+        ],
+        "equipment": "공통 도구. 희귀 약초 실물 소비가 전직 조건은 아니다. 초점도구는 휴대 매개/장비 촉매이며 양손 스태프를 강제하지 않는다.",
+        "sequence": "흔적 마련 → 적 유도 → 되밟기",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_trick_faith",
+      "name": "비밀순례자",
+      "masteries": [
+        "trick",
+        "faith"
+      ],
+      "signature": {
+        "id": "v3_bridge_trick_faith",
+        "name": "침묵의 서약",
+        "trigger": "공격하지 않는 보호 준비를 마치고 적의 공격을 회피하면",
+        "effect": "다음 직접 기술의 준비 중 이동 속도 손실을 줄인다.",
+        "tradeoff": "준비 중 공격하면 서약이 풀리며 공격 쿨타임·후딜 삭제는 없다.",
+        "compatible_tags": [
+          "dodge",
+          "ward"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "자제 → 회피 → 안전하게 시전",
+      "equipment_note": "한손 무기 또는 초점도구. 투명화/텔레포트 없음.",
+      "example": {
+        "active_slots": [
+          "v3_trick_side_feint",
+          "v3_faith_folded_sign"
+        ],
+        "equipment": "한손 무기 또는 초점도구. 투명화/텔레포트 없음. 초점도구는 휴대 매개/장비 촉매이며 양손 스태프를 강제하지 않는다.",
+        "sequence": "자제 → 회피 → 안전하게 시전",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_trick_forge",
+      "name": "함정공",
+      "masteries": [
+        "trick",
+        "forge"
+      ],
+      "signature": {
+        "id": "v3_bridge_trick_forge",
+        "name": "회수의 계산",
+        "trigger": "설치한 전투 도구를 적이 밟기 전에 직접 회수하면",
+        "effect": "다음 설치 형태를 좁은 지향형으로 바꿀 수 있다.",
+        "tradeoff": "회수 중 노출되고 환급은 실제 남은 준비분만 허용하며 재료 복제는 없다.",
+        "compatible_tags": [
+          "device",
+          "trap"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "놓기 → 적 경로 판단 → 회수/발동 선택",
+      "equipment_note": "도구. 자동 제작·아이템 증식과 분리.",
+      "example": {
+        "active_slots": [
+          "v3_trick_snare_line",
+          "v3_forge_field_emplacement"
+        ],
+        "equipment": "도구. 자동 제작·아이템 증식과 분리.",
+        "sequence": "놓기 → 적 경로 판단 → 회수/발동 선택",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_element_life",
+      "name": "계절술사",
+      "masteries": [
+        "element",
+        "life"
+      ],
+      "signature": {
+        "id": "v3_bridge_element_life",
+        "name": "싹과 서리",
+        "trigger": "생명 구역에 직접 원소 기술을 연결하면",
+        "effect": "회복 구역을 소모해 잠깐의 방해 구역으로 전환한다.",
+        "tradeoff": "회복과 공격을 동시에 전부 얻지 못하며 같은 구역을 되돌려 중첩할 수 없다.",
+        "compatible_tags": [
+          "element",
+          "zone",
+          "heal"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "회복 마련 → 유지 또는 전환 → 재배치",
+      "equipment_note": "초점도구. 원소 융합의 기존 규칙과 별도 중복 발동 점검.",
+      "example": {
+        "active_slots": [
+          "v3_element_ember_stroke",
+          "v3_life_resting_patch"
+        ],
+        "equipment": "초점도구. 원소 융합의 기존 규칙과 별도 중복 발동 점검. 초점도구는 휴대 매개/장비 촉매이며 양손 스태프를 강제하지 않는다.",
+        "sequence": "회복 마련 → 유지 또는 전환 → 재배치",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_element_faith",
+      "name": "성화술사",
+      "masteries": [
+        "element",
+        "faith"
+      ],
+      "signature": {
+        "id": "v3_bridge_element_faith",
+        "name": "정화의 간격",
+        "trigger": "보호 준비를 공격하지 않고 마친 다음 원소 기술을 직접 시전하면",
+        "effect": "해당 원소 기술의 기본 범위를 플레이어 앞의 좁은 십자형 단발 폭발로 바꾼다.",
+        "tradeoff": "시전 준비가 길어지고 준비 중 이동이 제한되며, 원래의 긴 사거리 또는 넓은 부채꼴을 포기한다.",
+        "compatible_tags": [
+          "element",
+          "ward"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "보호 준비 → 단발 폭발 → 재준비",
+      "equipment_note": "초점도구. 성화라는 이름이 화속성 고정이나 종교 설정을 뜻하지 않는다.",
+      "example": {
+        "active_slots": [
+          "v3_element_ember_stroke",
+          "v3_faith_folded_sign"
+        ],
+        "equipment": "초점도구. 성화라는 이름이 화속성 고정이나 종교 설정을 뜻하지 않는다. 초점도구는 휴대 매개/장비 촉매이며 양손 스태프를 강제하지 않는다.",
+        "sequence": "보호 준비 → 단발 폭발 → 재준비",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_element_forge",
+      "name": "마도공학자",
+      "masteries": [
+        "element",
+        "forge"
+      ],
+      "signature": {
+        "id": "v3_bridge_element_forge",
+        "name": "축전의 그릇",
+        "trigger": "전투 장치에 직접 원소 기술을 연결하면",
+        "effect": "장치에 한 번의 방향성 발사를 저장하고 플레이어 입력으로 방출한다.",
+        "tradeoff": "저장한 시전은 즉시 피해를 내지 않고 장치 파괴/회수 시 예약이 사라진다.",
+        "compatible_tags": [
+          "element",
+          "device"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "장치 → 저장 → 적 방향 확인 → 방출",
+      "equipment_note": "초점도구+장치. 자율 포탑 AI 대신 명시적 방출 입력 후보.",
+      "example": {
+        "active_slots": [
+          "v3_element_ember_stroke",
+          "v3_forge_field_emplacement"
+        ],
+        "equipment": "초점도구+장치. 자율 포탑 AI 대신 명시적 방출 입력 후보. 초점도구는 휴대 매개/장비 촉매이며 양손 스태프를 강제하지 않는다.",
+        "sequence": "장치 → 저장 → 적 방향 확인 → 방출",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_life_faith",
+      "name": "치유성직자",
+      "masteries": [
+        "life",
+        "faith"
+      ],
+      "signature": {
+        "id": "v3_bridge_life_faith",
+        "name": "남겨 둔 온기",
+        "trigger": "실제 체력 손실이 있는 자신에게 직접 생명 회복을 적용하려 할 때",
+        "effect": "직접 회복의 유효량을 먼저 계산한 뒤, 그 일부는 체력 회복으로, 나머지는 다음 방어 가능한 피격의 작은 보호로 원자적으로 나눠 적용한다.",
+        "tradeoff": "회복량 일부를 포기하고 최대 체력 대상·과잉 회복으로 보호를 농사짓지 못한다.",
+        "compatible_tags": [
+          "heal",
+          "ward"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "손실 확인 → 회복/보호 분배 → 다음 피격 대비",
+      "equipment_note": "공통 시전. 솔로 자기 대상으로 완결, 부활 없음.",
+      "example": {
+        "active_slots": [
+          "v3_life_leaf_dressing",
+          "v3_faith_folded_sign"
+        ],
+        "equipment": "공통 시전. 솔로 자기 대상으로 완결, 부활 없음. 초점도구는 휴대 매개/장비 촉매이며 양손 스태프를 강제하지 않는다.",
+        "sequence": "손실 확인 → 회복/보호 분배 → 다음 피격 대비",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_life_forge",
+      "name": "생체연금사",
+      "masteries": [
+        "life",
+        "forge"
+      ],
+      "signature": {
+        "id": "v3_bridge_life_forge",
+        "name": "접어 둔 온실",
+        "trigger": "회복 구역을 장치로 고정하면",
+        "effect": "움직이지 않는 좁은 회복 지점으로 전환해 유지 시간을 조절한다.",
+        "tradeoff": "구역의 넓이를 포기하고 장치 회수 시 회복도 끝나며 판매 가능한 물약은 만들지 않는다.",
+        "compatible_tags": [
+          "heal",
+          "zone",
+          "device"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "지점 선정 → 고정 → 보호 또는 회수",
+      "equipment_note": "도구/초점. 제련 경제 데이터와 회복 자원을 분리.",
+      "example": {
+        "active_slots": [
+          "v3_life_resting_patch",
+          "v3_forge_field_emplacement"
+        ],
+        "equipment": "도구/초점. 제련 경제 데이터와 회복 자원을 분리. 초점도구는 휴대 매개/장비 촉매이며 양손 스태프를 강제하지 않는다.",
+        "sequence": "지점 선정 → 고정 → 보호 또는 회수",
+        "status": "requires_runtime_implementation"
+      }
+    },
+    {
+      "id": "v3_class_faith_forge",
+      "name": "성물장인",
+      "masteries": [
+        "faith",
+        "forge"
+      ],
+      "signature": {
+        "id": "v3_bridge_faith_forge",
+        "name": "서약의 받침",
+        "trigger": "보호 서약을 전투 받침에 새긴 뒤",
+        "effect": "받침 가까이서 직접 방어할 때 한 차례 충격 표시와 안정 효과를 제공한다.",
+        "tradeoff": "받침을 떠나면 효과를 잃고 보호를 계속 복제하거나 영구 장비 강화로 바꾸지 않는다.",
+        "compatible_tags": [
+          "ward",
+          "device"
+        ],
+        "anti_loop": "플레이어의 직접 행동만 시작 조건으로 인정. 파생 피해·회복·잔향은 재발동 조건에서 제외. 준비 토큰은 1개, 소비/만료/전투 종료로 제거하며 장비·슬롯 교체로 초기화하지 않는다."
+      },
+      "play_pattern": "준비물 설치 → 위치 약속 → 방어 후 회수",
+      "equipment_note": "도구+호환 보호 장비. ‘성물장인’은 가칭이며 세계관의 다섯 수호 성물을 제작하는 능력이 아니다.",
+      "example": {
+        "active_slots": [
+          "v3_faith_folded_sign",
+          "v3_forge_field_emplacement"
+        ],
+        "equipment": "도구+호환 보호 장비. ‘성물장인’은 가칭이며 세계관의 다섯 수호 성물을 제작하는 능력이 아니다. 초점도구는 휴대 매개/장비 촉매이며 양손 스태프를 강제하지 않는다.",
+        "sequence": "준비물 설치 → 위치 약속 → 방어 후 회수",
+        "status": "requires_runtime_implementation"
+      }
+    }
+  ],
+  "rules_note": "example은 장착 후보의 참조 검증 대상일 뿐 실행 보증이 아니다. life 구역 전환은 새 효과/자원 적용 전에 원본 구역과 잔여량을 원자적으로 소비하며 이미 끝난 구역은 사용 불가. 설치 슬롯 재입력은 회수/준비 완료 후 방출 문맥 행동. 방패 없는 brace는 guarded_hit 이벤트를 발생시키지 않는다."
+}

@@ -1,0 +1,21 @@
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+WARNING: [Data] stats.luk: 만렙 몰빵(147포인트) crit_chance=0.1970 가 상한(0.7500)에 못 미침 — 상한이 사실상 의미 없음
+   at: push_warning (core/variant/variant_utility.cpp:1118)
+WARNING: [Data] stats.int: 만렙 몰빵 cooldown_reduction=0.2940 가 상한(0.3000)에 못 미침 — 상한이 사실상 의미 없음
+   at: push_warning (core/variant/variant_utility.cpp:1118)
+[Metrics] 세션 시작. tester=anon, 저장 경로=user://playtest/session_1789231204.json
+[AudioManager] (headless) play_bgm id=bgm_grassland_1 fade=1.50
+OBJECT_SAVE_ISOLATION_PASS C:/Users/freer/AppData/Roaming/Games-QA-object-observation-20260913-story
+[PASS] actual partial save loads
+[PASS] load leaves objective active without interaction
+[PASS] explicit E after file load completes objective
+[PASS] repeat after restore has no duplicate signal or reward
+OBJECT_OBSERVATION_SAVE_RESULT mode=verify PASS=4 FAIL=0
+=== [Metrics] 플레이테스트 요약 (tester=anon) ===
+세션 길이: 0.5s, 사망: 0
+구르기: 시도=0 성공=0 성공률=0% (무적중 피격=0)
+가드: 저스트 시도=0 성공=0 성공률=0%, 일반 가드=0
+콤보 3타 완주: 0회
+플레이어 피격: 0회, 총 피해: 0
+=== [Metrics] 저장: user://playtest/session_1789231204.json ===

@@ -1,0 +1,4 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://tests/smoke/smoke_diagnostic_walk.gd" id="1"]
+[node name="SmokeDiagnosticWalk" type="Node"]
+script = ExtResource("1")

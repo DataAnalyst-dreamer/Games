@@ -20,7 +20,10 @@ static func flash(target: CanvasItem) -> void:
 	if target == null or not is_instance_valid(target):
 		return
 	# 진행 중인 플래시가 있으면 끊고, 원래 색은 첫 호출 때 저장한 값을 그대로 쓴다.
-	var previous: Tween = target.get_meta(META_TWEEN, null) as Tween
+	# null은 get_meta의 오류 억제 기본값이 아니므로 최초 피격은 존재 여부부터 확인한다.
+	var previous: Tween = null
+	if target.has_meta(META_TWEEN):
+		previous = target.get_meta(META_TWEEN) as Tween
 	if previous != null and previous.is_valid():
 		previous.kill()
 	var original: Color
