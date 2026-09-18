@@ -148,6 +148,10 @@ const REQUIRED_SCHEMA := {
 	# quest-system-m2.md §10에서 "형식만 두고 값은 검사하지 않는다"고 했던 부분을 M2-8이
 	# 실제 레벨 배치가 생기면서 채운다).
 	"world_objects": [],
+	# exp_curve.csv(M3-1, F1-2 신설) — level 키(문자열)의 동적 딕셔너리라 위 테이블들과
+	# 동일 패턴("테이블 존재"만 여기 등록)으로 두고 필드 단위 검증은 _validate_exp_curve()에
+	# 위임한다. JSON이 아닌 CSV라 로더는 _load_csv()가 별도 담당(§0 "CSV는 별도 파서 필요").
+	"exp_curve": [],
 }
 
 ## monsters.json은 monster_id를 키로 하는 동적 딕셔너리라 REQUIRED_SCHEMA(고정 경로)로
@@ -275,11 +279,17 @@ func _load_all(dir_path: String) -> void:
 	dir.list_dir_begin()
 	var file_name := dir.get_next()
 	while file_name != "":
-		if not dir.current_is_dir() and file_name.get_extension() == "json":
+		if not dir.current_is_dir():
+			var ext := file_name.get_extension()
 			var table_name := file_name.get_basename()
-			var table: Variant = _load_json("%s/%s" % [dir_path, file_name])
-			if table != null:
-				tables[table_name] = table
+			if ext == "json":
+				var table: Variant = _load_json("%s/%s" % [dir_path, file_name])
+				if table != null:
+					tables[table_name] = table
+			elif ext == "csv":
+				var csv_table: Variant = _load_csv("%s/%s" % [dir_path, file_name])
+				if csv_table != null:
+					tables[table_name] = csv_table
 		file_name = dir.get_next()
 	dir.list_dir_end()
 
@@ -344,6 +354,52 @@ func _load_json(path: String) -> Variant:
 	return json.data
 
 
+## CSV 전용 파서(M3-1, exp_curve.csv — data_tables.md §0 "CSV는 별도 파서 필요"). 첫 줄을
+## 헤더로 쓰고, 이후 각 행을 헤더 컬럼명 키의 Dictionary로 만든 뒤 "첫 컬럼 값(문자열)"을
+## 키로 하는 Dictionary에 담는다(monsters.json 등 동적 딕셔너리 테이블과 동일한 접근
+## 형태 — Data.get_value("exp_curve", "5.exp_to_next") 식으로 조회 가능). '#'로 시작하는
+## 줄과 빈 줄은 주석/공백으로 건너뛴다(밸런스 잠정치 설명을 코드 밖에 남기기 위함).
+## 값은 int로 파싱되면 int, float로 파싱되면 float, 그 외엔 문자열 그대로 둔다.
+func _load_csv(path: String) -> Variant:
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		_report("CSV 파일을 열 수 없음: %s (err=%d)" % [path, FileAccess.get_open_error()])
+		return null
+	var header: PackedStringArray = []
+	var result: Dictionary = {}
+	var line_no := 0
+	while not file.eof_reached():
+		var raw_line := file.get_line()
+		line_no += 1
+		var line := raw_line.strip_edges()
+		if line.is_empty() or line.begins_with("#"):
+			continue
+		var cols := line.split(",")
+		if header.is_empty():
+			header = cols
+			continue
+		if cols.size() != header.size():
+			_report("CSV 컬럼 수 불일치: %s:%d (헤더 %d개, 이 줄 %d개)" % [path, line_no, header.size(), cols.size()])
+			continue
+		var row: Dictionary = {}
+		for i in header.size():
+			var col_key := header[i].strip_edges()
+			var value := cols[i].strip_edges()
+			if value.is_valid_int():
+				row[col_key] = int(value)
+			elif value.is_valid_float():
+				row[col_key] = float(value)
+			else:
+				row[col_key] = value
+		# String(int)은 GDScript 타입 생성자가 지원하지 않는 조합이라(숫자->문자열은
+		# str()을 써야 함) row_key가 숫자로 파싱됐을 수 있는 첫 컬럼 값을 str()로 안전
+		# 변환한다.
+		var row_key := str(row.get(header[0].strip_edges(), line_no))
+		result[row_key] = row
+	file.close()
+	return result
+
+
 func _validate() -> void:
 	for table_name: String in REQUIRED_SCHEMA:
 		if not tables.has(table_name):
@@ -356,6 +412,7 @@ func _validate() -> void:
 				if not OS.is_debug_build():
 					_set_path(tables[table_name], key_path, RELEASE_FALLBACKS[table_name][key_path])
 	_validate_monsters()
+	_validate_exp_curve()
 	_validate_items()
 	_validate_affixes()
 	_validate_drop_tables()
@@ -413,6 +470,40 @@ func _validate_monsters() -> void:
 			var drop_tables_table: Dictionary = tables.get("drop_tables", {})
 			if not drop_tables_table.has(dt_id):
 				_report("monsters.%s: drop_table_id '%s' 가 drop_tables.json에 없음 (D-67 위반)" % [monster_id, dt_id])
+
+
+## exp_curve.csv 필드 단위 검증(M3-1, F1-2. data_tables.md §4 검증 규칙 1~3 이식).
+func _validate_exp_curve() -> void:
+	if not tables.has("exp_curve"):
+		_report("필수 테이블 누락: exp_curve.csv")
+		return
+	var curve: Dictionary = tables["exp_curve"]
+	var max_level: int = int(get_value("stats", "max_level", 50))
+	var prev_exp_to_next: int = 0
+	for level in range(1, max_level + 1):
+		var row: Variant = curve.get(str(level), null)
+		if not (row is Dictionary):
+			_report("exp_curve: level %d 행 누락(1~%d 연속이어야 함)" % [level, max_level])
+			continue
+		var r: Dictionary = row
+		if not r.has("exp_to_next"):
+			_report("exp_curve.%d: 필수 키 누락 exp_to_next" % level)
+			continue
+		var exp_to_next: int = int(r["exp_to_next"])
+		# 단조 비감소·">0" 규칙은 "성장 중" 구간(1~max_level-1)에만 적용한다. max_level
+		# 행의 exp_to_next=0은 "더 오를 곳 없음" 종료 표식이라 이전 레벨보다 작아도
+		# 위반이 아니다(data_tables.md §4 "레벨50은 0 또는 공란" 예외).
+		if level < max_level:
+			if exp_to_next <= 0:
+				_report("exp_curve.%d: exp_to_next(%d)는 만렙(%d) 미만 레벨에서 반드시 >0" % [level, exp_to_next, max_level])
+			if exp_to_next < prev_exp_to_next:
+				_report("exp_curve.%d: exp_to_next(%d)가 이전 레벨(%d)보다 작음 — 단조 비감소 위반" \
+					% [level, exp_to_next, prev_exp_to_next])
+			prev_exp_to_next = exp_to_next
+		if not r.has("hp_bonus"):
+			_report("exp_curve.%d: 필수 키 누락 hp_bonus" % level)
+		if not r.has("atk_bonus"):
+			_report("exp_curve.%d: 필수 키 누락 atk_bonus" % level)
 
 
 ## items.json 필드 단위 검증(M2-1, tools/qa/validate_tables.py:validate_items() 이식).

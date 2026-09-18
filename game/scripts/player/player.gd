@@ -252,7 +252,9 @@ func apply_equipment_stats(stats: Dictionary) -> void:
 ## 실제 타격 데미지 계산이 읽는 공격력(F2-1 기본값 + 장비 합산, M2-1). characters.json/
 ## stats.json이 확정되면 STR 등 스탯 기반 공격력 공식으로 교체될 자리(godot-engineer TODO).
 func get_attack_power() -> float:
-	return Tuning.PLAYER_BASE_ATTACK + equip_attack_bonus
+	# M3-1(F1-2): 레벨업 자동 공격력 상승분(GameState.level_stat_bonus.attack, exp_curve.csv
+	# atk_bonus 누적치)을 장비 보너스와 합산한다.
+	return Tuning.PLAYER_BASE_ATTACK + equip_attack_bonus + float(GameState.level_stat_bonus.get("attack", 0.0))
 
 
 ## Knight의 방향별 단일 공격 자세(D-137) 위에 무기 회전으로 휘두름을 표현한다.
