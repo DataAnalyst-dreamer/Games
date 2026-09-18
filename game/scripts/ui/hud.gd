@@ -15,6 +15,7 @@ const LOG_DURATION_SEC := 3.0
 const HP_BLINK_INTERVAL_SEC := 0.25
 const STAMINA_BLINK_INTERVAL_SEC := 0.2
 const STAMINA_FLASH_CYCLE_SEC := 0.08
+var _npc_visit_lines: Dictionary = {} # Presentation only; not quest/save progress.
 
 @export var player_path: NodePath
 
@@ -84,6 +85,7 @@ var _boss_fill_style: StyleBoxFlat
 
 
 func _ready() -> void:
+	add_to_group("world_observation_hud")
 	if not player_path.is_empty():
 		_player = get_node(player_path) as Player
 
@@ -300,8 +302,27 @@ func _on_gold_changed(_new_amount: int, delta: int) -> void:
 ## M2-8(QuestNpc). "npc.<id>.greeting" key가 없으면(신규 NPC 배치 전 등) key 문자열
 ## 자체가 그대로 나온다 — tr()의 기본 동작(번역 없으면 원문 반환)에 맡긴다.
 func _on_npc_talked(npc_id: StringName) -> void:
-	var greeting_key := StringName("npc.%s.greeting" % npc_id)
+	var cave_done := QuestSystem.get_state("quest_main_a1_06_echocave") == "completed"
+	var montsil_done := QuestSystem.get_state("quest_side_heartland_montsil") == "completed"
+	var greeting_key := _next_npc_greeting(npc_id, cave_done, montsil_done)
 	_push_log_line(tr(greeting_key))
+
+
+func _next_npc_greeting(npc_id: StringName, cave_done: bool, montsil_done: bool = false) -> StringName:
+	if npc_id not in [&"teo", &"meru", &"pinto", &"rozel", &"dami"]:
+		return StringName("npc.%s.greeting" % npc_id)
+	var group := "everyday"
+	if npc_id in [&"teo", &"meru"] and cave_done: group = "after_cave"
+	if npc_id == &"dami" and montsil_done: group = "after_montsil"
+	var bucket := "%s.%s" % [npc_id, group]
+	var index := int(_npc_visit_lines.get(bucket, 0)) % 3
+	_npc_visit_lines[bucket] = (index + 1) % 3
+	return StringName("npc.%s.%s.%d" % [npc_id, group, index + 1])
+
+
+func show_world_observation(key: StringName) -> void:
+	var message := tr(key)
+	if message != String(key): _push_log_line(message)
 
 
 func _push_log_line(text: String, color: Variant = null, icon: Texture2D = null) -> void:

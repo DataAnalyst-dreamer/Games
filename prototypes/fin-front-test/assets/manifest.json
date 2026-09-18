@@ -1,0 +1,109 @@
+{
+  "cell": [
+    96,
+    128
+  ],
+  "body_budget": [
+    64,
+    96
+  ],
+  "foot_anchor": [
+    48,
+    112
+  ],
+  "fps": 8,
+  "frames": [
+    {
+      "frame": 0,
+      "torso_offset": [
+        0,
+        0
+      ],
+      "leg_phase": [
+        0,
+        4
+      ]
+    },
+    {
+      "frame": 1,
+      "torso_offset": [
+        0,
+        1
+      ],
+      "leg_phase": [
+        1,
+        5
+      ]
+    },
+    {
+      "frame": 2,
+      "torso_offset": [
+        0,
+        0
+      ],
+      "leg_phase": [
+        2,
+        6
+      ]
+    },
+    {
+      "frame": 3,
+      "torso_offset": [
+        0,
+        -1
+      ],
+      "leg_phase": [
+        3,
+        7
+      ]
+    },
+    {
+      "frame": 4,
+      "torso_offset": [
+        0,
+        0
+      ],
+      "leg_phase": [
+        4,
+        0
+      ]
+    },
+    {
+      "frame": 5,
+      "torso_offset": [
+        0,
+        1
+      ],
+      "leg_phase": [
+        5,
+        1
+      ]
+    },
+    {
+      "frame": 6,
+      "torso_offset": [
+        0,
+        0
+      ],
+      "leg_phase": [
+        6,
+        2
+      ]
+    },
+    {
+      "frame": 7,
+      "torso_offset": [
+        0,
+        -1
+      ],
+      "leg_phase": [
+        7,
+        3
+      ]
+    }
+  ],
+  "head_identity_test": "pass; 43 source rows unchanged after bob compensation",
+  "distinct_frames": 8,
+  "status": "front-only cutout motion blockout; not final hand-drawn animation",
+  "source": "docs/art/preview/fin-resolution/front-64.png"
+}

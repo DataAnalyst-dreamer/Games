@@ -255,8 +255,8 @@ func get_attack_power() -> float:
 	return Tuning.PLAYER_BASE_ATTACK + equip_attack_bonus
 
 
-## 공격 프레임이 없는 Knight 시트 대신 무기 스프라이트를 회전시켜 휘두름을 표현한다
-## (godot-engineer 결정, pixel-artist 몫 TODO: 공격 전용 프레임 필요 — 완료 보고 참고).
+## Knight의 방향별 단일 공격 자세(D-137) 위에 무기 회전으로 휘두름을 표현한다.
+## 새 원작 6f 공격(T04~06) 전까지의 임시 연출이며 콤보/판정 시간은 기존 값을 유지한다.
 func play_attack_swing(hit_index: int, duration: float) -> void:
 	if weapon_pivot == null:
 		return

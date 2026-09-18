@@ -20,11 +20,12 @@ static func flash(target: CanvasItem) -> void:
 	if target == null or not is_instance_valid(target):
 		return
 	# 진행 중인 플래시가 있으면 끊고, 원래 색은 첫 호출 때 저장한 값을 그대로 쓴다.
-	# get_meta()는 기본값이 null이면 키가 없을 때 오류를 찍으므로 has_meta()로 먼저 확인한다.
+	# null은 get_meta의 오류 억제 기본값이 아니므로 최초 피격은 존재 여부부터 확인한다.
+	var previous: Tween = null
 	if target.has_meta(META_TWEEN):
-		var previous: Tween = target.get_meta(META_TWEEN) as Tween
-		if previous != null and previous.is_valid():
-			previous.kill()
+		previous = target.get_meta(META_TWEEN) as Tween
+	if previous != null and previous.is_valid():
+		previous.kill()
 	var original: Color
 	if target.has_meta(META_ORIGINAL_COLOR):
 		original = target.get_meta(META_ORIGINAL_COLOR)

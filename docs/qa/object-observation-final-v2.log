@@ -1,0 +1,73 @@
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+WARNING: [Data] stats.luk: 만렙 몰빵(147포인트) crit_chance=0.1970 가 상한(0.7500)에 못 미침 — 상한이 사실상 의미 없음
+   at: push_warning (core/variant/variant_utility.cpp:1118)
+WARNING: [Data] stats.int: 만렙 몰빵 cooldown_reduction=0.2940 가 상한(0.3000)에 못 미침 — 상한이 사실상 의미 없음
+   at: push_warning (core/variant/variant_utility.cpp:1118)
+[Metrics] 세션 시작. tester=anon, 저장 경로=user://playtest/session_1789230847.json
+[AudioManager] (headless) play_bgm id=bgm_grassland_1 fade=1.50
+---  GUT  ---
+[INFO]:  using [C:/Users/freer/AppData/Roaming/Games-QA-npc-greeting-20260913-story] for temporary output.
+Godot version:  4.4.1
+GUT version:  9.4.0
+
+
+res://tests/unit/test_object_observation.gd
+* test_used_cargo_observation_does_not_repeat_quest_signal
+* test_active_cargo_objective_and_outside_input
+* test_ward_state_reactions_and_unlisted_fallback
+* test_observation_width_and_translation
+OBSERVATION_BOUNDS observe.cargo.before width=125.0
+OBSERVATION_BOUNDS observe.cargo.active width=141.0
+OBSERVATION_BOUNDS observe.cargo.used width=141.0
+OBSERVATION_BOUNDS observe.ward.before width=141.0
+OBSERVATION_BOUNDS observe.ward.active width=141.0
+OBSERVATION_BOUNDS observe.ward.after width=129.0
+* test_explore_cargo_before_accepting_does_not_block_later_objective
+* test_restore_active_state_requires_explicit_interaction
+* test_later_objective_and_repeat_acceptance_require_new_input
+7/7 passed.
+
+
+res://tests/unit/test_npc_greeting.gd
+* test_visit_lines_cycle_and_completed_group_is_separate
+* test_all_visit_keys_have_korean_translation
+* test_new_lines_fit_existing_log_width
+NPC_TEXT_BOUNDS npc.teo.everyday.1 width=112.0 limit=154
+NPC_TEXT_BOUNDS npc.teo.everyday.2 width=129.0 limit=154
+NPC_TEXT_BOUNDS npc.teo.everyday.3 width=150.0 limit=154
+NPC_TEXT_BOUNDS npc.teo.after_cave.1 width=146.0 limit=154
+NPC_TEXT_BOUNDS npc.teo.after_cave.2 width=150.0 limit=154
+NPC_TEXT_BOUNDS npc.teo.after_cave.3 width=129.0 limit=154
+NPC_TEXT_BOUNDS npc.meru.everyday.1 width=130.0 limit=154
+NPC_TEXT_BOUNDS npc.meru.everyday.2 width=141.0 limit=154
+NPC_TEXT_BOUNDS npc.meru.everyday.3 width=113.0 limit=154
+NPC_TEXT_BOUNDS npc.meru.after_cave.1 width=128.0 limit=154
+NPC_TEXT_BOUNDS npc.meru.after_cave.2 width=125.0 limit=154
+NPC_TEXT_BOUNDS npc.meru.after_cave.3 width=118.0 limit=154
+3/3 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+---- Totals ----
+Scripts           2
+Tests             10
+  Passing         10
+Asserts           83
+Time              0.982s
+
+
+---- All tests passed! ----
+
+=== [Metrics] 플레이테스트 요약 (tester=anon) ===
+세션 길이: 1.2s, 사망: 0
+구르기: 시도=0 성공=0 성공률=0% (무적중 피격=0)
+가드: 저스트 시도=0 성공=0 성공률=0%, 일반 가드=0
+콤보 3타 완주: 0회
+플레이어 피격: 0회, 총 피해: 0
+=== [Metrics] 저장: user://playtest/session_1789230847.json ===

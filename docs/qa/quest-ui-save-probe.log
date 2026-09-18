@@ -1,0 +1,6 @@
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2289)
+QUEST_UI_SAVE_PROBE actual=C:/Users/freer/AppData/Roaming/Games-QA-quest-ui-save-20260913-story
+QUEST_UI_SAVE_PROBE_PASS=true

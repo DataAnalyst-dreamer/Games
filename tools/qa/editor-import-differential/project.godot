@@ -1,0 +1,14 @@
+config_version=5
+[application]
+config/name="Editor import differential"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="EditorImportDifferential"
+[autoload]
+PhantomCameraManager="*res://addons/phantom_camera/scripts/managers/phantom_camera_manager.gd"
+[display]
+window/size/viewport_width=640
+window/size/viewport_height=360
+[editor_plugins]
+enabled=PackedStringArray()
+[rendering]
+renderer/rendering_method="gl_compatibility"

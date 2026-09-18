@@ -1,13 +1,50 @@
 keys,ko
+observe.cargo.before,차곡차곡 쌓인 짐.
+observe.cargo.active,묶인 짐을 살펴보자.
+observe.cargo.used,짐을 살펴본 자리다.
+observe.ward.before,홀씨 모양의 돌이다.
+observe.ward.active,돌을 가까이 살핀다.
+observe.ward.after,다시 돌 앞에 섰다.
+observe.waypoint.before,언덕 위 비석이다.
+observe.waypoint.active,비석을 살펴보자.
+observe.waypoint.after,살펴본 비석이다.
+ui.quest_npc.accept,수주하기
+ui.quest_npc.complete,완료 보고
+ui.quest_npc.active,목표 진행 중
+ui.quest_npc.close,닫기
 ui.hud.level_prefix,레벨
 ui.hud.gold_unit,골드
 ui.hud.save_icon,저장됨
 ui.hud.quest_progress_fmt,%s (%d/%d)
 npc.teo.greeting,"짐부터 챙기고 움직이자."
 npc.meru.greeting,"왔으면 밥부터 먹어. 국 데워줄게."
+npc.teo.everyday.1,"짐은 다 챙겼나?"
+npc.teo.everyday.2,"돌아올 길도 봐 둬."
+npc.teo.everyday.3,"서두르지 마. 발밑 봐."
+npc.teo.after_cave.1,"돌아왔군. 한숨 돌려."
+npc.teo.after_cave.2,"굴에서 본 건 적어 둬."
+npc.teo.after_cave.3,"아는 길도 살펴 가."
+npc.meru.everyday.1,"앉아. 국 데워줄게."
+npc.meru.everyday.2,"빈속으로 다니지 마."
+npc.meru.everyday.3,"부츠 흙 털고 와."
+npc.meru.after_cave.1,"굴에서 안 다쳤어?"
+npc.meru.after_cave.2,"얘기는 앉아서 해."
+npc.meru.after_cave.3,"또 왔네. 쉬어 가."
 npc.pinto.greeting,"어이, 이 망치 좀 봐! 나 요즘 늘고 있다니까."
+npc.pinto.everyday.1,망치가 손에 익어 가!
+npc.pinto.everyday.2,오늘도 연습할 거야.
+npc.pinto.everyday.3,불똥 튀니 조심해!
 npc.rozel.greeting,"오늘도 목초지 순찰 중이야. 별일 없지?"
+npc.rozel.everyday.1,목초지 다녀왔어.
+npc.rozel.everyday.2,울타리도 살펴봐야지.
+npc.rozel.everyday.3,풀밭에선 발밑을 봐.
 npc.dami.greeting,"저기... 몽실이 못 봤어요? 갑자기 사라졌어요."
+npc.dami.everyday.1,몽실이 못 봤어요?
+npc.dami.everyday.2,어디로 간 걸까요.
+npc.dami.everyday.3,같이 찾아줄래요?
+npc.dami.after_montsil.1,함께 찾아줘 고마워요.
+npc.dami.after_montsil.2,잠깐 쉬고 갈래요.
+npc.dami.after_montsil.3,오늘은 여기 있을게요.
 ui.inv.tab.inventory,가방
 ui.inv.tab.skill,스킬
 ui.inv.tab.codex,도감

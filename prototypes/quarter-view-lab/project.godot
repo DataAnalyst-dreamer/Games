@@ -1,0 +1,21 @@
+config_version=5
+
+[application]
+config/name="Quarter View Lab"
+run/main_scene="res://Main.tscn"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="QuarterViewLab"
+
+[display]
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/size/mode=4
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false
+environment/defaults/default_clear_color=Color(0.04,0.06,0.06,1)

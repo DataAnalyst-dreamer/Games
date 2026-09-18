@@ -1,0 +1,7 @@
+config_version=5
+[application]
+config/name="Quarter View Lab"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="QuarterViewLab"
+[rendering]
+renderer/rendering_method="gl_compatibility"

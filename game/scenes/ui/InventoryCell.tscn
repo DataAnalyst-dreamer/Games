@@ -18,6 +18,18 @@ offset_bottom = 23.0
 mouse_filter = 2
 color = Color(0.5, 0.5, 0.5, 0.85)
 
+[node name="ItemTexture" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 3.0
+offset_top = 3.0
+offset_right = 23.0
+offset_bottom = 23.0
+mouse_filter = 2
+texture_filter = 1
+expand_mode = 1
+stretch_mode = 5
+visible = false
+
 [node name="GradeBar" type="ColorRect" parent="."]
 layout_mode = 0
 offset_left = 2.0

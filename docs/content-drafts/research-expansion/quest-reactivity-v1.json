@@ -1,0 +1,599 @@
+{
+  "schema_version": 1,
+  "status": "draft_unconnected",
+  "runtime_registered": false,
+  "source_document": "docs/content-drafts/research-expansion/story-quests-v2.md",
+  "canon_refs": [
+    "docs/story/world-bible.md",
+    "docs/story/characters.md",
+    "docs/story/main-storyline.md",
+    "docs/content-drafts/story-world-demo-v1.md"
+  ],
+  "layout_policy": {
+    "hud_target_width_px": 154,
+    "hud_max_codepoints": 13,
+    "expanded_max_codepoints": 110,
+    "pixel_width_status": "measured_godot_galmuri11_size11_max101px_unconnected",
+    "note": "별도 QA reactivity-font-width-20260913.md에서 실제 테마/폰트11px로40문장 최대101px 확인. 큰 글씨 parent15 설정도 자식 Label은11px를 유지하므로15px 성공주장 아님. expanded와 실제게임등록/배경대비는 미검증."
+  },
+  "speaker_refs": {
+    "fin": {
+      "path": "docs/story/characters.md",
+      "token": "### 2.1 핀"
+    },
+    "teo": {
+      "path": "game/data/world_objects.json",
+      "token": "teo"
+    },
+    "meru": {
+      "path": "game/data/world_objects.json",
+      "token": "meru"
+    },
+    "rozel": {
+      "path": "game/data/world_objects.json",
+      "token": "rozel"
+    }
+  },
+  "reactions": [
+    {
+      "id": "draft_reactivity_returning_sign_start",
+      "source_id": "SQH-V2-01",
+      "source_code": "draft_quest_heartland_returning_sign",
+      "state": "start",
+      "location_anchor": "heartland_hilltop_waypoint",
+      "condition": "원자료의 start 상태에서만; 선발견/선해결을 다시 요구하지 않음",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "표지가 돌아갔다.",
+          "expanded": "표지가 길 옆을 가리키네. 받침에 닳은 자국이 있어요.",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_returning_sign_progress",
+      "source_id": "SQH-V2-01",
+      "source_code": "draft_quest_heartland_returning_sign",
+      "state": "progress",
+      "location_anchor": "heartland_hilltop_waypoint",
+      "condition": "원자료의 progress 상태에서만; 선발견/선해결을 다시 요구하지 않음",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "돌아갈 길도 보자.",
+          "expanded": "동굴만 보고 맞추지 말고 마을 쪽에서도 한 번 봐 줘.",
+          "speaker_ref": "rozel"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_returning_sign_complete",
+      "source_id": "SQH-V2-01",
+      "source_code": "draft_quest_heartland_returning_sign",
+      "state": "complete",
+      "location_anchor": "heartland_hilltop_waypoint",
+      "condition": "원자료의 complete 상태에서만; 선발견/선해결을 다시 요구하지 않음",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "두 길이 맞았다.",
+          "expanded": "이제 가는 사람도 돌아오는 사람도 같은 표지를 믿겠네.",
+          "speaker_ref": "rozel"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_returning_sign_revisit",
+      "source_id": "SQH-V2-01",
+      "source_code": "draft_quest_heartland_returning_sign",
+      "state": "revisit",
+      "location_anchor": "heartland_hilltop_waypoint",
+      "condition": "원자료의 revisit 상태에서만; 선발견/선해결을 다시 요구하지 않음",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "방향은 그대로다.",
+          "expanded": "돌아와서 보니 더 잘 알겠어요. 저쪽이 마을이네요.",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_wind_caught_cloth_start",
+      "source_id": "SQH-V2-02",
+      "source_code": "draft_quest_heartland_wind_caught_cloth",
+      "state": "start",
+      "location_anchor": "heartland_dandelion_village",
+      "condition": "원자료의 start 상태에서만; 선발견/선해결을 다시 요구하지 않음",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "빈 빨랫줄이다.",
+          "expanded": "널어 둔 천이 하나 비었네. 기운 자리부터 찾아보자.",
+          "speaker_ref": "meru"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_wind_caught_cloth_progress",
+      "source_id": "SQH-V2-02",
+      "source_code": "draft_quest_heartland_wind_caught_cloth",
+      "state": "progress",
+      "location_anchor": "heartland_dandelion_village",
+      "condition": "원자료의 progress 상태에서만; 선발견/선해결을 다시 요구하지 않음",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "매듭을 살피자.",
+          "expanded": "걸린 쪽을 풀어도 되고 낮은 담장 뒤로 돌아가도 되겠어요.",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_wind_caught_cloth_complete",
+      "source_id": "SQH-V2-02",
+      "source_code": "draft_quest_heartland_wind_caught_cloth",
+      "state": "complete",
+      "location_anchor": "heartland_dandelion_village",
+      "condition": "원자료에 이미 있는 선택의 결과가 실제 성립한 뒤만 표시; 선택 전에는 표시하지 않음",
+      "lines": [
+        {
+          "choice": "식탁",
+          "hud_short": "식탁에 펼쳤다.",
+          "expanded": "이제 그릇을 올려도 되겠네. 기운 쪽도 펴 놓자.",
+          "speaker_ref": "meru"
+        },
+        {
+          "choice": "출입구 짐받침",
+          "hud_short": "짐 밑에 놓았다.",
+          "expanded": "짐을 잠깐 올려두기 좋겠네. 기운 쪽은 밖으로 보이게 두자.",
+          "speaker_ref": "meru"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_wind_caught_cloth_revisit",
+      "source_id": "SQH-V2-02",
+      "source_code": "draft_quest_heartland_wind_caught_cloth",
+      "state": "revisit",
+      "location_anchor": "heartland_dandelion_village",
+      "condition": "원자료에 이미 있는 선택의 결과가 실제 성립한 뒤만 표시; 선택 전에는 표시하지 않음",
+      "lines": [
+        {
+          "choice": "식탁",
+          "hud_short": "식탁의 기운 천.",
+          "expanded": "다시 보니 저 식탁이네요. 돌아온 천이 제자리를 찾았어요.",
+          "speaker_ref": "fin"
+        },
+        {
+          "choice": "출입구 짐받침",
+          "hud_short": "문 앞의 기운 천.",
+          "expanded": "들어오자마자 보이네요. 짐 놓는 자리도 헷갈리지 않겠어요.",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_lonely_boot_start",
+      "source_id": "SQH-V2-03",
+      "source_code": "draft_quest_heartland_lonely_boot",
+      "state": "start",
+      "location_anchor": "heartland_dandelion_village",
+      "condition": "원자료의 start 상태에서만; 선발견/선해결을 다시 요구하지 않음",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "장화 한 짝이다.",
+          "expanded": "한 짝만 남았네요. 누가 두고 간 건지 먼저 물어봐야겠어요.",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_lonely_boot_progress",
+      "source_id": "SQH-V2-03",
+      "source_code": "draft_quest_heartland_lonely_boot",
+      "state": "progress",
+      "location_anchor": "heartland_dandelion_village",
+      "condition": "밑창 비교 A 경로에서 무늬를 관찰한 뒤만; 머루에게 묻는 B 경로에 이 단서를 요구하지 않음",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "밑창이 닮았다.",
+          "expanded": "흙에 남은 모양이 닮았어요. 주인을 찾은 건지는 확인해야죠.",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_lonely_boot_complete",
+      "source_id": "SQH-V2-03",
+      "source_code": "draft_quest_heartland_lonely_boot",
+      "state": "complete",
+      "location_anchor": "heartland_dandelion_village",
+      "condition": "원자료의 complete 상태에서만; 선발견/선해결을 다시 요구하지 않음",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "주인을 찾았다.",
+          "expanded": "내 장화야. 흙을 털려고 두고 잊었네. 걱정하게 했구나.",
+          "speaker_ref": "rozel"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_lonely_boot_revisit",
+      "source_id": "SQH-V2-03",
+      "source_code": "draft_quest_heartland_lonely_boot",
+      "state": "revisit",
+      "location_anchor": "heartland_dandelion_village",
+      "condition": "원자료의 revisit 상태에서만; 선발견/선해결을 다시 요구하지 않음",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "두 짝이 나란히.",
+          "expanded": "오늘은 둘 다 있네요. 괜찮다니 저도 마음이 놓여요.",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_echo_not_answer_start",
+      "source_id": "SQH-V2-04",
+      "source_code": "draft_quest_heartland_echo_not_answer",
+      "state": "start",
+      "location_anchor": "heartland_echo_cave_entrance",
+      "condition": "원자료의 start 상태에서만; 선발견/선해결을 다시 요구하지 않음",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "두드림이 들린다.",
+          "expanded": "소리가 안쪽에서 오는 것 같군. 어디서 시작되는지 보자.",
+          "speaker_ref": "teo"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_echo_not_answer_progress",
+      "source_id": "SQH-V2-04",
+      "source_code": "draft_quest_heartland_echo_not_answer",
+      "state": "progress",
+      "location_anchor": "heartland_echo_cave_entrance",
+      "condition": "원자료의 progress 상태에서만; 선발견/선해결을 다시 요구하지 않음",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "판이 움직인다.",
+          "expanded": "소리 날 때 판도 움직여요. 옆 벽에서도 같은 때인지 볼까요?",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_echo_not_answer_complete",
+      "source_id": "SQH-V2-04",
+      "source_code": "draft_quest_heartland_echo_not_answer",
+      "state": "complete",
+      "location_anchor": "heartland_echo_cave_entrance",
+      "condition": "원자료에 이미 있는 선택의 결과가 실제 성립한 뒤만 표시; 선택 전에는 표시하지 않음",
+      "lines": [
+        {
+          "choice": "판 고정",
+          "hud_short": "판을 고정했다.",
+          "expanded": "두드림이 멎었군. 이번 소리는 어디서 났는지 확인했네.",
+          "speaker_ref": "teo"
+        },
+        {
+          "choice": "그대로 두고 기록",
+          "hud_short": "판은 그대로 둔다.",
+          "expanded": "두드림은 남겨 두자. 판에서 나는 소리라는 점은 확인했군.",
+          "speaker_ref": "teo"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_echo_not_answer_revisit",
+      "source_id": "SQH-V2-04",
+      "source_code": "draft_quest_heartland_echo_not_answer",
+      "state": "revisit",
+      "location_anchor": "heartland_echo_cave_entrance",
+      "condition": "원자료에 이미 있는 선택의 결과가 실제 성립한 뒤만 표시; 선택 전에는 표시하지 않음",
+      "lines": [
+        {
+          "choice": "판 고정",
+          "hud_short": "판은 조용하다.",
+          "expanded": "입구가 조용해졌어요. 그때 고정한 판도 그대로네요.",
+          "speaker_ref": "fin"
+        },
+        {
+          "choice": "그대로 두고 기록",
+          "hud_short": "다시 판이 두드린다.",
+          "expanded": "이번엔 소리와 판이 함께 보여요. 누군가의 대답은 아니었죠.",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_place_for_stand_start",
+      "source_id": "SQH-V2-05",
+      "source_code": "draft_quest_heartland_place_for_stand",
+      "state": "start",
+      "location_anchor": "heartland_dandelion_village",
+      "condition": "원자료의 start 상태에서만; 선발견/선해결을 다시 요구하지 않음",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "접힌 받침이다.",
+          "expanded": "함께 쓰는 물건이라는 표시가 있어요. 어디에 두면 좋을까요?",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_place_for_stand_progress",
+      "source_id": "SQH-V2-05",
+      "source_code": "draft_quest_heartland_place_for_stand",
+      "state": "progress",
+      "location_anchor": "heartland_dandelion_village",
+      "condition": "원자료의 progress 상태에서만; 선발견/선해결을 다시 요구하지 않음",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "쓸 자리를 고르자.",
+          "expanded": "여관의 젖은 짐에도, 목자의 도구 밑에도 놓을 수 있겠네요.",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_place_for_stand_complete",
+      "source_id": "SQH-V2-05",
+      "source_code": "draft_quest_heartland_place_for_stand",
+      "state": "complete",
+      "location_anchor": "heartland_dandelion_village",
+      "condition": "원자료에 이미 있는 선택의 결과가 실제 성립한 뒤만 표시; 선택 전에는 표시하지 않음",
+      "lines": [
+        {
+          "choice": "머루 여관",
+          "hud_short": "여관에 놓았다.",
+          "expanded": "젖은 짐을 둘 자리가 생겼네. 도구 쪽에 필요하면 옮겨도 돼.",
+          "speaker_ref": "meru"
+        },
+        {
+          "choice": "로젤 작업장",
+          "hud_short": "도구 밑에 놓았다.",
+          "expanded": "이제 도구를 흙에서 띄울 수 있겠네. 여관에서 필요하면 옮겨 쓰자.",
+          "speaker_ref": "rozel"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_place_for_stand_revisit",
+      "source_id": "SQH-V2-05",
+      "source_code": "draft_quest_heartland_place_for_stand",
+      "state": "revisit",
+      "location_anchor": "heartland_dandelion_village",
+      "condition": "원자료에 이미 있는 선택의 결과가 실제 성립한 뒤만 표시; 선택 전에는 표시하지 않음",
+      "lines": [
+        {
+          "choice": "머루 여관",
+          "hud_short": "여관의 받침이다.",
+          "expanded": "짐 놓는 자리가 여기였죠. 다른 곳에 필요하면 다시 옮길게요.",
+          "speaker_ref": "fin"
+        },
+        {
+          "choice": "로젤 작업장",
+          "hud_short": "도구 받침이다.",
+          "expanded": "도구 밑에 있으니 잘 보이네요. 필요하면 여관 쪽으로 옮겨도 되고요.",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_similar_tracks_start",
+      "source_id": "SQH-V2-06",
+      "source_code": "draft_quest_heartland_similar_tracks",
+      "state": "start",
+      "location_anchor": "heartland_pasture_boundary",
+      "condition": "원자료의 start 상태에서만; 선발견/선해결을 다시 요구하지 않음",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "담장에 긁힌 자국.",
+          "expanded": "발자국이 가까이 있긴 해. 그래도 무엇이 닿았는지부터 보자.",
+          "speaker_ref": "rozel"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_similar_tracks_progress",
+      "source_id": "SQH-V2-06",
+      "source_code": "draft_quest_heartland_similar_tracks",
+      "state": "progress",
+      "location_anchor": "heartland_pasture_boundary",
+      "condition": "원자료의 progress 상태에서만; 선발견/선해결을 다시 요구하지 않음",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "가지 높이가 같다.",
+          "expanded": "가지 끝과 긁힌 높이가 같아요. 발자국만 보고 정할 뻔했네요.",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_similar_tracks_complete",
+      "source_id": "SQH-V2-06",
+      "source_code": "draft_quest_heartland_similar_tracks",
+      "state": "complete",
+      "location_anchor": "heartland_pasture_boundary",
+      "condition": "원자료에 이미 있는 선택의 결과가 실제 성립한 뒤만 표시; 선택 전에는 표시하지 않음",
+      "lines": [
+        {
+          "choice": "직접 가지 치움",
+          "hud_short": "가지를 치웠다.",
+          "expanded": "닿던 가지를 옆에 두었어요. 담장에는 이제 부딪히지 않겠네요.",
+          "speaker_ref": "fin"
+        },
+        {
+          "choice": "로젤에게 위치 보고",
+          "hud_short": "위치를 알렸다.",
+          "expanded": "그 가지로구나. 돌아올 때까지 내가 정리해 둘게.",
+          "speaker_ref": "rozel"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_similar_tracks_revisit",
+      "source_id": "SQH-V2-06",
+      "source_code": "draft_quest_heartland_similar_tracks",
+      "state": "revisit",
+      "location_anchor": "heartland_pasture_boundary",
+      "condition": "원자료에 이미 있는 선택의 결과가 실제 성립한 뒤만 표시; 선택 전에는 표시하지 않음",
+      "lines": [
+        {
+          "choice": "직접 가지 치움",
+          "hud_short": "가지는 옆에 있다.",
+          "expanded": "치워 둔 가지가 저기 있네요. 긁힌 자국은 아직 보여요.",
+          "speaker_ref": "fin"
+        },
+        {
+          "choice": "로젤에게 위치 보고",
+          "hud_short": "가지가 정리됐다.",
+          "expanded": "말해 준 자리를 정리했어. 남은 자국을 보니 높이가 딱 맞네.",
+          "speaker_ref": "rozel"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_two_hand_heights_observe",
+      "source_id": "ENVH-V2-01",
+      "source_code": "draft_discovery_heartland_two_hand_heights",
+      "state": "observe",
+      "location_anchor": "heartland_dandelion_village",
+      "condition": "원자료의 단서가 보일 때 선택 관찰; 필수 게이트 아님",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "낮은 곳도 닳았다.",
+          "expanded": "손잡이 아래도 반질반질해요. 밀어서 열기도 했나 봐요.",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_two_hand_heights_revisit",
+      "source_id": "ENVH-V2-01",
+      "source_code": "draft_discovery_heartland_two_hand_heights",
+      "state": "revisit",
+      "location_anchor": "heartland_dandelion_village",
+      "condition": "원자료의 단서가 보일 때 선택 관찰; 필수 게이트 아님",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "여기도 밀기판이다.",
+          "expanded": "높이가 달라도 문을 여는 자리네요. 손잡이만 볼 건 아니었어요.",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_three_stitches_observe",
+      "source_id": "ENVH-V2-02",
+      "source_code": "draft_discovery_heartland_three_stitches",
+      "state": "observe",
+      "location_anchor": "heartland_dandelion_village",
+      "condition": "원자료의 단서가 보일 때 선택 관찰; 필수 게이트 아님",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "실 색이 다르다.",
+          "expanded": "천과 다른 색으로 기웠네요. 바구니에 같은 색 실이 보여요.",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_three_stitches_revisit",
+      "source_id": "ENVH-V2-02",
+      "source_code": "draft_discovery_heartland_three_stitches",
+      "state": "revisit",
+      "location_anchor": "heartland_dandelion_village",
+      "condition": "SQH-V2-02 반환 후 선택한 배치 장소에서 관찰; 미완료면 observe 유지",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "같은 세 땀이다.",
+          "expanded": "자리가 바뀌어도 알아보겠어요. 저 기운 모양이 그대로예요.",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_empty_hook_observe",
+      "source_id": "ENVH-V2-03",
+      "source_code": "draft_discovery_heartland_empty_hook",
+      "state": "observe",
+      "location_anchor": "heartland_echo_cave_entrance",
+      "condition": "원자료의 단서가 보일 때 선택 관찰; 필수 게이트 아님",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "둥근 자국이다.",
+          "expanded": "걸이 아래 둥근 자국이 있어요. 물통을 걸고 쉬었을지도 몰라요.",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_empty_hook_revisit",
+      "source_id": "ENVH-V2-03",
+      "source_code": "draft_discovery_heartland_empty_hook",
+      "state": "revisit",
+      "location_anchor": "heartland_echo_cave_entrance",
+      "condition": "원자료의 단서가 보일 때 선택 관찰; 필수 게이트 아님",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "걸이는 안쪽으로.",
+          "expanded": "다시 보니 걸이가 벽을 향해 있네요. 누가 썼는지는 모르겠어요.",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_return_side_mark_observe",
+      "source_id": "ENVH-V2-04",
+      "source_code": "draft_discovery_heartland_return_side_mark",
+      "state": "observe",
+      "location_anchor": "heartland_hilltop_waypoint",
+      "condition": "원자료의 단서가 보일 때 선택 관찰; 필수 게이트 아님",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "이쪽엔 표시가 있다.",
+          "expanded": "돌아서는 쪽에서 보이는 표시네요. 마을 방향을 가리켜요.",
+          "speaker_ref": "fin"
+        }
+      ]
+    },
+    {
+      "id": "draft_reactivity_return_side_mark_revisit",
+      "source_id": "ENVH-V2-04",
+      "source_code": "draft_discovery_heartland_return_side_mark",
+      "state": "revisit",
+      "location_anchor": "heartland_hilltop_waypoint",
+      "condition": "원자료의 단서가 보일 때 선택 관찰; 필수 게이트 아님",
+      "lines": [
+        {
+          "choice": "common",
+          "hud_short": "귀환길에 잘 보인다.",
+          "expanded": "갈 때는 못 봤는데 돌아오니 보여요. 아까 손잡이 표식과는 달라요.",
+          "speaker_ref": "fin"
+        }
+      ]
+    }
+  ]
+}

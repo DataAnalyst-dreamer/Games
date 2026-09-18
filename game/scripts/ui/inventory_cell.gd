@@ -7,6 +7,7 @@ class_name InventoryCell
 extends Panel
 
 @onready var icon: ColorRect = $Icon
+@onready var item_texture: TextureRect = $ItemTexture
 @onready var grade_bar: ColorRect = $GradeBar
 @onready var grade_icon: Label = $GradeIcon
 @onready var enhance_label: Label = $EnhanceLabel
@@ -29,6 +30,8 @@ func _ready() -> void:
 
 ## 빈 칸으로 되돌린다(아이템 표시 전부 숨김). caption(있으면)만 남는다.
 func clear() -> void:
+	item_texture.texture = null
+	item_texture.visible = false
 	icon.visible = false
 	grade_bar.visible = false
 	grade_icon.visible = false
@@ -45,6 +48,7 @@ func set_caption(text: String) -> void:
 
 
 func set_item(grade_color: Color, grade_icon_char: String, quantity: int, enhance_level: int) -> void:
+	set_item_texture(null) # Cells can be reused by inventory and blacksmith.
 	caption_label.visible = false
 	icon.visible = true
 	grade_bar.visible = true
@@ -56,6 +60,13 @@ func set_item(grade_color: Color, grade_icon_char: String, quantity: int, enhanc
 	qty_label.text = "x%d" % quantity
 	enhance_label.visible = enhance_level > 0
 	enhance_label.text = "+%d" % enhance_level
+
+
+## Optional art; grade/quantity/lock/focus remain separate overlays.
+func set_item_texture(texture: Texture2D) -> void:
+	item_texture.texture = texture
+	item_texture.visible = texture != null
+	icon.visible = texture == null
 
 
 func set_focused(focused: bool) -> void:

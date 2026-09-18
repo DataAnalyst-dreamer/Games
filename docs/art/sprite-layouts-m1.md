@@ -1,5 +1,7 @@
 # 스프라이트 레이아웃 조사 — M1 (Knight / Slime / 뿔토끼·버섯돌이 대역)
 
+> **2026-09-12 정정(D-137): 이 문서의 Knight 행/열 해석은 폐기한다.** 원본은 열=방향(down/up/left/right), 첫 네 행=보행 시간이며 y=64는 방향별 공격 단일 포즈다. SeparateAnim 사각영역 일치는 그 안의 방향 의미를 증명하지 못한다. 아래 내용은 오류 원인을 추적하기 위한 과거 기록이다. 최신 좌표·검증은 `../qa/sprite-direction-correction-2026-09-12.md`를 따른다.
+
 > 조사 방법: Python(Pillow)로 시트를 직접 열어 픽셀 단위로 대조했다. Ninja Adventure의
 > `Actor/Character/<이름>/SeparateAnim/*.png`는 완성된 `SpriteSheet.png`를 만들기 전 애니메이션별로
 > 나눠 작업한 원본 조각으로 보이며, 조각 이미지와 합본 시트를 **바이트 단위로 diff**하면 각 조각이

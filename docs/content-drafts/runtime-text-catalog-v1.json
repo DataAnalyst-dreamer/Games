@@ -1,0 +1,28 @@
+{
+  "status": "prepared_text_not_runtime",
+  "locale": "ko",
+  "items": [
+    {"item_id":"slime_jelly","existing_desc_key":"item_slime_jelly_desc","text":"병 안에서 느릿하게 흐르는 젤리. 철검과 철 경갑을 만드는 재료로 쓰인다.","blueprint_refs":["blueprint_iron_sword","blueprint_iron_greaves"]},
+    {"item_id":"rabbit_horn","existing_desc_key":"item_rabbit_horn_desc","text":"뿔토끼에게서 얻는 작은 뿔. 가죽 모자를 만드는 재료로 쓰인다.","blueprint_refs":["blueprint_leather_cap"]},
+    {"item_id":"mushroom_cap","existing_desc_key":"item_mushroom_cap_desc","text":"갓 아래에 주름이 겹겹이 잡힌 재료. 대장간의 가죽 조끼 도면에 쓰인다.","blueprint_refs":["blueprint_leather_vest"]},
+    {"item_id":"iron_ore","existing_desc_key":"item_iron_ore_desc","text":"거친 돌 사이로 금속빛이 비친다. 여러 장비 도면에 쓰이는 대장간 재료다.","blueprint_refs":["blueprint_iron_sword","blueprint_iron_greatsword","blueprint_leather_vest","blueprint_iron_plate","blueprint_iron_greaves"]},
+    {"item_id":"salvage_scrap","existing_desc_key":"item_salvage_scrap_desc","text":"크기도 모양도 제각각인 고철 조각. 한때 어떤 장비의 일부였는지는 알 수 없다.","blueprint_refs":[]},
+    {"item_id":"weapon_common_1","existing_desc_key":"item_weapon_common_1_desc","text":"흠집이 남은 낡은 검. 화려한 장식보다 손에 쥐는 감각이 먼저 전해진다.","blueprint_refs":[]},
+    {"item_id":"sub_common_1","existing_desc_key":"item_sub_common_1_desc","text":"나뭇결이 드러나는 방패. 몸 앞에 들어 올리면 가장자리에 남은 사용 흔적이 보인다.","blueprint_refs":[]},
+    {"item_id":"potion_hp_small","existing_desc_key":"item_potion_hp_small_desc","text":"체력을 회복하는 작은 물약. 남은 수량을 확인하고 필요한 순간에 사용하자.","blueprint_refs":[]},
+    {"item_id":"backpack_small","existing_desc_key":"item_backpack_small_desc","text":"소지품을 챙겨 넣는 작은 배낭.","blueprint_refs":[]}
+  ],
+  "monsters": [
+    {"monster_id":"slime","existing_codex_entry_id":"slime","proposed_text_key":"codex_slime_observation","text":"하틀랜드에서 만나는 방울 슬라임. 가까이 다가와 공격을 준비한 뒤 접촉 공격을 한다. 공격이 끝나고 다시 움직이기 전의 틈을 관찰하자.","attack_pattern_ref":"melee_contact","drop_table_ref":"slime_common","material_refs":["slime_jelly","salvage_scrap","iron_ore"]},
+    {"monster_id":"horn_rabbit","existing_codex_entry_id":"horn_rabbit","proposed_text_key":"codex_horn_rabbit_observation","text":"하틀랜드의 뿔토끼. 공격 예고 뒤 앞으로 돌진한다. 진행 방향에서 옆으로 벗어나고 돌진이 끝나는 순간을 살피자.","attack_pattern_ref":"charge","drop_table_ref":"horn_rabbit_common","material_refs":["rabbit_horn","salvage_scrap","iron_ore"]},
+    {"monster_id":"mushroom","existing_codex_entry_id":"mushroom","proposed_text_key":"codex_mushroom_observation","text":"하틀랜드에서 만나는 버섯돌이. 가까운 상대를 공격하며 주변에 포자 위험 구역을 만든다. 접촉 공격을 피했더라도 남은 위험 구역을 확인하자.","attack_pattern_ref":"spore_patch","drop_table_ref":"mushroom_common","material_refs":["mushroom_cap","salvage_scrap","iron_ore"]}
+  ],
+  "quest_candidates_reviewed_not_linked": [
+    "draft_quest_heartland_returning_sign",
+    "draft_quest_heartland_wind_caught_cloth",
+    "draft_quest_heartland_lonely_boot",
+    "draft_quest_heartland_echo_not_answer",
+    "draft_quest_heartland_place_for_stand",
+    "draft_quest_heartland_similar_tracks"
+  ]
+}

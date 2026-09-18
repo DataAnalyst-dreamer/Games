@@ -13,6 +13,14 @@ extends Control
 signal close_requested()
 
 const CELL_SCENE := preload("res://scenes/ui/InventoryCell.tscn")
+const SLIME_JELLY_ICON_PATH := "res://assets/generated/items/item-slime-jelly-v1.png"
+const MATERIAL_ICON_PATHS := {
+	"slime_jelly": SLIME_JELLY_ICON_PATH,
+	"rabbit_horn": "res://assets/generated/items/item-rabbit-horn-v1.png",
+	"mushroom_cap": "res://assets/generated/items/item-mushroom-cap-v1.png",
+	"potion_hp_small": "res://assets/generated/items/item-potion-hp-small-v1.png",
+}
+var _item_icon_cache: Dictionary = {}
 const EQUIP_CELL_SPACING := 30.0
 const GRID_COLS := 8
 ## D-88(M2-5): Y 홀드로 "즐겨찾기 잠금"을 토글한다(가역 마킹 0.5초 — 대장간 분해 탭의
@@ -92,10 +100,25 @@ var _lock_hold_time: float = 0.0
 var _lock_hold_triggered: bool = false
 
 var _last_input_was_pad: bool = false
+var _description_label: Label
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	var descriptions := load("res://localization/item_descriptions_ko.po") as Translation
+	if descriptions != null:
+		TranslationServer.add_translation(descriptions)
+	_description_label = Label.new()
+	_description_label.name = "ItemDescription"
+	_description_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_description_label.max_lines_visible = 2
+	_description_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_description_label.add_theme_font_size_override("font_size", 10)
+	_description_label.add_theme_color_override("font_color", Color.WHITE)
+	_description_label.custom_minimum_size.y = 28
+	_description_label.mouse_filter = Control.MOUSE_FILTER_PASS
+	header_label.get_parent().add_child(_description_label)
+	header_label.get_parent().move_child(_description_label, 1)
 	_apply_theme_frames()
 	_build_tabs()
 	_build_filter_chips()
@@ -158,7 +181,9 @@ func confirm() -> void:
 
 func _apply_theme_frames() -> void:
 	backdrop.add_theme_stylebox_override("panel", theme.get_stylebox(&"backdrop", &"Inventory"))
-	compare_tooltip.add_theme_stylebox_override("panel", theme.get_stylebox(&"wood_frame", &"HUD"))
+	# The legacy 16px wood center contains border pixels and tiles into a grid.
+	# Reuse the existing quiet backdrop only here; other HUD frames stay unchanged.
+	compare_tooltip.add_theme_stylebox_override("panel", theme.get_stylebox(&"backdrop", &"Inventory"))
 
 
 # --- 탭 ---
@@ -356,6 +381,15 @@ func _paint_cell_with_slot(cell: InventoryCell, slot: Dictionary) -> void:
 	cell.set_item(Rarity.color_of(grade_enum, theme), Rarity.icon_of(grade_enum),
 		int(slot.get("quantity", 1)), int(slot.get("enhance_level", 0)))
 	cell.set_locked_marked(bool(slot.get("locked", false)))
+	var item_id := String(slot.get("item_id", ""))
+	if MATERIAL_ICON_PATHS.has(item_id):
+		cell.set_item_texture(_optional_item_icon(MATERIAL_ICON_PATHS[item_id]))
+
+
+func _optional_item_icon(path: String) -> Texture2D:
+	if not _item_icon_cache.has(path):
+		_item_icon_cache[path] = load(path) as Texture2D if ResourceLoader.exists(path, "Texture2D") else null
+	return _item_icon_cache[path] as Texture2D
 
 
 func _on_grid_cell_gui_input(event: InputEvent, index: int) -> void:
@@ -499,6 +533,13 @@ func _refresh_tooltip() -> void:
 
 	header_label.text = "%s %s" % [Rarity.icon_of(grade_enum), tr(StringName(name_key))]
 	header_label.add_theme_color_override("font_color", grade_color)
+	var desc_key := String(item_def.get("desc_key", ""))
+	var description := tr(StringName(desc_key)) if not desc_key.is_empty() else ""
+	if description == desc_key:
+		description = "" # Missing translations must not expose internal keys.
+	_description_label.text = description
+	_description_label.tooltip_text = description
+	_description_label.visible = not description.is_empty()
 
 	for child in stat_rows.get_children():
 		child.queue_free()

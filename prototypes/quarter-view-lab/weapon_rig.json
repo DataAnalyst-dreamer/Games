@@ -1,0 +1,335 @@
+{
+  "schema_version": 1,
+  "status": "source_spec_v1_runtime_validation_recorded_separately",
+  "frame_size": [
+    16,
+    16
+  ],
+  "sprite_scale": 4,
+  "sprite_offset": [
+    0,
+    -24
+  ],
+  "source_texture": "res://assets/proxy-knight.png",
+  "source_sha256": "D20EACC1334ABE43BD69C9298F55E383B86A1E71C726973240EB2BB0C4F5F08C",
+  "coordinate_convention": "pixel-cell boundary coordinates; source pixel (x,y) occupies [x,x+1]x[y,y+1]; socket is centre of original coloured glove patch; actor_local=(socket-frame_size/2)*sprite_scale+sprite_offset",
+  "direction_rule": "same four-column dominant-axis rule as original body; ties horizontal; 8-direction aim is not 8-direction art",
+  "directions": {
+    "down": {
+      "column": 0,
+      "render_order": "in_front",
+      "carry_angle_deg": -55,
+      "idle": {
+        "row": 0,
+        "hand_socket_px": [
+          13,
+          14
+        ],
+        "glove_overlay_rect_px": [
+          11,
+          12,
+          4,
+          4
+        ]
+      },
+      "attack": {
+        "row": 4,
+        "hand_socket_px": [
+          14,
+          12
+        ],
+        "glove_overlay_rect_px": [
+          12,
+          10,
+          4,
+          4
+        ]
+      },
+      "walk": {
+        "1": {
+          "row": 1,
+          "hand_socket_px": [
+            11,
+            15
+          ],
+          "glove_overlay_rect_px": [
+            9,
+            13,
+            4,
+            3
+          ]
+        },
+        "2": {
+          "row": 2,
+          "hand_socket_px": [
+            13,
+            14
+          ],
+          "glove_overlay_rect_px": [
+            11,
+            12,
+            4,
+            4
+          ]
+        },
+        "3": {
+          "row": 3,
+          "hand_socket_px": [
+            13.5,
+            12
+          ],
+          "glove_overlay_rect_px": [
+            12,
+            10,
+            3,
+            4
+          ]
+        }
+      }
+    },
+    "up": {
+      "column": 1,
+      "render_order": "behind_body",
+      "carry_angle_deg": -125,
+      "idle": {
+        "row": 0,
+        "hand_socket_px": [
+          3,
+          14
+        ],
+        "glove_overlay_rect_px": [
+          1,
+          12,
+          4,
+          4
+        ]
+      },
+      "attack": {
+        "row": 4,
+        "hand_socket_px": [
+          5,
+          1
+        ],
+        "glove_overlay_rect_px": [
+          3,
+          0,
+          4,
+          3
+        ]
+      },
+      "walk": {
+        "1": {
+          "row": 1,
+          "hand_socket_px": [
+            4,
+            13
+          ],
+          "glove_overlay_rect_px": [
+            2,
+            11,
+            4,
+            4
+          ]
+        },
+        "2": {
+          "row": 2,
+          "hand_socket_px": [
+            3,
+            14
+          ],
+          "glove_overlay_rect_px": [
+            1,
+            12,
+            4,
+            4
+          ]
+        },
+        "3": {
+          "row": 3,
+          "hand_socket_px": [
+            3,
+            10.5
+          ],
+          "glove_overlay_rect_px": [
+            1,
+            9,
+            4,
+            3
+          ]
+        }
+      }
+    },
+    "left": {
+      "column": 2,
+      "render_order": "in_front",
+      "carry_angle_deg": -145,
+      "idle": {
+        "row": 0,
+        "hand_socket_px": [
+          8,
+          14
+        ],
+        "glove_overlay_rect_px": [
+          6,
+          12,
+          4,
+          4
+        ]
+      },
+      "attack": {
+        "row": 4,
+        "hand_socket_px": [
+          1,
+          12
+        ],
+        "glove_overlay_rect_px": [
+          0,
+          10,
+          3,
+          4
+        ]
+      },
+      "walk": {
+        "1": {
+          "row": 1,
+          "hand_socket_px": [
+            5,
+            14
+          ],
+          "glove_overlay_rect_px": [
+            3,
+            12,
+            4,
+            4
+          ]
+        },
+        "2": {
+          "row": 2,
+          "hand_socket_px": [
+            8,
+            14
+          ],
+          "glove_overlay_rect_px": [
+            6,
+            12,
+            4,
+            4
+          ]
+        },
+        "3": {
+          "row": 3,
+          "hand_socket_px": [
+            12,
+            14
+          ],
+          "glove_overlay_rect_px": [
+            10,
+            12,
+            4,
+            4
+          ]
+        }
+      }
+    },
+    "right": {
+      "column": 3,
+      "render_order": "in_front",
+      "carry_angle_deg": -35,
+      "idle": {
+        "row": 0,
+        "hand_socket_px": [
+          8,
+          14
+        ],
+        "glove_overlay_rect_px": [
+          6,
+          12,
+          4,
+          4
+        ]
+      },
+      "attack": {
+        "row": 4,
+        "hand_socket_px": [
+          15,
+          12
+        ],
+        "glove_overlay_rect_px": [
+          13,
+          10,
+          3,
+          4
+        ]
+      },
+      "walk": {
+        "1": {
+          "row": 1,
+          "hand_socket_px": [
+            11,
+            14
+          ],
+          "glove_overlay_rect_px": [
+            9,
+            12,
+            4,
+            4
+          ]
+        },
+        "2": {
+          "row": 2,
+          "hand_socket_px": [
+            8,
+            14
+          ],
+          "glove_overlay_rect_px": [
+            6,
+            12,
+            4,
+            4
+          ]
+        },
+        "3": {
+          "row": 3,
+          "hand_socket_px": [
+            4,
+            14
+          ],
+          "glove_overlay_rect_px": [
+            2,
+            12,
+            4,
+            4
+          ]
+        }
+      }
+    }
+  },
+  "palette": {
+    "outline": "#141B1B",
+    "blade_mid": "#8D977F",
+    "blade_shadow": "#5F7160",
+    "blade_edge": "#E3F1F5",
+    "grip": "#3B3643",
+    "pommel": "#4E484A",
+    "glove_source_red": "#D14B34",
+    "glove_source_orange": "#EF914F"
+  },
+  "render_guidance": {
+    "grip_center": "hand_socket_px transformed to actor local; never origin+rotating blade_inner",
+    "glove": "re-render original texture region at exactly its existing body-aligned location above the grip; do not invent an opaque recolour patch",
+    "up_order": "weapon behind body, original body, original glove region",
+    "other_order": "original body, weapon, original glove region",
+    "hand_pose_transition": "switch socket only when original body atlas row changes; no interpolated floating socket or body bitmap rotation/translation/stretch",
+    "walking": "resolve walk row 1/2/3 when these actual body frames are visible; idle socket alone is not accurate for walking",
+    "rest": "point tip upward or diagonally upward; do not trail a full-length sword below feet",
+    "weapon_form": "code-native compact blade silhouette with dark outline, muted steel body, narrow pale edge and dark hilt; avoid luminous white rod or high-detail photoreal metal",
+    "blade_length": "prefer one physically consistent blade length across carried/startup/active/recovery display; final geometry is runtime implementation scope and must share active render/damage endpoints",
+    "dead": "weapon may be hidden for dead actor"
+  },
+  "limitations": [
+    "These are existing proxy poses, not newly authored Fin animation or approved Fin handedness.",
+    "The visible extended glove is used; down-right/up-left screen placement may read as a left-handed proxy. Fin's approved right sword/left shield identity remains unchanged.",
+    "Hand position changes when original row0 changes to row4; right hand moves 28 world pixels forward. Damage distance and first-contact timing must be remeasured without changing approved timing configuration.",
+    "Hand/glove interpretation uses original coloured pixels and pose context; independent review and actual direction previews are still required."
+  ]
+}

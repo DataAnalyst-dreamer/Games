@@ -1,0 +1,11 @@
+# Exact built-in image prompt
+
+Use case: identity-preserve
+Asset type: ONE full-body standing character concept candidate for the same Fin, for a warm medieval fixed 2D quarter-view game. Single still pose, NOT an animation sprite sheet.
+Input images: Image1 is the approved Fin identity reference. Image2 is only the village palette/material style reference; do not include its scenery.
+Primary request: redraw the SAME cute Fin at a cleaner higher source resolution, preserving his brown eyes, warm brown hair, silver open-faced ridged helmet, red feather plume, ochre tunic, green short cape/scarf, brown boots, and approachable youthful SD proportions. Preserve identity instead of redesigning him. He has a simple silver sword in HIS RIGHT hand (viewer-left in this frontal stance) and a wooden round shield with silver rim on HIS LEFT arm (viewer-right). Keep hand visibly gripping the hilt. The blade rests diagonally upward/outward so it does not cross his face or pierce the ground. Feet planted naturally, two connected legs with coherent pelvis-knee-boot anatomy.
+Scene/backdrop: actual transparent PNG alpha. Outside the character and equipment is empty transparent space: no checkerboard, no white paper, no black background, no glow, no haze, no cast shadow or ground patch.
+Style/medium: detailed clean pixel-style illustration with readable color clusters, crisp stepped silhouette and controlled warm highlights, suited to the warm richly textured village. Not a crude16px proxy, not smooth 3D, not painterly blur. Maintain the approved large head and compact body.
+Composition: entire standing character including boots, feather, blade and shield visible with transparent padding; nearly frontal with mild elevated quarter-view volume, fixed camera. This is a single high-resolution design source; later body target64x96 excludes blade/shield protrusions, do not pretend a high-resolution rendering is an exact64x96 production sprite.
+Constraints: same identity and outfit; no text, labels, panels, watermark, companions, extra gear, extra limbs, attack motion, running, motion blur, multiple views or animation frames. No disconnected legs. Actual alpha, no painted transparency checkerboard.
+

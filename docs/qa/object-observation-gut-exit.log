@@ -1,0 +1,94 @@
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+WARNING: [Data] stats.luk: 만렙 몰빵(147포인트) crit_chance=0.1970 가 상한(0.7500)에 못 미침 — 상한이 사실상 의미 없음
+   at: push_warning (core/variant/variant_utility.cpp:1118)
+WARNING: [Data] stats.int: 만렙 몰빵 cooldown_reduction=0.2940 가 상한(0.3000)에 못 미침 — 상한이 사실상 의미 없음
+   at: push_warning (core/variant/variant_utility.cpp:1118)
+[Metrics] 세션 시작. tester=anon, 저장 경로=user://playtest/session_1789231062.json
+[AudioManager] (headless) play_bgm id=bgm_grassland_1 fade=1.50
+---  GUT  ---
+[INFO]:  using [C:/Users/freer/AppData/Roaming/Games-QA-npc-greeting-20260913-story] for temporary output.
+Godot version:  4.4.1
+GUT version:  9.4.0
+
+
+res://tests/unit/test_object_observation.gd
+* test_used_cargo_observation_does_not_repeat_quest_signal
+    [Passed]:  [STRING_NAME(observe.cargo.before)] expected to equal [STRING_NAME(observe.cargo.before)]:  
+    [Passed]:  [1] expected to equal [1]:  
+    [Passed]:  [STRING_NAME(observe.cargo.used)] expected to equal [STRING_NAME(observe.cargo.used)]:  
+    [Passed]:  [1] expected to equal [1]:  repeat observation never re-emits one-shot event
+    [Passed]:  ["짐을 살펴본 자리다."] expected to equal ["짐을 살펴본 자리다."]:  
+* test_active_cargo_objective_and_outside_input
+    [Passed]:  [STRING_NAME(observe.cargo.active)] expected to equal [STRING_NAME(observe.cargo.active)]:  
+    [Passed]:  [0] expected to equal [0]:  out-of-range input does not observe or progress
+    [Passed]:  ["complete_ready"] expected to equal ["complete_ready"]:  
+    [Passed]:  [1] expected to equal [1]:  
+    [Passed]:  ["complete_ready"] expected to equal ["complete_ready"]:  
+* test_ward_state_reactions_and_unlisted_fallback
+    [Passed]:  [STRING_NAME(observe.ward.before)] expected to equal [STRING_NAME(observe.ward.before)]:  
+    [Passed]:  [STRING_NAME(observe.ward.active)] expected to equal [STRING_NAME(observe.ward.active)]:  
+    [Passed]:  [STRING_NAME(observe.ward.after)] expected to equal [STRING_NAME(observe.ward.after)]:  
+    [Passed]:  [2] expected to equal [2]:  repeatable ward keeps existing repeated event semantics
+    [Passed]:  [STRING_NAME()] expected to equal [STRING_NAME()]:  
+* test_observation_width_and_translation
+    [Passed]:  ["차곡차곡 쌓인 짐."] expected to not equal ["observe.cargo.before"]:  
+OBSERVATION_BOUNDS observe.cargo.before width=125.0
+    [Passed]:  [125.0] expected to be <= than [154.0]:  
+    [Passed]:  ["묶인 짐을 살펴보자."] expected to not equal ["observe.cargo.active"]:  
+OBSERVATION_BOUNDS observe.cargo.active width=141.0
+    [Passed]:  [141.0] expected to be <= than [154.0]:  
+    [Passed]:  ["짐을 살펴본 자리다."] expected to not equal ["observe.cargo.used"]:  
+OBSERVATION_BOUNDS observe.cargo.used width=141.0
+    [Passed]:  [141.0] expected to be <= than [154.0]:  
+    [Passed]:  ["홀씨 모양의 돌이다."] expected to not equal ["observe.ward.before"]:  
+OBSERVATION_BOUNDS observe.ward.before width=141.0
+    [Passed]:  [141.0] expected to be <= than [154.0]:  
+    [Passed]:  ["돌을 가까이 살핀다."] expected to not equal ["observe.ward.active"]:  
+OBSERVATION_BOUNDS observe.ward.active width=141.0
+    [Passed]:  [141.0] expected to be <= than [154.0]:  
+    [Passed]:  ["다시 돌 앞에 섰다."] expected to not equal ["observe.ward.after"]:  
+OBSERVATION_BOUNDS observe.ward.after width=129.0
+    [Passed]:  [129.0] expected to be <= than [154.0]:  
+* test_explore_cargo_before_accepting_does_not_block_later_objective
+    [Passed]:  ["active"] expected to equal ["active"]:  accept/talk must not auto interact
+    [Passed]:  ["complete_ready"] expected to equal ["complete_ready"]:  explicit revisit progresses prior discovered cargo
+    [Passed]:  [2] expected to equal [2]:  first discovery + one active objective, no repeat farming
+* test_restore_active_state_requires_explicit_interaction
+    [Passed]:  [1] expected to equal [1]:  
+    [Passed]:  ["active"] expected to equal ["active"]:  
+    [Passed]:  [1] expected to equal [1]:  load does not automatically interact
+    [Passed]:  ["complete_ready"] expected to equal ["complete_ready"]:  
+    [Passed]:  [2] expected to equal [2]:  
+* test_later_objective_and_repeat_acceptance_require_new_input
+    [Passed]:  [1] expected to equal [1]:  
+    [Passed]:  [1] expected to equal [1]:  later objective activation is not automatic interaction
+    [Passed]:  [2] expected to equal [2]:  accept notification alone emits nothing
+    [Passed]:  [3] expected to equal [3]:  new acceptance epoch allows explicit use
+7/7 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+---- Totals ----
+Scripts           1
+Tests             7
+  Passing         7
+Asserts           39
+Time              0.977s
+
+
+---- All tests passed! ----
+
+[INFO]:  Exiting with code 0
+=== [Metrics] 플레이테스트 요약 (tester=anon) ===
+세션 길이: 1.1s, 사망: 0
+구르기: 시도=0 성공=0 성공률=0% (무적중 피격=0)
+가드: 저스트 시도=0 성공=0 성공률=0%, 일반 가드=0
+콤보 3타 완주: 0회
+플레이어 피격: 0회, 총 피해: 0
+=== [Metrics] 저장: user://playtest/session_1789231062.json ===

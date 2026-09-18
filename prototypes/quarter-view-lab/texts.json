@@ -1,0 +1,20 @@
+{
+  "ko": {
+    "title": "마을 입구 · 쿼터뷰 플레이 실험",
+    "badge": "독립 샘플 | 기사·슬라임: 기존 임시 배우 | 핀 최종 모션 아님",
+    "controls": "WASD / 방향키 이동   ·   Space / 클릭 공격   ·   R 다시 시작\nF11 전체화면 / 창   ·   H 화면 흔들림   ·   L 언어   ·   Esc 종료",
+    "status": "기사 HP %d / %d     슬라임 HP %d / %d     처치 %d",
+    "shake_off": "화면 흔들림: 꺼짐",
+    "shake_on": "화면 흔들림: 켜짐 (약하게)",
+    "missing": "애셋 또는 전투 구현이 아직 없습니다. 진단용 화면입니다."
+  },
+  "en": {
+    "title": "Village Gate · Quarter-view Play Lab",
+    "badge": "Independent sample | Temporary knight & slime actors | Not final Fin animation",
+    "controls": "WASD / arrows move   ·   Space / click attack   ·   R restart\nF11 fullscreen / window   ·   H camera shake   ·   L language   ·   Esc quit",
+    "status": "Knight HP %d / %d     Slime HP %d / %d     Defeated %d",
+    "shake_off": "Camera shake: OFF",
+    "shake_on": "Camera shake: ON (gentle)",
+    "missing": "Missing assets or combat implementation. Diagnostic screen only."
+  }
+}
