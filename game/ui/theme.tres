@@ -79,6 +79,14 @@ HUD/colors/text_default = Color(1, 1, 1, 1)
 HUD/colors/text_muted = Color(0.8, 0.8, 0.8, 1)
 HUD/colors/vignette = Color(0.7, 0, 0, 0.35)
 
+; --- 경험치바 (M3-2, D-153) ---
+HUD/colors/exp_fill = Color(0.352941, 0.658824, 0.313725, 1)
+HUD/colors/exp_bg = Color(0.121569, 0.101961, 0.078431, 0.85)
+
+; --- NPC 머리 위 퀘스트 표식 (M3-2, D-155: 폰트 라벨, ! 노랑/? 하늘색) ---
+HUD/colors/quest_marker_available = Color(0.964706, 0.831373, 0.223529, 1)
+HUD/colors/quest_marker_complete = Color(0.454902, 0.780392, 0.898039, 1)
+
 ; --- 폰트 크기 2단계 (접근성, wireframes 화면10) ---
 HUD/font_sizes/default = 11
 HUD/font_sizes/large = 15

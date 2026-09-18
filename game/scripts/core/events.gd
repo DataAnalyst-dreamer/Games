@@ -18,6 +18,13 @@ signal player_stamina_changed(current: float, max_value: float)
 signal player_stamina_insufficient(action: StringName)
 signal player_hp_changed(current: int, max_value: int)
 signal player_level_up(new_level: int)
+## M3-1(로직, godot-engineer)/M3-2(UI, 이 스테이지) 합의 인터페이스. 경험치/레벨
+## 시스템 브랜치가 아직 없어 이 UI 스테이지가 먼저 선언해 스모크로 검증한다 —
+## 시그니처는 두 담당이 사전 합의한 값 그대로라 브랜치 병합 시 충돌해도 정리만 하면 된다.
+## exp_changed: 경험치 변동마다(획득/레벨업 직후 초과분 재계산 등). level_up: 레벨이
+## 오를 때 1회, stat_gains는 {stat_key: 증가량} 형태(예: {"max_hp": 10, "attack": 2}).
+signal exp_changed(current_exp: int, exp_to_next: int, level: int)
+signal level_up(new_level: int, stat_gains: Dictionary)
 
 # --- 전투 ---
 ## is_advantage: 원소 상성 적중 여부(ElementCalc.get_multiplier() > 1.0). is_critical:
@@ -118,6 +125,10 @@ signal quest_objective_updated(quest_id: StringName, objective_id: StringName, c
 ## 사이드/일일 의뢰 전부 포함 — 메인 퀘스트 완료는 main_quest_stage_completed(아래
 ## 월드 섹션, M2-6 기존 신호)도 함께 emit해 SaveManager 오토세이브를 건다.
 signal quest_completed(quest_id: StringName)
+## QuestSystem.set_tracked()로 HUD 추적 대상이 "목표 진행 없이" 수동으로 바뀌었을 때만
+## emit(D-156, 퀘스트 로그의 추적 토글). 진행도 변화 자체는 quest_objective_updated가
+## 이미 커버한다.
+signal quest_tracked_changed(quest_id: StringName)
 
 # --- 월드 ---
 signal chunk_loaded(chunk_coord: Vector2i)

@@ -62,11 +62,25 @@ Hud (CanvasLayer)
 HUD 자체는 비상호작용(포커스 이동 불필요)이라 위 두 토글 외에는 입력 맵 추가가 필요 없다
 (작업 지시 5번 확인 완료 — `map`, `debug_toggle` 모두 `project.godot` [input]에 등록됨).
 
+## 3.5 성장 표시 (경험치바·레벨업, M3-2/D-153)
+
+`hud_progress.gd`(별도 파일 — hud.gd가 이미 500줄 상한 D-145에 가까워 분리)가
+`Events.exp_changed(current_exp, exp_to_next, level)`/`Events.level_up(new_level, stat_gains)`
+두 신호만 구독해 TopLeft의 LevelLabel·(신설) ExpBar와 화면 중앙 LevelUpBanner를 갱신한다.
+로직 브랜치(stage/m3-1-exp-level)가 아직 없어 이 신호는 UI 스테이지가 먼저 선언했다
+(`core/events.gd`, 합의된 시그니처 그대로 — 병합 시 중복되면 디렉터가 정리). ExpBar는
+HP/스태미나와 같은 "장식 없는 색 바"만 쓰고, 640×360 해상도 제약상 숫자 오버레이는
+넣지 않았다(레벨 숫자는 LevelLabel이 이미 담당). 레벨업 배너는 3초 노출 + 0.4초
+페이드, 스탯 상승은 `stat_gains` 키를 그대로 대문자로 나열한다(스탯 이름 로컬라이징은
+game-designer의 stats.json 확정 이후 범위).
+
 ## 4. 상태 목록
 
 | 상태 | 트리거 | 표시 |
 |---|---|---|
 | 평상시 | — | HP/스태미나 바 정상 색, 보스바·비네트·디버그패널 숨김 |
+| 경험치 변동 | `Events.exp_changed` | TopLeft ExpBar 값 갱신, LevelLabel 텍스트 갱신 |
+| 레벨업 | `Events.level_up` | 화면 중앙 LevelUpBanner 3초 노출 후 페이드(`hud_progress.gd`) |
 | HP 25% 이하 | `HudMath.is_hp_critical()` | HP 바 점멸(HUD/colors/hp_warning) + 화면 가장자리 비네트. 색약 모드면 비네트 대신 대각선 해치 패턴(`vignette_overlay.gd`) |
 | 스태미나 고갈 | `resources.stamina <= 0` (매 프레임 판정) | 스태미나 바 지속 빨간 점멸 |
 | 스태미나 액션 실패 | `Events.player_stamina_insufficient` | 스태미나 바 3회 급속 점멸(플래시) |
@@ -88,7 +102,7 @@ HUD 자체는 비상호작용(포커스 이동 불필요)이라 위 두 토글 �
 ## 6. 남은 이슈
 
 1. 로컬라이징: `ui.hud.*` 키에 대응하는 실제 한국어 문자열이 아직 어느 CSV/Translation 리소스에도 없다. narrative-writer가 키 테이블을 만들면 자동 반영된다(코드 변경 불필요).
-2. 레벨 표시("Lv.1")는 정적 placeholder — characters.json/경험치 시스템(M1 범위 밖)이 아직 없어 `Events.player_level_up`을 실제로 쏘는 곳이 없다.
+2. (M3-2에서 UI 골격 해소) 레벨/경험치 표시는 `hud_progress.gd`가 `Events.exp_changed`/`level_up`을 구독해 갱신하지만, 두 신호를 실제로 emit하는 경험치 시스템(stage/m3-1-exp-level, godot-engineer)이 아직 병합 전이라 지금은 스모크(`SmokeProgressUi.tscn`)가 신호를 직접 emit해야만 확인 가능하다. 병합 후 실제 전투/퀘스트 보상 경로 재검증 필요.
 3. 퀵슬롯·스킬 슬롯은 표시 전용(아이콘·쿨타임 실데이터 없음) — 인벤토리/스킬 시스템(F7-2) 완성 후 연결.
 4. 획득 로그는 `item_picked_up`/`gold_changed` 이벤트를 그대로 문자열화한다 — 아이템명 한글화(아이템 테이블 연동)는 F7-2/데이터 테이블 확정 후.
 5. 미니맵 홀드 → 월드맵 열기(와이어프레임 제안)는 이번 범위 밖(월드맵 화면 F7-2에서 구현).

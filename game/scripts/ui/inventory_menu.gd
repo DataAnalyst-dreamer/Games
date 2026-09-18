@@ -62,6 +62,9 @@ const COSTUME_SLOTS := [
 @onready var inventory_tab: Control = $ContentArea/InventoryTab
 @onready var placeholder_tab: Control = $ContentArea/PlaceholderTab
 @onready var placeholder_label: Label = $ContentArea/PlaceholderTab/PlaceholderLabel
+## "quest" 탭 실제 구현(M3-2, D-153) — 다른 형제 노드와 달리 이 스크립트에 로직을
+## 넣지 않고 quest_log_tab.gd로 분리했다(500줄 상한 D-145, 이 파일이 이미 초과 상태).
+@onready var quest_log_tab: QuestLogTab = $ContentArea/QuestLogTab
 @onready var equip_area: Control = $ContentArea/InventoryTab/LeftPanel/EquipArea
 @onready var costume_header: Label = $ContentArea/InventoryTab/LeftPanel/CostumeHeader
 @onready var costume_area: Control = $ContentArea/InventoryTab/LeftPanel/CostumeArea
@@ -119,6 +122,7 @@ func _ready() -> void:
 	_description_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	header_label.get_parent().add_child(_description_label)
 	header_label.get_parent().move_child(_description_label, 1)
+	quest_log_tab.theme = theme # 자식 Control은 부모 theme을 스크립트에서 자동 상속하지 않음(D-24류 관례).
 	_apply_theme_frames()
 	_build_tabs()
 	_build_filter_chips()
@@ -148,6 +152,7 @@ func open_menu() -> void:
 
 func close_menu() -> void:
 	visible = false
+	quest_log_tab.close()
 
 
 func is_open() -> bool:
@@ -177,6 +182,16 @@ func focus_grid_at(index: int) -> void:
 
 func confirm() -> void:
 	_handle_confirm()
+
+
+## D-153(J 키 "퀘스트 로그 바로가기"). UiRoot가 메뉴를 열거나(닫혀 있었으면) 이미
+## 열려 있는 메뉴를 이 탭으로 바로 전환할 때 쓴다. 알 수 없는 tab_id는 무시.
+func select_tab(tab_id: String) -> void:
+	var idx: int = TABS.find(tab_id)
+	if idx < 0:
+		return
+	_tab_index = idx
+	_apply_tab_visibility()
 
 
 func _apply_theme_frames() -> void:
@@ -210,14 +225,19 @@ func _change_tab(delta: int) -> void:
 
 
 func _apply_tab_visibility() -> void:
-	var is_inventory: bool = TABS[_tab_index] == "inventory"
+	var tab_id: String = TABS[_tab_index]
+	var is_inventory: bool = tab_id == "inventory"
+	var is_quest: bool = tab_id == "quest"
 	inventory_tab.visible = is_inventory
-	placeholder_tab.visible = not is_inventory
-	if not is_inventory:
-		placeholder_label.text = tr(&"ui.inv.placeholder_tab")
-	else:
+	quest_log_tab.visible = is_quest
+	placeholder_tab.visible = not is_inventory and not is_quest
+	if is_inventory:
 		_refresh_focus_visuals()
 		_refresh_tooltip()
+	elif is_quest:
+		quest_log_tab.open()
+	else:
+		placeholder_label.text = tr(&"ui.inv.placeholder_tab")
 	_update_tab_labels()
 
 
@@ -638,6 +658,10 @@ func _process(delta: float) -> void:
 		_change_tab(-1)
 	elif Input.is_action_just_pressed(&"ui_tab_next"):
 		_change_tab(1)
+
+	if TABS[_tab_index] == "quest":
+		quest_log_tab.handle_input(delta)
+		return
 
 	if TABS[_tab_index] != "inventory":
 		return

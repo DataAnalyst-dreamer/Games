@@ -38,6 +38,15 @@ func _unhandled_input(_event: InputEvent) -> void:
 		if is_blacksmith_open() or is_mailbox_open() or is_quest_npc_open():
 			return
 		toggle_menu()
+	elif Input.is_action_just_pressed(&"quest_log"):
+		# D-153: J 키 = 퀘스트 로그 바로가기(키보드 전용, 패드 미배정). 다른 전체화면
+		# UI가 이미 열려 있으면 무시하고, 메뉴가 닫혀 있으면 열면서 곧장 quest 탭으로,
+		# 이미 열려 있으면(다른 탭이었어도) quest 탭으로만 전환한다.
+		if is_blacksmith_open() or is_mailbox_open() or is_quest_npc_open():
+			return
+		if not is_menu_open():
+			open_menu()
+		inventory_menu.select_tab("quest")
 
 
 func is_menu_open() -> bool:

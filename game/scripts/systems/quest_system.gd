@@ -55,6 +55,14 @@ var pending_skill_points: int = 0
 ## 별도 담당). npc slug -> 누적 요청량(affinity 보상) 또는 마지막 stage 문자열.
 var _npc_affinity_pending: Dictionary = {}
 
+## 수동 추적 대상(D-156, 퀘스트 로그 "추적 설정"). 비어 있으면(또는 더 이상 활성이
+## 아니면) get_tracked()가 기존 자동 우선순위(get_tracked_quest_id())로 폴백한다.
+var _tracked_override: String = ""
+
+## 새 게임 온보딩(D-154, M3-2)이 자동 수주하는 MQ01. 세이브 없이 막 시작한 상태에서만
+## 의미가 있다 — ensure_onboarding_quest() 참고.
+const ONBOARDING_QUEST_ID := "quest_main_a1_01_arrival"
+
 
 func _ready() -> void:
 	Events.monster_died.connect(_on_monster_died)
@@ -282,12 +290,17 @@ func _apply_progress(obj_type: String, target_key: String, amount: int) -> void:
 		var current: int = mini(int(progress.get(obj_id, 0)) + amount, required)
 		progress[obj_id] = current
 		state["progress"] = progress
-		Events.quest_objective_updated.emit(StringName(quest_id), StringName(obj_id), current, required)
-
+		var just_completed_all_objectives := false
 		if current >= required:
+			# get_state()가 참조하는 objective_index를 emit보다 먼저 갱신한다(D-155
+			## 회귀에서 발견: 표식/HUD가 quest_objective_updated 핸들러 안에서 동기적으로
+			## get_state()를 불러도 "이미 complete_ready로 넘어간 상태"를 보게 하기 위함
+			## — emit 인자값(current/required)은 그대로라 기존 소비자 동작은 바뀌지 않는다).
 			state["objective_index"] = idx + 1
-			if int(state["objective_index"]) >= objectives.size():
-				_on_objectives_complete(quest_id, qdef)
+			just_completed_all_objectives = int(state["objective_index"]) >= objectives.size()
+		Events.quest_objective_updated.emit(StringName(quest_id), StringName(obj_id), current, required)
+		if just_completed_all_objectives:
+			_on_objectives_complete(quest_id, qdef)
 
 
 func _on_objectives_complete(quest_id: String, qdef: Dictionary) -> void:
@@ -445,6 +458,7 @@ func _apply_on_complete(on_complete: Dictionary) -> void:
 # --- HUD 추적 퀘스트 한 줄(F7-1) ---
 
 ## 표시 우선순위: 활성 메인 퀘스트 > 그 외 활성 퀘스트(가장 먼저 수주한 순) > 없음("").
+## 수동 추적(set_tracked)이 없을 때의 자동 폴백 — get_tracked()에서만 호출한다.
 func get_tracked_quest_id() -> String:
 	var fallback: String = ""
 	for quest_id: String in _active.keys():
@@ -455,13 +469,48 @@ func get_tracked_quest_id() -> String:
 	return fallback
 
 
+## D-156(퀘스트 로그 "추적 설정"). quest_id가 비어있지 않고 활성 상태일 때만 수동
+## 추적으로 설정한다(활성이 아닌 퀘스트를 추적하면 진행도 계산이 의미 없음). 빈
+## 문자열을 넘기면 수동 추적을 해제해 자동 우선순위로 되돌린다.
+func set_tracked(quest_id: String) -> void:
+	if quest_id.is_empty():
+		_tracked_override = ""
+		return
+	if not _active.has(quest_id):
+		return
+	_tracked_override = quest_id
+	Events.quest_tracked_changed.emit(StringName(quest_id))
+
+
+## 현재 HUD/퀘스트 로그가 추적해야 할 quest_id. 수동 추적이 유효하면 그것을, 아니면
+## 자동 우선순위(get_tracked_quest_id, 기본값 "가장 최근 수락한 메인 퀘스트"와 동치 —
+## 메인 퀘스트는 보통 동시에 하나만 활성이라 첫/마지막 구분이 실질적으로 없다)를 쓴다.
+func get_tracked() -> String:
+	if not _tracked_override.is_empty() and _active.has(_tracked_override):
+		return _tracked_override
+	return get_tracked_quest_id()
+
+
+## 새 게임 온보딩(D-154). quest_main_a1_01_arrival이 손대지지 않은 상태(available)일
+## 때만 자동 수주 + 추적 지정한다 — 이미 수주/완료(디버그 로드로 세이브를 불러온 경우
+## 포함)면 아무 것도 하지 않는다. Main 씬 부트스트랩(main_bootstrap.gd)이 "진짜 새
+## 게임으로 부팅했을 때"만 1회 호출한다(스모크/테스트 하네스는 호출하지 않음).
+func ensure_onboarding_quest() -> void:
+	if get_state(ONBOARDING_QUEST_ID) != STATE_AVAILABLE:
+		return
+	var result: Dictionary = accept(ONBOARDING_QUEST_ID)
+	if bool(result.get("ok", false)):
+		set_tracked(ONBOARDING_QUEST_ID)
+		print("[QuestSystem] 온보딩: %s 자동 수주 + 추적 지정" % ONBOARDING_QUEST_ID)
+
+
 ## {} (추적 대상 없음) 또는 {quest_id, title_key, current, target}. current/target 의미:
 ## 진행 중인 목표의 목표 수량이 1보다 크면(kill/collect) 그 목표의 진행/목표 수량,
 ## 아니면(talk/reach/interact, count==1) "완료한 목표 수/전체 목표 수"로 대신한다 —
 ## 목표 하나짜리 진행률은 정보량이 없어 퀘스트 전체 진행으로 보여주는 편이 유용하다는
 ## 판단(docs/specs/quest-system-m2.md §5 HUD 표시 규칙 참고, 필요시 game-designer 조정).
 func get_tracked_quest_progress() -> Dictionary:
-	var quest_id: String = get_tracked_quest_id()
+	var quest_id: String = get_tracked()
 	if quest_id.is_empty():
 		return {}
 	var qdef: Dictionary = _quest_def(quest_id)
@@ -480,6 +529,28 @@ func get_tracked_quest_progress() -> Dictionary:
 	return {"quest_id": quest_id, "title_key": title_key, "current": idx, "target": objectives.size()}
 
 
+## 퀘스트 로그(D-153, 임의 quest_id — 추적 대상이 아니어도 목록에서 선택한 항목의
+## 상세를 보여줘야 한다)용. get_tracked_quest_progress()와 계산 규칙은 같지만 quest_id를
+## 인자로 받고, objective_index도 함께 돌려준다(로그가 "이전 목표는 완료, 이후 목표는
+## 잠김"을 그리는 데 필요). 활성이 아니면 {}.
+func get_objective_progress(quest_id: String) -> Dictionary:
+	if not _active.has(quest_id):
+		return {}
+	var qdef: Dictionary = _quest_def(quest_id)
+	var objectives: Array = qdef.get("objectives", [])
+	var state: Dictionary = _active.get(quest_id, {})
+	var idx: int = int(state.get("objective_index", 0))
+	if idx >= objectives.size() or objectives.is_empty():
+		return {"objective_index": objectives.size(), "current": objectives.size(), "target": objectives.size()}
+	var obj: Dictionary = objectives[idx]
+	var required: int = _resolve_objective_count(quest_id, obj)
+	if required > 1:
+		var obj_id: String = String(obj.get("id", ""))
+		var current: int = int((state.get("progress", {}) as Dictionary).get(obj_id, 0))
+		return {"objective_index": idx, "current": current, "target": required}
+	return {"objective_index": idx, "current": idx, "target": objectives.size()}
+
+
 # --- 직렬화(SaveManager 연동, F8-1) ---
 
 func to_dict() -> Dictionary:
@@ -492,6 +563,7 @@ func to_dict() -> Dictionary:
 		"total_exp_earned": total_exp_earned,
 		"pending_skill_points": pending_skill_points,
 		"npc_affinity_pending": _npc_affinity_pending.duplicate(true),
+		"tracked_quest_id": _tracked_override,
 	}
 
 
@@ -507,6 +579,7 @@ func from_dict(data: Dictionary) -> void:
 	total_exp_earned = int(data.get("total_exp_earned", 0))
 	pending_skill_points = int(data.get("pending_skill_points", 0))
 	_npc_affinity_pending = (data.get("npc_affinity_pending", {}) as Dictionary).duplicate(true)
+	_tracked_override = String(data.get("tracked_quest_id", ""))
 
 
 ## 테스트/디버그 전용 — 모든 상태를 초기화한다(실제 자동로드 싱글턴을 재사용하는
@@ -520,6 +593,7 @@ func reset() -> void:
 	total_exp_earned = 0
 	pending_skill_points = 0
 	_npc_affinity_pending = {}
+	_tracked_override = ""
 
 
 # --- 디버그/테스트 보조 ---
