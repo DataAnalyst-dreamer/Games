@@ -276,6 +276,8 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 | D-136 | 플레이 가능한 데모 배포 경로 | **Godot 웹(no-threads) 빌드 → `gh-pages` 브랜치 → GitHub Pages**. 아티팩트 페이지(16MB 제한)로는 엔진 wasm(44MB)을 못 올린다. 프리셋은 `tools/build/export_presets.web.cfg`, 참조되지 않는 서드파티 애셋은 exclude_filter로 제외(pck 16MB). 매 단계 PR 머지 후 데모를 재배포한다 | 사용자 요청 | tools/build/, docs/qa/web-demo.md |
 | D-137 | AI 도트 생성 툴 도입 | 원작 아트 초기 확보는 **PixelLab.ai(캐릭터 베이스·타일)·Ludo.ai(모션 프리셋)**로 사용자가 직접 생성하고, 우리는 브리프(`docs/art/brief-fin-pixellab.md`)·검수 체크리스트·정규화 스크립트(`tools/art/normalize_ai_sheet.py`)로 받는다. 고해상도 생성기(Higgsfield 등)는 타이틀·포트레이트·홍보물에만. D-135(주인공 시안 선행)의 시안 제작 수단을 프로그램 생성 → AI 툴로 교체 | 사용자 가이드 | docs/art/ai-sprite-pipeline.md |
 | D-138 | AI 생성물 라이선스 기록 | `asset-sources.md`에 등급 **"AI-생성"** 신설. 툴·플랜·생성일·프롬프트·해당 서비스의 상업 이용 조건을 `LICENSES.md`에 기록해야 `game/assets/`에 넣을 수 있다. 프롬프트에 특정 상용 게임 실명을 넣어 그 스타일을 지시하는 것은 금지(일반 스타일 기술어만) | 디렉터 | asset-sources.md, LICENSES.md |
+| D-144 | D-139/D-140 반영에 따른 D-130~D-135 정리 | D-130(960×540)·D-131(32×48)은 **폐기**한다(D-139의 FHD·D-140의 64×96이 대체). D-133(프레임 수 상향)·D-135(주인공 시안 선행)는 그대로 유지한다. D-132(타일·아이콘 32×32)·D-134(좌표 2배 마이그레이션)는 지금 재확정하지 않고, FHD 기준 카메라·타일 규격이 확정되는 T05(D-139 참고) 때 함께 재검토한다 | 아트 디렉터(문서 정합성 정리) | docs/art/ai-sprite-pipeline.md, docs/art/brief-fin-pixellab.md, docs/art/character-fin-spec.md, tools/art/normalize_ai_sheet.py |
+| D-145 | 개발 순서 재배치 | 사용자가 제시한 "바이브 코딩 6단계" 가이드를 현재 진행 상황에 맞게 재배치(`docs/plans/development-order.md`). 엔진은 **Godot 유지**(PhaserJS 전환 기각), 앞으로의 7단계(애셋 인덱스 → 경험치·레벨업 → 스킬 슬롯 → 퀘스트 로그 UI → 원작 아트 교체 → 대사 시스템 → 게임성 게이트 2차), 새 규칙 3개(단계 착수 시 계획 회신 후 구현·완료 보고에 검증 출력 필수·파일 500줄 상한) | 사용자 가이드 | development-order.md, .claude/agents/README.md 후속 |
 
 ## 변경 이력
 - 2026-09-08: 37건 최초 확정 (추천안 일괄 채택). GDD v1.0 → v1.1 개정.
@@ -303,3 +305,5 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 - 2026-09-10: 히트스톱 중첩 영구 정지 버그 결정(D-129) 확정.
 - 2026-09-10: 원작 아트 규격 6건(D-130~D-135) 확정 — 960×540 / 캐릭터 32×48 / 타일 32×32 / 프레임 수 상향.
 - 2026-09-18: 웹 데모 배포·AI 애셋 파이프라인 결정 3건(D-136~D-138) 확정.
+- 2026-09-18(병합 정리): D-144 확정 — D-139/D-140 반영에 따라 D-130(960×540)·D-131(32×48) 폐기, D-133·D-135 유지, D-132·D-134는 T05에서 재검토. `docs/art/ai-sprite-pipeline.md`·`brief-fin-pixellab.md`·`character-fin-spec.md`·`tools/art/normalize_ai_sheet.py`를 64×96/96×128/(48,112) 기준으로 정합.
+- 2026-09-18: 개발 순서 재배치(D-145) 확정.
