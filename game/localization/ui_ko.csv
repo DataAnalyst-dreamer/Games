@@ -349,3 +349,22 @@ ui.quest.reward_exp_fmt,경험치 %d
 ui.quest.reward_item_fmt,%s x%d
 ui.quest.reward_skill_point_fmt,스킬 포인트 +%d
 ui.quest.complete_toast_title,퀘스트 완료
+ui.stat.derived.sp_regen,SP 회복량
+ui.stat.derived.hit_scale,명중 판정
+ui.stat.derived.flee_iframe_bonus,회피(무적 연장)
+ui.stat.derived.move_speed_mult,이동 속도
+ui.stat.derived.combo_frame_mult,공격 속도
+ui.stat.derived.post_recovery_mult,후딜 감소
+ui.stat.effect.str,물리 공격력이 오른다
+ui.stat.effect.agi,공격 속도와 회피가 좋아진다
+ui.stat.effect.dex,공격이 더 잘 맞고 후딜이 짧아진다
+ui.stat.effect.int,마법 공격력과 최대 SP가 오르고 스킬 재사용 대기시간이 줄어든다
+ui.stat.effect.vit,최대 체력과 방어력이 오른다
+ui.stat.effect.luk,치명타 확률이 오른다
+ui.skill_tree.series.blade,검
+ui.skill_tree.series.guard,방패
+ui.skill_tree.series.trick,기교
+ui.skill.reason_no_points,스킬 포인트가 부족합니다
+ui.skill.reason_requires,선행 스킬 레벨이 부족합니다
+ui.skill.reason_maxed,이미 최대 레벨입니다
+ui.skill.reason_unknown,알 수 없는 스킬입니다

@@ -83,6 +83,12 @@ HUD/colors/vignette = Color(0.7, 0, 0, 0.35)
 HUD/colors/exp_fill = Color(0.352941, 0.658824, 0.313725, 1)
 HUD/colors/exp_bg = Color(0.121569, 0.101961, 0.078431, 0.85)
 
+; --- SP바 (M4-5, ro-benchmark-progression-v1.md §3). 스태미나 팔레트(황토색 계열)와
+; 구분되는 청색 계열로, HP(적)·스태미나(황토)·SP(청)가 색상만으로도 즉시 구분된다. ---
+HUD/colors/sp_fill = Color(0.32549, 0.482353, 0.756863, 1)
+HUD/colors/sp_bg = Color(0.121569, 0.101961, 0.078431, 0.85)
+HUD/colors/sp_empty = Color(0.45, 0.45, 0.45, 1)
+
 ; --- NPC 머리 위 퀘스트 표식 (M3-2, D-155: 폰트 라벨, ! 노랑/? 하늘색) ---
 HUD/colors/quest_marker_available = Color(0.964706, 0.831373, 0.223529, 1)
 HUD/colors/quest_marker_complete = Color(0.454902, 0.780392, 0.898039, 1)
@@ -111,6 +117,13 @@ Inventory/colors/tab_active = Color(1, 1, 1, 1)
 Inventory/colors/tab_inactive = Color(0.62, 0.62, 0.62, 1)
 Inventory/styles/focus_highlight = SubResource("StyleBoxFlat_focus_highlight")
 Inventory/styles/backdrop = SubResource("StyleBoxFlat_backdrop")
+
+; --- 스킬 트리 계열 강조색 (M4-5, D-161 3계열). skills.json vfx.color와 동일한 값을
+; 그대로 옮겨(단일 소스 원칙 위반 아님 — vfx 색은 이펙트용 Color 리터럴이라 여기서
+; 테마 토큰으로 한 번 더 등록해 탭 버튼 등 UI 강조에 재사용한다) 이펙트·UI 색을 통일한다. ---
+SkillTree/colors/blade = Color(0.886275, 0.329412, 0.309804, 1)
+SkillTree/colors/guard = Color(0.352941, 0.494118, 0.658824, 1)
+SkillTree/colors/trick = Color(0.498039, 0.74902, 0.372549, 1)
 
 ; --- 대장간·우편함 화면 전용 (F3-3·F3-4, M2-5). 등급 색·포커스·비활성·긍정/부정 색은
 ; 위 Inventory/colors/* 를 그대로 재사용한다(중복 정의 금지) — 여기는 D-90 "+7부터
