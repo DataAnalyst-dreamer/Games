@@ -1,0 +1,108 @@
+{
+  "_comment": "M3-3(D-141 최소 세트): 액티브 6개. GDD 4.3 '현재 액티브 슬롯 2개를 출발점' 방향만 구현 — docs/content-drafts/research-expansion/class-progression-v3.md(8계열·124노드, D-161: series/tier/node_type 필드만 호환, 미승인 설계는 미구현)와 필드 호환. 전부 tier 1·requires 빈 배열(D-159: 레벨 게이트 없음, F1-3 '레벨 제한 없음'과 정합). 전부 히트박스 배율·범위·넉백·자기 버프·짧은 무적으로만 구성(투사체/소환/상태이상 금지, 기존 Hitbox/Hurtbox 컴포넌트로 구현 가능). icon은 전부 null(D-161 합의 (b): 후속 작업, UI는 계열 첫 글자로 대체). 수치는 전부 _balance_todo. 스키마·self_effect 3종 고정값 설명: docs/specs/skills-m3.md.",
+
+  "blade_power_slash": {
+    "name_key": "skill.blade_power_slash.name",
+    "desc_key": "skill.blade_power_slash.desc",
+    "series": "blade",
+    "tier": 1,
+    "node_type": "active",
+    "cost_sp": 1,
+    "cooldown_sec": 4.0,
+    "stamina_cost": 15.0,
+    "damage_mult": 1.8,
+    "hitbox": { "shape": "arc", "range_px": 60, "width_px": 90 },
+    "knockback_px": 14,
+    "requires": [],
+    "icon": null,
+    "_balance_todo": ["cooldown_sec", "stamina_cost", "damage_mult", "hitbox", "knockback_px"]
+  },
+
+  "blade_thrust": {
+    "name_key": "skill.blade_thrust.name",
+    "desc_key": "skill.blade_thrust.desc",
+    "series": "blade",
+    "tier": 1,
+    "node_type": "active",
+    "cost_sp": 1,
+    "cooldown_sec": 2.5,
+    "stamina_cost": 10.0,
+    "damage_mult": 1.3,
+    "hitbox": { "shape": "line", "range_px": 80, "width_px": 20 },
+    "knockback_px": 6,
+    "requires": [],
+    "icon": null,
+    "_balance_todo": ["cooldown_sec", "stamina_cost", "damage_mult", "hitbox", "knockback_px"]
+  },
+
+  "guard_shield_bash": {
+    "name_key": "skill.guard_shield_bash.name",
+    "desc_key": "skill.guard_shield_bash.desc",
+    "series": "guard",
+    "tier": 1,
+    "node_type": "active",
+    "cost_sp": 1,
+    "cooldown_sec": 5.0,
+    "stamina_cost": 20.0,
+    "damage_mult": 1.0,
+    "hitbox": { "shape": "circle", "range_px": 40, "width_px": null },
+    "knockback_px": 24,
+    "requires": [],
+    "icon": null,
+    "_balance_todo": ["cooldown_sec", "stamina_cost", "damage_mult", "hitbox", "knockback_px"]
+  },
+
+  "guard_iron_wall": {
+    "name_key": "skill.guard_iron_wall.name",
+    "desc_key": "skill.guard_iron_wall.desc",
+    "series": "guard",
+    "tier": 1,
+    "node_type": "active",
+    "cost_sp": 1,
+    "cooldown_sec": 8.0,
+    "stamina_cost": 15.0,
+    "damage_mult": 0.0,
+    "hitbox": null,
+    "knockback_px": 0,
+    "self_effect": { "invuln_sec": 1.0 },
+    "requires": [],
+    "icon": null,
+    "_balance_todo": ["cooldown_sec", "stamina_cost", "self_effect"]
+  },
+
+  "trick_dash_strike": {
+    "name_key": "skill.trick_dash_strike.name",
+    "desc_key": "skill.trick_dash_strike.desc",
+    "series": "trick",
+    "tier": 1,
+    "node_type": "active",
+    "cost_sp": 1,
+    "cooldown_sec": 6.0,
+    "stamina_cost": 20.0,
+    "damage_mult": 1.4,
+    "hitbox": { "shape": "line", "range_px": 100, "width_px": 24 },
+    "knockback_px": 10,
+    "self_effect": { "dash_px": 80.0, "invuln_sec": 0.15 },
+    "requires": [],
+    "icon": null,
+    "_balance_todo": ["cooldown_sec", "stamina_cost", "damage_mult", "hitbox", "knockback_px", "self_effect"]
+  },
+
+  "trick_fleet_step": {
+    "name_key": "skill.trick_fleet_step.name",
+    "desc_key": "skill.trick_fleet_step.desc",
+    "series": "trick",
+    "tier": 1,
+    "node_type": "active",
+    "cost_sp": 1,
+    "cooldown_sec": 12.0,
+    "stamina_cost": 10.0,
+    "damage_mult": 0.0,
+    "hitbox": null,
+    "knockback_px": 0,
+    "self_effect": { "move_speed_mult": 1.3, "duration_sec": 4.0 },
+    "requires": [],
+    "icon": null,
+    "_balance_todo": ["cooldown_sec", "stamina_cost", "self_effect"]
+  }
+}

@@ -15,6 +15,10 @@ func handle_input(event: InputEvent) -> void:
 		try_enter_roll()
 	elif event.is_action_pressed("guard"):
 		finished.emit(&"Guard", {})
+	elif event.is_action_pressed("skill_1"):
+		try_enter_skill(0)
+	elif event.is_action_pressed("skill_2"):
+		try_enter_skill(1)
 
 
 func physics_update(_delta: float) -> void:

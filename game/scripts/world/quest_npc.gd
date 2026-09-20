@@ -56,6 +56,7 @@ func _ready() -> void:
 	Events.quest_accepted.connect(_on_any_quest_signal)
 	Events.quest_objective_updated.connect(_on_any_quest_signal)
 	Events.quest_completed.connect(_on_any_quest_signal)
+	Events.quest_tracked_changed.connect(_on_any_quest_signal) # M3-4: 수동 추적 전환도 ▼ 갱신 대상.
 	_refresh_marker()
 
 
@@ -107,10 +108,15 @@ func _on_any_quest_signal(_a: Variant = null, _b: Variant = null, _c: Variant = 
 	_refresh_marker()
 
 
-## 이 npc_id가 giver인 퀘스트를 전부 스캔해 완료 보고(?) > 수주 가능(!) 우선순위로
-## 표식을 정한다(quest_npc_panel.gd가 giver 매칭에 쓰는 것과 같은 방식이지만, 그쪽처럼
-## 특정 퀘스트 id 목록을 하드코딩하지 않고 데이터 테이블 전체를 스캔한다 — NPC 쪽은
-## 신규 퀘스트가 추가될 때마다 코드를 고칠 필요가 없어야 하기 때문).
+## 이 npc_id가 giver인 퀘스트를 전부 스캔해 완료 보고(?) > 수주 가능(!) > 추적 중인
+## 퀘스트의 목표 대상(▼, M3-4 D-163) 우선순위로 표식을 정한다(quest_npc_panel.gd가
+## giver 매칭에 쓰는 것과 같은 방식이지만, 그쪽처럼 특정 퀘스트 id 목록을 하드코딩하지
+## 않고 데이터 테이블 전체를 스캔한다 — NPC 쪽은 신규 퀘스트가 추가될 때마다 코드를
+## 고칠 필요가 없어야 하기 때문).
+##
+## ▼는 giver가 없는 메인 퀘스트(예: MQ01 "talk npc:teo")도 목표 대상 위에 표식이
+## 뜨게 하려고 추가했다 — 데모 피드백 "퀘스트 표식이 안 보인다"의 근본 원인이 giver
+## 전용 스캔이었다(giver=null인 메인 퀘스트는 애초에 이 스캔에 걸리지 않았다).
 func _refresh_marker() -> void:
 	if npc_id.is_empty():
 		_marker.visible = false
@@ -129,6 +135,8 @@ func _refresh_marker() -> void:
 		_show_marker("?", HUD_THEME.get_color(&"quest_marker_complete", &"HUD"))
 	elif has_available:
 		_show_marker("!", HUD_THEME.get_color(&"quest_marker_available", &"HUD"))
+	elif QuestSystem.is_tracked_objective_key(QuestSystem.get_active_talk_objective_keys(npc_id)):
+		_show_marker("▼", HUD_THEME.get_color(&"quest_marker_objective", &"HUD"))
 	else:
 		_marker.visible = false
 		_stop_bounce()

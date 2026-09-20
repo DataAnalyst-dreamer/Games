@@ -5,6 +5,12 @@
   "stat_points_per_levelup": 3,
   "skill_points_per_levelup": 1,
 
+  "allocation": {
+    "_comment": "M3-3(D-158): 수동 분배 규칙. initial은 이 파일이 관리하는 '분배 가능 자원'의 시작값일 뿐 캐릭터 기본 전투 스탯이 아니다(그건 characters.json 소관, 레벨업 자동 상승분과 동일 계층 — 여기 값과 합산해서 실제 전투 스탯이 됨). GDD 5.2/`docs/brd/03-features/01-캐릭터-성장.md` F1-2 어디에도 캐릭터별 시작 스탯 지급 언급이 없어 4캐릭터 공통 0으로 확정(D-158). max_per_stat=null은 F1-2 '사제 전체 리셋(D-02, 레벨×100G)'이 이미 한 스탯 몰빵 빌드를 전제하고 있어 스탯당 캡 근거가 없기 때문(D-158). 근거 문서: docs/specs/skills-m3.md §1.",
+    "initial": { "str": 0, "dex": 0, "int": 0, "vit": 0, "luk": 0 },
+    "max_per_stat": null
+  },
+
   "str": {
     "_comment": "GDD 5.2: 물리 공격력 + 무거운 무기 요구치(요구치 게이팅은 characters.json/items.json 소관, 여기는 데미지 계수만). effective_base_attack = combat.json 기준 player_base_attack(10, M1) + STR*physical_damage_per_point + weapon.atk. 계수 산정: 만렙 스탯 총량(3*49=147, 한 스탯 몰빵 가정) 중 STR 몰빵 시 +29.4 데미지로, GDD 5.3 '전투력 60%는 장비' 목표를 해치지 않는 수준(레벨15 rare급 무기 atk 중간값 16.9 대비 약 87% - 만렙까지 가면 무기도 더 좋아지므로 상대 비중은 계속 하락).",
     "physical_damage_per_point": 0.2,

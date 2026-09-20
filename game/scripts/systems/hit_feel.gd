@@ -19,12 +19,24 @@ static func apply(defender_body: Node2D, flash_target: CanvasItem, hitbox: Hitbo
 	var damage: int = int(round(hitbox.damage * multiplier))
 	var is_advantage: bool = multiplier > 1.0
 
+	# M3-3(D-162 (a)): defender가 플레이어면 VIT+장비 방어력을 damage_after_defense 공식으로
+	# 적용한다. 몬스터 쪽 방어는 이번 범위 밖(몬스터는 armor 필드로 별도 관리, characters.json).
+	if defender_body is Player:
+		var p := defender_body as Player
+		var vit: int = int(GameState.stats.get("vit", 0))
+		var per_point: float = float(Data.get_value("stats", "vit.defense_per_point", 1.0))
+		var defense: float = StatCalc.defense_value(vit, per_point, p.equip_defense)
+		damage = StatCalc.damage_after_defense(float(damage), defense)
+
 	# 타격 임팩트 SFX(sound-map-m1.md §2/§12): Events 구독만으로는 hitbox.is_heavy가
 	# 페이로드에 없어 강공격/일반을 구분할 수 없으므로 여기서 직접 호출한다. Hitstop.
 	# apply_to() 호출과 같은 프레임에, 가능한 한 그 직전에 재생해야 화면이 얼어붙기
 	# 전에 이미 소리가 나고 있다("즉시 느껴짐", GDD 4.2 원칙 1).
 	AudioManager.play_sfx(&"hit_heavy" if hitbox.is_heavy else &"hit_normal", defender_body.global_position)
-	if is_advantage:
+	# D-162 (c): LUK 진짜 크리티컬이 원소 상성 적중과 같은 프레임에 겹쳐도 같은 레이어를
+	# 한 번만 재생한다(둘 중 하나만 있어도 재생 — "LUK 크리 우선"은 전용 SFX가 아직 없어
+	# 이 공용 레이어를 LUK 크리도 트리거하는 것으로 반영, audio-designer TODO: 구분 SFX).
+	if is_advantage or hitbox.is_critical:
 		AudioManager.play_sfx(&"hit_critical_layer", defender_body.global_position)
 
 	# 히트스톱: 공격자·피격자 양측(F2-2 "양측 0.05~0.1초 히트스톱").
@@ -47,23 +59,28 @@ static func apply(defender_body: Node2D, flash_target: CanvasItem, hitbox: Hitbo
 	if flash_target != null:
 		HitFlash.flash(flash_target)
 
-	spawn_damage_number(defender_body, damage, is_advantage)
+	# D-162 (c): 데미지 숫자는 하나만 띄우되, 원소 상성이든 LUK 진짜 크리티컬이든 특별
+	# 타격이면 같은 강조 표시를 쓴다.
+	var is_special_hit: bool = is_advantage or hitbox.is_critical
+	spawn_damage_number(defender_body, damage, is_special_hit)
 
-	# M1에는 LUK 기반 진짜 크리티컬이 없다(is_critical은 항상 false) — is_advantage(원소
-	# 상성 적중)와 이름이 뒤바뀌어 있던 문제를 바로잡았다(events.gd 주석 참고).
-	Events.hit_landed.emit(hitbox.source, defender_body, damage, is_advantage, false)
+	Events.hit_landed.emit(hitbox.source, defender_body, damage, is_advantage, hitbox.is_critical)
 
 	# 카메라 셰이크 4단계(addendum §3-2, D-63 예정): 피격자가 플레이어면 "hit" 티어
-	# (몬스터 공격력·종 무관 일괄), 그 외(플레이어가 몬스터를 때린 경우)는 원소 상성
-	# 적중이면 "crit", 강공격/피니셔면 "heavy", 그 외는 "normal"(진폭 0, GDD 4.2 그대로
-	# 셰이크 없음). 히트스톱이 화면을 프리즈하는 동안은 안 보이므로 해제 직후 시작한다.
+	# (몬스터 공격력·종 무관 일괄). 그 외(플레이어가 몬스터를 때린 경우)는 "crit"(원소
+	# 상성 적중 또는 LUK 진짜 크리티컬) / "heavy"(강공격·피니셔)가 동시에 해당할 수 있어
+	# D-162 (c): 두 tier 중 진폭(amplitude_px)이 더 큰 쪽을 쓴다. 히트스톱이 화면을
+	# 프리즈하는 동안은 안 보이므로 해제 직후 시작한다.
 	var shake_tier: String = "normal"
 	if defender_body is Player:
 		shake_tier = "hit"
-	elif is_advantage:
-		shake_tier = "crit"
-	elif hitbox.is_heavy:
-		shake_tier = "heavy"
+	else:
+		var candidates: Array[String] = []
+		if is_special_hit:
+			candidates.append("crit")
+		if hitbox.is_heavy:
+			candidates.append("heavy")
+		shake_tier = _pick_larger_shake_tier(candidates)
 	_request_shake_after_hitstop(defender_body, shake_tier, hitbox.hitstop_sec)
 
 	return damage
@@ -82,6 +99,22 @@ static func _collect_freeze_targets(body: Node, out: Array) -> void:
 			out.append(p.weapon_pivot)
 	else:
 		out.append(body)
+
+
+## D-162 (c): 후보 tier가 없으면 "normal", 하나면 그대로, 둘이면 amplitude_px가 더 큰 쪽.
+static func _pick_larger_shake_tier(candidates: Array[String]) -> String:
+	if candidates.is_empty():
+		return "normal"
+	if candidates.size() == 1:
+		return candidates[0]
+	var best: String = candidates[0]
+	var best_amplitude: float = float(Data.get_value("combat", "camera_shake.%s.amplitude_px" % best, 0.0))
+	for tier: String in candidates.slice(1):
+		var amplitude: float = float(Data.get_value("combat", "camera_shake.%s.amplitude_px" % tier, 0.0))
+		if amplitude > best_amplitude:
+			best = tier
+			best_amplitude = amplitude
+	return best
 
 
 static func _request_shake_after_hitstop(defender_body: Node2D, tier: String, hitstop_sec: float) -> void:

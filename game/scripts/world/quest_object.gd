@@ -18,6 +18,10 @@
 class_name QuestObject
 extends Area2D
 
+## 색·폰트는 game/ui/theme.tres 한 곳에서만 관리한다 — 이 노드는 Control 트리 밖(월드 2D
+## 트리)이라 테마 상속을 받지 못해 quest_npc.gd와 동일하게 직접 preload해서 읽는다.
+const HUD_THEME: Theme = preload("res://ui/theme.tres")
+
 @export var object_id: StringName = &""
 @export var one_shot: bool = false
 @export var vanish_on_complete: bool = false
@@ -26,10 +30,19 @@ extends Area2D
 
 @onready var _visual: Node2D = $Placeholder
 @onready var _visual_used: Node2D = get_node_or_null("PlaceholderUsed")
+@onready var _marker: Label = $MarkerLabel
 
 var _used: bool = false
 var _emitted_objectives: Dictionary = {}
 var _player_inside: Player = null
+
+## 머리 위 "목표 표식"(M3-4, D-163) — quest_npc.gd의 ▼ 표식과 같은 바운스 연출을
+## 그대로 복제한다(공용 헬퍼로 뽑기엔 두 곳뿐이라 과함, 판정 로직만
+## QuestSystem.is_tracked_objective_key()로 공유한다).
+const MARKER_BOUNCE_PX := 6.0
+const MARKER_BOUNCE_SEC := 0.8
+var _marker_base_y: float = 0.0
+var _marker_tween: Tween
 
 
 func _ready() -> void:
@@ -37,8 +50,14 @@ func _ready() -> void:
 	body_exited.connect(_on_body_exited)
 	Events.quest_accepted.connect(_on_quest_accepted)
 	Events.load_completed.connect(_on_load_completed)
+	Events.quest_objective_updated.connect(_on_any_quest_signal)
+	Events.quest_completed.connect(_on_any_quest_signal)
+	Events.quest_tracked_changed.connect(_on_any_quest_signal)
 	if _visual_used != null:
 		_visual_used.visible = false
+	_marker_base_y = _marker.position.y
+	_marker.visible = false
+	_refresh_marker()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -108,6 +127,52 @@ func observation_key() -> StringName:
 func _on_quest_accepted(quest_id: StringName) -> void:
 	for key: String in _emitted_objectives.keys():
 		if key.begins_with(String(quest_id) + ":"): _emitted_objectives.erase(key)
+	_refresh_marker()
+
+
+func _on_any_quest_signal(_a: Variant = null, _b: Variant = null, _c: Variant = null, _d: Variant = null) -> void:
+	_refresh_marker()
+
+
+func _refresh_marker() -> void:
+	if object_id.is_empty() or not QuestSystem.is_tracked_objective_key(QuestSystem.get_active_interact_objective_keys(object_id)):
+		_marker.visible = false
+		_stop_bounce()
+		return
+	_marker.text = "▼"
+	_marker.add_theme_color_override("font_color", HUD_THEME.get_color(&"quest_marker_objective", &"HUD"))
+	_marker.add_theme_font_override("font", HUD_THEME.default_font)
+	_marker.add_theme_font_size_override("font_size", HUD_THEME.get_font_size(&"large", &"HUD"))
+	_marker.visible = true
+	_start_bounce()
+
+
+func _start_bounce() -> void:
+	if _marker_tween != null and _marker_tween.is_valid():
+		return
+	_marker_tween = create_tween()
+	_marker_tween.set_loops()
+	_marker_tween.tween_property(_marker, "position:y", _marker_base_y - MARKER_BOUNCE_PX, MARKER_BOUNCE_SEC * 0.5)\
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_marker_tween.tween_property(_marker, "position:y", _marker_base_y, MARKER_BOUNCE_SEC * 0.5)\
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+
+func _stop_bounce() -> void:
+	if _marker_tween != null and _marker_tween.is_valid():
+		_marker_tween.kill()
+	_marker_tween = null
+	_marker.position.y = _marker_base_y
+
+
+# --- 테스트 보조용(스모크에서 표식 상태를 직접 확인, quest_npc.gd와 동일 API) ---
+
+func marker_text() -> String:
+	return _marker.text
+
+
+func marker_visible() -> bool:
+	return _marker.visible
 
 
 func _on_load_completed(_slot: int, _kind: StringName, ok: bool) -> void:

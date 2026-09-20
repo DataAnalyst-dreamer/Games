@@ -250,3 +250,36 @@ ui.quest_log.empty,표시할 퀘스트가 없습니다
 ui.quest_log.tracking_mark,[추적]
 ui.quest_log.tracking_on,현재 추적 중인 퀘스트입니다
 ui.quest_log.track_hint,확인 버튼으로 이 퀘스트를 추적합니다
+skill.blade_power_slash.name,강타
+skill.blade_power_slash.desc,정면 부채꼴 범위를 강하게 베어 넉백을 준다.
+skill.blade_thrust.name,찌르기
+skill.blade_thrust.desc,짧은 준비 동작 후 앞을 직선으로 찌른다.
+skill.guard_shield_bash.name,방패 강타
+skill.guard_shield_bash.desc,주변 적을 밀쳐내는 원형 타격.
+skill.guard_iron_wall.name,철벽
+skill.guard_iron_wall.desc,잠시 무적 상태가 되어 다음 공격을 흘려낸다.
+skill.trick_dash_strike.name,쇄도
+skill.trick_dash_strike.desc,짧게 돌진하며 무적 상태로 적을 꿰뚫는다.
+skill.trick_fleet_step.name,축지
+skill.trick_fleet_step.desc,잠시 이동 속도가 크게 증가한다.
+ui.skill_panel.tab.stat,스탯
+ui.skill_panel.tab.skill,스킬
+ui.stat.str,힘
+ui.stat.dex,민첩
+ui.stat.int,지능
+ui.stat.vit,체력
+ui.stat.luk,행운
+ui.stat.points_remaining,잔여 포인트: %d
+ui.stat.derived.attack,공격
+ui.stat.derived.max_hp,HP
+ui.stat.derived.defense,방어
+ui.stat.derived.crit_chance,크리
+ui.stat.derived.pending,현재값을 불러오는 중입니다.
+ui.skill.state.learned,[습득됨]
+ui.skill.state.learnable,[습득]
+ui.skill.requires_none,없음
+ui.skill.meta_fmt,계열 %s · SP %d · 요구 %s
+ui.skill.learn_hint,확인 버튼으로 습득합니다
+ui.skill.slot_hint,Q 또는 R로 슬롯에 장착합니다
+ui.skill.locked_hint,포인트가 부족하거나 선행 스킬이 필요합니다
+ui.hud.level_up_points_hint,포인트 %d 남음 — Tab

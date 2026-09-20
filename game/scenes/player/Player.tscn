@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://scripts/player/states/dead.gd" id="8_dead"]
 [ext_resource type="Script" path="res://scripts/player/states/roll.gd" id="12_roll"]
 [ext_resource type="Script" path="res://scripts/player/states/guard.gd" id="13_guard"]
+[ext_resource type="Script" path="res://scripts/player/states/skill.gd" id="14_skill"]
 [ext_resource type="Script" path="res://scripts/systems/hitbox.gd" id="9_hitbox"]
 [ext_resource type="Script" path="res://scripts/systems/hurtbox.gd" id="10_hurtbox"]
 [ext_resource type="Texture2D" path="res://assets/third_party/ninja_adventure/Items/Weapons/Sword/Sprite.png" id="11_sword"]
@@ -285,3 +286,6 @@ script = ExtResource("12_roll")
 
 [node name="Guard" type="Node" parent="StateMachine"]
 script = ExtResource("13_guard")
+
+[node name="Skill" type="Node" parent="StateMachine"]
+script = ExtResource("14_skill")

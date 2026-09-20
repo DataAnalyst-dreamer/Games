@@ -86,6 +86,9 @@ HUD/colors/exp_bg = Color(0.121569, 0.101961, 0.078431, 0.85)
 ; --- NPC 머리 위 퀘스트 표식 (M3-2, D-155: 폰트 라벨, ! 노랑/? 하늘색) ---
 HUD/colors/quest_marker_available = Color(0.964706, 0.831373, 0.223529, 1)
 HUD/colors/quest_marker_complete = Color(0.454902, 0.780392, 0.898039, 1)
+; M3-4(D-163): giver 없이도 "추적 중인 퀘스트의 현재 목표 대상"(talk/interact)이면 ▼로
+; 표시. 위 !/?와 모양 자체가 달라 색약 모드에서도 구분된다(글자 색은 부가 정보).
+HUD/colors/quest_marker_objective = Color(0.85, 0.549020, 0.243137, 1)
 
 ; --- 폰트 크기 2단계 (접근성, wireframes 화면10) ---
 HUD/font_sizes/default = 11

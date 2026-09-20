@@ -53,3 +53,12 @@ func try_enter_roll() -> void:
 ## multiplier).
 func get_stamina_regen_multiplier() -> float:
 	return 1.0
+
+
+## 스킬 발동 공용 헬퍼(M3-3, try_enter_roll과 동일 패턴). Idle/Move 등이 skill_1/skill_2
+## 입력에서 호출 — 쿨타임/스태미나/장착 여부는 Progression.can_cast_skill()이 검증한다.
+func try_enter_skill(slot: int) -> void:
+	if Progression.can_cast_skill(slot):
+		finished.emit(&"Skill", {"slot": slot})
+	else:
+		Events.player_stamina_insufficient.emit(StringName("skill_%d" % slot))

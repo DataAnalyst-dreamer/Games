@@ -119,6 +119,48 @@ func test_real_monsters_all_have_exp_reward() -> void:
 		assert_gt(int(entry.get("exp_reward", 0)), 0, "monsters.%s: exp_reward는 양수여야 한다" % monster_id)
 
 
+# --- 실데이터(game/data/skills.json, stats.json.allocation, M3-3) 통합 확인 ---
+
+const SkillCalcScript := preload("res://scripts/systems/skill_calc.gd")
+const REAL_SKILL_IDS := [
+	"blade_power_slash", "blade_thrust", "guard_shield_bash",
+	"guard_iron_wall", "trick_dash_strike", "trick_fleet_step",
+]
+
+
+func test_real_skills_table_has_six_active_skills_with_no_validation_errors() -> void:
+	assert_eq(_data.validation_errors.size(), 0, "검증 에러가 없어야 한다: %s" % [_data.validation_errors])
+	var skills: Dictionary = _data.table("skills")
+	for id: String in REAL_SKILL_IDS:
+		assert_true(skills.has(id), "skills.json에 %s가 있어야 한다" % id)
+		assert_eq(String(skills[id].get("node_type", "")), "active")
+
+
+func test_real_skills_hitbox_null_iff_damage_mult_zero() -> void:
+	# skills-m3.md §2: damage_mult>0이면 hitbox 필수, 0이면(순수 자기 버프) null.
+	var skills: Dictionary = _data.table("skills")
+	for id: String in REAL_SKILL_IDS:
+		var entry: Dictionary = skills[id]
+		var has_hitbox: bool = entry.get("hitbox", null) != null
+		var has_damage: bool = float(entry.get("damage_mult", 0.0)) > 0.0
+		assert_eq(has_hitbox, has_damage, "skills.%s: hitbox 유무와 damage_mult>0 이 일치해야 한다" % id)
+
+
+func test_real_skill_damage_for_blade_power_slash() -> void:
+	var entry: Dictionary = _data.table("skills")["blade_power_slash"]
+	assert_eq(SkillCalcScript.damage_for(entry, 10.0), 18, "damage_mult=1.8 * effective_attack 10")
+
+
+func test_real_stats_allocation_initial_is_all_zero_and_uncapped() -> void:
+	# JSON 숫자는 float으로 로드되므로(godot-engineer 관례, D-45 정본 문자열 검증과 동일
+	# 이유) 값 비교는 각 키를 float으로 캐스팅해서 한다.
+	var allocation: Dictionary = _data.get_value("stats", "allocation", {})
+	var initial: Dictionary = allocation.get("initial", {})
+	for key: String in ["str", "dex", "int", "vit", "luk"]:
+		assert_eq(float(initial.get(key, -1)), 0.0, "allocation.initial.%s" % key)
+	assert_null(allocation.get("max_per_stat"), "D-158: 스탯당 상한 없음")
+
+
 # --- 세이브 라운드트립(GameState.to_dict()/from_dict()) ---
 
 func test_game_state_level_exp_round_trips_through_save_dict() -> void:
@@ -138,5 +180,24 @@ func test_game_state_level_exp_round_trips_through_save_dict() -> void:
 	assert_eq(restored.skill_points, 3)
 	assert_eq(int(restored.level_stat_bonus.get("max_hp", -1)), 48)
 	assert_eq(float(restored.level_stat_bonus.get("attack", -1.0)), 6.0)
+	gs.free()
+	restored.free()
+
+
+## M3-3(D-158~D-162): 5스탯/배운 스킬/슬롯도 동일 라운드트립을 거쳐야 한다.
+func test_game_state_stats_and_skills_round_trip_through_save_dict() -> void:
+	var gs: Node = load("res://scripts/core/game_state.gd").new()
+	gs.stats = {"str": 3, "dex": 1, "int": 0, "vit": 5, "luk": 2}
+	var learned: Array[String] = ["blade_power_slash", "blade_thrust"]
+	gs.learned_skills = learned
+	var slots: Array[String] = ["blade_power_slash", ""]
+	gs.skill_slots = slots
+	var saved: Dictionary = gs.to_dict()
+
+	var restored: Node = load("res://scripts/core/game_state.gd").new()
+	restored.from_dict(saved)
+	assert_eq(restored.stats, {"str": 3, "dex": 1, "int": 0, "vit": 5, "luk": 2})
+	assert_eq(restored.learned_skills, ["blade_power_slash", "blade_thrust"])
+	assert_eq(restored.skill_slots, ["blade_power_slash", ""])
 	gs.free()
 	restored.free()

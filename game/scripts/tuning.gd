@@ -90,6 +90,11 @@ const MONSTER_ATTACK_VFX_MARGIN_PX: float = 2.0
 ## 제안값(DEATH_RESPAWN_DELAY_SEC=1.0)과 동일한 이름/값으로 맞췄다.
 const DEATH_RESPAWN_DELAY_SEC: float = 1.0
 
+## 스킬 히트박스 활성 지속시간(초, M3-3). skills.json에 아직 스킬별 전용 애니메이션/
+## 판정창 필드가 없어(docs/specs/skills-m3.md §2 "스킬 전용 히트스톱 값은 이번 범위 밖"과
+## 동일한 이유) ATTACK_HIT_DURATION_SEC과 같은 값으로 임시 고정한다.
+const SKILL_HIT_DURATION_SEC: float = ATTACK_HIT_DURATION_SEC
+
 # --- 카메라 셰이크: 4단계 진폭·지속은 combat.json.camera_shake로 이관됨
 # (addendum §3-2, D-63 예정, _balance_todo — M1 게이트 실측 후 확정). 접근성 배율표만
 # settings.json 소유자 미배정(addendum §3-3 결정 요청 4)으로 잠정 여기 유지.
