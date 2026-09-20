@@ -17,7 +17,7 @@
 ## 결정 필요 항목(D-103 후보) 참고.
 extends Node
 
-const FORMAT_VERSION := 2
+const FORMAT_VERSION := 3
 const SAVE_DIR := "user://saves"
 const SLOT_COUNT := 3
 const KINDS: Array[String] = ["manual", "auto"]
@@ -169,6 +169,11 @@ func load(slot: int, kind: String) -> Dictionary:
 		# 이유가 없다. 다음 포맷 변경 때는 이 자리에 version == 2 분기를 잇는다.
 		payload = _migrate_v1_to_v2(payload)
 		version = int(payload.get("version", 0))
+	if version == 2:
+		# D-225(iso-1): 등각 전환으로 월드 좌표가 지면 -> 화면 투영으로 바뀌었다.
+		# 세이브에 든 좌표는 여전히 플레이어 위치 한 쌍뿐이라 변환도 한 번이다.
+		payload = _migrate_v2_to_v3(payload)
+		version = int(payload.get("version", 0))
 	if version != FORMAT_VERSION:
 		return _finish_load(slot, kind, {"ok": false, "reason": "version_unsupported"})
 
@@ -189,6 +194,23 @@ func _migrate_v1_to_v2(payload: Dictionary) -> Dictionary:
 			pos["y"] = float(pos.get("y", 0.0)) * 2.0
 	payload["version"] = 2
 	push_warning("[SaveManager] 세이브 포맷 v1 -> v2 마이그레이션(월드 단위 ×2, D-210)")
+	return payload
+
+
+## v2 -> v3: 지면 좌표를 등각 화면 좌표로 투영한다(D-219/D-225).
+func _migrate_v2_to_v3(payload: Dictionary) -> Dictionary:
+	var state: Dictionary = payload.get("state", {})
+	var player_state: Variant = state.get("player", {})
+	if player_state is Dictionary:
+		var position: Variant = (player_state as Dictionary).get("position", {})
+		if position is Dictionary:
+			var pos: Dictionary = position
+			var screen: Vector2 = IsoMath.to_screen(
+				Vector2(float(pos.get("x", 0.0)), float(pos.get("y", 0.0))))
+			pos["x"] = screen.x
+			pos["y"] = screen.y
+	payload["version"] = 3
+	push_warning("[SaveManager] 세이브 포맷 v2 -> v3 마이그레이션(등각 투영, D-225)")
 	return payload
 
 

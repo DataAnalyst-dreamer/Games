@@ -118,7 +118,9 @@ func _apply_self_effect(effect_variant: Variant) -> void:
 func _dash(distance_px: float) -> void:
 	if distance_px <= 0.0:
 		return
-	var target: Vector2 = player.global_position + player.facing * distance_px
+	# D-222: dash_px 는 지면 거리. 넉백과 같은 이유로 Tween 경로를 직접 변환한다.
+	var target: Vector2 = player.global_position \
+		+ IsoMath.offset_for_ground_distance(player.facing, distance_px)
 	var tween := player.create_tween()
 	tween.tween_property(player, "global_position", target, _duration) \
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)

@@ -80,7 +80,7 @@ func _start_current_hit() -> void:
 	player.play_attack_swing(hit_index, combo.hit_duration_sec)
 	_play_swing_sfx(hit_index)
 	var lunge_speed: float = Tuning.ATTACK_LUNGE_PX / maxf(combo.hit_duration_sec, 0.01)
-	player.velocity = _lunge_dir * lunge_speed
+	player.velocity = IsoMath.move_velocity(_lunge_dir, lunge_speed)
 	_fire_hitbox(hit_index)
 
 

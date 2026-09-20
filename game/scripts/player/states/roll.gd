@@ -45,7 +45,7 @@ func enter(_prev: StringName, _data: Dictionary = {}) -> void:
 	_elapsed = 0.0
 	_ghost_accum = 0.0
 	player.start_iframes(iframes_sec)
-	player.velocity = _direction * _speed_px_s
+	player.velocity = IsoMath.move_velocity(_direction, _speed_px_s)
 	player.play_anim("walk") # 전용 구르기 프레임 없음(pixel-artist TODO, 완료 보고 참고).
 
 
@@ -66,5 +66,5 @@ func physics_update(delta: float) -> void:
 			finished.emit(&"Idle", {})
 		return
 
-	player.velocity = _direction * _speed_px_s
+	player.velocity = IsoMath.move_velocity(_direction, _speed_px_s)
 	player.move_and_slide()

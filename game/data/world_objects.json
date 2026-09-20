@@ -7,8 +7,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      -760,
-      320
+      -1080,
+      -220
     ],
     "one_shot": true,
     "region_id": "bridgeport"
@@ -18,8 +18,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      -320,
-      -40
+      -280,
+      -180
     ],
     "one_shot": true,
     "region_id": "heartland"
@@ -29,8 +29,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      -60,
-      -180
+      120,
+      -120
     ],
     "one_shot": false,
     "region_id": "heartland",
@@ -41,8 +41,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      -80,
-      -200
+      120,
+      -140
     ],
     "one_shot": true,
     "region_id": "heartland",
@@ -53,8 +53,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      560,
-      -360
+      920,
+      100
     ],
     "one_shot": true,
     "region_id": "heartland"
@@ -64,8 +64,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      520,
-      120
+      400,
+      320
     ],
     "one_shot": true,
     "region_id": "heartland"
@@ -75,8 +75,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      120,
-      -520
+      640,
+      -200
     ],
     "one_shot": true,
     "region_id": "heartland"
@@ -87,8 +87,8 @@
     "scene": "res://scenes/world/QuestObject.tscn",
     "sprite": "res://assets/quarter/props/cargo_pile.png",
     "position": [
-      -780,
-      350
+      -1130,
+      -215
     ],
     "one_shot": true,
     "region_id": "bridgeport"
@@ -99,8 +99,8 @@
     "scene": "res://scenes/world/QuestObject.tscn",
     "_comment": "D-28은 결계석과 워프 비석을 같은 물리적 위치로 규정하지만, b3에서 둘 다 실제 그림이 생기면서 4px 간격이면 스프라이트가 그대로 겹쳐 보인다(사각형 placeholder 시절엔 드러나지 않던 문제). 비석 Waystone1(-80,-200) 바로 옆으로 물려 둘 다 읽히게 했다 — 여전히 같은 결계석 터다. level-designer 확인 대상.",
     "position": [
-      -152,
-      -176
+      24,
+      -164
     ],
     "one_shot": false,
     "region_id": "heartland"
@@ -110,8 +110,8 @@
     "kind": "object",
     "scene": "res://scenes/world/QuestObject.tscn",
     "position": [
-      580,
-      -380
+      960,
+      100
     ],
     "one_shot": true,
     "region_id": "heartland",
@@ -122,8 +122,8 @@
     "kind": "object",
     "scene": "res://scenes/world/QuestObject.tscn",
     "position": [
-      600,
-      180
+      420,
+      390
     ],
     "one_shot": true,
     "vanish_on_complete": true,
@@ -137,8 +137,8 @@
     "kind": "object",
     "scene": "res://scenes/world/QuestObject.tscn",
     "position": [
-      130,
-      -530
+      660,
+      -200
     ],
     "one_shot": false,
     "region_id": "heartland"
@@ -148,8 +148,8 @@
     "kind": "npc",
     "scene": "res://scenes/world/QuestNpc.tscn",
     "position": [
-      -720,
-      280
+      -1000,
+      -220
     ],
     "one_shot": false,
     "region_id": "bridgeport",
@@ -161,8 +161,8 @@
     "kind": "npc",
     "scene": "res://scenes/world/QuestNpc.tscn",
     "position": [
-      -80,
-      -300
+      220,
+      -190
     ],
     "one_shot": false,
     "region_id": "heartland",
@@ -170,11 +170,12 @@
   },
   "pinto": {
     "id": "pinto",
+    "_comment": "D-219 등각 투영 후 대장간(BlacksmithNpc1 @ -40,-220)과 45px 까지 붙어 두 상호작용 영역이 겹쳤다 — QuestNpc 가 interact 입력을 set_input_as_handled() 로 먹어 대장간을 열 수 없었다(SmokeBlacksmith 회귀로 발견). 서쪽으로 물려 분리했다. 투영 자체는 옳고 배치가 겹친 것이라 level-designer 확인 대상.",
     "kind": "npc",
     "scene": "res://scenes/world/QuestNpc.tscn",
     "position": [
-      -190,
-      -170
+      -140,
+      -110
     ],
     "one_shot": false,
     "region_id": "heartland",
@@ -185,8 +186,8 @@
     "kind": "npc",
     "scene": "res://scenes/world/QuestNpc.tscn",
     "position": [
-      280,
-      -40
+      320,
+      120
     ],
     "one_shot": false,
     "region_id": "heartland",
@@ -197,8 +198,8 @@
     "kind": "npc",
     "scene": "res://scenes/world/QuestNpc.tscn",
     "position": [
-      460,
-      80
+      380,
+      270
     ],
     "one_shot": false,
     "region_id": "heartland",

@@ -44,15 +44,19 @@ func test_launch_sets_velocity_direction_and_speed() -> void:
 	var proj := _make_projectile()
 	proj.launch(Vector2.RIGHT, 220.0, 1.2)
 	proj._physics_process(0.001)
-	assert_almost_eq(proj.velocity.x, 220.0, 0.01, "발사 속도(dart speed)가 그대로 반영되어야 한다")
+	# D-222(iso-1): speed_px 는 지면 속력이다(화면에서는 방향에 따라 달라 보인다).
+	assert_almost_eq(IsoMath.ground_length(proj.velocity), 220.0, 0.01,
+		"발사 속도(dart speed)가 지면 속력으로 반영되어야 한다")
 	assert_almost_eq(proj.velocity.y, 0.0, 0.01)
+	assert_gt(proj.velocity.x, 0.0, "화면 +x 발사는 화면 +x 로 날아간다")
 
 
 func test_launch_normalizes_non_unit_direction() -> void:
 	var proj := _make_projectile()
 	proj.launch(Vector2(3.0, 4.0), 100.0, 1.0) # length=5 → 정규화 필요.
 	proj._physics_process(0.001)
-	assert_almost_eq(proj.velocity.length(), 100.0, 0.01, "방향 벡터를 정규화한 뒤 속도를 곱해야 한다")
+	assert_almost_eq(IsoMath.ground_length(proj.velocity), 100.0, 0.01,
+		"방향 벡터를 정규화한 뒤 지면 속력을 곱해야 한다")
 
 
 func test_hit_confirmed_frees_the_projectile() -> void:

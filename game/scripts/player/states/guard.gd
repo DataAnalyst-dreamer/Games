@@ -42,7 +42,7 @@ func physics_update(_delta: float) -> void:
 	if input_dir != Vector2.ZERO:
 		player.set_facing(input_dir)
 		var move_mult: float = float(Data.get_value("combat", "guard.move_speed_multiplier", 0.5))
-		player.velocity = input_dir * player.walk_speed * move_mult
+		player.velocity = IsoMath.move_velocity(input_dir, player.walk_speed * move_mult)
 	else:
 		player.velocity = Vector2.ZERO
 	player.move_and_slide()

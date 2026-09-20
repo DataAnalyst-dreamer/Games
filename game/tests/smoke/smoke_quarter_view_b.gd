@@ -48,6 +48,7 @@ func _ready() -> void:
 	_check_save_migration_on_real_terrain()
 	await _check_monster_wall_and_leash()
 	_check_interactable_sprites()
+	_check_interactables_do_not_overlap()
 
 	if _ok:
 		print("[PASS] 벽 충돌·가림·좌표·세이브·몬스터 벽 모두 기대대로")
@@ -102,33 +103,38 @@ func _check_coordinates() -> void:
 
 
 ## 2) 절벽은 막고, 진입로 틈은 통과된다.
+##
+## 등각(iso-1)에서 절벽 한 줄은 **격자 행**이라 화면에서는 대각선이다 - "북쪽으로 밀어
+## 본다"는 정사각 격자 시절 가정이 더 이상 성립하지 않는다. 격자 좌표로 민다.
 func _check_wall_blocks_and_gap_passes() -> void:
 	print("-- 2. 벽 충돌 / 진입로 통과 --")
 	var player: Player = _main.get_node("Player") as Player
 	var layout: Dictionary = Data.table("world_layout_hartland")
 	var cliff: Dictionary = (layout.get("cliffs", []) as Array)[0]
-	var front_y: float = float(cliff["front_y"]) * _tile_px()
-	# 절벽 한가운데 아래에서 북쪽으로 밀어 본다.
-	var wall_x: float = (float(cliff["x"]) + float(cliff["length"]) * 0.5) * _tile_px()
-	var start_y: float = front_y + _tile_px() * 3.0
-	player.global_position = Vector2(wall_x, start_y)
-	await _push_north(player)
-	if player.global_position.y < front_y:
-		_fail("절벽을 통과했다 (y=%.0f, 접지선 y=%.0f)" % [player.global_position.y, front_y])
+	var wall_row: int = int(cliff["front_y"])
+	var wall_col: int = int(cliff["x"]) + int(int(cliff["length"]) / 2)
+
+	await _push_towards_wall(player, Vector2i(wall_col, wall_row + 3))
+	var blocked_row: int = IsoMath.screen_to_cell(player.global_position).y
+	if blocked_row <= wall_row:
+		_fail("절벽을 통과했다 (도달 행=%d, 벽 행=%d)" % [blocked_row, wall_row])
 	else:
-		print("  절벽 앞에서 멈춤: y=%.0f (접지선 %.0f)" % [player.global_position.y, front_y])
-	# 진입로 틈(x=0 부근)에서는 통과돼야 한다.
-	player.global_position = Vector2(0.0, start_y)
-	await _push_north(player)
-	if player.global_position.y > front_y:
-		_fail("진입로 틈이 막혀 있다 (y=%.0f)" % player.global_position.y)
+		print("  절벽 앞에서 멈춤: 행 %d (벽 행 %d)" % [blocked_row, wall_row])
+
+	await _push_towards_wall(player, Vector2i(0, wall_row + 3))
+	var gap_row: int = IsoMath.screen_to_cell(player.global_position).y
+	if gap_row > wall_row:
+		_fail("진입로 틈이 막혀 있다 (도달 행=%d, 벽 행=%d)" % [gap_row, wall_row])
 	else:
-		print("  진입로 통과: y=%.0f" % player.global_position.y)
+		print("  진입로 통과: 행 %d" % gap_row)
 
 
-func _push_north(player: Player) -> void:
-	for _i in range(90):
-		player.velocity = Vector2(0.0, -player.walk_speed * 3.0)
+## start_cell 에 놓고 격자 -y(벽 쪽)로 민다. 격자 방향을 화면 방향으로 변환해야 한다.
+func _push_towards_wall(player: Player, start_cell: Vector2i) -> void:
+	player.global_position = IsoMath.cell_to_screen(start_cell)
+	var screen_dir: Vector2 = IsoMath.to_screen(Vector2(0.0, -1.0))
+	for _i in range(120):
+		player.velocity = IsoMath.move_velocity(screen_dir, player.walk_speed * 3.0)
 		player.move_and_slide()
 		await get_tree().physics_frame
 
@@ -249,3 +255,43 @@ func _check_interactable_sprites() -> void:
 	else:
 		print("  변형 적용: cargo_pile=%s / 기본=%s" \
 			% [cargo_texture.resource_path.get_file(), marker_texture.resource_path.get_file()])
+
+
+## 8) 상호작용 오브젝트끼리 영역이 겹치지 않는가 (iso-1 회귀로 추가).
+##
+## QuestNpc/QuestObject 는 interact 입력을 set_input_as_handled() 로 소비한다. 두 상호작용
+## 영역이 겹치면 **뒤쪽 노드는 영원히 열리지 않는다** - 등각 투영 후 pinto 가 대장간에
+## 45px 까지 붙으면서 실제로 SmokeBlacksmith 가 깨졌고, 그때는 "왜 안 열리지"를 한참
+## 뒤져야 했다. 좌표를 옮기는 작업마다 이 검사가 먼저 잡도록 남긴다.
+func _check_interactables_do_not_overlap() -> void:
+	print("-- 8. 상호작용 영역 중복 --")
+	# QuestTrigger(kind=location)는 **걸어 들어가면 발동**하는 영역이라 대상이 아니다 -
+	# 오히려 비석·오브젝트와 같은 자리에 겹쳐 두는 게 정상이다(D-28: 결계석 트리거 =
+	# 워프 비석 위치). interact 입력을 소비하는 종류만 본다.
+	var interactables: Array[Node2D] = []
+	for node: Node in _main.get_children() + _quest_layer_children():
+		if node is QuestNpc or node is QuestObject or node is BlacksmithNpc \
+				or node is MailboxNpc or node is BoardNpc or node is Waystone:
+			interactables.append(node as Node2D)
+	var minimum: float = 64.0 # 상호작용 영역(40~48px)이 겹치지 않을 최소 간격.
+	var clashes: Array[String] = []
+	for i in range(interactables.size()):
+		for j in range(i + 1, interactables.size()):
+			var a: Node2D = interactables[i]
+			var b: Node2D = interactables[j]
+			if a.global_position.distance_to(b.global_position) < minimum:
+				clashes.append("%s↔%s(%.0fpx)" % [a.name, b.name,
+					a.global_position.distance_to(b.global_position)])
+	if clashes.is_empty():
+		print("  상호작용 노드 %d개, 최소 간격 %.0fpx 이상" % [interactables.size(), minimum])
+	else:
+		_fail("상호작용 영역이 겹친다(뒤쪽 노드가 열리지 않는다): %s" % [clashes])
+
+
+func _quest_layer_children() -> Array[Node]:
+	var out: Array[Node] = []
+	var layer: Node = _main.get_node_or_null("HartlandQuestLayer")
+	if layer != null:
+		for id: String in layer.spawned_by_id:
+			out.append(layer.spawned_by_id[id] as Node)
+	return out

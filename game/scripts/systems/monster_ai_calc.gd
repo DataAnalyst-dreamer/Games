@@ -20,7 +20,8 @@ static func should_leash(distance_px: float, leash_range_px: float) -> bool:
 
 ## 돌진(charge, 뿔토끼) 중 이동 속도 벡터.
 static func dash_velocity(direction: Vector2, dash_speed_px: float) -> Vector2:
-	return direction * dash_speed_px
+	# D-222: dash_speed_px 는 지면 속력이다(호출부 2곳이 이 변환을 자동으로 물려받는다).
+	return IsoMath.move_velocity(direction, dash_speed_px)
 
 
 ## 포자 장판(spore_patch, 버섯돌이) 1틱 데미지. monsters.json.atk_tick_per_sec은 "초당
@@ -93,7 +94,7 @@ static func pick_non_overlapping_offsets(
 			var candidate: Vector2 = Vector2(cos(angle), sin(angle)) * r
 			var ok: bool = true
 			for existing: Vector2 in offsets:
-				if candidate.distance_to(existing) < min_separation_px:
+				if IsoMath.ground_distance(existing, candidate) < min_separation_px:
 					ok = false
 					break
 			chosen = candidate

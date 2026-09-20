@@ -74,7 +74,9 @@ stretch` 다 — 128×64 를 쓰려면 정수 배율을 포기하거나(도트�
 해법은 **지면 거리 헬퍼 하나**다(신규 `scripts/systems/iso_math.gd`):
 
 ```
-지면 벡터  ground(d) = Vector2(d.x, d.y * 2.0)        # 2:1 이므로 세로만 복원
+지면 벡터  ground(d) = Vector2(d.x/2 + d.y, d.y - d.x/2)   # 화면→지면 정확한 역변환(iso_math.to_ground)
+# (정정) 초안의 Vector2(d.x, d.y*2)는 항상 정확한 값의 √2배가 나오는 순진 근사였다 — 등방이라 테스트로는
+# 안 잡히지만 모든 사거리가 1/√2로 줄어든다. SmokeIsoCoords §3이 화면(64,0)→지면 45.255를 고정한다.
 지면 거리  ground_distance(a, b) = ground(b - a).length()
 ```
 

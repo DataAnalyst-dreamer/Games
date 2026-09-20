@@ -191,8 +191,8 @@ func _ready() -> void:
 	hurtbox.hurt.connect(_on_hurtbox_hurt)
 	hitbox.stagger_requested.connect(_on_stagger_requested)
 	detection_area.body_entered.connect(_on_detection_body_entered)
-	if detection_shape.shape is CircleShape2D:
-		(detection_shape.shape as CircleShape2D).radius = aggro_range_px
+	# 인식 범위는 **지면** 원이다(D-222) - 화면에서는 2:1 타원이 된다.
+	IsoMath.apply_ground_circle(detection_shape, aggro_range_px)
 	if attack_pattern_id == "spore_patch" and aoe_radius_px > 0.0:
 		_create_spore_hitbox()
 	_setup_hp_bar()
@@ -302,7 +302,10 @@ func _enter_state(next: State) -> void:
 		State.PATROL:
 			var angle: float = _rng.randf_range(0.0, TAU)
 			var radius: float = _rng.randf_range(patrol_radius_px * 0.3, patrol_radius_px)
-			_patrol_target = _spawn_position + Vector2(cos(angle), sin(angle)) * radius
+			# 지면에서 원을 그린 뒤 화면으로 옮긴다 - 화면에서 바로 원을 그리면
+			# 지면에서는 남북으로 2배 긴 타원이 된다.
+			_patrol_target = _spawn_position \
+				+ IsoMath.to_screen(Vector2(cos(angle), sin(angle)) * radius)
 		State.CHASE:
 			pass
 		State.TELEGRAPH:
@@ -370,7 +373,7 @@ func _process_patrol(delta: float) -> void:
 	if to_target.length() <= 2.0:
 		_enter_state(State.IDLE)
 		return
-	velocity = to_target.normalized() * move_speed_px * 0.5
+	velocity = IsoMath.move_velocity(to_target, move_speed_px * 0.5)
 	_face_towards(velocity)
 
 
@@ -379,14 +382,14 @@ func _process_chase(_delta: float) -> void:
 		_enter_state(State.IDLE)
 		return
 	var to_player: Vector2 = _player.global_position - global_position
-	if MonsterAiCalc.should_leash(to_player.length(), leash_range_px):
+	if MonsterAiCalc.should_leash(IsoMath.ground_length(to_player), leash_range_px):
 		_player = null
 		_enter_state(State.IDLE)
 		return
-	if MonsterAiCalc.is_in_melee_range(to_player.length(), melee_range_px):
+	if MonsterAiCalc.is_in_melee_range(IsoMath.ground_length(to_player), melee_range_px):
 		_enter_state(State.TELEGRAPH)
 		return
-	velocity = to_player.normalized() * move_speed_px
+	velocity = IsoMath.move_velocity(to_player, move_speed_px)
 	_face_towards(velocity)
 
 
@@ -454,7 +457,7 @@ func _maybe_start_whistle() -> void:
 		return
 	if not _player_valid():
 		return
-	if global_position.distance_to(_player.global_position) > aggro_range_px:
+	if IsoMath.ground_distance(global_position, _player.global_position) > aggro_range_px:
 		return
 	_enter_state(State.WHISTLE)
 
@@ -473,7 +476,7 @@ func _do_whistle_summon() -> void:
 			continue # 이미 스스로 인식했거나 전투 중인 대상은 "증원"의 의미가 없다.
 		candidates.append({
 			"monster_id": other.monster_id,
-			"distance_px": global_position.distance_to(other.global_position),
+			"distance_px": IsoMath.ground_distance(global_position, other.global_position),
 			"node": other,
 		})
 	var picked: Array = MonsterAiCalc.filter_whistle_candidates(
@@ -746,9 +749,7 @@ func _create_spore_hitbox() -> void:
 	_spore_hitbox.collision_layer = hitbox.collision_layer
 	_spore_hitbox.collision_mask = hitbox.collision_mask
 	var shape := CollisionShape2D.new()
-	var circle := CircleShape2D.new()
-	circle.radius = aoe_radius_px
-	shape.shape = circle
+	IsoMath.apply_ground_circle(shape, aoe_radius_px) # 포자 장판도 지면 원.
 	_spore_hitbox.add_child(shape)
 	add_child(_spore_hitbox)
 

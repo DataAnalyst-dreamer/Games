@@ -14,7 +14,8 @@ extends RefCounted
 static func edge_arrow(camera_center: Vector2, viewport_size: Vector2, zoom: Vector2, target_world: Vector2, margin_px: float) -> Dictionary:
 	var effective_zoom: Vector2 = zoom if zoom.x > 0.0 and zoom.y > 0.0 else Vector2.ONE
 	var offset_world: Vector2 = target_world - camera_center
-	var distance_px: float = offset_world.length()
+	# D-222: 화면 px 가 아니라 지면 거리여야 "1타일=1m" 환산이 방향과 무관해진다.
+	var distance_px: float = IsoMath.ground_length(offset_world)
 	var half_screen_world: Vector2 = (viewport_size * 0.5) / effective_zoom
 	var on_screen: bool = absf(offset_world.x) <= half_screen_world.x and absf(offset_world.y) <= half_screen_world.y
 	if on_screen:

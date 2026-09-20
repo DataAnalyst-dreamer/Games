@@ -37,47 +37,47 @@ y_sort_enabled = true
 [node name="Player" parent="." instance=ExtResource("2_player")]
 
 [node name="Slime1" parent="." instance=ExtResource("5_slime")]
-position = Vector2(120, -80)
+position = Vector2(200, 20)
 
 [node name="Slime2" parent="." instance=ExtResource("5_slime")]
-position = Vector2(-140, 60)
+position = Vector2(-200, -40)
 
 [node name="Slime3" parent="." instance=ExtResource("5_slime")]
-position = Vector2(40, 180)
+position = Vector2(-140, 110)
 
 [node name="HornRabbit1" parent="." instance=ExtResource("10_horn_rabbit")]
-position = Vector2(300, -60)
+position = Vector2(360, 120)
 
 [node name="HornRabbit2" parent="." instance=ExtResource("10_horn_rabbit")]
-position = Vector2(-300, 120)
+position = Vector2(-420, -90)
 
 [node name="Mushroom1" parent="." instance=ExtResource("11_mushroom")]
-position = Vector2(0, 340)
+position = Vector2(-340, 170)
 
 [node name="GoblinScout1" parent="." instance=ExtResource("13_goblin_scout")]
-position = Vector2(440, -160)
+position = Vector2(600, 140)
 
 [node name="GoblinScout2" parent="." instance=ExtResource("13_goblin_scout")]
-position = Vector2(-440, -120)
+position = Vector2(-320, -280)
 
 [node name="EliteGoblinCaptain1" parent="." instance=ExtResource("14_elite_goblin_captain")]
-position = Vector2(500, 280)
+position = Vector2(220, 390)
 
 [node name="EliteBunchiSpawn1" parent="." instance=ExtResource("15_elite_bunchi_spawn")]
-position = Vector2(-500, -280)
+position = Vector2(-220, -390)
 
 [node name="Waystone1" parent="." instance=ExtResource("9_waystone")]
-position = Vector2(-80, -200)
+position = Vector2(120, -140)
 waystone_id = &"waystone1"
 
 [node name="BlacksmithNpc1" parent="." instance=ExtResource("16_blacksmith_npc")]
-position = Vector2(-240, -200)
+position = Vector2(-40, -220)
 
 [node name="MailboxNpc1" parent="." instance=ExtResource("17_mailbox_npc")]
-position = Vector2(-20, -200)
+position = Vector2(180, -110)
 
 [node name="BoardNpc1" parent="." instance=ExtResource("20_board_npc")]
-position = Vector2(88, -200)
+position = Vector2(288, -56)
 
 [node name="HartlandQuestLayer" type="Node2D" parent="."]
 y_sort_enabled = true
