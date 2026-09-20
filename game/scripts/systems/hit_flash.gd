@@ -16,7 +16,10 @@ const META_ORIGINAL_COLOR := &"_hit_flash_original"
 const META_TWEEN := &"_hit_flash_tween"
 
 
-static func flash(target: CanvasItem) -> void:
+## color: 플래시 색(기본 흰 오버브라이트). M4-3(D-179): 스킬 vfx.color가 있으면
+## Hitbox.flash_color로 넘어온 그 색을 그대로 쓴다 — "이 스킬로 맞으면 그 색으로
+## 번쩍인다"는 요구를 이 한 인자로 충족(기본값을 생략하면 기존 흰 플래시와 완전히 동일).
+static func flash(target: CanvasItem, color: Color = FLASH_COLOR) -> void:
 	if target == null or not is_instance_valid(target):
 		return
 	# 진행 중인 플래시가 있으면 끊고, 원래 색은 첫 호출 때 저장한 값을 그대로 쓴다.
@@ -35,7 +38,7 @@ static func flash(target: CanvasItem) -> void:
 	var tween := target.create_tween()
 	target.set_meta(META_TWEEN, tween)
 	for i in FLASH_CYCLES:
-		tween.tween_property(target, "modulate", FLASH_COLOR, FLASH_CYCLE_SEC * 0.5)
+		tween.tween_property(target, "modulate", color, FLASH_CYCLE_SEC * 0.5)
 		tween.tween_property(target, "modulate", original, FLASH_CYCLE_SEC * 0.5)
 	tween.finished.connect(func() -> void:
 		if is_instance_valid(target):
