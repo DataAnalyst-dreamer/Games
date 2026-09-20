@@ -339,6 +339,17 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 | D-188 | 스킬 계열 캐릭터 잠금 | blade/guard/trick 3계열은 4캐릭터 **전원 공통**. 캐릭터별 추천 계열(class-progression-v3.md)은 참고만 | 스펙 §8 제안 채택 | skills.json |
 | D-189 | 재전직 시 스킬 포인트 환불 | 이번 스펙 범위 밖, `retraining-policy-v1.md`에 위임 | 스펙 §8 제안 채택 | 후속 스펙 |
 
+## AE. M4-4 런타임 v2 / M4-5 성장 UI 계획 승인 (2026-09-20)
+
+| ID | 항목 | 결정 | 출처 | 반영 |
+|---|---|---|---|---|
+| D-190 | SP 보관·회복 위치 | `GameState.sp` + `Progression._process` 틱(플레이어 없이 헤드리스 테스트 가능). PlayerResources 대안 기각 | M4-4 계획 질문 | progression_service.gd |
+| D-191 | 기본 공격 히트박스 DEX 배율 | 공격 중에만 Hitbox scale을 곱하고 상태 이탈(Attack exit·Hurt·Death 포함) 시 복원. 복원은 공통 경로에 둔다 | M4-4 계획 질문 | states/attack.gd, hitbox.gd |
+| D-192 | quest_system.gd 한 줄 배선 | 500줄 초과 파일이지만 `grant_skill_point:N` placeholder를 `Progression.grant_skill_points(n)`으로 소비하는 한 줄 수정은 허용(로직 중복 회피) | M4-4 계획 질문 | quest_system.gd |
+| D-193 | 패시브×스탯 합성 | aspd_pct↔AGI 콤보 배율, move_speed_pct↔AGI 이동속도는 **곱연산**, 최종 곱에 stats.json cap 적용 | M4-4 계획 질문 | stat_calc.gd |
+| D-194 | 습득 불가 사유 전달 | `can_learn_skill()`은 StringName reason(&"no_points"/&"requires"/&"maxed"/&"unknown")만 반환, 로컬라이징 키 `ui.skill.reason_*` 매핑은 UI 몫 | M4-4/M4-5 계획 질문 | skill_tree_tab.gd |
+| D-195 | 스킬 계열 표시명·선딜 상수 | blade/guard/trick 표시명 검/방패/기교는 placeholder(최종 네이밍 narrative-writer 후속). `Tuning.SKILL_ANTICIPATION_SEC=0.1` 전 스킬 공용 임시값, 스킬별 차등은 skills.json 필드로 후속 | M4-5/M4-3 계획 질문 | ui_ko.csv, tuning.gd |
+
 ## 변경 이력(계속)
 - 2026-09-13 **D-143 후속 플레이 피드백:** 사용자가 샘플의 조작·공간감은 좋으나 공격 모션이 어색하고 타격이 늦다고 평가했다. 같은 독립 샘플의 공격 반응·검 표현을 조정한다. 준비50ms/타격85ms/회수140ms는 이 피드백에 대한 구현 조정안이며 본편 수치의 사용자 확정이 아니다. 이동·맵·배경과 본편/저장은 유지하고, 새 핀 원화·본편 시점 이관 승인은 여전히 별개다. 후속 검증: `docs/qa/quarter-view-attack-feedback-20260913.md`.
 - 2026-09-13 **D-143 — 쿼터뷰 비교 샘플 제작 승인:** 사용자 “너의 추천대로 해보자”에 따라 기존 본편·저장을 보존하고 별도 2D 고정 쿼터뷰 마을 입구/이동/기본 공격/슬라임/가림 샘플을 제작한다. FHD·승인 핀 외형/몸체64×96 목표를 유지한다. 새 핀 방향별 완성 모션 확보와 시점 시험의 성공은 별개다. 본편 전체 이관·3D·회전 카메라·정확한 등각 타일 구조를 확정한 것은 아니다. 범위: `docs/plans/quarter-view-pilot-20260913.md`.
@@ -392,3 +403,4 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 - 2026-09-20: 게이트 4차 소감 → RO 벤치마크 방향 8건(D-167~D-174) 확정.
 - 2026-09-20: M4-1/M4-2/M4-3 계획 승인 결정 9건(D-175~D-183) 확정.
 - 2026-09-20: M4-0 RO 벤치마크 성장 스펙 v1 결정 6건(D-184~D-189) 확정.
+- 2026-09-20: M4-4/M4-5 계획 승인 결정 6건(D-190~D-195) 확정.
