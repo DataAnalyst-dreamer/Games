@@ -53,7 +53,10 @@ func _ready() -> void:
 	_check(QuestSystem.get_state(Q1) == "available", "수락 전 상태는 available")
 	var offer_text: String = _ui_root.quest_npc_panel.body_label.text
 	_check(offer_text.contains(tr(&"ui.quest_npc.reward_prefix")), "수락 패널 본문에 보상 접두어 표시")
-	_check(offer_text.contains(tr(&"ui.quest_log.reward_exp_fmt") % 5), "수락 패널에 실제 EXP 보상(5) 표시: '%s'" % offer_text)
+	var q1_rewards: Dictionary = Data.get_value("quests", Q1, {}).get("rewards", {})
+	var exp_reward: int = int(q1_rewards.get("exp", 0))
+	var reward_rows: int = int(exp_reward > 0) + int(int(q1_rewards.get("gold", 0)) > 0) + (q1_rewards.get("items", []) as Array).size()
+	_check(offer_text.contains(tr(&"ui.quest_log.reward_exp_fmt") % exp_reward), "수락 패널에 실제 EXP 보상(%d) 표시: '%s'" % [exp_reward, offer_text])
 
 	# --- 2) 수락 -> 퀘스트 로그 상세에도 같은 보상이 실데이터로 반영되는지 ---
 	var log_before := _ui_root.hud.log_list.get_child_count()
@@ -63,8 +66,8 @@ func _ready() -> void:
 	_ui_root.inventory_menu.select_tab("quest")
 	_check(quest_log_tab._detail_title.text == tr(&"quest_main_a1_01_arrival_title"), "퀘스트 로그가 MQ01 상세를 보여줌")
 	var mq01_children := quest_log_tab._detail_rewards.get_children()
-	_check(mq01_children.size() == 2, "MQ01은 exp 보상 1종 + 헤더 = 자식 2개(gold/item 없음)")
-	_check((mq01_children[1] as HBoxContainer).get_child_count() == 1, "exp 행은 아이콘 없이 텍스트만(icon=null)")
+	_check(mq01_children.size() == 1 + reward_rows, "MQ01은 보상 %d종 + 헤더 = 자식 %d개(actual=%d)" % [reward_rows, 1 + reward_rows, mq01_children.size()])
+	_check((mq01_children[mq01_children.size() - 1] as HBoxContainer).get_child_count() == 1, "exp 행은 아이콘 없이 텍스트만(icon=null)")
 	_ui_root.close_menu()
 
 	# --- 3) 합성 데이터로 렌더링 코드 자체 검증(gold/exp/item 3종 전부 — 실데이터는
@@ -95,13 +98,13 @@ func _ready() -> void:
 	await _key(KEY_E)
 	await _key(KEY_ENTER) # 완료 보고.
 	await get_tree().process_frame
-	_check(QuestSystem.get_state(Q1) == "completed" and QuestSystem.total_exp_earned == xp_before + 5,
-		"실제 지급 확인: Progression.grant_exp 경로로 EXP +5 반영")
+	_check(QuestSystem.get_state(Q1) == "completed" and QuestSystem.total_exp_earned == xp_before + exp_reward,
+		"실제 지급 확인: Progression.grant_exp 경로로 EXP +%d 반영" % exp_reward)
 	_check(_ui_root.hud.log_list.get_child_count() > log_before,
 		"완료 토스트가 좌하단 로그에 추가됨(before=%d after=%d)" % [log_before, _ui_root.hud.log_list.get_child_count()])
 	var last_log := _ui_root.hud.log_list.get_child(_ui_root.hud.log_list.get_child_count() - 1)
 	var last_text := _find_label_text(last_log)
-	_check(last_text == tr(&"ui.quest_log.reward_exp_fmt") % 5, "완료 토스트 텍스트가 EXP +5: '%s'" % last_text)
+	_check(last_text == tr(&"ui.quest_log.reward_exp_fmt") % exp_reward, "완료 토스트 텍스트가 EXP +%d: '%s'" % [exp_reward, last_text])
 
 	# --- 스크린샷(옵션): Xvfb 실 렌더러일 때만 — 퀘스트 로그 상세의 보상 목록을 담는다 ---
 	var capture := ""

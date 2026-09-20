@@ -42,7 +42,9 @@ func _ready() -> void:
 	_ui_root.inventory_menu.select_tab("skill")
 	_skill_tab = _ui_root.inventory_menu.skill_panel_tab
 	var tree_tab: SkillTreeTab = _skill_tab._skill_tree_tab
-	Events.skills_changed.emit({"blade_power_slash": 1}, ["blade_power_slash", ""], 0) # M4-4: learned는 id->레벨
+	# M4-4 병합 후 노드 상태는 Progression(실데이터)에서 읽으므로 가짜 신호 대신 실제로 배운다.
+	GameState.skill_points += 1
+	Progression.learn_skill("blade_power_slash")
 	_skill_tab._sub_tab_index = 1
 	tree_tab._focus_index = tree_tab._focus_ids.find("blade_power_slash")
 	tree_tab._refresh_detail()
