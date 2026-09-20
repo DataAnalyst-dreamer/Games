@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/board_npc.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/quarter/props/board.png" id="2_sprite"]
 
 [sub_resource type="RectangleShape2D" id="area_shape"]
 size = Vector2(48, 48)
@@ -14,6 +15,8 @@ script = ExtResource("1_script")
 position = Vector2(0, -8)
 shape = SubResource("area_shape")
 
-[node name="Placeholder" type="Polygon2D" parent="."]
-color = Color(0.45, 0.3, 0.15, 1)
-polygon = PackedVector2Array(-16, 20, -16, -20, 16, -20, 16, 20)
+[node name="Placeholder" type="Sprite2D" parent="."]
+texture_filter = 1
+texture = ExtResource("2_sprite")
+centered = false
+offset = Vector2(-24, -60)

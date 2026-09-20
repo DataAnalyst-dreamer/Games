@@ -47,6 +47,7 @@ func _ready() -> void:
 	_check_occlusion()
 	_check_save_migration_on_real_terrain()
 	await _check_monster_wall_and_leash()
+	_check_interactable_sprites()
 
 	if _ok:
 		print("[PASS] 벽 충돌·가림·좌표·세이브·몬스터 벽 모두 기대대로")
@@ -200,3 +201,51 @@ func _check_monster_wall_and_leash() -> void:
 		_fail("리쉬 범위 밖인데 아직 추적 중이다")
 	else:
 		print("  리쉬 범위 밖 -> 추적 포기 (state=%d)" % monster.state)
+
+
+## 7) 상호작용 오브젝트 5종이 사각형 placeholder 가 아니라 오블리크 스프라이트를 쓰고,
+## 노드 원점이 발밑이라 Y-sort 가 제대로 걸리는가 (D-214~D-218, 단계 b3).
+func _check_interactable_sprites() -> void:
+	print("-- 7. 상호작용 오브젝트 스프라이트 (b3) --")
+	var scenes := {
+		"BoardNpc": "res://scenes/world/BoardNpc.tscn",
+		"MailboxNpc": "res://scenes/world/MailboxNpc.tscn",
+		"Waystone": "res://scenes/world/Waystone.tscn",
+		"BlacksmithNpc": "res://scenes/world/BlacksmithNpc.tscn",
+		"QuestObject": "res://scenes/world/QuestObject.tscn",
+	}
+	for label: String in scenes:
+		var instance: Node = (load(scenes[label]) as PackedScene).instantiate()
+		var visual: Node = instance.get_node_or_null("Placeholder")
+		if not (visual is Sprite2D):
+			_fail("%s 의 Placeholder 가 Sprite2D 가 아니다" % label)
+		else:
+			var sprite := visual as Sprite2D
+			if sprite.texture == null:
+				_fail("%s 에 텍스처가 없다" % label)
+			elif sprite.centered:
+				_fail("%s 가 centered=true — 발밑 원점이 되지 않는다" % label)
+			elif sprite.position != Vector2.ZERO:
+				# 그림은 offset 으로 올리고 노드는 발밑에 둬야 Y-sort 가 발 기준으로 걸린다.
+				_fail("%s 의 스프라이트 position 이 0 이 아니다(offset 을 써야 한다)" % label)
+			else:
+				print("  %s: %dx%d, offset=%s" % [label, sprite.texture.get_width(),
+					sprite.texture.get_height(), sprite.offset])
+		instance.free()
+	# 기본 변형과 데이터 지정 변형이 실제로 다른 그림인지.
+	var spawner: Node = _main.get_node_or_null("HartlandQuestLayer")
+	if spawner == null:
+		_fail("HartlandQuestLayer 를 찾지 못했다")
+		return
+	var cargo: Node = spawner.spawned_by_id.get("cargo_pile")
+	var marker: Node = spawner.spawned_by_id.get("waypoint_stone_01")
+	if cargo == null or marker == null:
+		_fail("cargo_pile / waypoint_stone_01 이 스폰되지 않았다")
+		return
+	var cargo_texture: Texture2D = (cargo.get_node("Placeholder") as Sprite2D).texture
+	var marker_texture: Texture2D = (marker.get_node("Placeholder") as Sprite2D).texture
+	if cargo_texture == marker_texture:
+		_fail("짐 보따리와 표식 돌이 같은 그림이다 — sprite 키가 적용되지 않았다")
+	else:
+		print("  변형 적용: cargo_pile=%s / 기본=%s" \
+			% [cargo_texture.resource_path.get_file(), marker_texture.resource_path.get_file()])

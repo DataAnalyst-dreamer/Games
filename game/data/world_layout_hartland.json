@@ -41,6 +41,9 @@
     {"asset": "fence", "tile": [1, -11], "variant": 0},
     {"asset": "fence", "tile": [1, -10], "variant": 0},
 
+    {"_comment": "마을 우물. 퀘스트가 붙지 않은 장식이라 접지 띠 충돌을 준다(D-214).",
+     "asset": "well", "tile": [-5, -3]},
+
     {"asset": "rock", "tile": [-12, -2]},
     {"asset": "rock", "tile": [7, -3]},
     {"asset": "bush", "tile": [3, -9]},

@@ -85,6 +85,7 @@
     "id": "cargo_pile",
     "kind": "object",
     "scene": "res://scenes/world/QuestObject.tscn",
+    "sprite": "res://assets/quarter/props/cargo_pile.png",
     "position": [
       -780,
       350
@@ -96,9 +97,10 @@
     "id": "ward_stone_dandelion",
     "kind": "object",
     "scene": "res://scenes/world/QuestObject.tscn",
+    "_comment": "D-28은 결계석과 워프 비석을 같은 물리적 위치로 규정하지만, b3에서 둘 다 실제 그림이 생기면서 4px 간격이면 스프라이트가 그대로 겹쳐 보인다(사각형 placeholder 시절엔 드러나지 않던 문제). 비석 Waystone1(-80,-200) 바로 옆으로 물려 둘 다 읽히게 했다 — 여전히 같은 결계석 터다. level-designer 확인 대상.",
     "position": [
-      -84,
-      -192
+      -152,
+      -176
     ],
     "one_shot": false,
     "region_id": "heartland"

@@ -49,7 +49,13 @@ TILE RULES: Seamless, tileable, no outline, no vignette, no lighting hotspot, un
 | 1 | 나무(큰 참나무) | `props/tree_oak.png` | 64×96 | 1024×1024 | Y-sort 가림의 대표 |
 | 1 | 수풀·바위·울타리·표지판 | `props/bush.png` `props/rock.png` `props/fence.png`(3종 96×32) `props/sign.png` | 32×32 / 32×48 | 1024×1024(한 종류씩) | 장식·충돌 |
 | 1 | 민들레 마을 집 A/B | `buildings/house_a.png` · `house_b.png` | 96×96 / 128×112 | 1024×1024 | 거점 |
-| 1 | 대장간·퀘스트 게시판·우편함·워프 비석·우물 | `buildings/smithy.png` · `props/board.png` · `props/mailbox.png` · `props/waystone.png` · `props/well.png` | 각각 | 1024×1024 | 상호작용 오브젝트 |
+| 1 | 대장간(작업장) | `buildings/smithy.png` | **128×96** (발 기준점 64,92) | 1024×1024 | 상호작용 오브젝트 |
+| 1 | 퀘스트 게시판 | `props/board.png` | **48×64** (24,60) | 1024×1024 | 상호작용 오브젝트 |
+| 1 | 우편함 | `props/mailbox.png` | **32×48** (16,44) | 1024×1024 | 상호작용 오브젝트 |
+| 1 | 워프 비석 | `props/waystone.png` | **48×80** (24,76) | 1024×1024 | 상호작용 오브젝트 |
+| 1 | 우물 | `props/well.png` | **64×64** (32,60) | 1024×1024 | 마을 장식 |
+| 1 | 퀘스트 오브젝트 — 짐 보따리 | `props/cargo_pile.png` | **48×48** (24,44) | 1024×1024 | QuestObject 변형 |
+| 1 | 퀘스트 오브젝트 — 표식 돌(기본) | `props/marker_stone.png` | **32×48** (16,44) | 1024×1024 | QuestObject 기본 변형 |
 | 2 | 핀 4방향 정지 포즈(대기) | `actors/fin_idle_<dir>.png` | 64×96 (캔버스 96×128) | 1024×1024 ×4 | 시안·PixelLab 입력 |
 | 2 | 몬스터 6종 정면·측면 정지 | `actors/<monster_id>_<dir>.png` | 32~64 | 1024×1024 | 시안·PixelLab 입력 |
 | 2 | NPC 테오·대장장이·우편배달부 정면 | `actors/npc_<id>_down.png` | 64×96 | 1024×1024 | 시안 |

@@ -16,6 +16,7 @@
 저작권은 프로젝트 소유, 크레딧 불필요다.
 
 - 산출물: `game/assets/quarter/{ground,walls,props,buildings}/*.png` + 규격 계약 `game/assets/quarter/quarter_atlas.json`
+  (b2: 지면 3·흙길·물·절벽·나무·수풀·바위·울타리·집A / b3 추가: 대장간·게시판·우편함·워프 비석·우물·짐 보따리·표식 돌 — D-214~D-218)
 - 재생성: `python3 tools/art/gen_quarter_tiles.py` (시드 고정, 결정적)
 - 성격: **정식 애셋 전 자리표시자**. `docs/art/brief-quarter-view-gpt-image.md` §2의 같은 파일명·논리 크기로
   정식 애셋이 나오면 같은 경로에 PNG만 덮어써 교체한다. 최종 게임 아트 승인이 아니다.

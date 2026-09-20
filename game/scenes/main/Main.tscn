@@ -19,6 +19,7 @@
 [ext_resource type="PackedScene" path="res://scenes/world/MailboxNpc.tscn" id="17_mailbox_npc"]
 [ext_resource type="Script" path="res://scripts/world/quest_layout_spawner.gd" id="18_quest_layout_spawner"]
 [ext_resource type="Script" path="res://scripts/world/main_bootstrap.gd" id="19_main_bootstrap"]
+[ext_resource type="PackedScene" path="res://scenes/world/BoardNpc.tscn" id="20_board_npc"]
 
 [node name="Main" type="Node2D"]
 y_sort_enabled = true
@@ -70,10 +71,13 @@ position = Vector2(-80, -200)
 waystone_id = &"waystone1"
 
 [node name="BlacksmithNpc1" parent="." instance=ExtResource("16_blacksmith_npc")]
-position = Vector2(-140, -200)
+position = Vector2(-240, -200)
 
 [node name="MailboxNpc1" parent="." instance=ExtResource("17_mailbox_npc")]
 position = Vector2(-20, -200)
+
+[node name="BoardNpc1" parent="." instance=ExtResource("20_board_npc")]
+position = Vector2(88, -200)
 
 [node name="HartlandQuestLayer" type="Node2D" parent="."]
 y_sort_enabled = true

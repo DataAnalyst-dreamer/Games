@@ -188,6 +188,139 @@
         92
       ],
       "collision_band_px": 20
+    },
+    "smithy": {
+      "path": "game/assets/quarter/buildings/smithy.png",
+      "width": 128,
+      "height": 96,
+      "kind": "prop",
+      "cell": [
+        128,
+        96
+      ],
+      "grid": [
+        1,
+        1
+      ],
+      "pivot": [
+        64,
+        92
+      ],
+      "collision_band_px": 20
+    },
+    "board": {
+      "path": "game/assets/quarter/props/board.png",
+      "width": 48,
+      "height": 64,
+      "kind": "prop",
+      "cell": [
+        48,
+        64
+      ],
+      "grid": [
+        1,
+        1
+      ],
+      "pivot": [
+        24,
+        60
+      ],
+      "collision_band_px": 0
+    },
+    "mailbox": {
+      "path": "game/assets/quarter/props/mailbox.png",
+      "width": 32,
+      "height": 48,
+      "kind": "prop",
+      "cell": [
+        32,
+        48
+      ],
+      "grid": [
+        1,
+        1
+      ],
+      "pivot": [
+        16,
+        44
+      ],
+      "collision_band_px": 0
+    },
+    "waystone": {
+      "path": "game/assets/quarter/props/waystone.png",
+      "width": 48,
+      "height": 80,
+      "kind": "prop",
+      "cell": [
+        48,
+        80
+      ],
+      "grid": [
+        1,
+        1
+      ],
+      "pivot": [
+        24,
+        76
+      ],
+      "collision_band_px": 0
+    },
+    "cargo_pile": {
+      "path": "game/assets/quarter/props/cargo_pile.png",
+      "width": 48,
+      "height": 48,
+      "kind": "prop",
+      "cell": [
+        48,
+        48
+      ],
+      "grid": [
+        1,
+        1
+      ],
+      "pivot": [
+        24,
+        44
+      ],
+      "collision_band_px": 0
+    },
+    "marker_stone": {
+      "path": "game/assets/quarter/props/marker_stone.png",
+      "width": 32,
+      "height": 48,
+      "kind": "prop",
+      "cell": [
+        32,
+        48
+      ],
+      "grid": [
+        1,
+        1
+      ],
+      "pivot": [
+        16,
+        44
+      ],
+      "collision_band_px": 0
+    },
+    "well": {
+      "path": "game/assets/quarter/props/well.png",
+      "width": 64,
+      "height": 64,
+      "kind": "prop",
+      "cell": [
+        64,
+        64
+      ],
+      "grid": [
+        1,
+        1
+      ],
+      "pivot": [
+        32,
+        60
+      ],
+      "collision_band_px": 14
     }
   }
 }

@@ -76,6 +76,10 @@ def role_colors(by_name):
         "water": find("물 하이라이트"),
         "water_sh": find("물 그림자"),
         "straw": find("모래"),
+        "paper": find("연분홍"),
+        "accent": find("레드"),
+        "rune": find("물 최상단"),
+        "moss": find("이끼"),
     }
 
 
@@ -248,6 +252,154 @@ def make_house_a(rng, c):
     return img
 
 
+# --- 상호작용 오브젝트 (D-214~D-218, 단계 b3) ---
+#
+# 브리프 §3.8 의 조형을 기초 도형으로 옮긴 것이다. 전부 바닥 중앙이 발 기준점이고,
+# 수직면은 정면이 보이며 윗면만 OBLIQUE_SQUASH 로 눌린다.
+
+def _ground_shadow(d, box):
+    d.ellipse(box, fill=(0, 0, 0, 55))
+
+
+def make_smithy(rng, c):
+    """128×96. 돌 기단 + 목조 상단 + 평평한 지붕 + 화로가 보이는 넓은 정면."""
+    img = new_image(128, 96)
+    d = ImageDraw.Draw(img)
+    _ground_shadow(d, [10, 86, 118, 94])
+    d.rectangle([8, 54, 119, 91], fill=c["stone"])            # 돌 기단(정면)
+    noise(d, rng, (10, 56, 117, 89), c["stone_sh"], 40)
+    d.rectangle([8, 28, 119, 54], fill=c["wood"])             # 목조 상단
+    d.rectangle([8, 28, 119, 34], fill=c["wood_hi"])
+    d.polygon([(2, 28), (125, 28), (119, 18), (8, 18)], fill=shade(c["wood_sh"], 0.8))  # 평지붕
+    d.polygon([(2, 28), (125, 28), (119, 18), (8, 18)], outline=c["ink"])
+    d.rectangle([98, 4, 112, 20], fill=c["stone_sh"])         # 굴뚝
+    d.rectangle([98, 4, 112, 20], outline=c["ink"])
+    d.ellipse([96, -4, 116, 8], fill=(255, 255, 255, 120))    # 연기
+    d.rectangle([30, 56, 97, 90], fill=shade(c["ink"], 1.6))  # 열린 정면(어두운 내부)
+    d.ellipse([46, 68, 80, 86], fill=c["roof"])               # 화로
+    d.ellipse([52, 72, 74, 83], fill=c["roof_hi"])
+    noise(d, rng, (50, 70, 78, 84), (255, 255, 255), 6)       # 불티
+    d.rectangle([84, 74, 95, 86], fill=c["stone_sh"])         # 모루
+    d.polygon([(82, 74), (97, 74), (93, 68), (86, 68)], fill=c["stone_sh"])
+    d.rectangle([8, 18, 119, 91], outline=c["ink"])
+    d.rectangle([30, 56, 97, 90], outline=c["ink"])
+    return img
+
+
+def make_board(rng, c):
+    """48×64. 기둥 둘 + 작은 지붕 + 쪽지 셋(글자 없음)."""
+    img = new_image(48, 64)
+    d = ImageDraw.Draw(img)
+    _ground_shadow(d, [10, 54, 38, 62])
+    for x in (8, 34):
+        d.rectangle([x, 26, x + 5, 58], fill=c["wood"])
+        d.rectangle([x, 26, x + 1, 58], fill=c["wood_sh"])
+        d.rectangle([x - 1, 25, x + 6, 59], outline=c["ink"])
+    d.rectangle([6, 20, 41, 46], fill=c["wood_hi"])           # 판
+    noise(d, rng, (8, 22, 39, 44), c["wood_sh"], 16)
+    d.rectangle([6, 20, 41, 46], outline=c["ink"])
+    for index in range(3):                                    # 쪽지
+        nx = 10 + index * 11
+        d.rectangle([nx, 25, nx + 7, 35], fill=c["paper"])
+        d.rectangle([nx, 25, nx + 7, 35], outline=c["ink"])
+    d.polygon([(2, 20), (45, 20), (40, 11), (7, 11)], fill=c["roof"])
+    d.polygon([(2, 20), (45, 20), (40, 11), (7, 11)], outline=c["ink"])
+    return img
+
+
+def make_mailbox(rng, c):
+    """32×48. 기둥 위의 둥근 뚜껑 상자 + 붉은 깃발."""
+    img = new_image(32, 48)
+    d = ImageDraw.Draw(img)
+    _ground_shadow(d, [9, 38, 23, 46])
+    d.rectangle([13, 24, 18, 43], fill=c["wood"])             # 기둥
+    d.rectangle([12, 23, 19, 44], outline=c["ink"])
+    d.rectangle([6, 14, 25, 26], fill=c["wood_hi"])           # 상자 정면
+    d.pieslice([6, 6, 25, 22], 180, 360, fill=c["wood"])      # 둥근 뚜껑
+    d.rectangle([6, 14, 25, 26], outline=c["ink"])
+    d.pieslice([6, 6, 25, 22], 180, 360, outline=c["ink"])
+    d.rectangle([13, 18, 18, 23], fill=shade(c["wood_sh"], 0.9))  # 투입구
+    d.rectangle([25, 10, 27, 22], fill=c["wood_sh"])          # 깃대
+    d.rectangle([27, 10, 31, 16], fill=c["accent"])           # 깃발
+    d.rectangle([27, 10, 31, 16], outline=c["ink"])
+    return img
+
+
+def make_waystone(rng, c):
+    """48×80. 풍화된 선돌 + 은은한 청록 룬 + 밑동 이끼와 잔돌."""
+    img = new_image(48, 80)
+    d = ImageDraw.Draw(img)
+    _ground_shadow(d, [8, 68, 40, 78])
+    body = [(14, 74), (12, 26), (20, 8), (30, 8), (36, 26), (34, 74)]
+    d.polygon(body, fill=c["stone"])
+    d.polygon([(14, 74), (12, 26), (20, 8), (24, 8), (24, 74)], fill=shade(c["stone"], 1.15))
+    noise(d, rng, (15, 12, 34, 70), c["stone_sh"], 26)
+    d.polygon(body, outline=c["ink"])
+    for radius in (6, 10, 14):                                 # 새겨진 나선 룬
+        d.arc([24 - radius, 36 - radius, 24 + radius, 36 + radius], 200, 520, fill=c["rune"])
+    d.ellipse([10, 66, 38, 76], fill=c["moss"])                # 밑동 이끼
+    for offset in (-14, 12):                                   # 잔돌
+        d.ellipse([24 + offset, 68, 24 + offset + 8, 75], fill=c["stone"])
+        d.ellipse([24 + offset, 68, 24 + offset + 8, 75], outline=c["ink"])
+    return img
+
+
+def make_well(rng, c):
+    """64×64. 정면이 보이는 낮은 돌 테두리 + 기둥 둘 + 지붕 + 두레박."""
+    img = new_image(64, 64)
+    d = ImageDraw.Draw(img)
+    _ground_shadow(d, [8, 54, 56, 62])
+    rim_h = int(28 * OBLIQUE_SQUASH)                           # 윗면은 눌린 타원
+    d.rectangle([10, 42, 53, 58], fill=c["stone"])             # 테두리 정면
+    noise(d, rng, (12, 44, 51, 56), c["stone_sh"], 20)
+    d.rectangle([10, 42, 53, 58], outline=c["ink"])
+    d.ellipse([10, 42 - rim_h, 53, 42 + rim_h], fill=c["stone"])
+    d.ellipse([18, 44 - rim_h, 45, 40 + rim_h], fill=shade(c["water_sh"], 0.8))
+    d.ellipse([10, 42 - rim_h, 53, 42 + rim_h], outline=c["ink"])
+    for x in (14, 45):                                         # 기둥
+        d.rectangle([x, 14, x + 4, 40], fill=c["wood"])
+        d.rectangle([x - 1, 13, x + 5, 41], outline=c["ink"])
+    d.polygon([(6, 16), (57, 16), (48, 4), (15, 4)], fill=c["roof"])
+    d.polygon([(6, 16), (57, 16), (48, 4), (15, 4)], outline=c["ink"])
+    d.line([31, 16, 31, 28], fill=c["wood_sh"])                # 밧줄
+    d.rectangle([26, 28, 37, 36], fill=c["wood"])              # 두레박
+    d.rectangle([26, 28, 37, 36], outline=c["ink"])
+    return img
+
+
+def make_cargo_pile(rng, c):
+    """48×48. 쌓아 둔 짐 보따리 — 퀘스트 오브젝트 변형 1."""
+    img = new_image(48, 48)
+    d = ImageDraw.Draw(img)
+    _ground_shadow(d, [6, 38, 42, 46])
+    d.rectangle([8, 26, 40, 43], fill=c["straw"])              # 아래 궤짝
+    noise(d, rng, (10, 28, 38, 41), c["dirt_sh"], 16)
+    d.rectangle([8, 26, 40, 43], outline=c["ink"])
+    d.line([8, 34, 40, 34], fill=c["wood_sh"])
+    d.ellipse([12, 8, 36, 30], fill=c["dirt"])                 # 위 보따리
+    d.ellipse([16, 11, 29, 21], fill=shade(c["dirt"], 1.15))
+    d.ellipse([12, 8, 36, 30], outline=c["ink"])
+    d.line([14, 20, 34, 20], fill=c["wood_sh"])                # 묶은 끈
+    d.polygon([(22, 8), (26, 8), (28, 3), (20, 3)], fill=c["dirt_sh"])  # 묶음 매듭
+    return img
+
+
+def make_marker_stone(rng, c):
+    """32×48. 표식이 새겨진 작은 돌 — 퀘스트 오브젝트 기본 변형."""
+    img = new_image(32, 48)
+    d = ImageDraw.Draw(img)
+    _ground_shadow(d, [5, 38, 27, 46])
+    body = [(8, 43), (7, 18), (13, 8), (20, 8), (25, 18), (24, 43)]
+    d.polygon(body, fill=c["stone"])
+    d.polygon([(8, 43), (7, 18), (13, 8), (16, 8), (16, 43)], fill=shade(c["stone"], 1.15))
+    noise(d, rng, (9, 11, 23, 40), c["stone_sh"], 14)
+    d.polygon(body, outline=c["ink"])
+    d.polygon([(16, 17), (22, 25), (18, 25), (18, 33), (14, 33), (14, 25), (10, 25)],
+              fill=c["rune"])                                   # 새겨진 화살표 표식
+    d.ellipse([6, 38, 26, 45], fill=c["moss"])
+    return img
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", default="game/assets/quarter")
@@ -296,6 +448,27 @@ def main():
     print("건물:")
     emit("buildings", "house_a", make_house_a(rng, c),
          kind="prop", cell=[96, 96], grid=[1, 1], pivot=[48, 92], collision_band_px=20)
+    # D-215: 브리프 §2 계약대로 대장간은 buildings/ 에 둔다(props/ 아님).
+    emit("buildings", "smithy", make_smithy(rng, c),
+         kind="prop", cell=[128, 96], grid=[1, 1], pivot=[64, 92], collision_band_px=20)
+
+    print("상호작용 오브젝트:")
+    # D-214: 게시판·우편함·비석·퀘스트 오브젝트는 **충돌 없음**(collision_band_px=0).
+    # 걸어 들어가 상호작용하는 소품이고, 퀘스트 트리거가 같은 좌표에 겹쳐 있어
+    # (heartland_ward_stone = Waystone1) 벽으로 만들면 배치 무결성 불변이 깨진다.
+    emit("props", "board", make_board(rng, c),
+         kind="prop", cell=[48, 64], grid=[1, 1], pivot=[24, 60], collision_band_px=0)
+    emit("props", "mailbox", make_mailbox(rng, c),
+         kind="prop", cell=[32, 48], grid=[1, 1], pivot=[16, 44], collision_band_px=0)
+    emit("props", "waystone", make_waystone(rng, c),
+         kind="prop", cell=[48, 80], grid=[1, 1], pivot=[24, 76], collision_band_px=0)
+    emit("props", "cargo_pile", make_cargo_pile(rng, c),
+         kind="prop", cell=[48, 48], grid=[1, 1], pivot=[24, 44], collision_band_px=0)
+    emit("props", "marker_stone", make_marker_stone(rng, c),
+         kind="prop", cell=[32, 48], grid=[1, 1], pivot=[16, 44], collision_band_px=0)
+    # 우물은 퀘스트가 붙지 않은 순수 장식이라 접지 띠 충돌을 준다(D-214).
+    emit("props", "well", make_well(rng, c),
+         kind="prop", cell=[64, 64], grid=[1, 1], pivot=[32, 60], collision_band_px=14)
 
     atlas = {
         "_comment": ("쿼터뷰 애셋 계약(D-207). tools/art/gen_quarter_tiles.py 가 생성한 "

@@ -28,8 +28,19 @@ const HUD_THEME: Theme = preload("res://ui/theme.tres")
 @export var branch_quest_id: StringName = &""
 @export var branch_choice_id: StringName = &""
 
-@onready var _visual: Node2D = $Placeholder
-@onready var _visual_used: Node2D = get_node_or_null("PlaceholderUsed")
+## world_objects.json 의 `sprite` 키로 종류별 외형을 바꾼다(D-218). 비우면 씬 기본값
+## (marker_stone)을 쓴다 — quest_layout_spawner.gd 가 instantiate() 직후, 즉 @onready
+## 가 돌기 전에 대입하므로 값만 보관하고 _ready() 에서 한 번 더 적용한다(quest_npc.gd 와
+## 동일 패턴).
+@export var sprite_texture: Texture2D:
+	set(value):
+		sprite_texture = value
+		_apply_sprite_texture()
+
+## 이미 사용한 오브젝트의 탈색. 전용 "사용됨" 그림을 종류마다 따로 만들지 않는다.
+const USED_TINT := Color(0.45, 0.45, 0.45, 0.75)
+
+@onready var _visual: CanvasItem = $Placeholder
 @onready var _marker: Label = $MarkerLabel
 
 var _used: bool = false
@@ -54,8 +65,8 @@ func _ready() -> void:
 	Events.quest_objective_updated.connect(_on_any_quest_signal)
 	Events.quest_completed.connect(_on_any_quest_signal)
 	Events.quest_tracked_changed.connect(_on_any_quest_signal)
-	if _visual_used != null:
-		_visual_used.visible = false
+
+	_apply_sprite_texture()
 	_marker_base_y = _marker.position.y
 	_marker.visible = false
 	_refresh_marker()
@@ -181,11 +192,16 @@ func _on_load_completed(_slot: int, _kind: StringName, ok: bool) -> void:
 	# Deliberately do not interact: the next explicit player input is required.
 
 
+func _apply_sprite_texture() -> void:
+	if sprite_texture != null and _visual is Sprite2D:
+		(_visual as Sprite2D).texture = sprite_texture
+
+
 func _swap_to_used_visual() -> void:
+	# 전용 "사용됨" 스프라이트를 따로 두는 대신 같은 그림을 탈색한다 — 종류별 변형이
+	# 생기면서(D-218) 변형마다 used 그림을 하나씩 더 만드는 비용이 실익보다 크다.
 	if _visual != null:
-		_visual.visible = false
-	if _visual_used != null:
-		_visual_used.visible = true
+		_visual.modulate = USED_TINT
 
 
 func _on_body_entered(body: Node) -> void:
