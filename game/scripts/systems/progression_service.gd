@@ -22,13 +22,33 @@
 ## _on_load_completed()에서 처리한다(GameState.from_dict()는 필드 로딩만 담당).
 ##   Progression.assign_hotbar(slot, kind, id) / clear_hotbar(slot)
 ##   Events.hotbar_changed / skills_changed(learned, slots, skill_points — slots는 이제 9칸)
+## M4-4(D-167~D-174, D-184~D-194, docs/specs/ro-benchmark-progression-v1.md) 추가:
+## 6스탯(AGI 신규) + 체증 비용 곡선 + SP 자원 + 스킬 트리 v2(노드 레벨 1~5). 계산은
+## StatCalc/SkillCalc에 그대로 위임하고 여기는 상태/신호/타이머만 담당한다.
+##   Progression.next_stat_cost(key) / get_skill_level(id) / can_learn_skill(id) /
+##   skill_level_data(id) / spend_sp(amount) / passive_bonus(stat) / buff_pct(stat) /
+##   apply_buff(stat, value, sec) / move_speed_mult() / grant_skill_points(n)
+##   Events.sp_changed(current, max) / skills_changed(learned: Dictionary, slots, points)
 extends Node
 
 const MAX_LEVEL_FALLBACK := 50
-const STAT_KEYS: Array[String] = ["str", "dex", "int", "vit", "luk"]
+const STAT_KEYS: Array[String] = ["str", "agi", "dex", "int", "vit", "luk"]
 
 ## slot(int) -> 남은 쿨타임(초). 값이 있는 슬롯만 담아 매 프레임 순회를 최소화한다.
 var _skill_cooldowns: Dictionary = {}
+
+## 자기 버프(skills.json levels[i].self_effect) 효과: stat_key -> {"value": float,
+## "remaining": float}. 같은 stat을 다시 걸면 덮어쓴다(스택 없음 — 버프 스택 시스템은
+## 필요해질 때 별도 파일로, ponytail).
+var _buffs: Dictionary = {}
+
+## SkillCalc.passive_totals() 결과 캐시(학습/로드 때만 바뀐다 — 매 프레임 재계산 방지).
+var _passive_cache: Dictionary = {}
+var _passive_dirty: bool = true
+
+## 마지막 스킬 시전 후 경과 시간(초). stats.json sp.regen_idle_delay_sec를 넘기면
+## 회복이 regen_idle_multiplier 배로 빨라진다(§3, RO의 "앉기" 대체).
+var _sp_idle_elapsed: float = 999.0
 
 
 func _ready() -> void:
@@ -36,11 +56,15 @@ func _ready() -> void:
 	# D-150(c): 세이브 로드 직후에도 1회 발신해 HUD가 로드 즉시 올바른 값을 갖게 한다.
 	# GameState.from_dict()가 이미 끝난 뒤 SaveManager가 이 신호를 쏘므로 타이밍이 맞다.
 	Events.load_completed.connect(_on_load_completed)
+	# 새 게임 시작 시 SP는 가득 찬 상태(세이브 로드 시에는 _on_load_completed가 덮어쓴다).
+	refill_sp()
 
 
 ## 스킬 쿨타임 타이머(M3-3). HUD가 슬롯별 잔여 쿨타임을 직접 조회할 필요 없이
 ## skill_ready(slot) 신호만 구독하면 되도록, 0에 도달한 슬롯만 골라 통지한다.
 func _process(delta: float) -> void:
+	_tick_buffs(delta)
+	_tick_sp(delta)
 	if _skill_cooldowns.is_empty():
 		return
 	for slot: Variant in _skill_cooldowns.keys().duplicate():
@@ -92,9 +116,19 @@ func _apply_level_up_effects(stat_gains: Dictionary) -> void:
 	var atk_gain: float = float(stat_gains.get("attack", 0.0))
 	GameState.level_stat_bonus["max_hp"] = int(GameState.level_stat_bonus.get("max_hp", 0)) + hp_gain
 	GameState.level_stat_bonus["attack"] = float(GameState.level_stat_bonus.get("attack", 0.0)) + atk_gain
-	GameState.stat_points += int(Data.get_value("stats", "stat_points_per_levelup", 3))
-	GameState.skill_points += int(Data.get_value("stats", "skill_points_per_levelup", 1))
+	# M4-4(§2): 지급량은 exp_curve.csv.stat_points_gain(레벨별 체증)이 정본. 컬럼이 없는
+	# 옛 테이블만 stats.json.stat_points_per_levelup(레거시 고정값)으로 폴백한다.
+	# UI 합의(M4-4): 레벨업 배너가 읽도록 stat_gains payload에 두 지급량을 명시해 넣는다
+	# (Events.level_up 시그니처는 그대로, 키만 추가 — 호출부가 emit 전에 이 함수를 거친다).
+	var stat_point_gain: int = int(stat_gains.get(
+		"stat_points", Data.get_value("stats", "stat_points_per_levelup", 3)))
+	var skill_point_gain: int = int(Data.get_value("stats", "skill_points_per_levelup", 1))
+	stat_gains["stat_points"] = stat_point_gain
+	stat_gains["skill_points"] = skill_point_gain
+	GameState.stat_points += stat_point_gain
+	GameState.skill_points += skill_point_gain
 	GameState.recompute_player_stats()
+	refill_sp()
 	var player: Player = GameState.get_player()
 	if player == null or player.resources == null:
 		return
@@ -126,6 +160,10 @@ func _on_load_completed(_slot: int, _kind: StringName, ok: bool) -> void:
 	if not ok:
 		return
 	_migrate_hotbar_if_needed()
+	_passive_dirty = true
+	_buffs.clear()
+	GameState.sp = clampf(GameState.sp, 0.0, max_sp())
+	_emit_sp_changed()
 	_emit_exp_changed()
 	_emit_stats_changed()
 	_emit_skills_changed()
@@ -148,41 +186,42 @@ func _migrate_hotbar_if_needed() -> void:
 
 # --- M3-3: 스탯 분배 ---
 
-## 스탯 포인트 1개를 key(str/dex/int/vit/luk)에 분배한다. 포인트가 없거나 key가 잘못되면
-## false(D-158: 스탯당 상한 없음 — allocation.max_per_stat=null).
+## 스탯 key(str/agi/dex/int/vit/luk)를 1 올린다. M4-4(§2): 소모 포인트는 현재값에 따라
+## 체증한다(cost(n->n+1)=floor(n/10)+1). 포인트가 모자라거나 key가 잘못되면 false
+## (D-158: 스탯당 상한 없음 — allocation.max_per_stat=null).
 func allocate_stat(key: String) -> bool:
-	if not StatCalc.can_allocate(key, GameState.stat_points, STAT_KEYS):
+	var cost: int = next_stat_cost(key)
+	if not StatCalc.can_allocate(key, GameState.stat_points, STAT_KEYS, cost):
 		return false
-	GameState.stat_points -= 1
+	GameState.stat_points -= cost
 	GameState.stats[key] = int(GameState.stats.get(key, 0)) + 1
 	GameState.recompute_player_stats()
+	GameState.sp = minf(GameState.sp, max_sp())
+	_emit_sp_changed()
 	_emit_stats_changed()
 	return true
 
 
-## 파생 전투 수치(HUD 표시용). attack/max_hp/defense는 실제 게임플레이가 쓰는 것과 동일한
-## StatCalc 호출로 계산해 표시값과 실제 값이 어긋나지 않는다.
+## key를 1 올리는 데 필요한 스탯 포인트(스탯 패널 표시용, §2 체증 곡선).
+func next_stat_cost(key: String) -> int:
+	return StatCalc.allocation_cost(int(GameState.stats.get(key, 0)))
+
+
+## 파생 전투 수치(HUD 표시용 + 게임플레이 공용, §1 6스탯 전체). 실제 계산은
+## DerivedStats(순수)가 하고 여기서는 패시브/버프 합성값만 넘긴다 — 이 파일 500줄
+## 상한(D-157)을 지키기 위한 분리이며, 호출부는 전부 이 한 함수의 키만 읽는다
+## (attack/max_hp/defense/crit_chance/roll_cost_mult/cooldown_mult/matk/mdef/
+##  combo_frame_mult/post_recovery_mult/hitbox_scale/roll_iframe_bonus/
+##  move_speed_mult/max_sp/sp_regen).
 func get_derived() -> Dictionary:
-	var s: Dictionary = GameState.stats
-	var player: Player = GameState.get_player()
-	var attack: float = player.get_attack_power() if player != null else Tuning.PLAYER_BASE_ATTACK
-	var max_hp: int = player.resources.max_hp if player != null and player.resources != null else Tuning.PLAYER_MAX_HP
-	var equip_defense: float = player.equip_defense if player != null else 0.0
-	var defense: float = StatCalc.defense_value(
-		int(s.get("vit", 0)), float(Data.get_value("stats", "vit.defense_per_point", 1.0)), equip_defense)
-	var roll_cost_mult: float = PlayerResources.roll_cost_with_dex(1.0, float(s.get("dex", 0)))
-	var cd_mult: float = StatCalc.cooldown_mult(
-		int(s.get("int", 0)),
-		float(Data.get_value("stats", "int.cooldown_reduction_per_point", 0.002)),
-		float(Data.get_value("stats", "int.cooldown_reduction_cap_pct", 0.30)))
-	return {
-		"attack": attack,
-		"max_hp": max_hp,
-		"defense": defense,
-		"crit_chance": _crit_chance(),
-		"roll_cost_mult": roll_cost_mult,
-		"cooldown_mult": cd_mult,
-	}
+	return DerivedStats.compute(GameState.stats, _passives(), buff_pct("move_speed_pct"), GameState.get_player())
+
+
+## AGI FLEE 번역 (b): 이동속도 배율. GameState._apply_equipment_stats_to_player()가
+## walk_speed 재계산 때 곱한다(장비 speed_pct와 곱연산, D-193).
+func move_speed_mult() -> float:
+	return DerivedStats.move_speed_mult(
+		int(GameState.stats.get("agi", 0)), passive_bonus("move_speed_pct"), buff_pct("move_speed_pct"))
 
 
 func _emit_stats_changed() -> void:
@@ -190,11 +229,7 @@ func _emit_stats_changed() -> void:
 
 
 func _crit_chance() -> float:
-	return StatCalc.crit_chance(
-		int(GameState.stats.get("luk", 0)),
-		float(Data.get_value("stats", "luk.base_crit_chance", 0.05)),
-		float(Data.get_value("stats", "luk.crit_chance_per_point", 0.001)),
-		float(Data.get_value("stats", "luk.crit_chance_cap", 0.75)))
+	return DerivedStats.crit_chance(int(GameState.stats.get("luk", 0)), passive_bonus("crit_chance_pct"))
 
 
 ## STR/스킬 기본 데미지에 LUK 진짜 크리티컬을 굴려 적용한다(attack.gd/skill.gd 공용,
@@ -203,21 +238,55 @@ func roll_crit(damage: int) -> Dictionary:
 	var is_crit: bool = randf() < _crit_chance()
 	var final_damage: int = damage
 	if is_crit:
-		final_damage = StatCalc.crit_damage(damage, float(Data.get_value("stats", "luk.crit_damage_multiplier", 1.5)))
+		# blade_edge(crit_damage_pct 패시브)는 배율에 곱연산으로 합성한다(D-193).
+		final_damage = StatCalc.crit_damage(
+			damage, DerivedStats.crit_damage_mult(passive_bonus("crit_damage_pct")))
 	return {"damage": final_damage, "is_critical": is_crit}
 
 
 # --- M3-3: 스킬 배우기/장착/시전/쿨타임 ---
 
-## skills.json 확인 + 스킬 포인트 소모 + 습득 반영(D-159: 레벨 게이트 없음).
+## M4-4(D-170): 스킬 노드를 1레벨 올린다(미습득이면 1레벨 습득). 스킬 포인트 1점 소모 +
+## requires의 선행 스킬 레벨 충족 + max_level 미만일 때만 성공.
 func learn_skill(id: String) -> bool:
-	if not SkillCalc.can_learn(id, GameState.learned_skills, GameState.skill_points, Data.table("skills")):
+	var check: Dictionary = can_learn_skill(id)
+	if not bool(check.get("ok", false)):
 		return false
 	var entry: Dictionary = Data.get_value("skills", id, {})
-	GameState.skill_points -= int(entry.get("cost_sp", 1))
-	GameState.learned_skills.append(id)
+	GameState.skill_points -= int(entry.get("cost_skill_point_per_level", 1))
+	GameState.learned_skills[id] = get_skill_level(id) + 1
+	_passive_dirty = true
+	GameState.recompute_player_stats()
+	_emit_stats_changed()
 	_emit_skills_changed()
 	return true
+
+
+## 현재 습득 레벨(미습득 0).
+func get_skill_level(id: String) -> int:
+	return int(GameState.learned_skills.get(id, 0))
+
+
+## 레벨업 가능 여부 + 불가 사유. {"ok": bool, "reason": StringName} —
+## &"no_points"/&"requires"/&"maxed"/&"unknown"(가능하면 &""). UI(스킬 트리 패널)는
+## reason을 ui.skill.reason_* 로컬라이징 키에 매핑해 표시한다(D-194).
+func can_learn_skill(id: String) -> Dictionary:
+	return SkillCalc.can_learn(id, GameState.learned_skills, GameState.skill_points, Data.table("skills"))
+
+
+## 현재 습득 레벨의 levels[] 항목(sp_cost/cooldown_sec/damage_mult/self_effect/value).
+## 미습득이거나 없는 id면 빈 Dictionary — skill.gd/HUD가 get()으로 안전 폴백한다.
+func skill_level_data(id: String) -> Dictionary:
+	return SkillCalc.level_data(Data.get_value("skills", id, {}), get_skill_level(id))
+
+
+## 퀘스트 보상 등 외부에서 스킬 포인트를 지급하는 공통 진입점(D-192:
+## quest_system.gd의 grant_skill_point:N 태그가 여기로 들어온다).
+func grant_skill_points(amount: int) -> void:
+	if amount <= 0:
+		return
+	GameState.skill_points += amount
+	_emit_skills_changed()
 
 
 ## slot(0~8)에 skill 또는 item을 배정한다(M4-1, D-160 계승: 슬롯 교체 자유).
@@ -228,7 +297,7 @@ func assign_hotbar(slot: int, kind: String, id: String) -> bool:
 	if slot < 0 or slot >= GameState.hotbar.size():
 		return false
 	if kind == "skill":
-		if not SkillCalc.can_equip(id, GameState.learned_skills):
+		if not SkillCalc.can_equip(id, GameState.learned_skills, Data.table("skills")):
 			return false
 		GameState.skill_slots[slot] = id
 	elif kind == "item":
@@ -258,24 +327,112 @@ func _emit_skills_changed() -> void:
 	Events.skills_changed.emit(GameState.learned_skills, GameState.skill_slots, GameState.skill_points)
 
 
-## slot에 스킬이 장착돼 있고, 쿨타임이 다 됐고, 스태미나가 충분하면 true(skill.gd 진입
-## 전 state.gd:try_enter_skill()이 조회).
+## slot에 배운 스킬이 장착돼 있고, 쿨타임이 다 됐고, SP가 충분하면 true(D-169: 스태미나가
+## 아니라 SP. skill.gd 진입 전 state.gd:try_enter_skill()이 조회).
 func can_cast_skill(slot: int) -> bool:
 	if slot < 0 or slot >= GameState.skill_slots.size():
 		return false
 	var id: String = GameState.skill_slots[slot]
 	if id == "":
 		return false
-	var player: Player = GameState.get_player()
-	var stamina: float = player.resources.stamina if player != null and player.resources != null else 0.0
-	return SkillCalc.can_cast(id, Data.table("skills"), stamina, float(_skill_cooldowns.get(slot, 0.0)))
+	return SkillCalc.can_cast(id, get_skill_level(id), Data.table("skills"), GameState.sp,
+		float(_skill_cooldowns.get(slot, 0.0)))
 
 
-## 시전 성공 시(skill.gd가 스태미나를 실제로 소모한 직후) 호출 — INT 쿨감을 적용한 실제
-## 쿨타임을 등록하고 HUD용 Events.skill_cast를 발신한다.
+## 시전 성공 시(skill.gd가 SP를 실제로 소모한 직후) 호출 — 현재 스킬 레벨의 cooldown_sec에
+## INT 쿨감을 적용한 실제 쿨타임을 등록하고 HUD용 Events.skill_cast를 발신한다.
 func start_skill_cooldown(slot: int, skill_id: String) -> void:
-	var entry: Dictionary = Data.get_value("skills", skill_id, {})
-	var base_cd: float = float(entry.get("cooldown_sec", 0.0))
+	var base_cd: float = float(skill_level_data(skill_id).get("cooldown_sec", 0.0))
 	var cd: float = SkillCalc.effective_cooldown(base_cd, get_derived().get("cooldown_mult", 1.0))
 	_skill_cooldowns[slot] = cd
+	_sp_idle_elapsed = 0.0
 	Events.skill_cast.emit(slot, skill_id, cd)
+
+
+# --- M4-4: SP 자원(D-169/D-190, §3) ---
+
+## INT 기반 최대 SP.
+func max_sp() -> float:
+	return DerivedStats.max_sp(int(GameState.stats.get("int", 0)))
+
+
+## SP를 가득 채운다(새 게임·레벨업 — HP/스태미나 전량 회복과 같은 취급, D-151).
+func refill_sp() -> void:
+	GameState.sp = max_sp()
+	_emit_sp_changed()
+
+
+## 스킬 시전 비용 소모. 부족하면 소모 없이 false(스태미나의 try_spend와 동일 관례).
+func spend_sp(amount: float) -> bool:
+	if GameState.sp < amount:
+		return false
+	GameState.sp -= amount
+	_sp_idle_elapsed = 0.0
+	_emit_sp_changed()
+	return true
+
+
+## 매 프레임 SP 회복. 마지막 시전 후 regen_idle_delay_sec가 지나면 regen_idle_multiplier
+## 배로 가속한다(§3 — RO의 "앉기"를 실시간 액션용으로 번역한 것).
+func _tick_sp(delta: float) -> void:
+	_sp_idle_elapsed += delta
+	var cap: float = max_sp()
+	if GameState.sp >= cap:
+		if GameState.sp > cap:
+			GameState.sp = cap
+			_emit_sp_changed()
+		return
+	var is_idle: bool = _sp_idle_elapsed >= float(Data.get_value("stats", "sp.regen_idle_delay_sec", 2.0))
+	var regen: float = DerivedStats.sp_regen(
+		int(GameState.stats.get("int", 0)), passive_bonus("sp_regen_pct"), is_idle)
+	GameState.sp = minf(GameState.sp + regen * delta, cap)
+	_emit_sp_changed()
+
+
+func _emit_sp_changed() -> void:
+	Events.sp_changed.emit(GameState.sp, max_sp())
+
+
+# --- M4-4: 패시브 합산 · 자기 버프(§4-2, D-193 곱연산 합성) ---
+
+## 습득한 패시브 노드의 현재 레벨 value 합계(passive_stat 기준, 단위는 % 또는 절대값).
+## 학습/로드 때만 바뀌므로 캐시한다.
+func passive_bonus(stat: String) -> float:
+	return float(_passives().get(stat, 0.0))
+
+
+func _passives() -> Dictionary:
+	if _passive_dirty:
+		_passive_cache = SkillCalc.passive_totals(GameState.learned_skills, Data.table("skills"))
+		_passive_dirty = false
+	return _passive_cache
+
+
+## 버프 스킬(self_effect)의 현재 효과량(%, 없으면 0). 같은 stat 재시전은 덮어쓴다.
+func buff_pct(stat: String) -> float:
+	var entry: Variant = _buffs.get(stat, null)
+	return float((entry as Dictionary).get("value", 0.0)) if entry is Dictionary else 0.0
+
+
+## duration_sec 동안 stat에 value(%)만큼의 버프를 건다(skill.gd가 호출).
+func apply_buff(stat: String, value: float, duration_sec: float) -> void:
+	if stat == "" or duration_sec <= 0.0:
+		return
+	_buffs[stat] = {"value": value, "remaining": duration_sec}
+	GameState.recompute_player_stats()
+	_emit_stats_changed()
+
+
+func _tick_buffs(delta: float) -> void:
+	if _buffs.is_empty():
+		return
+	var expired: bool = false
+	for stat: Variant in _buffs.keys().duplicate():
+		var entry: Dictionary = _buffs[stat]
+		entry["remaining"] = float(entry["remaining"]) - delta
+		if float(entry["remaining"]) <= 0.0:
+			_buffs.erase(stat)
+			expired = true
+	if expired:
+		GameState.recompute_player_stats()
+		_emit_stats_changed()

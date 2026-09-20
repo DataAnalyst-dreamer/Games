@@ -167,7 +167,9 @@ func _handle_guarded_hit(source_hitbox: Hitbox, guard_state: GuardState) -> void
 		_apply_full_hit(source_hitbox)
 		return
 	Events.player_stamina_changed.emit(resources.stamina, resources.max_stamina)
-	var chip_ratio: float = float(Data.get_value("combat", "guard.chip_damage_ratio", 0.2))
+	# M4-4(D-168): guard_steadfast(guard_damage_reduction_pct 패시브)만큼 칩데미지가 더 줄어든다.
+	var chip_ratio: float = float(Data.get_value("combat", "guard.chip_damage_ratio", 0.2)) \
+		* maxf(0.0, 1.0 - Progression.passive_bonus("guard_damage_reduction_pct") * 0.01)
 	var damage: int = GuardCalc.chip_damage(source_hitbox.damage, chip_ratio)
 	var died: bool = resources.take_damage(damage)
 	Events.player_damaged.emit(damage, source_hitbox.source)
@@ -251,7 +253,11 @@ func get_attack_power() -> float:
 	# atk_bonus 누적치)을 장비 보너스와 합산한다.
 	var str_bonus: float = StatCalc.attack_bonus(
 		int(GameState.stats.get("str", 0)), float(Data.get_value("stats", "str.physical_damage_per_point", 0.2)))
-	return Tuning.PLAYER_BASE_ATTACK + equip_attack_bonus + float(GameState.level_stat_bonus.get("attack", 0.0)) + str_bonus
+	var base: float = Tuning.PLAYER_BASE_ATTACK + equip_attack_bonus \
+		+ float(GameState.level_stat_bonus.get("attack", 0.0)) + str_bonus
+	# M4-4(D-168/D-193): blade_focus(atk_pct 패시브)와 blade_bloodlust(atk_buff_pct 버프)를
+	# 곱연산으로 합성한다 — 둘 다 %, 계산은 Progression 한 곳.
+	return base * (1.0 + (Progression.passive_bonus("atk_pct") + Progression.buff_pct("atk_buff_pct")) * 0.01)
 
 
 ## Knight의 방향별 단일 공격 자세(D-137) 위에 무기 회전으로 휘두름을 표현한다.

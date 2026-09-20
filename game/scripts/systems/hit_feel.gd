@@ -25,8 +25,12 @@ static func apply(defender_body: Node2D, flash_target: CanvasItem, hitbox: Hitbo
 		var p := defender_body as Player
 		var vit: int = int(GameState.stats.get("vit", 0))
 		var per_point: float = float(Data.get_value("stats", "vit.defense_per_point", 1.0))
-		var defense: float = StatCalc.defense_value(vit, per_point, p.equip_defense)
+		# M4-4(D-168): guard_bulwark(defense_flat 패시브)를 방어력에 더하고, guard_fortify
+		# (dmg_reduction_pct 버프)를 최종 피해에 곱한다.
+		var defense: float = StatCalc.defense_value(vit, per_point, p.equip_defense) \
+			+ Progression.passive_bonus("defense_flat")
 		damage = StatCalc.damage_after_defense(float(damage), defense)
+		damage = int(round(float(damage) * maxf(0.0, 1.0 - Progression.buff_pct("dmg_reduction_pct") * 0.01)))
 
 	# 타격 임팩트 SFX(sound-map-m1.md §2/§12): Events 구독만으로는 hitbox.is_heavy가
 	# 페이로드에 없어 강공격/일반을 구분할 수 없으므로 여기서 직접 호출한다. Hitstop.

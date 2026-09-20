@@ -77,9 +77,19 @@ func _on_level_up(new_level: int, stat_gains: Dictionary) -> void:
 	_show_banner(stat_gains)
 
 
+## M4-5(D-195): stat_gains에 실린 "stat_points"/"skill_points"(레벨업 1회당 지급량,
+## exp_curve.csv.stat_points_gain 체증분 — stage/m4-4가 이 두 키를 stat_gains Dictionary에
+## 얹기로 코디네이터와 합의)를 배너에 그대로 보여준다. 0이면 그 줄은 생략한다(만렙 등
+## 지급이 없는 레벨업에서 "+0" 스팸 방지).
 func _show_banner(stat_gains: Dictionary) -> void:
 	banner_title.text = tr(&"ui.hud.level_up_banner") % _level
 	var stats_text: String = _format_stat_gains(stat_gains)
+	var stat_points_gained: int = int(stat_gains.get("stat_points", 0))
+	var skill_points_gained: int = int(stat_gains.get("skill_points", 0))
+	if stat_points_gained > 0:
+		stats_text += "\n" + tr(&"ui.hud.stat_gain_toast") % stat_points_gained
+	if skill_points_gained > 0:
+		stats_text += "\n" + tr(&"ui.hud.skill_gain_toast") % skill_points_gained
 	# M3-4: 레벨업으로 쌓인 스탯/스킬 포인트를 어디서 쓰는지 안내(D-153 데모 피드백
 	# "레벨업 후 할 행동이 필요" — GameState.stat_points는 이미 존재하는 실제 필드).
 	if GameState.stat_points > 0:
@@ -97,9 +107,15 @@ func _show_banner(stat_gains: Dictionary) -> void:
 
 ## stat_gains는 {stat_key: 증가량}(예: {"max_hp": 10, "attack": 2}) — 스탯 이름 자체의
 ## 로컬라이징 key는 game-designer의 stats.json 확정 이후 범위라 지금은 키를 그대로
-## 대문자로 보여준다(텍스트 골격 ui.hud.level_up_stat_fmt만 로컬라이징 key).
+## 대문자로 보여준다(텍스트 골격 ui.hud.level_up_stat_fmt만 로컬라이징 key). "stat_points"/
+## "skill_points"(M4-5, D-195)는 별도 줄(_show_banner)로 이미 표시하므로 여기서 뺀다.
+const _POINT_GAIN_KEYS := ["stat_points", "skill_points"]
+
+
 func _format_stat_gains(stat_gains: Dictionary) -> String:
 	var parts := PackedStringArray()
 	for stat_key: Variant in stat_gains.keys():
+		if String(stat_key) in _POINT_GAIN_KEYS:
+			continue
 		parts.append(tr(&"ui.hud.level_up_stat_fmt") % [String(stat_key).to_upper(), str(stat_gains[stat_key])])
 	return " · ".join(parts)

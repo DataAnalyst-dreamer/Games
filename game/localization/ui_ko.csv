@@ -265,24 +265,124 @@ skill.trick_dash_strike.name,쇄도
 skill.trick_dash_strike.desc,짧게 돌진하며 무적 상태로 적을 꿰뚫는다.
 skill.trick_fleet_step.name,축지
 skill.trick_fleet_step.desc,잠시 이동 속도가 크게 증가한다.
+skill.blade_focus.name,칼끝 집중
+skill.blade_focus.desc,평소 자세를 가다듬어 공격력이 오른다.
+skill.blade_followup.name,연격
+skill.blade_followup.desc,베어낸 자리를 다시 찔러 더 큰 피해를 준다.
+skill.blade_edge.name,예기
+skill.blade_edge.desc,칼날을 벼려 치명타 피해가 오른다.
+skill.blade_bloodlust.name,투기
+skill.blade_bloodlust.desc,잠시 공격력이 크게 오른다.
+skill.blade_reflex.name,검의 반사
+skill.blade_reflex.desc,몸에 익은 검술로 공격 속도가 오른다.
+skill.blade_finishing_strike.name,종언의 일격
+skill.blade_finishing_strike.desc,모든 힘을 실어 정면을 꿰뚫는 필살의 찌르기.
+skill.guard_bulwark.name,방벽술
+skill.guard_bulwark.desc,방패를 다루는 요령으로 방어력이 오른다.
+skill.guard_shield_charge.name,방패 돌격
+skill.guard_shield_charge.desc,방패를 앞세워 짧게 돌진하며 적을 밀친다.
+skill.guard_steadfast.name,버팀목
+skill.guard_steadfast.desc,가드 중 받는 피해가 줄어든다.
+skill.guard_fortify.name,결의
+skill.guard_fortify.desc,잠시 받는 피해가 크게 줄어든다.
+skill.guard_vitality.name,불굴
+skill.guard_vitality.desc,단련된 체력으로 최대 체력이 오른다.
+skill.guard_retribution.name,심판의 방패
+skill.guard_retribution.desc,방패로 대지를 내리쳐 주변을 크게 강타한다.
+skill.trick_quickslash.name,빠른 베기
+skill.trick_quickslash.desc,짧고 빠르게 베어 넘긴다.
+skill.trick_insight.name,기감
+skill.trick_insight.desc,감각을 예민하게 다듬어 SP 회복이 빨라진다.
+skill.trick_flurry.name,난격
+skill.trick_flurry.desc,넓게 휘둘러 주변을 연달아 벤다.
+skill.trick_precision.name,급소 노림
+skill.trick_precision.desc,약점을 노려 치명타 확률이 오른다.
+skill.trick_swift.name,경신술
+skill.trick_swift.desc,몸이 가벼워져 이동 속도가 오른다.
+skill.trick_execute.name,급소 일격
+skill.trick_execute.desc,빈틈을 놓치지 않고 정확히 찔러 넣는다.
 ui.skill_panel.tab.stat,스탯
 ui.skill_panel.tab.skill,스킬
 ui.stat.str,힘
-ui.stat.dex,민첩
+ui.stat.agi,민첩
+ui.stat.dex,재주
 ui.stat.int,지능
 ui.stat.vit,체력
 ui.stat.luk,행운
 ui.stat.points_remaining,잔여 포인트: %d
-ui.stat.derived.attack,공격
-ui.stat.derived.max_hp,HP
-ui.stat.derived.defense,방어
-ui.stat.derived.crit_chance,크리
+ui.stat.point_cost_fmt,다음 %d포인트
+ui.stat.derived.attack,공격력
+ui.stat.derived.matk,마법 공격력
+ui.stat.derived.max_hp,최대 체력
+ui.stat.derived.max_sp,최대 SP
+ui.stat.derived.defense,방어력
+ui.stat.derived.mdef,마법 방어력
+ui.stat.derived.crit_chance,치명타 확률
+ui.stat.derived.hit,명중
+ui.stat.derived.flee,회피
+ui.stat.derived.aspd,공격 속도
 ui.stat.derived.pending,현재값을 불러오는 중입니다.
+ui.skill.node_type.active,액티브
+ui.skill.node_type.passive,패시브
+ui.skill.node_type.buff,버프
+ui.skill.level_fmt,Lv.%d/%d
 ui.skill.state.learned,[습득됨]
 ui.skill.state.learnable,[습득]
+ui.skill.state.maxed,[최대]
 ui.skill.requires_none,없음
-ui.skill.meta_fmt,계열 %s · SP %d · 요구 %s
-ui.skill.learn_hint,확인 버튼으로 습득합니다
-ui.skill.slot_hint,1~9 키로 핫바에 등록합니다
-ui.skill.locked_hint,포인트가 부족하거나 선행 스킬이 필요합니다
+ui.skill.requires_fmt,%s Lv.%d 이상
+ui.skill.meta_fmt,계열 %s · SP소모 %s · 요구 %s
+ui.skill.learn_hint,확인 버튼으로 습득/레벨업합니다(스킬 포인트 1 소모)
+ui.skill.slot_hint,숫자키 1~9로 핫바에 장착합니다
+ui.skill.locked_hint,포인트가 부족하거나 선행 스킬 레벨이 부족합니다
 ui.hud.level_up_points_hint,포인트 %d 남음 — Tab
+ui.hud.sp_label,SP
+ui.hud.stat_gain_toast,스탯 포인트 +%d
+ui.hud.skill_gain_toast,스킬 포인트 +%d
+ui.hotbar.empty_hint,핫바 슬롯이 비어 있습니다
+ui.hotbar.assign_hint,스킬이나 아이템을 끌어놓거나 숫자키로 지정하세요
+ui.menu.tab_prev_hint,[
+ui.menu.tab_next_hint,]
+ui.quest.reward_preview_label,보상
+ui.quest.reward_gold_fmt,골드 %d
+ui.quest.reward_exp_fmt,경험치 %d
+ui.quest.reward_item_fmt,%s x%d
+ui.quest.reward_skill_point_fmt,스킬 포인트 +%d
+ui.quest.complete_toast_title,퀘스트 완료
+ui.stat.derived.sp_regen,SP 회복량
+ui.stat.derived.hit_scale,명중 판정
+ui.stat.derived.flee_iframe_bonus,회피(무적 연장)
+ui.stat.derived.move_speed_mult,이동 속도
+ui.stat.derived.combo_frame_mult,공격 속도
+ui.stat.derived.post_recovery_mult,후딜 감소
+ui.stat.effect.str,물리 공격력이 오른다
+ui.stat.effect.agi,공격 속도와 회피가 좋아진다
+ui.stat.effect.dex,공격이 더 잘 맞고 후딜이 짧아진다
+ui.stat.effect.int,마법 공격력과 최대 SP가 오르고 스킬 재사용 대기시간이 줄어든다
+ui.stat.effect.vit,최대 체력과 방어력이 오른다
+ui.stat.effect.luk,치명타 확률이 오른다
+ui.skill_tree.series.blade,검
+ui.skill_tree.series.guard,방패
+ui.skill_tree.series.trick,기교
+ui.skill.reason_no_points,스킬 포인트가 부족합니다
+ui.skill.reason_requires,선행 스킬 레벨이 부족합니다
+ui.skill.reason_maxed,이미 최대 레벨입니다
+ui.skill.reason_unknown,알 수 없는 스킬입니다
+ui.skill.field.sp_cost,SP %s
+ui.skill.field.cooldown_sec,재사용 %s초
+ui.skill.field.damage_mult,피해 %s%%
+ui.skill.field.atk_buff_pct,공격력 +%s%%
+ui.skill.field.dmg_reduction_pct,피해 감소 %s%%
+ui.skill.field.move_speed_mult,이동 속도 +%s%%
+ui.skill.field.invuln_sec,무적 %s초
+ui.skill.field.dash_px,돌진 거리 %spx
+ui.skill.field.duration_sec,지속 %s초
+ui.skill.field.atk_pct,공격력 +%s%%
+ui.skill.field.crit_damage_pct,치명타 피해 +%s%%
+ui.skill.field.aspd_pct,공격 속도 +%s%%
+ui.skill.field.defense_flat,방어력 +%s
+ui.skill.field.guard_damage_reduction_pct,가드 피해 감소 +%s%%
+ui.skill.field.max_hp_pct,최대 체력 +%s%%
+ui.skill.field.sp_regen_pct,SP 회복 +%s%%
+ui.skill.field.crit_chance_pct,치명타 확률 +%s%%
+ui.skill.field.move_speed_pct,이동 속도 +%s%%

@@ -124,14 +124,23 @@ func _fire_hitbox(hit_index: int) -> void:
 	hitbox.element = &""
 	hitbox.source = player
 	hitbox.position = _lunge_dir * 10.0
+	# M4-4(D-168/D-191, §1 HIT 번역): DEX만큼 판정이 넓어진다. 복원은 Hitbox.deactivate()가
+	# 책임지므로 Hurt/Dead 같은 강제 전이로 Attack을 빠져나가도 배율이 남지 않는다.
+	hitbox.apply_scale_mult(float(Progression.get_derived().get("hitbox_scale", 1.0)))
 	hitbox.activate(combo.hit_duration_sec)
 
 
+## M4-4(D-168, §1): AGI(주)+DEX(부)의 ASPD가 콤보 프레임 전체에, DEX의 모션 잠금 단축이
+## 피니셔 후딜에 각각 곱연산으로 붙는다(딜레이 2계층 중 "모션 잠금" 층 — 쿨다운 층은
+## INT가 담당해 서로 겹치지 않는다, D-184).
 func _make_combo_state() -> ComboState:
+	var derived: Dictionary = Progression.get_derived()
+	var frame_mult: float = float(derived.get("combo_frame_mult", 1.0))
+	var recovery_mult: float = float(derived.get("post_recovery_mult", 1.0))
 	return ComboState.new(
 		int(Data.get_value("combat", "combo.hits", 3)),
-		float(Data.get_value("combat", "combo.input_buffer_sec", 0.2)),
+		float(Data.get_value("combat", "combo.input_buffer_sec", 0.2)) * frame_mult,
 		float(Data.get_value("combat", "combo.reset_after_sec", 0.6)),
-		Tuning.ATTACK_HIT_DURATION_SEC,
+		Tuning.ATTACK_HIT_DURATION_SEC * frame_mult,
 		float(Data.get_value("combat", "combo.finisher_recovery_sec", 0.35)),
 	)

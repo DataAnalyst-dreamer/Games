@@ -33,12 +33,14 @@ func enter(_prev: StringName, data: Dictionary = {}) -> void:
 	if skill_id == "" or not Progression.can_cast_skill(slot):
 		finished.emit(&"Idle", {})
 		return
+	# M4-4(D-169/D-170): 노드 정의는 최상위(hitbox/knockback/vfx/feel), 수치는 현재 습득
+	# 레벨의 levels[] 항목(sp_cost/cooldown_sec/damage_mult/self_effect)에서 읽는다.
 	var entry: Dictionary = Data.get_value("skills", skill_id, {})
-	if not player.resources.try_spend(float(entry.get("stamina_cost", 0.0))):
-		Events.player_stamina_insufficient.emit(&"skill")
+	var level: Dictionary = Progression.skill_level_data(skill_id)
+	if not Progression.spend_sp(SkillCalc.sp_cost(level)):
+		Events.player_stamina_insufficient.emit(&"skill") # HUD 공용 "자원 부족" 깜박임 재사용.
 		finished.emit(&"Idle", {})
 		return
-	Events.player_stamina_changed.emit(player.resources.stamina, player.resources.max_stamina)
 	Progression.start_skill_cooldown(slot, skill_id)
 
 	_elapsed = 0.0
@@ -48,7 +50,7 @@ func enter(_prev: StringName, data: Dictionary = {}) -> void:
 	player.play_anim("attack") # 전용 스킬 애니메이션 없음(pixel-artist TODO, icon도 skills.json 전부 null).
 	AudioManager.play_sfx(&"atk_swing_finisher", player.global_position)
 
-	_apply_self_effect(entry.get("self_effect", null))
+	_apply_self_effect(level.get("self_effect", null))
 
 	# M4-3(D-167~D-180 "시전 연출 개선"): 선딜 동안은 자세만 고정하고(velocity=0, 위),
 	# 색 예고 플래시만 즉시 준다 — 실제 판정+발동 이펙트는 anticipation_sec 뒤로 미뤄
@@ -65,12 +67,12 @@ func enter(_prev: StringName, data: Dictionary = {}) -> void:
 	var anticipation_sec: float = Tuning.SKILL_ANTICIPATION_SEC
 	var tree := player.get_tree()
 	if tree == null or anticipation_sec <= 0.0:
-		_fire(entry, vfx, base_color, flash_color)
+		_fire(entry, level, vfx, base_color, flash_color)
 	else:
 		tree.create_timer(anticipation_sec).timeout.connect(func() -> void:
 			if _exited or not is_instance_valid(player):
 				return
-			_fire(entry, vfx, base_color, flash_color)
+			_fire(entry, level, vfx, base_color, flash_color)
 		)
 
 
@@ -91,17 +93,24 @@ func physics_update(delta: float) -> void:
 			finished.emit(&"Idle", {})
 
 
-## self_effect 3종 고정 스키마만 처리한다(skills-m3.md §3 — 이 외 키 조합은 데이터
-## 검증(validate_tables.py)에서 이미 걸러진다).
+## self_effect 스키마(v2, §4-2): dash_px(+invuln_sec) / invuln_sec / move_speed_mult /
+## atk_buff_pct / dmg_reduction_pct — 뒤의 3종은 지속시간이 있는 버프라 Progression이
+## 보관하고(스탯 계산에 합산), 즉발 2종만 여기서 직접 처리한다.
 func _apply_self_effect(effect_variant: Variant) -> void:
 	if not (effect_variant is Dictionary):
 		return
 	var effect: Dictionary = effect_variant
+	var duration: float = float(effect.get("duration_sec", 0.0))
 	if effect.has("dash_px"):
 		player.start_iframes(float(effect.get("invuln_sec", 0.0)))
 		_dash(float(effect.get("dash_px", 0.0)))
 	elif effect.has("move_speed_mult"):
-		_apply_speed_buff(float(effect.get("move_speed_mult", 1.0)), float(effect.get("duration_sec", 0.0)))
+		# 배율(1.20) -> 버프 %(20)로 환산해 Progression의 버프 창구 하나로 모은다.
+		Progression.apply_buff("move_speed_pct", (float(effect["move_speed_mult"]) - 1.0) * 100.0, duration)
+	elif effect.has("atk_buff_pct"):
+		Progression.apply_buff("atk_buff_pct", float(effect["atk_buff_pct"]), duration)
+	elif effect.has("dmg_reduction_pct"):
+		Progression.apply_buff("dmg_reduction_pct", float(effect["dmg_reduction_pct"]), duration)
 	elif effect.has("invuln_sec"):
 		player.start_iframes(float(effect.get("invuln_sec", 0.0)))
 
@@ -115,28 +124,11 @@ func _dash(distance_px: float) -> void:
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 
-## ponytail: 전역 버프 스택 시스템 없이 walk_speed를 직접 곱하고 타이머로 원복한다 —
-## 버프 창 동안 장비 교체 등으로 walk_speed가 재계산되면 원복값이 어긋날 수 있는 에지
-## 케이스가 있다(TODO: 전용 버프 시스템이 생기면 그쪽으로 이관).
-func _apply_speed_buff(mult: float, duration_sec: float) -> void:
-	if mult <= 0.0 or duration_sec <= 0.0:
-		return
-	var saved_speed: float = player.walk_speed
-	player.walk_speed *= mult
-	var tree := player.get_tree()
-	if tree == null:
-		return
-	tree.create_timer(duration_sec).timeout.connect(func() -> void:
-		if is_instance_valid(player):
-			player.walk_speed = saved_speed
-	)
-
-
 ## 선딜 종료 시점(즉시 또는 anticipation_sec 뒤)에 히트박스 판정과 발동 이펙트를 같은
 ## 콜백에서 함께 시작한다 — "히트박스 활성 프레임과 이펙트 타격 프레임을 동일 타이머로
 ## 동기화"(M4-3 요구사항 2)를 이 한 함수로 만족시킨다.
-func _fire(entry: Dictionary, vfx: Dictionary, base_color: Color, flash_color: Color) -> void:
-	_fire_hitbox(entry, flash_color)
+func _fire(entry: Dictionary, level: Dictionary, vfx: Dictionary, base_color: Color, flash_color: Color) -> void:
+	_fire_hitbox(entry, level, flash_color)
 	var hb_variant: Variant = entry.get("hitbox", null)
 	var range_px: float = float((hb_variant as Dictionary).get("range_px", 40.0)) if hb_variant is Dictionary else 40.0
 	var scale: float = float(vfx.get("scale", 1.0))
@@ -145,7 +137,7 @@ func _fire(entry: Dictionary, vfx: Dictionary, base_color: Color, flash_color: C
 
 ## hitbox가 null이면(damage_mult=0, 순수 자기 버프 스킬) 히트박스를 활성화하지 않는다
 ## (skills-m3.md §2). 크리티컬은 attack.gd와 동일하게 Progression.roll_crit()을 공유한다.
-func _fire_hitbox(entry: Dictionary, flash_color: Color) -> void:
+func _fire_hitbox(entry: Dictionary, level: Dictionary, flash_color: Color) -> void:
 	var hitbox := player.hitbox
 	if hitbox == null:
 		return
@@ -154,7 +146,7 @@ func _fire_hitbox(entry: Dictionary, flash_color: Color) -> void:
 		return
 	var hb: Dictionary = hb_variant
 
-	var base_damage: int = SkillCalc.damage_for(entry, player.get_attack_power())
+	var base_damage: int = SkillCalc.damage_for(level, player.get_attack_power())
 	var crit_result: Dictionary = Progression.roll_crit(base_damage)
 	hitbox.damage = int(crit_result.get("damage", base_damage))
 	hitbox.is_critical = bool(crit_result.get("is_critical", false))
@@ -174,8 +166,13 @@ func _fire_hitbox(entry: Dictionary, flash_color: Color) -> void:
 	hitbox.source = player
 	hitbox.position = Vector2.ZERO
 
+	# M4-4(D-168, §1 HIT 번역): DEX만큼 스킬 판정도 넓어진다(기본 공격은 attack.gd에서
+	# Hitbox.apply_scale_mult로 같은 배율을 적용 — 여기선 모양을 직접 만들므로 치수에 곱한다).
+	var hit_scale: float = float(Progression.get_derived().get("hitbox_scale", 1.0))
+	var width_variant: Variant = hb.get("width_px")
 	_apply_hitbox_shape(
-		String(hb.get("shape", "circle")), float(hb.get("range_px", 40.0)), hb.get("width_px"))
+		String(hb.get("shape", "circle")), float(hb.get("range_px", 40.0)) * hit_scale,
+		(float(width_variant) * hit_scale) if width_variant != null else null)
 	hitbox.activate(_duration)
 
 

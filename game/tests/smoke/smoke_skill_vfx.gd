@@ -77,6 +77,7 @@ func _check_all_kinds_spawn_and_free() -> void:
 func _check_real_cast_hitbox_and_vfx_are_synced() -> void:
 	const SKILL_ID := "blade_power_slash"
 	GameState.skill_points += 1
+	Progression.refill_sp() # M4-4(D-169): 스킬 시전은 SP를 쓴다.
 	Progression.learn_skill(SKILL_ID)
 	Progression.assign_hotbar(0, "skill", SKILL_ID)
 	var hp_before: int = _dummy.hp
@@ -94,7 +95,7 @@ func _check_real_cast_hitbox_and_vfx_are_synced() -> void:
 	await _wait_frames(6)
 	_check(_dummy.hp < hp_before, "선딜 종료 직후 히트박스 activate + 이펙트가 함께 발동한다")
 
-	await get_tree().create_timer(float(Data.get_value("skills", SKILL_ID + ".cooldown_sec", 4.0)) + 0.2).timeout
+	await get_tree().create_timer(float(Progression.skill_level_data(SKILL_ID).get("cooldown_sec", 4.0)) + 0.2).timeout
 
 
 ## 추가 요구사항 (a): 선딜 지연 중 피격(Hurt 전이)으로 Skill 상태를 캔슬하면, 나중에
@@ -103,7 +104,7 @@ func _check_real_cast_hitbox_and_vfx_are_synced() -> void:
 func _check_anticipation_cancel_skips_hitbox() -> void:
 	const SKILL_ID := "blade_power_slash"
 	if not Progression.can_cast_skill(0):
-		await get_tree().create_timer(float(Data.get_value("skills", SKILL_ID + ".cooldown_sec", 4.0)) + 0.2).timeout
+		await get_tree().create_timer(float(Progression.skill_level_data(SKILL_ID).get("cooldown_sec", 4.0)) + 0.2).timeout
 	var hp_before: int = _dummy.hp
 
 	var evt := InputEventAction.new()

@@ -476,7 +476,11 @@ func _apply_on_complete(on_complete: Dictionary) -> void:
 		elif tag == "save_checkpoint":
 			pass # main_quest_stage_completed가 advance() 끝에서 이미 오토세이브를 건다.
 		elif tag.begins_with("grant_skill_point:"):
-			pending_skill_points += int(tag.substr("grant_skill_point:".length()))
+			# M4-4(D-192): 누적만 하고 소비처가 없던 placeholder를 실제 지급에 배선한다
+			# (pending_skill_points는 기존 세이브 호환을 위해 그대로 유지).
+			var granted: int = int(tag.substr("grant_skill_point:".length()))
+			pending_skill_points += granted
+			Progression.grant_skill_points(granted)
 		elif tag.begins_with("affinity_stage:"):
 			var parts: PackedStringArray = tag.split(":")
 			if parts.size() >= 3:

@@ -94,6 +94,26 @@ func test_stat_gains_for_level_maps_curve_columns_and_skips_zero_stamina() -> vo
 	assert_eq(int(gains.get("max_hp", -1)), 8)
 	assert_eq(float(gains.get("attack", -1.0)), 1.0)
 	assert_false(gains.has("stamina"), "stamina_bonus=0이면 payload 키를 만들지 않는다")
+	assert_false(gains.has("stat_points"), "stat_points_gain 컬럼이 없는 옛 테이블은 키를 만들지 않는다")
+
+
+## M4-4(§2): 레벨업 지급량은 exp_curve.csv의 stat_points_gain 컬럼에서 온다.
+func test_stat_gains_for_level_carries_stat_points_gain_column() -> void:
+	var curve := {"11": {"exp_to_next": 730, "hp_bonus": 8, "atk_bonus": 1, "stat_points_gain": 3}}
+	assert_eq(int(CalcScript.stat_gains_for_level(11, curve).get("stat_points", -1)), 3)
+
+
+## 실데이터: points(L)=2+floor((L-1)/10), 레벨 1은 0, 1~50 합계 198(스펙 §2 검산값).
+func test_real_exp_curve_stat_points_gain_matches_spec_total() -> void:
+	var curve: Dictionary = _data.table("exp_curve")
+	var total: int = 0
+	for level in range(1, 51):
+		var row: Dictionary = curve[str(level)]
+		assert_true(row.has("stat_points_gain"), "exp_curve.csv level=%d: stat_points_gain 컬럼 누락" % level)
+		var gain: int = int(row["stat_points_gain"])
+		assert_eq(gain, 0 if level == 1 else 2 + (level - 1) / 10, "level=%d 지급량" % level)
+		total += gain
+	assert_eq(total, 198, "레벨 1~50 총 지급량(스펙 §2 검산)")
 
 
 # --- 실데이터(game/data/exp_curve.csv, monsters.json) 통합 확인 ---
@@ -122,18 +142,26 @@ func test_real_monsters_all_have_exp_reward() -> void:
 # --- 실데이터(game/data/skills.json, stats.json.allocation, M3-3) 통합 확인 ---
 
 const SkillCalcScript := preload("res://scripts/systems/skill_calc.gd")
+## M4-4(§4): M3-3 6종은 id를 유지한 채 24노드 트리에 흡수됐다 — trick_fleet_step만
+## node_type이 buff로 바뀌었고 나머지 5종은 여전히 active다.
 const REAL_SKILL_IDS := [
 	"blade_power_slash", "blade_thrust", "guard_shield_bash",
-	"guard_iron_wall", "trick_dash_strike", "trick_fleet_step",
+	"guard_iron_wall", "trick_dash_strike",
 ]
 
 
-func test_real_skills_table_has_six_active_skills_with_no_validation_errors() -> void:
+func test_real_skills_table_keeps_m3_ids_and_has_24_nodes() -> void:
 	assert_eq(_data.validation_errors.size(), 0, "검증 에러가 없어야 한다: %s" % [_data.validation_errors])
 	var skills: Dictionary = _data.table("skills")
+	var node_count: int = 0
+	for id: String in skills:
+		if not id.begins_with("_"):
+			node_count += 1
+	assert_eq(node_count, 24, "스킬 트리 v2는 3계열 × 8노드")
 	for id: String in REAL_SKILL_IDS:
 		assert_true(skills.has(id), "skills.json에 %s가 있어야 한다" % id)
 		assert_eq(String(skills[id].get("node_type", "")), "active")
+	assert_eq(String(skills["trick_fleet_step"].get("node_type", "")), "buff")
 
 
 func test_real_skills_hitbox_null_iff_damage_mult_zero() -> void:
@@ -142,13 +170,17 @@ func test_real_skills_hitbox_null_iff_damage_mult_zero() -> void:
 	for id: String in REAL_SKILL_IDS:
 		var entry: Dictionary = skills[id]
 		var has_hitbox: bool = entry.get("hitbox", null) != null
-		var has_damage: bool = float(entry.get("damage_mult", 0.0)) > 0.0
+		# v2: damage_mult는 levels[] 안에 있다(레벨별). 1레벨 값으로 판정한다.
+		var has_damage: bool = float(SkillCalcScript.level_data(entry, 1).get("damage_mult", 0.0)) > 0.0
 		assert_eq(has_hitbox, has_damage, "skills.%s: hitbox 유무와 damage_mult>0 이 일치해야 한다" % id)
 
 
-func test_real_skill_damage_for_blade_power_slash() -> void:
+func test_real_skill_damage_for_blade_power_slash_scales_with_level() -> void:
 	var entry: Dictionary = _data.table("skills")["blade_power_slash"]
-	assert_eq(SkillCalcScript.damage_for(entry, 10.0), 18, "damage_mult=1.8 * effective_attack 10")
+	assert_eq(SkillCalcScript.damage_for(SkillCalcScript.level_data(entry, 1), 10.0), 16,
+		"Lv1 damage_mult=1.6 * effective_attack 10")
+	assert_eq(SkillCalcScript.damage_for(SkillCalcScript.level_data(entry, 5), 10.0), 24,
+		"Lv5 damage_mult=2.4 — 레벨이 오르면 실제 데미지가 오른다")
 
 
 func test_real_stats_allocation_initial_is_all_zero_and_uncapped() -> void:
@@ -156,8 +188,8 @@ func test_real_stats_allocation_initial_is_all_zero_and_uncapped() -> void:
 	# 이유) 값 비교는 각 키를 float으로 캐스팅해서 한다.
 	var allocation: Dictionary = _data.get_value("stats", "allocation", {})
 	var initial: Dictionary = allocation.get("initial", {})
-	for key: String in ["str", "dex", "int", "vit", "luk"]:
-		assert_eq(float(initial.get(key, -1)), 0.0, "allocation.initial.%s" % key)
+	for key: String in ["str", "agi", "dex", "int", "vit", "luk"]:
+		assert_eq(float(initial.get(key, -1)), 0.0, "allocation.initial.%s (M4-4: agi 포함 6키)" % key)
 	assert_null(allocation.get("max_per_stat"), "D-158: 스탯당 상한 없음")
 
 
@@ -189,17 +221,18 @@ func test_game_state_level_exp_round_trips_through_save_dict() -> void:
 ## 패딩돼야 한다(from_dict의 자체 크기 방어 — 마이그레이션 자체는 Progression 몫).
 func test_game_state_stats_and_skills_round_trip_through_save_dict() -> void:
 	var gs: Node = load("res://scripts/core/game_state.gd").new()
-	gs.stats = {"str": 3, "dex": 1, "int": 0, "vit": 5, "luk": 2}
-	var learned: Array[String] = ["blade_power_slash", "blade_thrust"]
-	gs.learned_skills = learned
+	gs.stats = {"str": 3, "agi": 4, "dex": 1, "int": 0, "vit": 5, "luk": 2}
+	gs.learned_skills = {"blade_power_slash": 3, "blade_thrust": 1}
+	gs.sp = 17.5
 	var slots: Array[String] = ["blade_power_slash", ""]
 	gs.skill_slots = slots
 	var saved: Dictionary = gs.to_dict()
 
 	var restored: Node = load("res://scripts/core/game_state.gd").new()
 	restored.from_dict(saved)
-	assert_eq(restored.stats, {"str": 3, "dex": 1, "int": 0, "vit": 5, "luk": 2})
-	assert_eq(restored.learned_skills, ["blade_power_slash", "blade_thrust"])
+	assert_eq(restored.stats, {"str": 3, "agi": 4, "dex": 1, "int": 0, "vit": 5, "luk": 2})
+	assert_eq(restored.learned_skills, {"blade_power_slash": 3, "blade_thrust": 1})
+	assert_almost_eq(float(restored.sp), 17.5, 0.001, "SP도 세이브에 실린다(D-190)")
 	assert_eq(restored.skill_slots, ["blade_power_slash", "", "", "", "", "", "", "", ""])
 	gs.free()
 	restored.free()
@@ -229,4 +262,19 @@ func test_game_state_from_dict_leaves_hotbar_empty_when_save_predates_it() -> vo
 	restored.from_dict({"skill_slots": ["blade_power_slash", ""]})
 	assert_true(restored.hotbar.is_empty(), "hotbar 키가 없는 옛 세이브는 빈 배열이어야 마이그레이션 신호가 된다")
 	assert_eq(restored.skill_slots, ["blade_power_slash", "", "", "", "", "", "", "", ""])
+	restored.free()
+
+
+## M4-4 세이브 마이그레이션: 옛 세이브(5스탯 + learned_skills Array)를 로드해도
+## agi=0이 채워지고 배운 스킬은 전부 레벨 1이 된다.
+func test_game_state_from_dict_migrates_v1_stats_and_learned_skills() -> void:
+	var restored: Node = load("res://scripts/core/game_state.gd").new()
+	restored.from_dict({
+		"stats": {"str": 3, "dex": 1, "int": 2, "vit": 5, "luk": 2},
+		"learned_skills": ["blade_power_slash", "blade_thrust"],
+	})
+	assert_eq(restored.stats, {"str": 3, "agi": 0, "dex": 1, "int": 2, "vit": 5, "luk": 2},
+		"옛 5스탯 세이브는 agi=0으로 승격된다")
+	assert_eq(restored.learned_skills, {"blade_power_slash": 1, "blade_thrust": 1},
+		"옛 Array 세이브는 각 스킬 레벨 1로 승격된다")
 	restored.free()

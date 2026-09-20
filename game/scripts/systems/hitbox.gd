@@ -49,6 +49,11 @@ var _already_hit: Array[Node] = []
 ## 하도록 해 낡은 타이머를 무해화한다.
 var _activation_generation: int = 0
 
+## M4-4(D-191): DEX 히트박스 배율을 활성화 직전에 곱하고, deactivate()에서 씬 원본
+## 크기로 되돌린다 — 복원을 Attack.exit()이 아니라 여기 두어 Hurt/Dead 같은 강제 전이로
+## 상태를 빠져나가도(그 경로도 결국 deactivate()를 거친다) 배율이 남지 않게 한다.
+var _base_scale: Vector2 = Vector2.ONE
+
 signal hit_confirmed(hurtbox: Hurtbox)
 ## 저스트 가드 성공 시 이 히트박스의 소유자(공격자)에게 경직을 요청한다(S2-1c: "저스트
 ## 성공 시 적 경직"). 방어자(Player)가 emit하고, 공격자(MonsterBase 등)가 자신의 Hitbox에
@@ -61,6 +66,7 @@ func _ready() -> void:
 	# Hitbox는 monitorable일 필요가 없다(자신이 감지당할 이유가 없음).
 	monitoring = false
 	monitorable = false
+	_base_scale = scale
 	area_entered.connect(_on_area_entered)
 
 
@@ -110,6 +116,12 @@ func _hit_already_overlapping() -> void:
 
 func deactivate() -> void:
 	set_deferred("monitoring", false)
+	scale = _base_scale
+
+
+## 이번 활성화 구간에만 적용할 판정 크기 배율(1.0=원본). activate() 직전에 호출한다.
+func apply_scale_mult(mult: float) -> void:
+	scale = _base_scale * maxf(mult, 0.01)
 
 
 ## 지속 피해(장판)처럼 monitoring을 계속 켜 둔 채 반복 틱이 필요한 호출부가 매 틱마다

@@ -19,20 +19,28 @@ signal player_stamina_insufficient(action: StringName)
 signal player_hp_changed(current: int, max_value: int)
 ## M3-1(F1-2) 신설. player_level_up(new_level만 있던 미사용 placeholder, 리스너 0개
 ## 확인 후 교체)을 UI팀(stage/m3-2-progress-ui)과 합의한 시그니처로 대체했다. stat_gains
-## 예: {"max_hp": 8, "attack": 1} — exp_curve.csv 해당 레벨 행의 자동 상승분(레벨업 1회당
+## 예: {"max_hp": 8, "attack": 1, "stat_points": 2, "skill_points": 1} — exp_curve.csv 해당
+## 레벨 행의 자동 상승분 + M4-4에서 추가된 지급량 2키(stat_points=stat_points_gain 컬럼,
+## skill_points=stats.json.skill_points_per_levelup). UI 레벨업 배너가 두 키를 읽는다
+## (레벨업 1회당
 ## 1번씩 발신, 여러 레벨 동시 상승 시 이 신호가 그만큼 반복된다).
 signal level_up(new_level: int, stat_gains: Dictionary)
 ## M3-1(F1-2) 신설. 경험치가 바뀔 때마다(몬스터 처치·퀘스트 보상·세이브 로드 직후 포함)
 ## 발신 — HUD 경험치 바가 이 값만으로 항상 최신 상태를 그릴 수 있다. 만렙 캡 상태에서는
 ## exp_changed(0, 0, max_level)로 발신된다(D-152).
 signal exp_changed(current_exp: int, exp_to_next: int, level: int)
-## M3-3(D-158~D-162) 신설. stats: {"str":int,...} 5키 전체, derived: Progression.get_derived()
+## M3-3(D-158~D-162) 신설, M4-4에서 6키(agi 추가). stats: {"str":int,...} 6키 전체, derived: Progression.get_derived()
 ## 그대로(attack/max_hp/defense/crit_chance/roll_cost_mult/cooldown_mult). 스탯 분배·레벨업·
 ## 세이브 로드 직후 발신.
 signal stats_changed(stats: Dictionary, derived: Dictionary, stat_points: int)
-## M3-3 신설, M4-1에서 slots 9칸으로 확장. learned: 배운 skill_id 배열, slots: 크기 9
+## M4-4(D-169, D-190) 신설. 스킬 전용 자원 SP. 소모(시전)·회복(Progression._process)·
+## 세이브 로드 직후 발신 — HUD의 SP 바가 이 신호만 구독하면 항상 최신이다(구르기·가드가
+## 쓰는 스태미나는 기존 player_stamina_changed 그대로, 둘은 별개 자원이다).
+signal sp_changed(current: float, max_value: float)
+## M3-3 신설, M4-1에서 slots 9칸으로 확장, M4-4에서 learned가 Dictionary로 바뀌었다
+## (D-170 스킬 레벨 도입: skill_id -> 현재 레벨 int, 1~max_level). slots: 크기 9
 ## ("" = 빈 슬롯, 핫바의 kind="skill"인 칸만 채워짐). 학습·장착/해제·세이브 로드 직후 발신.
-signal skills_changed(learned: Array, slots: Array, skill_points: int)
+signal skills_changed(learned: Dictionary, slots: Array, skill_points: int)
 ## M3-3 신설. 스킬 시전 성공 시(쿨타임 시작) 1회 — HUD가 슬롯 쿨타임 UI를 채운다.
 signal skill_cast(slot: int, skill_id: String, cooldown_sec: float)
 ## M3-3 신설. 해당 슬롯 쿨타임이 다 돌았을 때 1회.

@@ -58,6 +58,7 @@ func _wait_frames(n: int) -> void:
 ## 스킬 배정(슬롯4=hotbar_5) -> hotbar_5 입력으로 실제 시전(더미 HP 감소) -> 쿨타임 왕복.
 func _check_skill_slot() -> void:
 	GameState.skill_points += 1
+	Progression.refill_sp() # M4-4(D-169): 스킬 시전은 SP를 쓴다.
 	var learned: bool = Progression.learn_skill(SKILL_ID)
 	var assigned: bool = Progression.assign_hotbar(4, "skill", SKILL_ID)
 	_check(learned and assigned and GameState.hotbar[4] == {"kind": "skill", "id": SKILL_ID},
@@ -71,7 +72,8 @@ func _check_skill_slot() -> void:
 	_check(_dummy.hp < hp_before, "hotbar_5 입력으로 실제 시전(더미 HP 감소, %d -> %d)" % [hp_before, _dummy.hp])
 	_check(not Progression.can_cast_skill(4), "시전 직후 슬롯4 쿨타임 중이라 재시전 불가")
 
-	var entry: Dictionary = Data.get_value("skills", SKILL_ID, {})
+	# M4-4(D-170): 쿨다운도 레벨별 값(levels[]).
+	var entry: Dictionary = Progression.skill_level_data(SKILL_ID)
 	await get_tree().create_timer(float(entry.get("cooldown_sec", 0.0)) + 0.2).timeout
 	_check(Progression.can_cast_skill(4), "쿨타임 만료 후 재시전 가능")
 
