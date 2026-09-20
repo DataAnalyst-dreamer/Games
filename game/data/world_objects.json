@@ -7,8 +7,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      -380,
-      160
+      -760,
+      320
     ],
     "one_shot": true,
     "region_id": "bridgeport"
@@ -18,8 +18,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      -160,
-      -20
+      -320,
+      -40
     ],
     "one_shot": true,
     "region_id": "heartland"
@@ -29,8 +29,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      -30,
-      -90
+      -60,
+      -180
     ],
     "one_shot": false,
     "region_id": "heartland",
@@ -41,8 +41,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      -40,
-      -100
+      -80,
+      -200
     ],
     "one_shot": true,
     "region_id": "heartland",
@@ -53,8 +53,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      280,
-      -180
+      560,
+      -360
     ],
     "one_shot": true,
     "region_id": "heartland"
@@ -64,8 +64,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      260,
-      60
+      520,
+      120
     ],
     "one_shot": true,
     "region_id": "heartland"
@@ -75,8 +75,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      60,
-      -260
+      120,
+      -520
     ],
     "one_shot": true,
     "region_id": "heartland"
@@ -86,8 +86,8 @@
     "kind": "object",
     "scene": "res://scenes/world/QuestObject.tscn",
     "position": [
-      -390,
-      175
+      -780,
+      350
     ],
     "one_shot": true,
     "region_id": "bridgeport"
@@ -97,8 +97,8 @@
     "kind": "object",
     "scene": "res://scenes/world/QuestObject.tscn",
     "position": [
-      -42,
-      -96
+      -84,
+      -192
     ],
     "one_shot": false,
     "region_id": "heartland"
@@ -108,8 +108,8 @@
     "kind": "object",
     "scene": "res://scenes/world/QuestObject.tscn",
     "position": [
-      290,
-      -190
+      580,
+      -380
     ],
     "one_shot": true,
     "region_id": "heartland",
@@ -120,8 +120,8 @@
     "kind": "object",
     "scene": "res://scenes/world/QuestObject.tscn",
     "position": [
-      300,
-      90
+      600,
+      180
     ],
     "one_shot": true,
     "vanish_on_complete": true,
@@ -135,8 +135,8 @@
     "kind": "object",
     "scene": "res://scenes/world/QuestObject.tscn",
     "position": [
-      65,
-      -265
+      130,
+      -530
     ],
     "one_shot": false,
     "region_id": "heartland"
@@ -146,8 +146,8 @@
     "kind": "npc",
     "scene": "res://scenes/world/QuestNpc.tscn",
     "position": [
-      -360,
-      140
+      -720,
+      280
     ],
     "one_shot": false,
     "region_id": "bridgeport",
@@ -159,8 +159,8 @@
     "kind": "npc",
     "scene": "res://scenes/world/QuestNpc.tscn",
     "position": [
-      -40,
-      -150
+      -80,
+      -300
     ],
     "one_shot": false,
     "region_id": "heartland",
@@ -171,8 +171,8 @@
     "kind": "npc",
     "scene": "res://scenes/world/QuestNpc.tscn",
     "position": [
-      -95,
-      -85
+      -190,
+      -170
     ],
     "one_shot": false,
     "region_id": "heartland",
@@ -183,8 +183,8 @@
     "kind": "npc",
     "scene": "res://scenes/world/QuestNpc.tscn",
     "position": [
-      140,
-      -20
+      280,
+      -40
     ],
     "one_shot": false,
     "region_id": "heartland",
@@ -195,8 +195,8 @@
     "kind": "npc",
     "scene": "res://scenes/world/QuestNpc.tscn",
     "position": [
-      230,
-      40
+      460,
+      80
     ],
     "one_shot": false,
     "region_id": "heartland",

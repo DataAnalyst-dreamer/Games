@@ -36,7 +36,7 @@ var _player_inside: Player = null
 
 ## D-155(M3-2): 스프라이트 없이 폰트 라벨(! 수주 가능/? 완료 보고 가능)로 시작.
 ## 위아래 바운스 6px, 0.8초 주기 — 색약 대비는 모양 자체가 다르므로 별도 대체 없음.
-const MARKER_BOUNCE_PX := 6.0
+const MARKER_BOUNCE_PX := 12.0 # D-206 단위 전환 ×2.
 const MARKER_BOUNCE_SEC := 0.8
 var _marker_base_y: float = 0.0
 var _marker_tween: Tween

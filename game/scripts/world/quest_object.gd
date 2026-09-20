@@ -39,7 +39,7 @@ var _player_inside: Player = null
 ## 머리 위 "목표 표식"(M3-4, D-163) — quest_npc.gd의 ▼ 표식과 같은 바운스 연출을
 ## 그대로 복제한다(공용 헬퍼로 뽑기엔 두 곳뿐이라 과함, 판정 로직만
 ## QuestSystem.is_tracked_objective_key()로 공유한다).
-const MARKER_BOUNCE_PX := 6.0
+const MARKER_BOUNCE_PX := 12.0 # D-206 단위 전환 ×2.
 const MARKER_BOUNCE_SEC := 0.8
 var _marker_base_y: float = 0.0
 var _marker_tween: Tween

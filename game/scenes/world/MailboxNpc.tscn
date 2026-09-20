@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/world/mailbox_npc.gd" id="1_script"]
 
 [sub_resource type="RectangleShape2D" id="area_shape"]
-size = Vector2(20, 20)
+size = Vector2(40, 40)
 
 [node name="MailboxNpc" type="Area2D"]
 collision_layer = 0
@@ -11,9 +11,9 @@ collision_mask = 2
 script = ExtResource("1_script")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, -4)
+position = Vector2(0, -8)
 shape = SubResource("area_shape")
 
 [node name="Placeholder" type="Polygon2D" parent="."]
 color = Color(0.2, 0.4, 0.65, 1)
-polygon = PackedVector2Array(-7, 9, -7, -3, 0, -9, 7, -3, 7, 9)
+polygon = PackedVector2Array(-14, 18, -14, -6, 0, -18, 14, -6, 14, 18)

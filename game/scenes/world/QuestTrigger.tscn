@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/world/quest_trigger.gd" id="1_script"]
 
 [sub_resource type="CircleShape2D" id="area_shape"]
-radius = 28.0
+radius = 56
 
 [node name="QuestTrigger" type="Area2D"]
 collision_layer = 0

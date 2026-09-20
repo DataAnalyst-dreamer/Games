@@ -39,10 +39,10 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="body_shape"]
-size = Vector2(10, 8)
+size = Vector2(20, 16)
 
 [sub_resource type="CircleShape2D" id="detection_shape"]
-radius = 77.0
+radius = 154
 
 [node name="EliteBunchiSpawn" type="CharacterBody2D" groups=["monster"]]
 collision_layer = 4
@@ -52,8 +52,8 @@ script = ExtResource("2_base")
 monster_id = "elite_bunchi_spawn"
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-position = Vector2(0, -4)
-scale = Vector2(1.4, 1.4)
+position = Vector2(0, -8)
+scale = Vector2(2.8, 2.8)
 modulate = Color(0.72, 0.4, 0.85, 1.0)
 sprite_frames = SubResource("sprite_frames")
 animation = &"idle"
@@ -69,7 +69,7 @@ script = ExtResource("3_hurtbox")
 team = &"enemy"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
-position = Vector2(0, -4)
+position = Vector2(0, -8)
 shape = SubResource("body_shape")
 
 [node name="Hitbox" type="Area2D" parent="."]
@@ -79,7 +79,7 @@ script = ExtResource("4_hitbox")
 team = &"enemy"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
-position = Vector2(0, -4)
+position = Vector2(0, -8)
 shape = SubResource("body_shape")
 
 [node name="DetectionArea" type="Area2D" parent="."]

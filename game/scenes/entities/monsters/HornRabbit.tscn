@@ -39,10 +39,10 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="body_shape"]
-size = Vector2(10, 8)
+size = Vector2(20, 16)
 
 [sub_resource type="CircleShape2D" id="detection_shape"]
-radius = 80.0
+radius = 160
 
 [node name="HornRabbit" type="CharacterBody2D" groups=["monster"]]
 collision_layer = 4
@@ -52,7 +52,8 @@ script = ExtResource("2_base")
 monster_id = "horn_rabbit"
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-position = Vector2(0, -4)
+position = Vector2(0, -8)
+scale = Vector2(2, 2)
 sprite_frames = SubResource("sprite_frames")
 animation = &"idle"
 autoplay = "idle"
@@ -67,7 +68,7 @@ script = ExtResource("3_hurtbox")
 team = &"enemy"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
-position = Vector2(0, -4)
+position = Vector2(0, -8)
 shape = SubResource("body_shape")
 
 [node name="Hitbox" type="Area2D" parent="."]
@@ -77,7 +78,7 @@ script = ExtResource("4_hitbox")
 team = &"enemy"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
-position = Vector2(0, -4)
+position = Vector2(0, -8)
 shape = SubResource("body_shape")
 
 [node name="DetectionArea" type="Area2D" parent="."]

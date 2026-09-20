@@ -91,4 +91,5 @@ sources/0 = SubResource("atlas_field")
 script = ExtResource("1_world")
 
 [node name="Ground" type="TileMapLayer" parent="."]
+scale = Vector2(2, 2)
 tile_set = SubResource("tileset_ground")

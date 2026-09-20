@@ -169,5 +169,5 @@ static func spawn_damage_number(at_body: Node2D, damage: int, is_advantage: bool
 		return
 	var number := DamageNumberScene.instantiate()
 	tree.current_scene.add_child(number)
-	number.global_position = at_body.global_position + Vector2(0, -12)
+	number.global_position = at_body.global_position + Vector2(0, -Tuning.DAMAGE_NUMBER_OFFSET_PX)
 	number.setup(damage, is_advantage)

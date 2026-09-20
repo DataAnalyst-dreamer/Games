@@ -40,7 +40,7 @@ static func edge_arrow(camera_center: Vector2, viewport_size: Vector2, zoom: Vec
 
 
 ## world px 거리 -> "m" 표시용 환산. GDD에 공식 px-미터 비율이 없어 tuning.gd의
-## TILE_SIZE_PROTOTYPE(16px/타일)을 "1타일=1m" 가정으로 재사용한다(ponytail: 추정치,
+## TILE_SIZE_PROTOTYPE(32px/타일, D-206)을 "1타일=1m" 가정으로 재사용한다(ponytail: 추정치,
 ## game-designer가 실제 스케일을 확정하면 tile_size_px 인자만 교체하면 된다).
 static func distance_meters(distance_px: float, tile_size_px: float) -> float:
 	if tile_size_px <= 0.0:

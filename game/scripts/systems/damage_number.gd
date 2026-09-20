@@ -2,7 +2,7 @@
 ## 스스로를 큐프리(queue_free)한다. 상성 적중 시 노란색으로 강조한다.
 extends Node2D
 
-const RISE_PX := 14.0
+const RISE_PX := 28.0 # D-206 단위 전환 ×2.
 const DURATION_SEC := 0.6
 const NORMAL_COLOR := Color(1, 1, 1)
 const ADVANTAGE_COLOR := Color(1, 0.85, 0.2)
@@ -14,7 +14,7 @@ func setup(damage: int, is_advantage: bool = false) -> void:
 	label.text = str(damage)
 	label.modulate = ADVANTAGE_COLOR if is_advantage else NORMAL_COLOR
 	# 겹쳐 뜨는 숫자를 살짝 흩뿌려 가독성을 준다.
-	position.x += randf_range(-4.0, 4.0)
+	position.x += randf_range(-8.0, 8.0) # D-206 단위 전환 ×2.
 	var tween := create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(self, "position:y", position.y - RISE_PX, DURATION_SEC).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)

@@ -212,13 +212,13 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="body_shape"]
-size = Vector2(10, 8)
+size = Vector2(20, 16)
 
 [sub_resource type="RectangleShape2D" id="hurtbox_shape"]
-size = Vector2(10, 8)
+size = Vector2(20, 16)
 
 [sub_resource type="CircleShape2D" id="hitbox_shape"]
-radius = 8.0
+radius = 16
 
 [node name="Player" type="CharacterBody2D"]
 collision_layer = 2
@@ -226,7 +226,8 @@ motion_mode = 1
 script = ExtResource("2_player")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-position = Vector2(0, -4)
+position = Vector2(0, -8)
+scale = Vector2(2, 2)
 sprite_frames = SubResource("sprite_frames")
 animation = &"idle_down"
 autoplay = "idle_down"
@@ -241,7 +242,7 @@ script = ExtResource("10_hurtbox")
 team = &"player"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
-position = Vector2(0, -4)
+position = Vector2(0, -8)
 shape = SubResource("hurtbox_shape")
 
 [node name="Hitbox" type="Area2D" parent="."]
@@ -251,15 +252,15 @@ script = ExtResource("9_hitbox")
 team = &"player"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
-position = Vector2(0, -4)
+position = Vector2(0, -8)
 shape = SubResource("hitbox_shape")
 
 [node name="WeaponPivot" type="Node2D" parent="."]
-position = Vector2(0, -4)
+position = Vector2(0, -8)
 visible = false
 
 [node name="WeaponSprite" type="Sprite2D" parent="WeaponPivot"]
-position = Vector2(0, -8)
+position = Vector2(0, -16)
 texture = ExtResource("11_sword")
 
 [node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]

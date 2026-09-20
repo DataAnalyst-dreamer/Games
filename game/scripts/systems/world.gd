@@ -6,6 +6,10 @@ extends Node2D
 
 ## TilesetField.png 아틀라스 좌표 (16px 셀, 5열 × 15행).
 ## 각 색상 블롭은 3×3(좌상단 col0,row r) + 2×2 변형(col3~4, row r~r+1).
+## D-206(단계 b1): 타일이 32 월드단위가 됐지만 프로토타입 지면 아트는 아직 16px 이라
+## Ground 레이어를 2배로 표시한다(World.tscn `scale = Vector2(2, 2)`). 액터 스프라이트를
+## 2배로 키운 것과 같은 임시 조치이며, 단계 (b2)에서 32px 오블리크 타일이 들어오면
+## scale 을 1 로 되돌린다.
 const ATLAS_SOURCE_ID := 0
 const GRASS_CENTER := Vector2i(1, 4)
 const GRASS_VARIANTS: Array[Vector2i] = [Vector2i(3, 3), Vector2i(4, 3), Vector2i(3, 4), Vector2i(4, 4)]

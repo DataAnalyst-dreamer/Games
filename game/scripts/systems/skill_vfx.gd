@@ -101,7 +101,7 @@ static func _spawn_slash_arc(player: Player, color: Color, size_px: float, paren
 	root.rotation = player.facing.angle()
 	root.position += player.facing * (size_px * 0.3)
 	var poly := Polygon2D.new()
-	poly.polygon = _wedge_points(maxf(size_px, 8.0), 55.0, 10)
+	poly.polygon = _wedge_points(maxf(size_px, 16.0), 55.0, 10)
 	poly.color = color
 	root.add_child(poly)
 	root.scale = Vector2(0.7, 0.7)
@@ -116,10 +116,10 @@ static func _spawn_thrust_line(player: Player, color: Color, size_px: float, par
 	if root == null:
 		return
 	root.rotation = player.facing.angle()
-	var length: float = maxf(size_px, 12.0)
+	var length: float = maxf(size_px, 24.0)
 	var poly := Polygon2D.new()
 	poly.polygon = PackedVector2Array([
-		Vector2(0, -3), Vector2(length, -3), Vector2(length, 3), Vector2(0, 3),
+		Vector2(0, -6), Vector2(length, -6), Vector2(length, 6), Vector2(0, 6),
 	])
 	poly.color = color
 	root.add_child(poly)
@@ -136,7 +136,7 @@ static func _spawn_ring(player: Player, color: Color, size_px: float, parent: No
 	if root == null:
 		return
 	var poly := Polygon2D.new()
-	poly.polygon = _circle_points(maxf(size_px, 10.0))
+	poly.polygon = _circle_points(maxf(size_px, 20.0))
 	poly.color = Color(color.r, color.g, color.b, 0.5)
 	root.add_child(poly)
 	root.scale = Vector2(0.2, 0.2)

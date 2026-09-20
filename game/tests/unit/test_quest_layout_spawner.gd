@@ -115,7 +115,10 @@ func test_spawner_instantiates_all_entries_with_correct_kind_and_position() -> v
 	assert_not_null(ward_stone, "heartland_ward_stone 트리거가 스폰되어야 한다")
 	assert_true(ward_stone is QuestTrigger)
 	assert_eq(String(ward_stone.location_id), "heartland_ward_stone")
-	assert_eq(ward_stone.position, Vector2(-40, -100))
+	var expected_position: Array = entries["heartland_ward_stone"]["position"]
+	assert_eq(ward_stone.position,
+		Vector2(float(expected_position[0]), float(expected_position[1])),
+		"스포너는 world_objects.json 좌표 그대로 배치해야 한다(숫자를 복사하지 않는다)")
 
 	var montsil: Node = spawner.spawned_by_id.get("montsil_rabbit")
 	assert_not_null(montsil, "montsil_rabbit 오브젝트가 스폰되어야 한다")

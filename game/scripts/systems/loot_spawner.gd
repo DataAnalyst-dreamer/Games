@@ -9,9 +9,6 @@ extends Node
 
 const ITEM_DROP_SCENE: PackedScene = preload("res://scenes/world/ItemDrop.tscn")
 
-## 여러 드랍이 겹쳐 스폰되지 않도록 하는 산개 반경(px). 순수 연출값 — 테이블화 대상 아님.
-const SCATTER_RADIUS_PX := 10.0
-
 var _rng := RandomNumberGenerator.new()
 
 
@@ -48,7 +45,7 @@ func _spawn_drop(item_instance: Dictionary, at_position: Vector2) -> void:
 	var parent: Node = get_parent() if get_parent() != null else self
 	parent.add_child(drop)
 	drop.global_position = at_position + Vector2(
-		_rng.randf_range(-SCATTER_RADIUS_PX, SCATTER_RADIUS_PX),
-		_rng.randf_range(-SCATTER_RADIUS_PX, SCATTER_RADIUS_PX),
+		_rng.randf_range(-Tuning.LOOT_SCATTER_RADIUS_PX, Tuning.LOOT_SCATTER_RADIUS_PX),
+		_rng.randf_range(-Tuning.LOOT_SCATTER_RADIUS_PX, Tuning.LOOT_SCATTER_RADIUS_PX),
 	)
 	drop.setup(item_instance, item_def)

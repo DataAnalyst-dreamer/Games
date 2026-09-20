@@ -145,10 +145,10 @@ var _hp_bar_fill: ColorRect = null
 var _hp_bar_hide_timer: float = 0.0
 var _hp_bar_fade_tween: Tween = null
 var _hp_bar_fill_full_width: float = 0.0
-const _ELITE_HP_BAR_WIDTH_PX: float = 24.0
-const _ELITE_HP_BAR_HEIGHT_PX: float = 3.0
-const _HP_BAR_WIDTH_PX: float = 14.0
-const _HP_BAR_HEIGHT_PX: float = 2.0
+const _ELITE_HP_BAR_WIDTH_PX: float = 48.0
+const _ELITE_HP_BAR_HEIGHT_PX: float = 6.0
+const _HP_BAR_WIDTH_PX: float = 28.0
+const _HP_BAR_HEIGHT_PX: float = 4.0
 
 const _PROJECTILE_SCENE: PackedScene = preload("res://scenes/effects/Projectile.tscn")
 
@@ -554,10 +554,12 @@ func _setup_nameplate() -> void:
 	_elite_nameplate = Label.new()
 	_elite_nameplate.text = name_ko
 	_elite_nameplate.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
+	# 폰트 크기는 화면 px 이라 월드 배율을 안 타므로 scale 로 키운다(D-206).
 	_elite_nameplate.add_theme_font_size_override("font_size", 8)
-	_elite_nameplate.position = Vector2(-_ELITE_HP_BAR_WIDTH_PX * 0.5, -22.0)
+	_elite_nameplate.scale = Vector2(2.0, 2.0)
+	_elite_nameplate.position = Vector2(-_ELITE_HP_BAR_WIDTH_PX * 0.5, -44.0)
 	_elite_nameplate.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_elite_nameplate.custom_minimum_size = Vector2(_ELITE_HP_BAR_WIDTH_PX, 10.0)
+	_elite_nameplate.custom_minimum_size = Vector2(_ELITE_HP_BAR_WIDTH_PX * 0.5, 10.0)
 	add_child(_elite_nameplate)
 
 
@@ -570,8 +572,8 @@ func _setup_hp_bar() -> void:
 	var width: float = _ELITE_HP_BAR_WIDTH_PX if is_elite else _HP_BAR_WIDTH_PX
 	var height: float = _ELITE_HP_BAR_HEIGHT_PX if is_elite else _HP_BAR_HEIGHT_PX
 	var bg_color: Color = Color(1.0, 0.85, 0.2) if is_elite else Color(0.05, 0.05, 0.05, 0.85)
-	var y_pos: float = -12.0 if is_elite else -10.0
-	var inset: float = 1.0 if is_elite else 0.5
+	var y_pos: float = -24.0 if is_elite else -20.0 # D-206 단위 전환 ×2.
+	var inset: float = 2.0 if is_elite else 1.0
 
 	_hp_bar_bg = ColorRect.new()
 	_hp_bar_bg.color = bg_color # 정예는 등급 테두리색(골드) — 배경째로 테두리처럼 보이게.

@@ -86,8 +86,10 @@ func _ready() -> void:
 ## 그려지므로, 여기서 그리면 전용 노드 없이도 그림자가 스프라이트 아래에 깔린다.
 ## 본체 좌표계에 그리므로 이동할 때마다 다시 그릴 필요가 없다 - _ready()의 queue_redraw()
 ## 한 번이면 충분하다(씬 진입 시의 최초 NOTIFICATION_DRAW를 놓치지 않기 위한 보험).
+## 반지름은 MonsterBase와 같은 규칙으로 sprite.scale 을 곱해 구한다 - 그래야 단위
+## 전환(D-206)처럼 스프라이트 배율이 통째로 바뀔 때 두 곳이 따로 놀지 않는다.
 func _draw() -> void:
-	FootShadow.draw(self)
+	FootShadow.draw(self, sprite.scale.x if sprite != null else 1.0)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -288,7 +290,7 @@ func play_attack_swing(hit_index: int, duration: float) -> void:
 		sweep = deg_to_rad(110.0)
 		start_angle = base_angle - sweep
 		end_angle = base_angle + sweep
-	weapon_pivot.position = facing * 8.0
+	weapon_pivot.position = facing * Tuning.WEAPON_PIVOT_OFFSET_PX
 	weapon_pivot.rotation = start_angle
 	weapon_pivot.visible = true
 	# D-127: 이전 타의 tween이 아직 실행 중이면 kill 해서(콤보 2·3타 빠른 입력 시) 같은

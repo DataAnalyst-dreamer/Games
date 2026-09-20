@@ -30,44 +30,44 @@ z_index = -2
 [node name="Player" parent="." instance=ExtResource("2_player")]
 
 [node name="Slime1" parent="." instance=ExtResource("5_slime")]
-position = Vector2(60, -40)
+position = Vector2(120, -80)
 
 [node name="Slime2" parent="." instance=ExtResource("5_slime")]
-position = Vector2(-70, 30)
+position = Vector2(-140, 60)
 
 [node name="Slime3" parent="." instance=ExtResource("5_slime")]
-position = Vector2(20, 90)
+position = Vector2(40, 180)
 
 [node name="HornRabbit1" parent="." instance=ExtResource("10_horn_rabbit")]
-position = Vector2(150, -30)
+position = Vector2(300, -60)
 
 [node name="HornRabbit2" parent="." instance=ExtResource("10_horn_rabbit")]
-position = Vector2(-150, 60)
+position = Vector2(-300, 120)
 
 [node name="Mushroom1" parent="." instance=ExtResource("11_mushroom")]
-position = Vector2(0, 170)
+position = Vector2(0, 340)
 
 [node name="GoblinScout1" parent="." instance=ExtResource("13_goblin_scout")]
-position = Vector2(220, -80)
+position = Vector2(440, -160)
 
 [node name="GoblinScout2" parent="." instance=ExtResource("13_goblin_scout")]
-position = Vector2(-220, -60)
+position = Vector2(-440, -120)
 
 [node name="EliteGoblinCaptain1" parent="." instance=ExtResource("14_elite_goblin_captain")]
-position = Vector2(250, 140)
+position = Vector2(500, 280)
 
 [node name="EliteBunchiSpawn1" parent="." instance=ExtResource("15_elite_bunchi_spawn")]
-position = Vector2(-250, -140)
+position = Vector2(-500, -280)
 
 [node name="Waystone1" parent="." instance=ExtResource("9_waystone")]
-position = Vector2(-40, -100)
+position = Vector2(-80, -200)
 waystone_id = &"waystone1"
 
 [node name="BlacksmithNpc1" parent="." instance=ExtResource("16_blacksmith_npc")]
-position = Vector2(-70, -100)
+position = Vector2(-140, -200)
 
 [node name="MailboxNpc1" parent="." instance=ExtResource("17_mailbox_npc")]
-position = Vector2(-10, -100)
+position = Vector2(-20, -200)
 
 [node name="HartlandQuestLayer" type="Node2D" parent="."]
 y_sort_enabled = true
@@ -84,8 +84,8 @@ script = ExtResource("4_pcam_2d")
 priority = 10
 follow_mode = 2
 follow_target = NodePath("../Player")
-follow_offset = Vector2(0, -12)
-zoom = Vector2(2, 2)
+follow_offset = Vector2(0, -24)
+zoom = Vector2(1, 1)
 snap_to_pixel = true
 tween_on_load = false
 noise_emitter_layer = 1
