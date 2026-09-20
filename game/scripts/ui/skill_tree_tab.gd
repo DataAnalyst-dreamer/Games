@@ -31,6 +31,20 @@ const NODE_TYPE_LABEL_KEYS := {
 	"passive": &"ui.skill.node_type.passive",
 	"buff": &"ui.skill.node_type.buff",
 }
+## 레벨별 수치 표시(코디네이터 후속 지시 1건, D-196): SkillTreeCalc.level_detail_rows()가
+## 내는 field 이름 -> "%s" 자리에 숫자(문자열)만 넣으면 되는 완성 템플릿. 필드명 원문이
+## 그대로 노출되지 않도록 여기 목록에 없는 field는 `_format_detail_rows()`가 건너뛴다.
+const FIELD_LABEL_KEYS := {
+	"sp_cost": &"ui.skill.field.sp_cost", "cooldown_sec": &"ui.skill.field.cooldown_sec",
+	"damage_mult": &"ui.skill.field.damage_mult", "atk_buff_pct": &"ui.skill.field.atk_buff_pct",
+	"dmg_reduction_pct": &"ui.skill.field.dmg_reduction_pct", "move_speed_mult": &"ui.skill.field.move_speed_mult",
+	"invuln_sec": &"ui.skill.field.invuln_sec", "dash_px": &"ui.skill.field.dash_px",
+	"duration_sec": &"ui.skill.field.duration_sec", "atk_pct": &"ui.skill.field.atk_pct",
+	"crit_damage_pct": &"ui.skill.field.crit_damage_pct", "aspd_pct": &"ui.skill.field.aspd_pct",
+	"defense_flat": &"ui.skill.field.defense_flat", "guard_damage_reduction_pct": &"ui.skill.field.guard_damage_reduction_pct",
+	"max_hp_pct": &"ui.skill.field.max_hp_pct", "sp_regen_pct": &"ui.skill.field.sp_regen_pct",
+	"crit_chance_pct": &"ui.skill.field.crit_chance_pct", "move_speed_pct": &"ui.skill.field.move_speed_pct",
+}
 
 var _series_bar: HBoxContainer
 var _series_buttons: Dictionary = {} # series -> Button
@@ -306,10 +320,28 @@ func _refresh_detail() -> void:
 	_detail_title.text = "%s %s" % [tr(StringName(String(def.get("name_key", id)))), tr(&"ui.skill.level_fmt") % [level, max_level]]
 	_detail_meta.text = tr(NODE_TYPE_LABEL_KEYS.get(String(def.get("node_type", "")), &"ui.skill.node_type.active"))
 	_detail_requires.text = _requires_text(id)
-	_detail_numbers.text = SkillTreeCalc.level_detail_text(def, maxi(level, 1))
+	_detail_numbers.text = _format_detail_rows(def, maxi(level, 1))
 	_detail_hint.text = _hint_text(def, state, level)
 	var node_type: String = String(def.get("node_type", ""))
 	_hotbar_bar.highlight_slot("skill", id if (level > 0 and node_type in ["active", "buff"]) else "")
+
+
+## SkillTreeCalc.level_detail_rows()의 {field,text,next_text}를 로컬라이징 템플릿에
+## 끼워 넣는다. next_text가 있으면 "현재 → 다음"을 숫자 자리 하나에 합쳐 넣어(예: 템플릿
+## "재사용 %s초" + "6.0 → 4.8" = "재사용 6.0 → 4.8초") 단위를 두 번 반복하지 않는다.
+## FIELD_LABEL_KEYS에 없는 field(=모르는 필드)는 건너뛴다 — 원문 필드명 노출 금지.
+func _format_detail_rows(entry: Dictionary, level: int) -> String:
+	var parts := PackedStringArray()
+	for row: Dictionary in SkillTreeCalc.level_detail_rows(entry, level):
+		var field: String = String(row.get("field", ""))
+		if not FIELD_LABEL_KEYS.has(field):
+			continue
+		var number: String = String(row.get("text", ""))
+		var next_text: String = String(row.get("next_text", ""))
+		if not next_text.is_empty():
+			number = "%s → %s" % [number, next_text]
+		parts.append(tr(FIELD_LABEL_KEYS[field]) % number)
+	return " · ".join(parts)
 
 
 func _requires_text(id: String) -> String:

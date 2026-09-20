@@ -10,12 +10,36 @@ func _make_table() -> Dictionary:
 	return {
 		"_comment": "메타 키, skill_ids()에서 제외되어야 함",
 		"a1": {"series": "blade", "node_type": "active", "requires": [], "max_level": 5,
-			"cost_skill_point_per_level": 1, "levels": [{"level": 1, "sp_cost": 10}]},
+			"cost_skill_point_per_level": 1, "levels": [
+				{"level": 1, "sp_cost": 10, "cooldown_sec": 4.5, "damage_mult": 1.6},
+				{"level": 2, "sp_cost": 12, "cooldown_sec": 4.3, "damage_mult": 1.8},
+			]},
 		"a2": {"series": "blade", "node_type": "active", "requires": [{"skill": "a1", "level": 3}],
 			"max_level": 5, "cost_skill_point_per_level": 1, "levels": [{"level": 1, "sp_cost": 14}]},
 		"a3": {"series": "blade", "node_type": "passive", "requires": [{"skill": "a2", "level": 3}],
-			"max_level": 5, "cost_skill_point_per_level": 1, "levels": [{"level": 1, "value": 2}]},
+			"max_level": 5, "cost_skill_point_per_level": 1, "passive_stat": "atk_pct",
+			"levels": [{"level": 1, "value": 2}, {"level": 2, "value": 4}]},
 		"b1": {"series": "guard", "node_type": "active", "requires": [], "max_level": 5,
+			"cost_skill_point_per_level": 1, "levels": [{"level": 1, "sp_cost": 10}]},
+	}
+
+
+## level_detail_rows() 전용 픽스처(tier/series/focus_order 테스트의 _make_table()과
+## 분리 — 저 테스트들은 정확히 4개 노드 개수/순서를 검증하므로 여기 섞으면 깨진다).
+func _make_detail_table() -> Dictionary:
+	return {
+		"guard_wall": {"series": "guard", "node_type": "active", "requires": [], "max_level": 5,
+			"cost_skill_point_per_level": 1, "levels": [
+				{"level": 1, "sp_cost": 10, "cooldown_sec": 8.0, "damage_mult": 0,
+					"self_effect": {"invuln_sec": 0.8}},
+				{"level": 2, "sp_cost": 12, "cooldown_sec": 7.6, "damage_mult": 0,
+					"self_effect": {"invuln_sec": 0.9}},
+			]},
+		"buff1": {"series": "blade", "node_type": "buff", "requires": [], "max_level": 5,
+			"cost_skill_point_per_level": 1, "levels": [
+				{"level": 1, "sp_cost": 18, "cooldown_sec": 25, "self_effect": {"atk_buff_pct": 6, "duration_sec": 5}},
+			]},
+		"maxed1": {"series": "blade", "node_type": "active", "requires": [], "max_level": 1,
 			"cost_skill_point_per_level": 1, "levels": [{"level": 1, "sp_cost": 10}]},
 	}
 
@@ -97,7 +121,44 @@ func test_sp_cost_at_reads_level_entry() -> void:
 	assert_eq(CalcScript.sp_cost_at(_make_table(), "a2", 1), 14.0)
 
 
-func test_level_detail_text_excludes_level_key() -> void:
-	var text: String = CalcScript.level_detail_text(_make_table()["a1"], 1)
-	assert_true(text.contains("sp_cost"))
-	assert_false(text.contains("level 1"))
+# --- level_detail_rows(): D-196 후속(필드명 원문 노출 금지, 다음 레벨 화살표) ---
+
+func test_level_detail_rows_active_has_next_arrow() -> void:
+	var rows: Array[Dictionary] = CalcScript.level_detail_rows(_make_table()["a1"], 1)
+	var by_field: Dictionary = {}
+	for row: Dictionary in rows:
+		by_field[row["field"]] = row
+	assert_eq(by_field["sp_cost"]["text"], "10")
+	assert_eq(by_field["sp_cost"]["next_text"], "12", "레벨2 sp_cost=12로 화살표 대상 채워짐")
+	assert_eq(by_field["cooldown_sec"]["text"], "4.5")
+	assert_eq(by_field["damage_mult"]["text"], "160", "damage_mult 1.6 -> 퍼센트 160(원문 노출 금지, 배율->%%)")
+	assert_eq(by_field["damage_mult"]["next_text"], "180")
+
+
+func test_level_detail_rows_damage_mult_zero_is_skipped() -> void:
+	var rows: Array[Dictionary] = CalcScript.level_detail_rows(_make_detail_table()["guard_wall"], 1)
+	var fields := []
+	for row: Dictionary in rows: fields.append(row["field"])
+	assert_false(fields.has("damage_mult"), "순수 유틸 스킬(damage_mult=0)은 피해 줄 생략")
+	assert_true(fields.has("invuln_sec"))
+
+
+func test_level_detail_rows_self_effect_buff() -> void:
+	var rows: Array[Dictionary] = CalcScript.level_detail_rows(_make_detail_table()["buff1"], 1)
+	var by_field: Dictionary = {}
+	for row: Dictionary in rows: by_field[row["field"]] = row
+	assert_eq(by_field["atk_buff_pct"]["text"], "6")
+	assert_eq(by_field["duration_sec"]["text"], "5.0")
+
+
+func test_level_detail_rows_passive_stat() -> void:
+	var rows: Array[Dictionary] = CalcScript.level_detail_rows(_make_table()["a3"], 1)
+	assert_eq(rows.size(), 1)
+	assert_eq(rows[0]["field"], "atk_pct")
+	assert_eq(rows[0]["text"], "2")
+	assert_eq(rows[0]["next_text"], "4")
+
+
+func test_level_detail_rows_no_next_arrow_when_maxed() -> void:
+	var rows: Array[Dictionary] = CalcScript.level_detail_rows(_make_detail_table()["maxed1"], 1)
+	assert_eq(rows[0]["next_text"], "", "max_level=1이면 다음 레벨이 없어 화살표도 없음")

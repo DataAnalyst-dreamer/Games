@@ -368,3 +368,21 @@ ui.skill.reason_no_points,스킬 포인트가 부족합니다
 ui.skill.reason_requires,선행 스킬 레벨이 부족합니다
 ui.skill.reason_maxed,이미 최대 레벨입니다
 ui.skill.reason_unknown,알 수 없는 스킬입니다
+ui.skill.field.sp_cost,SP %s
+ui.skill.field.cooldown_sec,재사용 %s초
+ui.skill.field.damage_mult,피해 %s%%
+ui.skill.field.atk_buff_pct,공격력 +%s%%
+ui.skill.field.dmg_reduction_pct,피해 감소 %s%%
+ui.skill.field.move_speed_mult,이동 속도 +%s%%
+ui.skill.field.invuln_sec,무적 %s초
+ui.skill.field.dash_px,돌진 거리 %spx
+ui.skill.field.duration_sec,지속 %s초
+ui.skill.field.atk_pct,공격력 +%s%%
+ui.skill.field.crit_damage_pct,치명타 피해 +%s%%
+ui.skill.field.aspd_pct,공격 속도 +%s%%
+ui.skill.field.defense_flat,방어력 +%s
+ui.skill.field.guard_damage_reduction_pct,가드 피해 감소 +%s%%
+ui.skill.field.max_hp_pct,최대 체력 +%s%%
+ui.skill.field.sp_regen_pct,SP 회복 +%s%%
+ui.skill.field.crit_chance_pct,치명타 확률 +%s%%
+ui.skill.field.move_speed_pct,이동 속도 +%s%%
