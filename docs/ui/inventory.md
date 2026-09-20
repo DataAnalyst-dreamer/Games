@@ -85,7 +85,8 @@ InventoryMenu (CanvasLayer, layer=10, script=inventory_menu.gd, process_mode=ALW
    │  │     ├─ EmptyHint (Label, 격자 0칸일 때만)
    │  │     └─ CompareTooltip (Panel, wood_frame) — Header/EnhanceLine/StatRows(VBox)/AffixRows(VBox)
    │  └─ PlaceholderTab (Control, 스킬/도감/퀘스트 공용) — "ui.inv.placeholder_tab" 문구
-   └─ GuideBar (HBoxContainer) — 하단 입력 가이드, 패드/키마 자동 전환
+   ├─ GuideBar (HBoxContainer) — 하단 입력 가이드, 패드/키마 자동 전환 + 마우스 안내 한 줄(M5-1)
+   └─ CloseButton (Button, "X", M5-1) — 도움말 바 오른쪽 끝, 클릭=닫기(우클릭/Backspace/B와 동일)
 ```
 
 ## 3. 입력 흐름 (패드/키보드)
@@ -105,7 +106,7 @@ InventoryMenu (CanvasLayer, layer=10, script=inventory_menu.gd, process_mode=ALW
 | 자동 정렬 | `ui_sort` (신규) | X | Space | |
 | 분해 표시 토글(홀드 0.5초) | `ui_mark_discard` (신규) | Y | X키 | 장착중 아이템 제외, 그리드 포커스에서만 |
 | 비교 툴팁 좌우 고정/전환 | `ui_compare_lock` (신규) | R3 | Alt | 이번 패스는 고정 토글만(좌우 전환은 후속) |
-| 마우스 | — | — | 좌클릭=결정, 우클릭=닫기, 휠=격자 스크롤 | 모든 상호작용 마우스로도 동일하게 가능 |
+| 마우스 | — | — | 좌클릭=결정/탭·필터 전환/정렬, 우클릭 또는 `CloseButton`("X") 클릭=닫기, 휠=격자 스크롤 | 모든 상호작용 마우스로도 동일하게 가능(M5-1, 게이트5 피드백) |
 
 - 하단 `GuideBar`는 마지막 입력 장치(키보드 vs 패드, `Input.is_action_just_pressed`가 감지된 이벤트 타입)에 따라
   라벨을 자동 전환한다(`inventory_menu.gd:_note_input_device()`).

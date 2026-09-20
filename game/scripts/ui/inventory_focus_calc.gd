@@ -88,3 +88,16 @@ static func grid_neighbor(index: int, cols: int, count: int, dir: Vector2i) -> i
 
 static func grid_is_leftmost_col(index: int, cols: int) -> bool:
 	return cols > 0 and (index % cols) == 0
+
+
+## M5-1(마우스): 핫바 미리보기 칸 클릭 시 등록할 item_id. 그리드에 포커스가 있고
+## 그 포커스가 실제 항목을 가리킬 때만 값을 준다(inventory_menu.gd의 기존 1~9 키
+## 폴링 `_poll_hotbar_register()`와 동일 가드) — 그 외(장비 포커스/빈 칸)에는 ""를
+## 반환해 호출부가 등록을 시도하지 않게 한다.
+static func focused_grid_item_id(focus_area: String, focus_grid_index: int, visible_indices: Array, slots: Array) -> String:
+	if focus_area != "grid" or focus_grid_index >= visible_indices.size():
+		return ""
+	var slot_index: int = int(visible_indices[focus_grid_index])
+	if slot_index < 0 or slot_index >= slots.size():
+		return ""
+	return String((slots[slot_index] as Dictionary).get("item_id", ""))

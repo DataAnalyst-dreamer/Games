@@ -3,9 +3,9 @@
 ## 이 파일 하나로 분리했다(hud.gd/hud_progress.gd와 같은 분리 원칙).
 ##
 ## 게임패드 우선(docs/ui/wireframes.md §0.1): 좌/우로 메인·사이드·의뢰 탭 전환, 상/하로
-## 목록 이동, 확인으로 추적 대상 토글. 마우스 클릭은 이번 범위에서 다루지 않는다(다른
-## 화면 placeholder 탭과 동일하게 패드/키보드만 완주 가능하면 충분 — inventory_menu.gd의
-## 그리드 포커스도 같은 원칙).
+## 목록 이동, 확인으로 추적 대상 토글. M5-1(마우스, 게이트5 피드백): 탭 버튼/목록 항목
+## 클릭도 지원한다 — 클릭=선택(포커스 이동)만, 추적 토글 확정은 여전히 확인(A/Enter)
+## 전용(실수로 토글되는 걸 막기 위해 지시서가 항목별 동작 범위를 그렇게 나눴다).
 ##
 ## 표시·정렬 계산은 전부 QuestLogUiCalc(순수 함수)에 위임하고, 여기서는 Data/QuestSystem
 ## 조회 + 노드 갱신만 한다.
@@ -37,7 +37,7 @@ var _detail_track_hint: Label
 var _tab_index: int = 0
 var _focus_index: int = 0
 var _tab_lists: Dictionary = {"main": [], "side": [], "daily": []}
-var _list_labels: Array = [] # Array[Label], 현재 탭에 그려진 항목(포커스 하이라이트용)
+var _list_labels: Array = [] # Array[Button](M5-1), 현재 탭에 그려진 항목(포커스 하이라이트용)
 
 
 func _ready() -> void:
@@ -53,12 +53,13 @@ func _build_ui() -> void:
 	_sub_tab_bar = HBoxContainer.new()
 	_sub_tab_bar.add_theme_constant_override("separation", 10)
 	root_vbox.add_child(_sub_tab_bar)
-	for tab_id: String in TABS:
+	for i in TABS.size():
 		var button := Button.new()
 		button.flat = true
 		button.focus_mode = Control.FOCUS_NONE
+		button.pressed.connect(_on_sub_tab_pressed.bind(i)) # M5-1(마우스).
 		_sub_tab_bar.add_child(button)
-		_sub_tab_buttons[tab_id] = button
+		_sub_tab_buttons[TABS[i]] = button
 
 	var body := HBoxContainer.new()
 	body.add_theme_constant_override("separation", 12)
@@ -172,11 +173,29 @@ func _change_sub_tab(delta: int) -> void:
 	_refresh_detail()
 
 
+## M5-1(마우스): 탭 버튼 클릭 — _change_sub_tab()과 동일하게 인덱스 대입 후 같은
+## 갱신 함수를 재사용.
+func _on_sub_tab_pressed(index: int) -> void:
+	_tab_index = index
+	_focus_index = 0
+	_refresh_tab_bar()
+	_refresh_list()
+	_refresh_detail()
+
+
 func _move_focus(delta: int) -> void:
 	var list_size: int = _current_list().size()
 	if list_size <= 0:
 		return
 	_focus_index = QuestLogUiCalc.clamp_focus_index(wrapi(_focus_index + delta, 0, list_size), list_size)
+	_refresh_list()
+	_refresh_detail()
+
+
+## M5-1(마우스): 목록 항목 클릭 = 선택(포커스 이동)만. 추적 토글은 여전히 확인
+## (A/Enter) 전용 — 클릭 한 번으로 실수로 토글되는 것을 막는다(클래스 헤더 참고).
+func _on_list_item_pressed(index: int) -> void:
+	_focus_index = index
 	_refresh_list()
 	_refresh_detail()
 
@@ -222,7 +241,12 @@ func _refresh_list() -> void:
 	for i in list.size():
 		var quest_id: String = String(list[i])
 		var qdef: Dictionary = Data.get_value("quests", quest_id, {})
-		var label := Label.new()
+		# M5-1(마우스): Label 대신 Button(flat) — 클릭=선택(포커스 이동)만, 추적 토글
+		# 확정은 여전히 확인(A/Enter) 전용(클래스 헤더 주석 참고).
+		var label := Button.new()
+		label.flat = true
+		label.focus_mode = Control.FOCUS_NONE
+		label.pressed.connect(_on_list_item_pressed.bind(i))
 		var title: String = tr(StringName(String(qdef.get("title_key", quest_id))))
 		var mark: String = (tr(&"ui.quest_log.tracking_mark") + " ") if quest_id == tracked_id else ""
 		label.text = mark + title
