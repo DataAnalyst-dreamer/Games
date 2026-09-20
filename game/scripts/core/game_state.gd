@@ -52,6 +52,13 @@ var stat_points: int = 0
 var skill_points: int = 0
 var level_stat_bonus: Dictionary = {"max_hp": 0, "attack": 0.0}
 
+## M3-3(D-158~D-162) 신설 — 저장값만 여기 두고 소비(전투 적용)·분배·학습/장착 검증은
+## 전부 Progression 오토로드(progression_service.gd)가 전담한다(이 파일 500줄 상한 유지
+## 원칙, 위 주석과 동일). stats 키는 str/dex/int/vit/luk 5개 고정(stats.json.allocation).
+var stats: Dictionary = {"str": 0, "dex": 0, "int": 0, "vit": 0, "luk": 0}
+var learned_skills: Array[String] = []
+var skill_slots: Array[String] = ["", ""]
+
 ## M2-7(F5-2 게시판 일일 의뢰) 신설. "게임 내 날짜" 정수 카운터 — QuestSystem이 일일
 ## 의뢰 재추첨 시드로 쓴다. 새 게임은 0에서 시작. D-111(확정, M2-7 후속): 게임플레이
 ## 내부 시간(낮/밤 사이클 등)이 아니라 **실제 달력 날짜**를 기준으로 증가한다 — 유일한
@@ -233,11 +240,11 @@ func claim_all_mail() -> Dictionary:
 	return result
 
 
-## LUK 스탯 훅(D-52 LUK 곱연산 공식의 입력값). stats.json/캐릭터 스탯 시스템이 아직 없어
-## 0.0 고정 — stats.json 확정 시 이 함수만 실제 플레이어 LUK를 반환하도록 고치면
-## LootSystem.roll_drop() 호출부(scripts/systems/loot_spawner.gd)는 그대로 둬도 된다.
+## LUK 스탯 훅(D-52 LUK 곱연산 공식의 입력값). M3-3: stats.json 확정으로 실제 분배된
+## LUK를 반환한다 — LootSystem.roll_drop() 호출부(scripts/systems/loot_spawner.gd)는
+## 수정 없이 그대로 이 값을 쓴다.
 func get_player_luck() -> float:
-	return 0.0
+	return float(stats.get("luk", 0))
 
 
 # --- 장비 (F3-2, D-12) ---
@@ -310,11 +317,14 @@ func unequip_item(slot_name: String) -> bool:
 func _apply_equipment_stats_to_player() -> void:
 	if _player == null or not is_instance_valid(_player):
 		return
-	var stats: Dictionary = Equipment.compute_stats(equipment.slots, Data.table("items"), Data.table("enhance"))
+	var equip_stats: Dictionary = Equipment.compute_stats(equipment.slots, Data.table("items"), Data.table("enhance"))
 	# M3-1: 레벨업 자동 HP 상승분(level_stat_bonus)을 장비 max_hp 보너스에 합산한다 —
 	# 그렇지 않으면 장착/해제·로드마다 이 함수가 다시 불릴 때 레벨 성장분이 사라진다.
-	stats["max_hp"] = float(stats.get("max_hp", 0.0)) + float(level_stat_bonus.get("max_hp", 0))
-	_player.apply_equipment_stats(stats)
+	# M3-3: VIT 분배분(StatCalc.hp_bonus)도 동일 지점에서 합산한다(D-158~D-162).
+	var vit_bonus: float = StatCalc.hp_bonus(
+		int(stats.get("vit", 0)), float(Data.get_value("stats", "vit.hp_per_point", 5.0)))
+	equip_stats["max_hp"] = float(equip_stats.get("max_hp", 0.0)) + float(level_stat_bonus.get("max_hp", 0)) + vit_bonus
+	_player.apply_equipment_stats(equip_stats)
 
 
 ## Progression 오토로드처럼 GameState 밖에서 장비+레벨 보너스 재계산을 트리거해야 할 때
@@ -535,6 +545,9 @@ func to_dict() -> Dictionary:
 		"stat_points": stat_points,
 		"skill_points": skill_points,
 		"level_stat_bonus": level_stat_bonus.duplicate(),
+		"stats": stats.duplicate(),
+		"learned_skills": learned_skills.duplicate(),
+		"skill_slots": skill_slots.duplicate(),
 	}
 
 
@@ -557,6 +570,16 @@ func from_dict(data: Dictionary) -> void:
 	stat_points = int(data.get("stat_points", 0))
 	skill_points = int(data.get("skill_points", 0))
 	level_stat_bonus = (data.get("level_stat_bonus", {"max_hp": 0, "attack": 0.0}) as Dictionary).duplicate()
+	stats = (data.get("stats", {"str": 0, "dex": 0, "int": 0, "vit": 0, "luk": 0}) as Dictionary).duplicate()
+	var loaded_skills: Array[String] = []
+	for id_v: Variant in (data.get("learned_skills", []) as Array):
+		loaded_skills.append(String(id_v))
+	learned_skills = loaded_skills
+	var loaded_slots: Array[String] = ["", ""]
+	var slots_data: Array = data.get("skill_slots", ["", ""])
+	for i in range(mini(loaded_slots.size(), slots_data.size())):
+		loaded_slots[i] = String(slots_data[i])
+	skill_slots = loaded_slots
 	_apply_equipment_stats_to_player()
 	_restore_waystones()
 

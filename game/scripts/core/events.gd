@@ -27,12 +27,24 @@ signal level_up(new_level: int, stat_gains: Dictionary)
 ## exp_changed(0, 0, max_level)로 발신된다(D-152).
 signal exp_changed(current_exp: int, exp_to_next: int, level: int)
 
+## M3-3(D-158~D-162) 신설. stats: {"str":int,...} 5키 전체, derived: Progression.get_derived()
+## 그대로(attack/max_hp/defense/crit_chance/roll_cost_mult/cooldown_mult). 스탯 분배·레벨업·
+## 세이브 로드 직후 발신.
+signal stats_changed(stats: Dictionary, derived: Dictionary, stat_points: int)
+## M3-3 신설. learned: 배운 skill_id 배열, slots: 크기 2("" = 빈 슬롯). 학습·장착/해제·
+## 세이브 로드 직후 발신.
+signal skills_changed(learned: Array, slots: Array, skill_points: int)
+## M3-3 신설. 스킬 시전 성공 시(쿨타임 시작) 1회 — HUD가 슬롯 쿨타임 UI를 채운다.
+signal skill_cast(slot: int, skill_id: String, cooldown_sec: float)
+## M3-3 신설. 해당 슬롯 쿨타임이 다 돌았을 때 1회.
+signal skill_ready(slot: int)
+
 # --- 전투 ---
 ## is_advantage: 원소 상성 적중 여부(ElementCalc.get_multiplier() > 1.0). is_critical:
-## LUK 기반 진짜 크리티컬(M2, stats.json 도입 후) — M1은 크리티컬 시스템이 없어 항상
-## false로 emit된다. 과거(M1-2까지) 4번째 인자 이름이 is_critical이면서 실제 값은
-## is_advantage였던 네이밍 불일치를 바로잡았다(sound-map-m1.md §2/§12 코드 주의 반영,
-## D-61 예정 — 시그니처가 바뀌었으므로 구독부는 이 순서(공격자/대상/피해/상성/크리)로 갱신).
+## LUK 기반 진짜 크리티컬(M3-3, stats.json luk 도입 후 Progression.roll_crit()이 굴린다).
+## 과거(M1-2까지) 4번째 인자 이름이 is_critical이면서 실제 값은 is_advantage였던 네이밍
+## 불일치를 바로잡았다(sound-map-m1.md §2/§12 코드 주의 반영, D-61 예정 — 시그니처가
+## 바뀌었으므로 구독부는 이 순서(공격자/대상/피해/상성/크리)로 갱신).
 signal hit_landed(attacker: Node, target: Node, damage: int, is_advantage: bool, is_critical: bool)
 signal just_guard_succeeded(defender: Node, attacker: Node)
 signal hitstop_requested(duration_sec: float)
