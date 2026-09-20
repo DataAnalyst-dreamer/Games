@@ -36,10 +36,8 @@ var is_dead: bool = false
 var _iframe_remaining: float = 0.0
 
 ## 장비 스탯 합산 결과(M2-1, F3-2 — GameState._apply_equipment_stats_to_player()가
-## Equipment.compute_stats() 결과로 채운다). 방어력을 실제 피해 감소로 쓰는 공식은 아직
-## 없어(docs/specs/items-and-drops-m2.md 결정 요청 A, D-74 예정 `_balance_todo`)
-## equip_defense는 보관만 하고 소비하는 코드가 없다 — 전투 데미지 공식 확정 시 여기
-## 값을 읽어 쓰면 된다.
+## Equipment.compute_stats() 결과로 채운다). D-162(M3-3): defense_formula가 확정돼
+## hit_feel.gd:apply()가 VIT 분배분과 합산해 실제 피해 감소에 소비한다.
 var equip_attack_bonus: float = 0.0
 var equip_defense: float = 0.0
 var _base_walk_speed: float = 0.0
@@ -221,12 +219,10 @@ func respawn() -> void:
 	Events.player_respawned.emit(GameState.last_waystone)
 
 
-## 구르기 스태미나 비용(DEX 경감 훅 포함, S2-1b 규칙 §3-3). stats 시스템이 아직 없어
-## DEX=0으로 고정한다 — characters.json/stats.json 확정 후 실제 DEX 값을 전달하도록
-## 이 함수만 고치면 된다(godot-engineer TODO).
+## 구르기 스태미나 비용(DEX 경감 훅 포함, S2-1b 규칙 §3-3). M3-3: 실제 분배된 DEX를 쓴다.
 func get_roll_cost() -> float:
 	var base_cost: float = float(Data.get_value("combat", "stamina.costs.roll", 20.0))
-	var dex: float = 0.0
+	var dex: float = float(GameState.stats.get("dex", 0))
 	return PlayerResources.roll_cost_with_dex(base_cost, dex)
 
 
@@ -249,12 +245,13 @@ func apply_equipment_stats(stats: Dictionary) -> void:
 	Events.player_hp_changed.emit(resources.hp, resources.max_hp)
 
 
-## 실제 타격 데미지 계산이 읽는 공격력(F2-1 기본값 + 장비 합산, M2-1). characters.json/
-## stats.json이 확정되면 STR 등 스탯 기반 공격력 공식으로 교체될 자리(godot-engineer TODO).
+## 실제 타격 데미지 계산이 읽는 공격력(F2-1 기본값 + 장비 합산, M2-1 + STR 분배분, M3-3).
 func get_attack_power() -> float:
 	# M3-1(F1-2): 레벨업 자동 공격력 상승분(GameState.level_stat_bonus.attack, exp_curve.csv
 	# atk_bonus 누적치)을 장비 보너스와 합산한다.
-	return Tuning.PLAYER_BASE_ATTACK + equip_attack_bonus + float(GameState.level_stat_bonus.get("attack", 0.0))
+	var str_bonus: float = StatCalc.attack_bonus(
+		int(GameState.stats.get("str", 0)), float(Data.get_value("stats", "str.physical_damage_per_point", 0.2)))
+	return Tuning.PLAYER_BASE_ATTACK + equip_attack_bonus + float(GameState.level_stat_bonus.get("attack", 0.0)) + str_bonus
 
 
 ## Knight의 방향별 단일 공격 자세(D-137) 위에 무기 회전으로 휘두름을 표현한다.
