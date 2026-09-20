@@ -250,3 +250,15 @@ ui.quest_log.empty,표시할 퀘스트가 없습니다
 ui.quest_log.tracking_mark,[추적]
 ui.quest_log.tracking_on,현재 추적 중인 퀘스트입니다
 ui.quest_log.track_hint,확인 버튼으로 이 퀘스트를 추적합니다
+skill.blade_power_slash.name,강타
+skill.blade_power_slash.desc,정면 부채꼴 범위를 강하게 베어 넉백을 준다.
+skill.blade_thrust.name,찌르기
+skill.blade_thrust.desc,짧은 준비 동작 후 앞을 직선으로 찌른다.
+skill.guard_shield_bash.name,방패 강타
+skill.guard_shield_bash.desc,주변 적을 밀쳐내는 원형 타격.
+skill.guard_iron_wall.name,철벽
+skill.guard_iron_wall.desc,잠시 무적 상태가 되어 다음 공격을 흘려낸다.
+skill.trick_dash_strike.name,쇄도
+skill.trick_dash_strike.desc,짧게 돌진하며 무적 상태로 적을 꿰뚫는다.
+skill.trick_fleet_step.name,축지
+skill.trick_fleet_step.desc,잠시 이동 속도가 크게 증가한다.

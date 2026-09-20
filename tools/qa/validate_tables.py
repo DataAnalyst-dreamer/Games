@@ -35,6 +35,13 @@ FARMING_TYPE_RESPAWN_SECONDS = {
 }
 FARMING_MAP_ICON_TYPES = {"elite", "world_boss"}
 EPS = 1e-6
+SKILL_HITBOX_SHAPES = {"arc", "line", "circle"}
+SKILL_SELF_EFFECT_KEYS = {
+    frozenset({"invuln_sec"}),
+    frozenset({"move_speed_mult", "duration_sec"}),
+    frozenset({"dash_px", "invuln_sec"}),
+}
+STAT_KEYS = {"str", "dex", "int", "vit", "luk"}
 
 
 class Report:
@@ -314,6 +321,79 @@ def validate_stats(stats: Dict[str, Any], report: Report) -> None:
                 f"stats.int: 만렙 몰빵 cooldown_reduction={projected_cd:.4f} 가 "
                 f"상한({int_stat['cooldown_reduction_cap_pct']:.4f})에 못 미침 — 상한이 사실상 의미 없음"
             )
+
+    allocation = stats.get("allocation")
+    if allocation is None:
+        report.error("stats.allocation 누락 (M3-3/D-158)")
+        return
+    initial = allocation.get("initial")
+    if not isinstance(initial, dict) or set(initial.keys()) != STAT_KEYS:
+        report.error(f"stats.allocation.initial 키가 {sorted(STAT_KEYS)} 5개와 정확히 일치해야 함 (현재 {initial})")
+    else:
+        for k, v in initial.items():
+            if not isinstance(v, (int, float)) or v < 0:
+                report.error(f"stats.allocation.initial.{k}={v} 는 0 이상의 숫자여야 함")
+    max_per_stat = allocation.get("max_per_stat")
+    if max_per_stat is not None and not (isinstance(max_per_stat, int) and max_per_stat > 0):
+        report.error(f"stats.allocation.max_per_stat={max_per_stat} 는 null 이거나 양의 정수여야 함")
+
+
+def validate_skills(skills: Dict[str, Any], report: Report) -> Dict[str, Any]:
+    """M3-3(D-141 최소 세트): docs/specs/skills-m3.md §2 스키마 검증. 참조 무결성(requires)·
+    순환 검출·필수 수치 유효성을 확인한다."""
+    data = entries(skills)
+    for skill_id, sk in data.items():
+        if sk.get("node_type") != "active":
+            report.error(f"skills.{skill_id}.node_type='{sk.get('node_type')}' — M3-3 범위는 'active'만 허용")
+        cd = sk.get("cooldown_sec")
+        if not isinstance(cd, (int, float)) or cd <= 0:
+            report.error(f"skills.{skill_id}.cooldown_sec={cd} 는 0보다 커야 함")
+        stamina = sk.get("stamina_cost")
+        if not isinstance(stamina, (int, float)) or stamina < 0:
+            report.error(f"skills.{skill_id}.stamina_cost={stamina} 는 0 이상이어야 함")
+        dmg = sk.get("damage_mult")
+        if not isinstance(dmg, (int, float)) or dmg < 0:
+            report.error(f"skills.{skill_id}.damage_mult={dmg} 는 0 이상이어야 함")
+        hitbox = sk.get("hitbox")
+        if hitbox is not None:
+            shape = hitbox.get("shape") if isinstance(hitbox, dict) else None
+            if shape not in SKILL_HITBOX_SHAPES:
+                report.error(f"skills.{skill_id}.hitbox.shape='{shape}' 는 {sorted(SKILL_HITBOX_SHAPES)} 중 하나여야 함")
+            elif not isinstance(hitbox.get("range_px"), (int, float)) or hitbox["range_px"] <= 0:
+                report.error(f"skills.{skill_id}.hitbox.range_px={hitbox.get('range_px')} 는 0보다 커야 함")
+        elif dmg and dmg > 0:
+            report.error(f"skills.{skill_id}: damage_mult={dmg} > 0 인데 hitbox가 null임")
+        self_effect = sk.get("self_effect")
+        if self_effect is not None:
+            if frozenset(self_effect.keys()) not in SKILL_SELF_EFFECT_KEYS:
+                report.error(
+                    f"skills.{skill_id}.self_effect 키 {sorted(self_effect.keys())} 는 고정된 3종 "
+                    f"({[sorted(s) for s in SKILL_SELF_EFFECT_KEYS]}) 중 하나와 정확히 일치해야 함"
+                )
+        for req in sk.get("requires", []):
+            if req not in data:
+                report.error(f"skills.{skill_id}.requires 참조 실패: '{req}' 없음")
+
+    # requires 순환 검출 (DFS)
+    WHITE, GRAY, BLACK = 0, 1, 2
+    color = {sid: WHITE for sid in data}
+
+    def visit(sid: str, stack: List[str]) -> None:
+        color[sid] = GRAY
+        for req in data.get(sid, {}).get("requires", []):
+            if req not in color:
+                continue
+            if color[req] == GRAY:
+                report.error(f"skills: requires 순환 감지 {' -> '.join(stack + [sid, req])}")
+            elif color[req] == WHITE:
+                visit(req, stack + [sid])
+        color[sid] = BLACK
+
+    for sid in data:
+        if color[sid] == WHITE:
+            visit(sid, [])
+
+    return data
 
 
 def validate_farming_sources(
@@ -613,6 +693,7 @@ def main() -> int:
     monsters = load_json(data_dir / "monsters.json", report)
     farming_sources = load_json(data_dir / "farming_sources.json", report)
     stats = load_json(data_dir / "stats.json", report)
+    skills = load_json(data_dir / "skills.json", report)
     blueprints = load_json(data_dir / "blueprints.json", report)
     pools = load_json(data_dir / "pools.json", report)
     world_objects_raw = load_json(data_dir / "world_objects.json", report)
@@ -627,6 +708,7 @@ def main() -> int:
     validate_monsters_exp_reward(monsters, report)
     validate_exp_curve(exp_curve, stats, report)
     validate_stats(stats, report)
+    skill_ids = validate_skills(skills, report)
     validate_farming_sources(farming_sources, drop_table_ids, monsters, report)
     blueprint_ids = validate_blueprints(blueprints, item_ids, report)
     pool_ids = validate_pools(pools, monsters, item_ids, report)
@@ -637,7 +719,7 @@ def main() -> int:
           f"drop_tables={len(drop_table_ids)} monsters={len(entries(monsters))} "
           f"farming_sources={len(entries(farming_sources))} blueprints={len(blueprint_ids)} "
           f"pools={len(pool_ids)} world_objects={len(world_object_ids)} quests={len(quests)} "
-          f"exp_curve={len(entries(exp_curve))}")
+          f"exp_curve={len(entries(exp_curve))} skills={len(skill_ids)}")
 
     if report.warnings:
         print(f"\n경고 {len(report.warnings)}건:")
