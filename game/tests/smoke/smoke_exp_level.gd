@@ -109,9 +109,13 @@ func _continue_with_direct_grants() -> void:
 		var gains: Dictionary = _level_up_log[0].get("stat_gains", {})
 		_check("level_up(2, {...}) 수신", int(_level_up_log[0].get("level", 0)) == 2)
 		_check("stat_gains에 max_hp/attack 포함", gains.has("max_hp") and gains.has("attack"))
+		# M4-4(UI 합의): 레벨업 배너가 읽도록 지급량 2키가 payload에 실린다.
+		_check("stat_gains에 stat_points/skill_points 포함(%s)" % [gains],
+			int(gains.get("stat_points", -1)) == 2 and int(gains.get("skill_points", -1)) == 1)
 	_check("GameState.level == 2", GameState.level == 2)
 	_check("GameState.exp == 0(정확히 소진, 잔여 없음)", GameState.exp == 0)
-	_check("stat_points +3 누적", GameState.stat_points == 3)
+	# M4-4(§2): 레벨업 지급량은 exp_curve.csv.stat_points_gain — 레벨 2 구간은 2점(구 고정값 3 폐기).
+	_check("stat_points +2 누적(exp_curve.csv stat_points_gain)", GameState.stat_points == 2)
 	_check("skill_points +1 누적", GameState.skill_points == 1)
 	_check("HP 전량 회복(max_hp=%d)" % _player.resources.max_hp, _player.resources.hp == _player.resources.max_hp)
 	_check("스태미나 전량 회복", _player.resources.stamina == _player.resources.max_stamina)

@@ -1,4 +1,4 @@
-## 헤드리스 스모크 테스트: M3-3 "5스탯 실제 적용 + 스탯 분배 + 스킬 배우기/장착/시전/쿨타임".
+## 헤드리스 스모크 테스트: M3-3/M4-4 "6스탯 실제 적용 + 스탯 분배 + 스킬 배우기/장착/시전/쿨타임".
 ## GameState.stats/learned_skills/skill_slots <-> Progression.allocate_stat()/get_derived()/
 ## learn_skill()/assign_hotbar()/can_cast_skill()/roll_crit() <-> 실제 Player/Hitbox/Events
 ## 배선 전체를 실제 Main.tscn(Slime3 더미)으로 확인한다(단위 계산은 test_stat_calc.gd/
@@ -46,9 +46,11 @@ func _check(condition: bool, label: String) -> void:
 		print("[FAIL] %s" % label)
 
 
+## M4-4(§2): 상승 비용이 체증하므로 "N번 올리기"에 필요한 포인트를 넉넉히 지급한 뒤
+## 실제 분배 횟수만 센다(단위 검증은 test_progression_v2.gd 몫, 여기는 배선만 본다).
 func _allocate(key: String, times: int) -> void:
-	GameState.stat_points += times
 	for i in range(times):
+		GameState.stat_points += Progression.next_stat_cost(key)
 		Progression.allocate_stat(key)
 
 
@@ -120,7 +122,9 @@ func _check_skill_cast_and_cooldown() -> void:
 	_check(learned and equipped and GameState.skill_slots[0] == SKILL_ID,
 		"스킬 배우기+핫바 슬롯0 배정: %s" % SKILL_ID)
 
-	var entry: Dictionary = Data.get_value("skills", SKILL_ID, {})
+	# M4-4(D-170): 수치는 현재 습득 레벨의 levels[] 항목에서 읽는다.
+	var entry: Dictionary = Progression.skill_level_data(SKILL_ID)
+	var sp_before: float = GameState.sp
 	var expected_base: int = SkillCalc.damage_for(entry, _player.get_attack_power())
 	var hp_before: int = _dummy.hp
 
@@ -148,6 +152,11 @@ func _check_skill_cast_and_cooldown() -> void:
 				% [str(ev), SKILL_ID, float(entry.get("cooldown_sec", 0.0))])
 
 	_check(not Progression.can_cast_skill(0), "시전 직후 쿨타임 중이라 재시전 불가")
+	# 대기 중에도 SP 회복이 돌므로(§3) 관측 감소량은 sp_cost보다 약간 작을 수 있다.
+	var sp_dropped: float = sp_before - GameState.sp
+	var sp_cost: float = float(entry.get("sp_cost", 0.0))
+	_check(sp_dropped <= sp_cost + 0.01 and sp_dropped >= sp_cost - 2.0,
+		"SP 소모 %.2f (기대 sp_cost=%.1f, 스태미나가 아니라 SP — D-169)" % [sp_dropped, sp_cost])
 
 	var ready_slots: Array = []
 	var ready_cb := func(slot: int) -> void: ready_slots.append(slot)

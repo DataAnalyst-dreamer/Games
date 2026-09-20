@@ -42,6 +42,10 @@ static func stat_gains_for_level(level: int, curve: Dictionary) -> Dictionary:
 		gains["attack"] = float(r["atk_bonus"])
 	if r.has("stamina_bonus") and float(r["stamina_bonus"]) != 0.0:
 		gains["stamina"] = float(r["stamina_bonus"])
+	# M4-4(§2): 레벨업당 스탯 포인트 지급량은 exp_curve.csv의 stat_points_gain 컬럼이
+	# 정본이다(stats.json.stat_points_per_levelup 고정값 3은 레거시로 격하).
+	if r.has("stat_points_gain"):
+		gains["stat_points"] = int(r["stat_points_gain"])
 	return gains
 
 
@@ -68,3 +72,30 @@ static func apply_exp(current_exp: int, current_level: int, gained: int, curve: 
 	if level >= max_level:
 		exp = 0
 	return {"exp": exp, "level": level, "level_ups": level_ups}
+
+
+# --- M4-4 세이브 마이그레이션(순수 변환). game_state.gd는 500줄 상한을 넘긴 파일이라
+# (D-157) 로직을 여기 두고 from_dict()는 한 줄 호출만 한다. ---
+
+## 옛 세이브의 5스탯 dict를 v2 6스탯(agi 추가)으로 올린다 — 없는 키는 0(기본값).
+static func migrate_stats(value: Variant) -> Dictionary:
+	var src: Dictionary = value if value is Dictionary else {}
+	var out: Dictionary = {}
+	for key: String in ["str", "agi", "dex", "int", "vit", "luk"]:
+		out[key] = int(src.get(key, 0))
+	return out
+
+
+## 옛 세이브의 learned_skills(Array[String])를 v2의 id -> level Dictionary로 올린다
+## (D-170: 배운 스킬은 전부 레벨 1로 간주). 이미 Dictionary면 정수 레벨로 정규화만 한다.
+static func migrate_learned(value: Variant) -> Dictionary:
+	var out: Dictionary = {}
+	if value is Dictionary:
+		for id_v: Variant in (value as Dictionary):
+			var level: int = int((value as Dictionary)[id_v])
+			if level > 0:
+				out[String(id_v)] = level
+	elif value is Array:
+		for id_v: Variant in (value as Array):
+			out[String(id_v)] = 1
+	return out

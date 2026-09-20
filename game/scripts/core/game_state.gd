@@ -54,9 +54,13 @@ var level_stat_bonus: Dictionary = {"max_hp": 0, "attack": 0.0}
 
 ## M3-3(D-158~D-162) 신설 — 저장값만 여기 두고 소비(전투 적용)·분배·학습/장착 검증은
 ## 전부 Progression 오토로드(progression_service.gd)가 전담한다(이 파일 500줄 상한 유지
-## 원칙, 위 주석과 동일). stats 키는 str/dex/int/vit/luk 5개 고정(stats.json.allocation).
-var stats: Dictionary = {"str": 0, "dex": 0, "int": 0, "vit": 0, "luk": 0}
-var learned_skills: Array[String] = []
+## 원칙, 위 주석과 동일). M4-4(D-167~D-174): stats 키는 str/agi/dex/int/vit/luk 6개
+## 고정(agi 신규, stats.json.allocation.initial), learned_skills는 skill_id -> 현재 레벨
+## Dictionary(D-170 스킬 레벨 도입 — 옛 Array 세이브는 ProgressionCalc.migrate_learned()가
+## 각 레벨 1로 올린다). sp는 스킬 전용 자원(D-169/D-190, 회복 틱은 Progression 담당).
+var stats: Dictionary = {"str": 0, "agi": 0, "dex": 0, "int": 0, "vit": 0, "luk": 0}
+var learned_skills: Dictionary = {}
+var sp: float = 0.0
 ## M4-1(D-175~D-177) 9칸으로 확장(옛 2칸 세이브는 Progression._on_load_completed()가
 ## hotbar로 승격 마이그레이션한다 — 이 파일은 필드 선언·직렬화만 담당).
 var skill_slots: Array[String] = ["", "", "", "", "", "", "", "", ""]
@@ -344,6 +348,12 @@ func _apply_equipment_stats_to_player() -> void:
 	var vit_bonus: float = StatCalc.hp_bonus(
 		int(stats.get("vit", 0)), float(Data.get_value("stats", "vit.hp_per_point", 5.0)))
 	equip_stats["max_hp"] = float(equip_stats.get("max_hp", 0.0)) + float(level_stat_bonus.get("max_hp", 0)) + vit_bonus
+	# M4-4(D-168/D-193): 최대 HP 패시브(max_hp_pct)와 AGI 이동속도·이동 패시브·버프는
+	# 전부 Progression이 합성해 주고(수치 계산은 그쪽 한 곳), 여기서는 곱만 한다.
+	equip_stats["max_hp"] = (float(Tuning.PLAYER_MAX_HP) + float(equip_stats["max_hp"])) \
+		* (1.0 + Progression.passive_bonus("max_hp_pct") * 0.01) - float(Tuning.PLAYER_MAX_HP)
+	equip_stats["speed_pct"] = (1.0 + float(equip_stats.get("speed_pct", 0.0))) \
+		* Progression.move_speed_mult() - 1.0
 	_player.apply_equipment_stats(equip_stats)
 
 
@@ -567,6 +577,7 @@ func to_dict() -> Dictionary:
 		"level_stat_bonus": level_stat_bonus.duplicate(),
 		"stats": stats.duplicate(),
 		"learned_skills": learned_skills.duplicate(),
+		"sp": sp,
 		"skill_slots": skill_slots.duplicate(),
 		"hotbar": hotbar.duplicate(true),
 	}
@@ -591,11 +602,11 @@ func from_dict(data: Dictionary) -> void:
 	stat_points = int(data.get("stat_points", 0))
 	skill_points = int(data.get("skill_points", 0))
 	level_stat_bonus = (data.get("level_stat_bonus", {"max_hp": 0, "attack": 0.0}) as Dictionary).duplicate()
-	stats = (data.get("stats", {"str": 0, "dex": 0, "int": 0, "vit": 0, "luk": 0}) as Dictionary).duplicate()
-	var loaded_skills: Array[String] = []
-	for id_v: Variant in (data.get("learned_skills", []) as Array):
-		loaded_skills.append(String(id_v))
-	learned_skills = loaded_skills
+	# M4-4: 5스탯/Array 세이브 -> 6스탯/Dictionary 승격(변환 로직은 ProgressionCalc,
+	# 이 파일은 500줄 상한 때문에 호출만 한다 — D-157).
+	stats = ProgressionCalc.migrate_stats(data.get("stats", {}))
+	learned_skills = ProgressionCalc.migrate_learned(data.get("learned_skills", {}))
+	sp = float(data.get("sp", 0.0))
 	var loaded_slots: Array[String] = ["", "", "", "", "", "", "", "", ""]
 	var slots_data: Array = data.get("skill_slots", [])
 	for i in range(mini(loaded_slots.size(), slots_data.size())):

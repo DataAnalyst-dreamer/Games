@@ -84,8 +84,9 @@ func test_accept_kill_progress_complete_and_rewards() -> void:
 	# giver="system"이라 마지막 목표 완료 즉시 advance()가 자동 호출된다.
 	assert_eq(qs.get_state("quest_main_a1_03_shadowfall"), "completed")
 	assert_true(qs._completed.has("quest_main_a1_03_shadowfall"))
-	assert_eq(GameState.gold, 10, "quest_main_a1_03_shadowfall rewards.gold=10")
-	assert_eq(qs.total_exp_earned, 15, "rewards.exp=15 placeholder 누적")
+	# M4-4(§6): 퀘스트 보상이 v2 공식(exp_to_next 비율 기반)으로 재산정됐다 — act1_hartland.json이 정본.
+	assert_eq(GameState.gold, 25, "quest_main_a1_03_shadowfall rewards.gold=25")
+	assert_eq(qs.total_exp_earned, 20, "rewards.exp=20 누적")
 
 
 func test_kill_progress_ignores_other_monster_ids() -> void:

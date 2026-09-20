@@ -41,7 +41,7 @@ func _ready() -> void:
 	_ui_root.open_menu()
 	_ui_root.inventory_menu.select_tab("skill")
 	_skill_tab = _ui_root.inventory_menu.skill_panel_tab
-	Events.skills_changed.emit(["blade_power_slash"], ["blade_power_slash", ""], 0)
+	Events.skills_changed.emit({"blade_power_slash": 1}, ["blade_power_slash", ""], 0) # M4-4: learned는 id->레벨
 	_skill_tab._sub_tab_index = 1
 	_skill_tab._skill_focus_index = _skill_tab._skill_ids.find("blade_power_slash")
 	_skill_tab._refresh_skill_detail()

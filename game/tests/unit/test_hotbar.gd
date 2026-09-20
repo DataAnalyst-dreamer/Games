@@ -25,7 +25,7 @@ func before_each() -> void:
 	}
 	GameState.hotbar = _empty_hotbar()
 	GameState.skill_slots = ["", "", "", "", "", "", "", "", ""]
-	GameState.learned_skills = [REAL_SKILL_ID]
+	GameState.learned_skills = {REAL_SKILL_ID: 1} # M4-4(D-170): id -> 레벨
 
 
 func after_each() -> void:

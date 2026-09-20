@@ -35,7 +35,9 @@ func enter(_prev: StringName, _data: Dictionary = {}) -> void:
 	_direction = input_dir.normalized() if input_dir != Vector2.ZERO else player.facing
 	player.set_facing(_direction)
 
-	var iframes_sec: float = float(Data.get_value("combat", "roll.iframes_sec", 0.3))
+	# M4-4(D-168, §1 FLEE 번역 a): AGI만큼 구르기 판정창이 넓어진다(확률 회피 아님).
+	var iframes_sec: float = float(Data.get_value("combat", "roll.iframes_sec", 0.3)) \
+		+ Progression.get_derived().get("roll_iframe_bonus", 0.0)
 	_duration_sec = float(Data.get_value("combat", "roll.duration_sec", 0.45))
 	var distance_px: float = float(Data.get_value("combat", "roll.distance_px", 48.0))
 	_speed_px_s = RollCalc.average_speed_px_s(distance_px, _duration_sec)

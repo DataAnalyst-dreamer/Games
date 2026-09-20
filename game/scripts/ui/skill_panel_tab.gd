@@ -51,7 +51,7 @@ var _sub_tab_index: int = 0
 var _stats: Dictionary = {}
 var _derived: Dictionary = {}
 var _stat_points: int = 0
-var _learned: Array = []
+var _learned: Dictionary = {} # M4-4(D-170): skill_id -> 레벨. 트리 UI 재작업은 병렬 담당.
 var _slots: Array = ["", ""]
 var _skill_points: int = 0
 
@@ -192,7 +192,7 @@ func _load_initial_state() -> void:
 	_stat_points = GameState.stat_points
 	_skill_points = GameState.skill_points
 	var learned_variant: Variant = GameState.get("learned_skills")
-	_learned = learned_variant if typeof(learned_variant) == TYPE_ARRAY else []
+	_learned = learned_variant if typeof(learned_variant) == TYPE_DICTIONARY else {}
 	var slots_variant: Variant = GameState.get("skill_slots")
 	_slots = slots_variant if typeof(slots_variant) == TYPE_ARRAY and (slots_variant as Array).size() >= 2 else ["", ""]
 	_derived = {} # 신호 수신 전까지 "-"로 표시(docs/ui/hud.md 3.5절과 동일 선례).
@@ -206,7 +206,7 @@ func _on_stats_changed(stats: Dictionary, derived: Dictionary, stat_points: int)
 		_refresh_stat_body()
 
 
-func _on_skills_changed(learned: Array, slots: Array, skill_points: int) -> void:
+func _on_skills_changed(learned: Dictionary, slots: Array, skill_points: int) -> void:
 	_learned = learned
 	_slots = slots
 	_skill_points = skill_points
