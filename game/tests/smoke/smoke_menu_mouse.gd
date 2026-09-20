@@ -66,6 +66,13 @@ func _click(control: Control) -> void:
 
 func _ready() -> void:
 	print("=== SMOKE MENU MOUSE: 탭 전환/노드 포커스·습득/스탯 분배/핫바 등록/닫기(좌표 클릭) ===")
+	# 순수 --headless에서는 마우스 이벤트가 뷰포트까지 전달되지 않는다. 전체 스모크를
+	# --headless로 한 번에 돌릴 때 영구 실패로 남지 않도록 건너뛰기로 끝낸다(캡처 씬과 동일 관례).
+	if DisplayServer.get_name() == "headless":
+		print("[SKIP] 렌더러 없음 - xvfb-run 으로 실행해야 클릭이 전달된다")
+		print("SMOKE_MENU_MOUSE_RESULT FAIL=0")
+		get_tree().quit(0)
+		return
 	_out_dir = ProjectSettings.globalize_path("res://").path_join("../docs/art/preview").simplify_path()
 	DirAccess.make_dir_recursive_absolute(_out_dir)
 
