@@ -144,6 +144,25 @@ func find_by_uid(uid: String) -> int:
 	return -1
 
 
+## M4-1(핫바) 신설. 핫바는 uid가 아니라 item_id로 배정되므로(스택 소모 시 슬롯이
+## 사라졌다 재획득 시 다른 uid/슬롯으로 되살아나도 계속 동작해야 함) 첫 매칭 슬롯
+## 인덱스를 찾는다. 여러 슬롯에 나뉜 스택(stack_max 초과분)은 앞쪽부터 소모된다.
+func find_first_by_item_id(item_id: String) -> int:
+	for i in slots.size():
+		if String((slots[i] as Dictionary).get("item_id", "")) == item_id:
+			return i
+	return -1
+
+
+## 핫바 아이템 슬롯의 수량 표시(HUD)용. 여러 슬롯에 나뉜 스택도 합산한다.
+func count_item(item_id: String) -> int:
+	var total := 0
+	for slot: Dictionary in slots:
+		if String(slot.get("item_id", "")) == item_id:
+			total += int(slot.get("quantity", 0))
+	return total
+
+
 ## 자동 정렬(F3-2: "등급→종류→id"). items_table은 슬롯의 category를 조회하기 위해
 ## 호출부(items.json 소유 테이블)가 명시적으로 넘긴다 — 이 클래스는 Data 오토로드를
 ## 직접 참조하지 않는 순수 로직 원칙을 지킨다.

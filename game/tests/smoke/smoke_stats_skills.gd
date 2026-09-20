@@ -1,6 +1,6 @@
 ## 헤드리스 스모크 테스트: M3-3 "5스탯 실제 적용 + 스탯 분배 + 스킬 배우기/장착/시전/쿨타임".
 ## GameState.stats/learned_skills/skill_slots <-> Progression.allocate_stat()/get_derived()/
-## learn_skill()/equip_skill()/can_cast_skill()/roll_crit() <-> 실제 Player/Hitbox/Events
+## learn_skill()/assign_hotbar()/can_cast_skill()/roll_crit() <-> 실제 Player/Hitbox/Events
 ## 배선 전체를 실제 Main.tscn(Slime3 더미)으로 확인한다(단위 계산은 test_stat_calc.gd/
 ## test_skill_calc.gd가 순수 로직으로 커버 — 이 스모크는 배선만 본다).
 ##
@@ -109,15 +109,16 @@ func _wait_frames(n: int) -> void:
 		await get_tree().physics_frame
 
 
-## 스킬 배우기(D-159) -> 슬롯0 장착(D-160) -> Q(skill_1) 시전 -> 실제 히트박스 데미지
-## 배율 확인 -> Events.skill_cast/skill_ready + Progression.can_cast_skill() 쿨타임 왕복.
+## 스킬 배우기(D-159) -> 핫바 슬롯0 배정(M4-1, D-175~D-177) -> hotbar_1 시전 -> 실제
+## 히트박스 데미지 배율 확인 -> Events.skill_cast/skill_ready + Progression.can_cast_skill()
+## 쿨타임 왕복.
 func _check_skill_cast_and_cooldown() -> void:
 	const SKILL_ID := "blade_power_slash"
 	GameState.skill_points += 1
 	var learned: bool = Progression.learn_skill(SKILL_ID)
-	var equipped: bool = Progression.equip_skill(0, SKILL_ID)
+	var equipped: bool = Progression.assign_hotbar(0, "skill", SKILL_ID)
 	_check(learned and equipped and GameState.skill_slots[0] == SKILL_ID,
-		"스킬 배우기+슬롯0 장착: %s" % SKILL_ID)
+		"스킬 배우기+핫바 슬롯0 배정: %s" % SKILL_ID)
 
 	var entry: Dictionary = Data.get_value("skills", SKILL_ID, {})
 	var expected_base: int = SkillCalc.damage_for(entry, _player.get_attack_power())
@@ -126,7 +127,7 @@ func _check_skill_cast_and_cooldown() -> void:
 	var cast_events: Array = []
 	var cb := func(slot: int, id: String, cd: float) -> void: cast_events.append([slot, id, cd])
 	Events.skill_cast.connect(cb)
-	_press_action("skill_1")
+	_press_action("hotbar_1")
 	await _wait_frames(6) # activate()의 call_deferred + area 재판정이 반영될 시간.
 	Events.skill_cast.disconnect(cb)
 

@@ -10,10 +10,18 @@
 ## M3-3(D-158~D-162, F1-2/F1-3) 추가: 5스탯 분배 + 스킬 배우기/장착/시전/쿨타임. 계산은
 ## StatCalc/SkillCalc(순수, RefCounted)에 위임하고 여기는 GameState 반영·Events 발신·
 ## 쿨타임 타이머만 담당한다(기존 exp/레벨 부분과 동일 원칙). 합의된 공개 인터페이스:
-##   Progression.allocate_stat(key) / get_derived() / learn_skill(id) / equip_skill(slot,id) /
-##   unequip_skill(slot) / can_cast_skill(slot) / start_skill_cooldown(slot, skill_id) /
+##   Progression.allocate_stat(key) / get_derived() / learn_skill(id) /
+##   can_cast_skill(slot) / start_skill_cooldown(slot, skill_id) /
 ##   roll_crit(damage) (attack.gd/skill.gd 공용)
-##   Events.stats_changed / skills_changed / skill_cast / skill_ready
+##   Events.stats_changed / skill_cast / skill_ready
+##
+## M4-1(D-175~D-177) 추가: 핫바 9칸(스킬·아이템 혼용). 기존 skill_1(Q)/skill_2(R) 전용
+## equip_skill/unequip_skill(slot 0~1 고정)은 assign_hotbar/clear_hotbar(slot 0~8)로
+## 대체했다 — 스킬 배정 시 skill_slots[slot]도 함께 채워 can_cast_skill/시전/쿨타임은
+## 그대로 slot 인덱스로 동작한다. 옛 세이브(2칸 skill_slots, hotbar 없음) 마이그레이션은
+## _on_load_completed()에서 처리한다(GameState.from_dict()는 필드 로딩만 담당).
+##   Progression.assign_hotbar(slot, kind, id) / clear_hotbar(slot)
+##   Events.hotbar_changed / skills_changed(learned, slots, skill_points — slots는 이제 9칸)
 extends Node
 
 const MAX_LEVEL_FALLBACK := 50
@@ -117,9 +125,25 @@ func _on_enemy_died(enemy: Node, killer: Node) -> void:
 func _on_load_completed(_slot: int, _kind: StringName, ok: bool) -> void:
 	if not ok:
 		return
+	_migrate_hotbar_if_needed()
 	_emit_exp_changed()
 	_emit_stats_changed()
 	_emit_skills_changed()
+
+
+## M4-1(D-175~D-177) 세이브 마이그레이션. GameState.from_dict()는 옛 세이브(hotbar 필드
+## 없음)를 의도적으로 빈 배열(size 0)로 남겨 둔다(game_state.gd 주석 참고) — 새 게임
+## 기본값(9칸, 빈 dict로 채움)과 구분하기 위해서다. 여기서만 그 구분을 소비해 옛
+## skill_slots(0/1번 칸)를 hotbar로 승격한다. 신규 세이브(hotbar 이미 9칸)는 그냥 지나간다.
+func _migrate_hotbar_if_needed() -> void:
+	if not GameState.hotbar.is_empty():
+		return
+	var migrated: Array = []
+	for skill_id_v: Variant in GameState.skill_slots:
+		var skill_id: String = String(skill_id_v)
+		migrated.append({"kind": "skill", "id": skill_id} if skill_id != "" else {"kind": "", "id": ""})
+	GameState.hotbar = migrated
+	Events.hotbar_changed.emit(GameState.hotbar)
 
 
 # --- M3-3: 스탯 분배 ---
@@ -196,19 +220,36 @@ func learn_skill(id: String) -> bool:
 	return true
 
 
-## slot(0/1)에 id를 장착한다. id=""이면 해제(D-160: 슬롯 교체 자유 — 배운 스킬이면 언제든).
-func equip_skill(slot: int, id: String) -> bool:
-	if slot < 0 or slot >= GameState.skill_slots.size():
+## slot(0~8)에 skill 또는 item을 배정한다(M4-1, D-160 계승: 슬롯 교체 자유).
+## kind="skill"이면 배운 스킬만(SkillCalc.can_equip), kind="item"이면 id만 있으면 된다
+## (재고 유무는 시전 시점에 판단 — D-177: 재고 0이어도 슬롯 배정 자체는 유지).
+## D-175: 같은 스킬을 여러 슬롯에 중복 배정하는 것을 막지 않는다(제약 없음).
+func assign_hotbar(slot: int, kind: String, id: String) -> bool:
+	if slot < 0 or slot >= GameState.hotbar.size():
 		return false
-	if not SkillCalc.can_equip(id, GameState.learned_skills):
+	if kind == "skill":
+		if not SkillCalc.can_equip(id, GameState.learned_skills):
+			return false
+		GameState.skill_slots[slot] = id
+	elif kind == "item":
+		if id == "":
+			return false
+		GameState.skill_slots[slot] = "" # 이 슬롯에 스킬이 있었다면 해제.
+	else:
 		return false
-	GameState.skill_slots[slot] = id
+	GameState.hotbar[slot] = {"kind": kind, "id": id}
 	_emit_skills_changed()
+	Events.hotbar_changed.emit(GameState.hotbar)
 	return true
 
 
-func unequip_skill(slot: int) -> void:
-	equip_skill(slot, "")
+func clear_hotbar(slot: int) -> void:
+	if slot < 0 or slot >= GameState.hotbar.size():
+		return
+	GameState.skill_slots[slot] = ""
+	GameState.hotbar[slot] = {"kind": "", "id": ""}
+	_emit_skills_changed()
+	Events.hotbar_changed.emit(GameState.hotbar)
 
 
 func _emit_skills_changed() -> void:

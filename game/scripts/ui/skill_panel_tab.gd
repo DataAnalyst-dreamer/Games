@@ -4,10 +4,11 @@
 ## 빈 컨테이너만 둔다).
 ##
 ## 게임패드 우선(docs/ui/skill-panel.md §3): 좌/우로 스탯·스킬 서브탭 전환, 상/하로 행/
-## 목록 이동, 확인으로 배분/습득, 기존 skill_1(Q)/skill_2(R) 액션으로 슬롯 장착(새 입력맵
-## 추가 없음).
+## 목록 이동, 확인으로 배분/습득. M4-1(D-175~D-177)부터 슬롯 장착은 옛 skill_1(Q)/
+## skill_2(R) 전용 2칸 대신 `hotbar_1~9` 숫자키로 배정한다(포커스된 스킬에서 원하는
+## 슬롯 번호 키를 누르면 그 칸에 배정 — Progression.assign_hotbar(slot,"skill",id)).
 ##
-## `Progression.allocate_stat/learn_skill/equip_skill`(stage/m3-3, 아직 미병합)는
+## `Progression.allocate_stat/learn_skill/assign_hotbar`(stage/m3-3, 아직 미병합)는
 ## `has_method` 가드로 호출한다 — 미병합 상태에서도 컴파일·실행이 깨지지 않아야 하고
 ## (Progression에 class_name이 없어 정적 타입 검사를 우회하려면 `call()`이 필요하다),
 ## 실제 반영은 `Events.stats_changed`/`skills_changed` 신호로만 받는다(로직은 소비만
@@ -28,7 +29,6 @@ const DERIVED_LABEL_KEYS := {
 	"attack": &"ui.stat.derived.attack", "max_hp": &"ui.stat.derived.max_hp",
 	"defense": &"ui.stat.derived.defense", "crit_chance": &"ui.stat.derived.crit_chance",
 }
-const SKILL_SLOT_ACTIONS := [&"skill_1", &"skill_2"]
 
 var _sub_tab_bar: HBoxContainer
 var _sub_tab_buttons: Dictionary = {} # sub_tab_id -> Button
@@ -224,10 +224,11 @@ func handle_input(_delta: float) -> void:
 		_move_focus(1)
 	elif Input.is_action_just_pressed(&"ui_confirm"):
 		_confirm()
-	elif SUB_TABS[_sub_tab_index] == "skill" and Input.is_action_just_pressed(SKILL_SLOT_ACTIONS[0]):
-		_equip_focused_skill(0)
-	elif SUB_TABS[_sub_tab_index] == "skill" and Input.is_action_just_pressed(SKILL_SLOT_ACTIONS[1]):
-		_equip_focused_skill(1)
+	elif SUB_TABS[_sub_tab_index] == "skill":
+		for slot in 9:
+			if Input.is_action_just_pressed("hotbar_%d" % (slot + 1)):
+				_equip_focused_skill(slot)
+				break
 
 
 func _change_sub_tab(delta: int) -> void:
@@ -273,7 +274,7 @@ func _equip_focused_skill(slot: int) -> void:
 	var id: String = _skill_ids[_skill_focus_index]
 	if not _learned.has(id):
 		return
-	Progression.equip_skill(slot, id)
+	Progression.assign_hotbar(slot, "skill", id)
 
 
 # --- 표시 갱신: 스탯 ---

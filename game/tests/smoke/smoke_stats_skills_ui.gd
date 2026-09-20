@@ -2,8 +2,8 @@
 ##
 ## 실행: godot --headless --path game res://tests/smoke/SmokeStatsSkillsUi.tscn --quit-after 300
 ##
-## 로직 브랜치(stage/m3-3-*)의 Progression.allocate_stat/learn_skill/equip_skill이 아직
-## 병합 전이라 Events.stats_changed/skills_changed/skill_cast/skill_ready를 이 스모크가
+## 로직 브랜치(stage/m3-3-*)의 Progression.allocate_stat/learn_skill/assign_hotbar가 아직
+## 병합 전이라 Events.stats_changed/hotbar_changed/skill_cast/skill_ready를 이 스모크가
 ## 직접 emit해 UI만 독립적으로 검증한다(지시서 "개발 중엔 스모크에서 이 시그널을 직접
 ## emit" 참고, smoke_progress_ui.gd와 동일 패턴). game/data/skills.json은 더미가 아니라
 ## stage/m3-3-skill-data에서 병합해 온 실제 데이터(액티브 6종)를 그대로 쓴다.
@@ -62,11 +62,12 @@ func _ready() -> void:
 	var vit_row: Dictionary = _skill_tab._stat_rows[3]
 	_check(not (vit_row["preview"] as Label).text.is_empty(), "VIT 파생치 미리보기(HP/방어) 표시됨: '%s'" % (vit_row["preview"] as Label).text)
 
-	# --- 스킬 탭: Events.skills_changed 직접 emit ---
-	Events.skills_changed.emit(["blade_power_slash"], ["blade_power_slash", ""], 0)
-	print("Events.skills_changed 발신")
-	_check(_hud_slots._icon_labels[0].text == "B", "HUD SkillSlot1 아이콘이 계열 첫 글자 'B'로 대체(icon:null 대체 규칙)")
-	_check(_hud_slots._icon_labels[1].text == "", "HUD SkillSlot2는 미장착이라 빈 아이콘")
+	# --- 핫바 탭: Events.hotbar_changed 직접 emit(M4-1, D-175~D-177 — HUD는 이제
+	# skills_changed가 아니라 hotbar_changed로 슬롯 내용을 받는다) ---
+	Events.hotbar_changed.emit([{"kind": "skill", "id": "blade_power_slash"}, {"kind": "", "id": ""}])
+	print("Events.hotbar_changed 발신")
+	_check(_hud_slots._icon_labels[0].text == "B", "HUD HotbarSlot1 아이콘이 계열 첫 글자 'B'로 대체(icon:null 대체 규칙)")
+	_check(_hud_slots._icon_labels[1].text == "", "HUD HotbarSlot2는 미장착이라 빈 아이콘")
 
 	# --- HUD 쿨타임 오버레이: skill_cast -> 진행 중 -> skill_ready로 조기 해제 ---
 	Events.skill_cast.emit(0, &"blade_power_slash", 4.0)

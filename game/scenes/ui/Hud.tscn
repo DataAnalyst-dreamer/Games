@@ -233,112 +233,158 @@ offset_right = 110.0
 offset_bottom = -6.0
 mouse_filter = 2
 
-[node name="SkillSlot1" type="Panel" parent="Root/BottomCenter"]
+[node name="HotbarSlot1" type="Panel" parent="Root/BottomCenter"]
 layout_mode = 0
+offset_left = 2.0
 offset_top = 20.0
-offset_right = 18.0
+offset_right = 20.0
 offset_bottom = 38.0
 mouse_filter = 2
 
-[node name="SkillSlot1Label" type="Label" parent="Root/BottomCenter/SkillSlot1"]
+[node name="HotbarSlot1Label" type="Label" parent="Root/BottomCenter/HotbarSlot1"]
 layout_mode = 0
 offset_right = 18.0
 offset_bottom = 18.0
-mouse_filter = 2
-horizontal_alignment = 1
-vertical_alignment = 1
-text = "Q"
-
-[node name="SkillSlot2" type="Panel" parent="Root/BottomCenter"]
-layout_mode = 0
-offset_left = 20.0
-offset_top = 20.0
-offset_right = 38.0
-offset_bottom = 38.0
-mouse_filter = 2
-
-[node name="SkillSlot2Label" type="Label" parent="Root/BottomCenter/SkillSlot2"]
-layout_mode = 0
-offset_right = 18.0
-offset_bottom = 18.0
-mouse_filter = 2
-horizontal_alignment = 1
-vertical_alignment = 1
-text = "R"
-
-[node name="QuickCross" type="Control" parent="Root/BottomCenter"]
-layout_mode = 0
-offset_left = 80.0
-offset_top = 5.0
-offset_right = 128.0
-offset_bottom = 53.0
-mouse_filter = 2
-
-[node name="SlotUp" type="Panel" parent="Root/BottomCenter/QuickCross"]
-layout_mode = 0
-offset_left = 16.0
-offset_right = 32.0
-offset_bottom = 16.0
-mouse_filter = 2
-
-[node name="SlotUpLabel" type="Label" parent="Root/BottomCenter/QuickCross/SlotUp"]
-layout_mode = 0
-offset_right = 16.0
-offset_bottom = 16.0
 mouse_filter = 2
 horizontal_alignment = 1
 vertical_alignment = 1
 text = "1"
 
-[node name="SlotRight" type="Panel" parent="Root/BottomCenter/QuickCross"]
+[node name="HotbarSlot2" type="Panel" parent="Root/BottomCenter"]
 layout_mode = 0
-offset_left = 32.0
-offset_top = 16.0
-offset_right = 48.0
-offset_bottom = 32.0
+offset_left = 22.0
+offset_top = 20.0
+offset_right = 40.0
+offset_bottom = 38.0
 mouse_filter = 2
 
-[node name="SlotRightLabel" type="Label" parent="Root/BottomCenter/QuickCross/SlotRight"]
+[node name="HotbarSlot2Label" type="Label" parent="Root/BottomCenter/HotbarSlot2"]
 layout_mode = 0
-offset_right = 16.0
-offset_bottom = 16.0
+offset_right = 18.0
+offset_bottom = 18.0
 mouse_filter = 2
 horizontal_alignment = 1
 vertical_alignment = 1
 text = "2"
 
-[node name="SlotDown" type="Panel" parent="Root/BottomCenter/QuickCross"]
+[node name="HotbarSlot3" type="Panel" parent="Root/BottomCenter"]
 layout_mode = 0
-offset_left = 16.0
-offset_top = 32.0
-offset_right = 32.0
-offset_bottom = 48.0
+offset_left = 42.0
+offset_top = 20.0
+offset_right = 60.0
+offset_bottom = 38.0
 mouse_filter = 2
 
-[node name="SlotDownLabel" type="Label" parent="Root/BottomCenter/QuickCross/SlotDown"]
+[node name="HotbarSlot3Label" type="Label" parent="Root/BottomCenter/HotbarSlot3"]
 layout_mode = 0
-offset_right = 16.0
-offset_bottom = 16.0
+offset_right = 18.0
+offset_bottom = 18.0
 mouse_filter = 2
 horizontal_alignment = 1
 vertical_alignment = 1
 text = "3"
 
-[node name="SlotLeft" type="Panel" parent="Root/BottomCenter/QuickCross"]
+[node name="HotbarSlot4" type="Panel" parent="Root/BottomCenter"]
 layout_mode = 0
-offset_top = 16.0
-offset_right = 16.0
-offset_bottom = 32.0
+offset_left = 62.0
+offset_top = 20.0
+offset_right = 80.0
+offset_bottom = 38.0
 mouse_filter = 2
 
-[node name="SlotLeftLabel" type="Label" parent="Root/BottomCenter/QuickCross/SlotLeft"]
+[node name="HotbarSlot4Label" type="Label" parent="Root/BottomCenter/HotbarSlot4"]
 layout_mode = 0
-offset_right = 16.0
-offset_bottom = 16.0
+offset_right = 18.0
+offset_bottom = 18.0
 mouse_filter = 2
 horizontal_alignment = 1
 vertical_alignment = 1
 text = "4"
+
+[node name="HotbarSlot5" type="Panel" parent="Root/BottomCenter"]
+layout_mode = 0
+offset_left = 82.0
+offset_top = 20.0
+offset_right = 100.0
+offset_bottom = 38.0
+mouse_filter = 2
+
+[node name="HotbarSlot5Label" type="Label" parent="Root/BottomCenter/HotbarSlot5"]
+layout_mode = 0
+offset_right = 18.0
+offset_bottom = 18.0
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "5"
+
+[node name="HotbarSlot6" type="Panel" parent="Root/BottomCenter"]
+layout_mode = 0
+offset_left = 102.0
+offset_top = 20.0
+offset_right = 120.0
+offset_bottom = 38.0
+mouse_filter = 2
+
+[node name="HotbarSlot6Label" type="Label" parent="Root/BottomCenter/HotbarSlot6"]
+layout_mode = 0
+offset_right = 18.0
+offset_bottom = 18.0
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "6"
+
+[node name="HotbarSlot7" type="Panel" parent="Root/BottomCenter"]
+layout_mode = 0
+offset_left = 122.0
+offset_top = 20.0
+offset_right = 140.0
+offset_bottom = 38.0
+mouse_filter = 2
+
+[node name="HotbarSlot7Label" type="Label" parent="Root/BottomCenter/HotbarSlot7"]
+layout_mode = 0
+offset_right = 18.0
+offset_bottom = 18.0
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "7"
+
+[node name="HotbarSlot8" type="Panel" parent="Root/BottomCenter"]
+layout_mode = 0
+offset_left = 142.0
+offset_top = 20.0
+offset_right = 160.0
+offset_bottom = 38.0
+mouse_filter = 2
+
+[node name="HotbarSlot8Label" type="Label" parent="Root/BottomCenter/HotbarSlot8"]
+layout_mode = 0
+offset_right = 18.0
+offset_bottom = 18.0
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "8"
+
+[node name="HotbarSlot9" type="Panel" parent="Root/BottomCenter"]
+layout_mode = 0
+offset_left = 162.0
+offset_top = 20.0
+offset_right = 180.0
+offset_bottom = 38.0
+mouse_filter = 2
+
+[node name="HotbarSlot9Label" type="Label" parent="Root/BottomCenter/HotbarSlot9"]
+layout_mode = 0
+offset_right = 18.0
+offset_bottom = 18.0
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "9"
 
 [node name="BottomLeft" type="Control" parent="Root"]
 layout_mode = 1

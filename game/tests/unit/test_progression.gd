@@ -184,7 +184,9 @@ func test_game_state_level_exp_round_trips_through_save_dict() -> void:
 	restored.free()
 
 
-## M3-3(D-158~D-162): 5스탯/배운 스킬/슬롯도 동일 라운드트립을 거쳐야 한다.
+## M3-3(D-158~D-162): 5스탯/배운 스킬/슬롯도 동일 라운드트립을 거쳐야 한다. M4-1부터
+## skill_slots는 9칸이라(D-175~D-177) 옛 2칸만 채운 배열도 나머지가 빈 문자열로
+## 패딩돼야 한다(from_dict의 자체 크기 방어 — 마이그레이션 자체는 Progression 몫).
 func test_game_state_stats_and_skills_round_trip_through_save_dict() -> void:
 	var gs: Node = load("res://scripts/core/game_state.gd").new()
 	gs.stats = {"str": 3, "dex": 1, "int": 0, "vit": 5, "luk": 2}
@@ -198,6 +200,33 @@ func test_game_state_stats_and_skills_round_trip_through_save_dict() -> void:
 	restored.from_dict(saved)
 	assert_eq(restored.stats, {"str": 3, "dex": 1, "int": 0, "vit": 5, "luk": 2})
 	assert_eq(restored.learned_skills, ["blade_power_slash", "blade_thrust"])
-	assert_eq(restored.skill_slots, ["blade_power_slash", ""])
+	assert_eq(restored.skill_slots, ["blade_power_slash", "", "", "", "", "", "", "", ""])
 	gs.free()
+	restored.free()
+
+
+## M4-1(D-175~D-177) 신설: hotbar 9칸도 세이브 라운드트립을 거쳐야 한다.
+func test_game_state_hotbar_round_trips_through_save_dict() -> void:
+	var gs: Node = load("res://scripts/core/game_state.gd").new()
+	gs.hotbar[0] = {"kind": "skill", "id": "blade_power_slash"}
+	gs.hotbar[3] = {"kind": "item", "id": "potion_hp_small"}
+	var saved: Dictionary = gs.to_dict()
+
+	var restored: Node = load("res://scripts/core/game_state.gd").new()
+	restored.from_dict(saved)
+	assert_eq(restored.hotbar.size(), 9)
+	assert_eq(restored.hotbar[0], {"kind": "skill", "id": "blade_power_slash"})
+	assert_eq(restored.hotbar[3], {"kind": "item", "id": "potion_hp_small"})
+	assert_eq(restored.hotbar[1], {"kind": "", "id": ""})
+	gs.free()
+	restored.free()
+
+
+## M4-1 옛 세이브(hotbar 필드 자체가 없음) 호환: GameState.from_dict()는 hotbar를
+## 의도적으로 빈 배열로 남겨야 한다(마이그레이션 판단 신호 — Progression이 소비).
+func test_game_state_from_dict_leaves_hotbar_empty_when_save_predates_it() -> void:
+	var restored: Node = load("res://scripts/core/game_state.gd").new()
+	restored.from_dict({"skill_slots": ["blade_power_slash", ""]})
+	assert_true(restored.hotbar.is_empty(), "hotbar 키가 없는 옛 세이브는 빈 배열이어야 마이그레이션 신호가 된다")
+	assert_eq(restored.skill_slots, ["blade_power_slash", "", "", "", "", "", "", "", ""])
 	restored.free()

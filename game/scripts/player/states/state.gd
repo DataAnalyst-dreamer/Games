@@ -55,10 +55,24 @@ func get_stamina_regen_multiplier() -> float:
 	return 1.0
 
 
-## 스킬 발동 공용 헬퍼(M3-3, try_enter_roll과 동일 패턴). Idle/Move 등이 skill_1/skill_2
-## 입력에서 호출 — 쿨타임/스태미나/장착 여부는 Progression.can_cast_skill()이 검증한다.
+## 스킬 발동 공용 헬퍼(M3-3, try_enter_roll과 동일 패턴). try_use_hotbar()가 호출 —
+## 쿨타임/스태미나/장착 여부는 Progression.can_cast_skill()이 검증한다.
 func try_enter_skill(slot: int) -> void:
 	if Progression.can_cast_skill(slot):
 		finished.emit(&"Skill", {"slot": slot})
 	else:
 		Events.player_stamina_insufficient.emit(StringName("skill_%d" % slot))
+
+
+## 핫바(M4-1, D-175~D-177) 공용 헬퍼. Idle/Move가 hotbar_1~9 입력에서 호출 — 슬롯 내용에
+## 따라 스킬 시전(try_enter_skill) 또는 소비품 사용(GameState.use_item_by_id)으로 분기한다.
+## 빈 슬롯이거나 아이템 재고가 0이면(D-177: 슬롯은 유지) 조용히 아무 일도 하지 않는다.
+func try_use_hotbar(slot: int) -> void:
+	if slot < 0 or slot >= GameState.hotbar.size():
+		return
+	var entry: Dictionary = GameState.hotbar[slot]
+	match String(entry.get("kind", "")):
+		"skill":
+			try_enter_skill(slot)
+		"item":
+			GameState.use_item_by_id(String(entry.get("id", "")))

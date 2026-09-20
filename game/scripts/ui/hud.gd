@@ -34,12 +34,12 @@ var _npc_visit_lines: Dictionary = {} # Presentation only; not quest/save progre
 @onready var boss_hp_bar: ProgressBar = $BossBar/BossFrame/BossVBox/BossHPBar
 @onready var boss_phase_label: Label = $BossBar/BossFrame/BossVBox/BossPhase
 
-@onready var skill_slot_1: Panel = $BottomCenter/SkillSlot1
-@onready var skill_slot_2: Panel = $BottomCenter/SkillSlot2
-@onready var slot_up: Panel = $BottomCenter/QuickCross/SlotUp
-@onready var slot_right: Panel = $BottomCenter/QuickCross/SlotRight
-@onready var slot_down: Panel = $BottomCenter/QuickCross/SlotDown
-@onready var slot_left: Panel = $BottomCenter/QuickCross/SlotLeft
+## M4-1(D-175~D-177): 옛 스킬 슬롯 2개+퀵크로스 4개를 핫바 9칸(HotbarSlot1~9)으로 대체.
+@onready var hotbar_slots: Array[Panel] = [
+	$BottomCenter/HotbarSlot1, $BottomCenter/HotbarSlot2, $BottomCenter/HotbarSlot3,
+	$BottomCenter/HotbarSlot4, $BottomCenter/HotbarSlot5, $BottomCenter/HotbarSlot6,
+	$BottomCenter/HotbarSlot7, $BottomCenter/HotbarSlot8, $BottomCenter/HotbarSlot9,
+]
 
 @onready var log_list: VBoxContainer = $BottomLeft/LogList
 
@@ -162,7 +162,7 @@ func _apply_theme_frames() -> void:
 	minimap_frame.add_theme_stylebox_override("panel", wood)
 	boss_frame.add_theme_stylebox_override("panel", wood)
 	debug_bg.add_theme_stylebox_override("panel", parchment)
-	for slot: Panel in [skill_slot_1, skill_slot_2, slot_up, slot_right, slot_down, slot_left]:
+	for slot: Panel in hotbar_slots:
 		slot.add_theme_stylebox_override("panel", cell)
 
 

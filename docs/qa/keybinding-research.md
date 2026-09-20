@@ -128,3 +128,14 @@ Ring, Tunic) vs 우클릭 1(Gungeon) vs 없음 1**. → Space가 다수.
 - https://www.pcgamesn.com/diablo-4/controller-support
 - https://www.sportskeeda.com/gaming-tech/diablo-4-best-controller-settings-pc-ps5-xbox
 - `game/project.godot` [input] 절, `game/README.md` "입력 액션" 표 (프로젝트 내부 근거)
+
+## 2026-09-20 추가 결정 (D-175~D-177)
+
+실제 플레이 피드백: "스킬을 등록하려면 해당 단축키(Q)를 누르는데, Q가 메뉴 탭 이동
+(`ui_tab_prev`)과 겹쳐서 등록이 안 된다"가 실사용 버그로 확인됐다. 이 리서치가 "약한
+확신으로 유지" 항목으로 분류했던 `skill_1`/`skill_2`(Q/R)와 메뉴 탭 이동(Q/E)의 동시
+사용이 실제 충돌을 냈다는 뜻 — 디렉터 결정(D-175~D-177, M4-1)으로 다음을 폐기·교체한다:
+`skill_1`/`skill_2`/`quick_1~4` 액션은 삭제하고 **핫바 9칸(`hotbar_1~9`, 1~9키, 스킬·
+아이템 혼용)**으로 통합, 메뉴 탭 이동은 `ui_tab_prev`/`ui_tab_next`를 그대로 두되 물리키만
+`[`/`]`로 옮긴다(패드 LB/RB는 유지). 이 문서 위쪽 조사 내용 자체는 변경하지 않는다(당시
+근거는 유효) — 이 절만 후속 결정 기록.

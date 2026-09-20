@@ -617,7 +617,7 @@ func _update_guide_bar() -> void:
 	var pad: bool = _last_input_was_pad
 	var confirm_k: String = "A" if pad else "Enter"
 	var close_k: String = "B" if pad else "Backspace"
-	var tab_k: String = "LB/RB" if pad else "Q/E"
+	var tab_k: String = "LB/RB" if pad else "[/]"
 	var filter_k: String = "LT/RT" if pad else "Z/C"
 	var sort_k: String = "X" if pad else "Space"
 	var mark_k: String = "Y" if pad else "X"
@@ -701,4 +701,24 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed(&"ui_confirm"):
 		_handle_confirm()
 
+	if _focus_area == "grid":
+		for slot in 9:
+			if Input.is_action_just_pressed("hotbar_%d" % (slot + 1)):
+				_assign_focused_item_to_hotbar(slot)
+				break
+
 	_update_lock_hold(delta)
+
+
+## M4-1(D-175~D-177) 신설. 포커스된 그리드 칸이 소비품이면 hotbar_N으로 그 슬롯에
+## 배정한다(스킬 패널의 동일 관례 — Progression.assign_hotbar). 장비/재료 등은 핫바 대상이
+## 아니므로 조용히 무시한다.
+func _assign_focused_item_to_hotbar(slot: int) -> void:
+	if _focus_grid_index >= _visible_indices.size():
+		return
+	var slot_index: int = _visible_indices[_focus_grid_index]
+	var item_slot: Dictionary = GameState.inventory.slots[slot_index]
+	var item_def: Dictionary = Data.get_value("items", String(item_slot.get("item_id", "")), {})
+	if String(item_def.get("category", "")) != "consumable":
+		return
+	Progression.assign_hotbar(slot, "item", String(item_slot.get("item_id", "")))
