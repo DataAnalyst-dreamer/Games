@@ -38,6 +38,7 @@ const DERIVED_LABEL_KEYS := {
 	"post_recovery_mult": &"ui.stat.derived.post_recovery_mult", "sp_regen": &"ui.stat.derived.sp_regen",
 }
 
+var _content_backdrop: Panel
 var _sub_tab_bar: HBoxContainer
 var _sub_tab_buttons: Dictionary = {} # sub_tab_id -> Button
 
@@ -60,6 +61,18 @@ func _ready() -> void:
 
 
 func _build_ui() -> void:
+	# 코디네이터 후속 지시 2건: 인벤토리 메뉴 전체엔 이미 Root/Backdrop(72% 불투명)이
+	# 있지만, 다른 탭(InventoryTab/QuestLogTab)과 달리 이 탭만 본문 전체가 텍스트뿐이라
+	# (격자 셀 아트 같은 자체 배경이 없다) 풀밭 텍스처 위에서 유독 가독성이 떨어졌다.
+	# 같은 Inventory/styles/backdrop 스타일을 이 탭 전용으로 한 번 더 깔아(두 겹 알파
+	# 합성으로 체감 불투명도만 올리고 새 테마 토큰은 만들지 않음) 다른 화면은 그대로
+	# 두고 이 화면만 보정한다.
+	var content_backdrop := Panel.new()
+	content_backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	content_backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(content_backdrop)
+	_content_backdrop = content_backdrop
+
 	var root_vbox := VBoxContainer.new()
 	root_vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(root_vbox)
@@ -133,6 +146,8 @@ func open() -> void:
 	if not Events.stats_changed.is_connected(_on_stats_changed):
 		Events.stats_changed.connect(_on_stats_changed)
 	_skill_tree_tab.theme = theme # 부모가 _ready()에서 뒤늦게 theme을 대입하므로 그보다 나중.
+	if theme != null:
+		_content_backdrop.add_theme_stylebox_override("panel", theme.get_stylebox(&"backdrop", &"Inventory"))
 	_load_initial_state()
 	_sub_tab_index = 0
 	_stat_focus_index = 0

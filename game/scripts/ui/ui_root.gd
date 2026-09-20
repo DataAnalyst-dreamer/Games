@@ -105,8 +105,19 @@ func close_mailbox() -> void:
 	_recompute_paused()
 
 
+## M4-5 버그 수정: 전체화면 UI가 열려 있는 동안 Hud(CanvasLayer)를 계속 그리고 있었다.
+## InventoryMenu의 반투명 Backdrop(72% 불투명, 의도된 "은은한" 디자인)이 HUD 위에
+## 겹쳐지면서 HUD TopLeft의 HP바(적색 채움)·HP 숫자("100 / 100")가 28% 밝기로 비쳐
+## 보였고, 하필 InventoryMenu의 TabBar(좌상단, 거의 같은 자리)와 겹쳐 "스킬OO 도감O"처럼
+## 탭 글자 위에 숫자가 겹쳐 보이는 문제를 만들었다(디버그 캡처로 원인 확정 — Hud만
+## 숨기면 겹침이 완전히 사라짐, TabBar 쪽엔 중복 노드가 전혀 없었다). 전체화면 UI가
+## 열려 있는 동안은 어차피 각 화면이 필요한 정보(스탯/스킬 패널의 파생치 등)를 자체
+## 표시하므로, HUD를 숨겨도 정보 손실이 없다 — `_recompute_paused()`와 동일한 조건으로
+## 함께 갱신한다.
 func _recompute_paused() -> void:
-	get_tree().paused = is_menu_open() or is_blacksmith_open() or is_mailbox_open() or is_quest_npc_open()
+	var any_fullscreen_open: bool = is_menu_open() or is_blacksmith_open() or is_mailbox_open() or is_quest_npc_open()
+	get_tree().paused = any_fullscreen_open
+	hud.visible = not any_fullscreen_open
 
 
 func is_quest_npc_open() -> bool:

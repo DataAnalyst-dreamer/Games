@@ -136,21 +136,77 @@ static func sp_cost_at(skills_table: Dictionary, id: String, level: int) -> floa
 	return float(level_entry(skills_table.get(id, {}), level).get("sp_cost", 0.0))
 
 
-## 레벨별 수치를 필드명 그대로 나열한 일반화 텍스트(placeholder 단계 — 필드마다 개별
-## 로컬라이징을 새로 만들지 않는다, D-167 "아이콘 placeholder 허용" 관례와 동일 정신).
-## "level" 키 자체는 제외한다.
-static func level_detail_text(entry: Dictionary, level: int) -> String:
-	var lv: Dictionary = level_entry(entry, level)
-	var parts := PackedStringArray()
-	for key: Variant in lv.keys():
-		if String(key) == "level":
+# --- 레벨별 수치 표시(M4-5 후속, 코디네이터 지시 1건: "필드명 그대로 노출 금지") ---
+# skills.json v2에 실제로 등장하는 필드만 안다(§ python3 조사: levels[] 최상위
+# {sp_cost,cooldown_sec,damage_mult,value}, self_effect{invuln_sec,atk_buff_pct,
+# duration_sec,dmg_reduction_pct,move_speed_mult,dash_px}, passive_stat 9종). 이 목록
+# 밖의 필드는 "모르는 필드"로 취급해 조용히 건너뛴다(표시하지 않음) — 화면에 원문
+# 필드명이 노출되는 사고를 구조적으로 막는다(허용 목록 방식, 동적 순회 아님).
+const ACTIVE_FIELD_ORDER: Array[String] = ["sp_cost", "cooldown_sec", "damage_mult"]
+const SELF_EFFECT_FIELD_ORDER: Array[String] = [
+	"atk_buff_pct", "dmg_reduction_pct", "move_speed_mult", "invuln_sec", "dash_px", "duration_sec",
+]
+const KNOWN_PASSIVE_STATS: Array[String] = [
+	"atk_pct", "crit_damage_pct", "aspd_pct", "defense_flat", "guard_damage_reduction_pct",
+	"max_hp_pct", "sp_regen_pct", "crit_chance_pct", "move_speed_pct",
+]
+const _SECONDS_FIELDS: Array[String] = ["cooldown_sec", "duration_sec", "invuln_sec"]
+const _FLAT_FIELDS: Array[String] = ["sp_cost", "defense_flat", "dash_px"]
+
+
+## 필드 하나의 표시용 숫자 문자열(단위 없이 — 단위·라벨은 tr() 템플릿이 UI 쪽에서
+## 붙인다, 이 파일은 순수 계산이라 로컬라이징 문자열을 만들지 않는다). 정수로 떨어지면
+## 소수점을 생략(damage_mult 1.8 -> "180", 0.5% 스탯은 "0.5" 그대로 유지).
+static func _format_field_value(field: String, value: float) -> String:
+	if field in _SECONDS_FIELDS:
+		return "%.1f" % value
+	if field in _FLAT_FIELDS:
+		return str(int(round(value)))
+	var pct: float = value * 100.0 if field == "damage_mult" \
+		else (value - 1.0) * 100.0 if field == "move_speed_mult" \
+		else value
+	if is_equal_approx(pct, round(pct)):
+		return str(int(round(pct)))
+	return "%.1f" % pct
+
+
+static func _row(field: String, value: float, next_value: Variant) -> Dictionary:
+	var next_text: String = ""
+	if next_value != null and not is_equal_approx(float(next_value), value):
+		next_text = _format_field_value(field, float(next_value))
+	return {"field": field, "text": _format_field_value(field, value), "next_text": next_text}
+
+
+## 레벨 하나의 표시 행 목록: [{field, text, next_text}]. next_text는 다음 레벨 값이
+## 현재와 다를 때만 채워진다(빈 문자열이면 화살표 생략). 패시브 노드는 passive_stat
+## 한 줄만, 액티브/버프는 sp_cost·cooldown_sec·damage_mult(0이면 생략 — 순수 유틸기
+## 스킬의 "피해 0%" 노이즈 방지) + self_effect 필드 순으로 만든다.
+static func level_detail_rows(entry: Dictionary, level: int) -> Array[Dictionary]:
+	var rows: Array[Dictionary] = []
+	var max_level: int = int(entry.get("max_level", DEFAULT_MAX_LEVEL))
+	var cur: int = clampi(level, 1, max_level)
+	var has_next: bool = cur < max_level
+	var cur_lv: Dictionary = level_entry(entry, cur)
+	var next_lv: Dictionary = level_entry(entry, cur + 1) if has_next else {}
+
+	if entry.has("passive_stat"):
+		var stat: String = String(entry["passive_stat"])
+		if stat in KNOWN_PASSIVE_STATS and cur_lv.has("value"):
+			rows.append(_row(stat, float(cur_lv["value"]), next_lv.get("value")))
+		return rows
+
+	for field in ACTIVE_FIELD_ORDER:
+		if not cur_lv.has(field):
 			continue
-		var value: Variant = lv[key]
-		if typeof(value) == TYPE_DICTIONARY:
-			var sub := PackedStringArray()
-			for sub_key: Variant in (value as Dictionary).keys():
-				sub.append("%s %s" % [sub_key, str((value as Dictionary)[sub_key])])
-			parts.append(" ".join(sub))
-		else:
-			parts.append("%s %s" % [key, str(value)])
-	return " · ".join(parts)
+		var v: float = float(cur_lv[field])
+		if field == "damage_mult" and is_equal_approx(v, 0.0):
+			continue
+		rows.append(_row(field, v, next_lv.get(field)))
+
+	var self_effect: Dictionary = cur_lv.get("self_effect", {})
+	var next_self_effect: Dictionary = next_lv.get("self_effect", {})
+	for field in SELF_EFFECT_FIELD_ORDER:
+		if not self_effect.has(field):
+			continue
+		rows.append(_row(field, float(self_effect[field]), next_self_effect.get(field)))
+	return rows
