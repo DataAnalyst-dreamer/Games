@@ -37,6 +37,10 @@ signal skills_changed(learned: Array, slots: Array, skill_points: int)
 signal skill_cast(slot: int, skill_id: String, cooldown_sec: float)
 ## M3-3 신설. 해당 슬롯 쿨타임이 다 돌았을 때 1회.
 signal skill_ready(slot: int)
+## M4-2 UI가 declare-first로 선언(D-181, exp_changed/level_up 선례). stage/m4-1(로직,
+## 미병합)의 GameState.hotbar(9칸 {"kind":"skill"|"item"|"","id":String})가 바뀔 때마다
+## 발신 예정 — 병합 시 중복 선언되면 디렉터가 정리한다. hud_hotbar_bar.gd가 구독한다.
+signal hotbar_changed(hotbar: Array)
 
 # --- 전투 ---
 ## is_advantage: 원소 상성 적중 여부(ElementCalc.get_multiplier() > 1.0). is_critical:

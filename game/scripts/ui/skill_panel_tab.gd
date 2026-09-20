@@ -4,8 +4,9 @@
 ## 빈 컨테이너만 둔다).
 ##
 ## 게임패드 우선(docs/ui/skill-panel.md §3): 좌/우로 스탯·스킬 서브탭 전환, 상/하로 행/
-## 목록 이동, 확인으로 배분/습득, 기존 skill_1(Q)/skill_2(R) 액션으로 슬롯 장착(새 입력맵
-## 추가 없음).
+## 목록 이동, 확인으로 배분/습득. 슬롯 장착은 M4-2(D-181~183)에서 기존 skill_1(Q)/
+## skill_2(R) 2슬롯 방식을 걷어내고 9칸 핫바 등록(hotbar_register_input.gd, 포커스한
+## 스킬 위에서 1~9)으로 교체했다(Q/R 장착 코드 제거) — `HudHotbarBar`로 미리보기 표시.
 ##
 ## `Progression.allocate_stat/learn_skill/equip_skill`(stage/m3-3, 아직 미병합)는
 ## `has_method` 가드로 호출한다 — 미병합 상태에서도 컴파일·실행이 깨지지 않아야 하고
@@ -28,8 +29,6 @@ const DERIVED_LABEL_KEYS := {
 	"attack": &"ui.stat.derived.attack", "max_hp": &"ui.stat.derived.max_hp",
 	"defense": &"ui.stat.derived.defense", "crit_chance": &"ui.stat.derived.crit_chance",
 }
-const SKILL_SLOT_ACTIONS := [&"skill_1", &"skill_2"]
-
 var _sub_tab_bar: HBoxContainer
 var _sub_tab_buttons: Dictionary = {} # sub_tab_id -> Button
 
@@ -46,6 +45,7 @@ var _skill_detail_title: Label
 var _skill_detail_desc: Label
 var _skill_detail_meta: Label
 var _skill_detail_hint: Label
+var _hotbar_bar: HudHotbarBar # M4-2(D-181~183): 핫바 등록 미리보기.
 
 var _sub_tab_index: int = 0
 var _stats: Dictionary = {}
@@ -143,6 +143,8 @@ func _build_skill_body(parent: VBoxContainer) -> void:
 	_skill_detail_hint = Label.new()
 	_skill_detail_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	detail_box.add_child(_skill_detail_hint)
+	_hotbar_bar = HudHotbarBar.new()
+	detail_box.add_child(_hotbar_bar)
 
 
 func _apply_theme_colors() -> void:
@@ -160,6 +162,8 @@ func open() -> void:
 	if not Events.stats_changed.is_connected(_on_stats_changed):
 		Events.stats_changed.connect(_on_stats_changed)
 		Events.skills_changed.connect(_on_skills_changed)
+	_hotbar_bar.theme = theme # 부모(InventoryMenu)가 _ready()에서 뒤늦게 theme을 대입하므로
+	# _build_skill_body() 시점엔 아직 null이다 — open()은 그보다 항상 나중이라 안전하다.
 	_load_initial_state()
 	# "_comment" 등 메타 키(다른 테이블과 동일 관례, stats.json도 동일)는 스킬이 아니다.
 	_skill_ids.assign(Data.table("skills").keys().filter(func(id): return not String(id).begins_with("_")))
@@ -224,10 +228,9 @@ func handle_input(_delta: float) -> void:
 		_move_focus(1)
 	elif Input.is_action_just_pressed(&"ui_confirm"):
 		_confirm()
-	elif SUB_TABS[_sub_tab_index] == "skill" and Input.is_action_just_pressed(SKILL_SLOT_ACTIONS[0]):
-		_equip_focused_skill(0)
-	elif SUB_TABS[_sub_tab_index] == "skill" and Input.is_action_just_pressed(SKILL_SLOT_ACTIONS[1]):
-		_equip_focused_skill(1)
+	elif SUB_TABS[_sub_tab_index] == "skill" and not _skill_ids.is_empty() and _learned.has(_skill_ids[_skill_focus_index]):
+		if HotbarRegisterInput.try_assign("skill", _skill_ids[_skill_focus_index]):
+			_hotbar_bar.highlight_slot("skill", _skill_ids[_skill_focus_index])
 
 
 func _change_sub_tab(delta: int) -> void:
@@ -265,15 +268,6 @@ func _learn_focused_skill() -> void:
 	if _skill_state(id) != "learnable":
 		return
 	Progression.learn_skill(id)
-
-
-func _equip_focused_skill(slot: int) -> void:
-	if _skill_ids.is_empty():
-		return
-	var id: String = _skill_ids[_skill_focus_index]
-	if not _learned.has(id):
-		return
-	Progression.equip_skill(slot, id)
 
 
 # --- 표시 갱신: 스탯 ---
@@ -368,8 +362,10 @@ func _refresh_skill_detail() -> void:
 		_skill_detail_desc.text = ""
 		_skill_detail_meta.text = ""
 		_skill_detail_hint.text = ""
+		_hotbar_bar.highlight_slot("skill", "")
 		return
 	var id: String = _skill_ids[_skill_focus_index]
+	_hotbar_bar.highlight_slot("skill", id if _learned.has(id) else "")
 	var def: Dictionary = Data.get_value("skills", id, {})
 	_skill_detail_title.text = tr(StringName(String(def.get("name_key", id))))
 	_skill_detail_desc.text = tr(StringName(String(def.get("desc_key", ""))))

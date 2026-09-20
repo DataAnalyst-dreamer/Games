@@ -31,6 +31,7 @@ var _empty_hint: Label
 var _detail_title: Label
 var _detail_state: Label
 var _detail_objectives: VBoxContainer
+var _detail_rewards: VBoxContainer
 var _detail_track_hint: Label
 
 var _tab_index: int = 0
@@ -85,6 +86,8 @@ func _build_ui() -> void:
 	detail_box.add_child(_detail_state)
 	_detail_objectives = VBoxContainer.new()
 	detail_box.add_child(_detail_objectives)
+	_detail_rewards = VBoxContainer.new() # M4-2(D-181~183): 보상 표시.
+	detail_box.add_child(_detail_rewards)
 	_detail_track_hint = Label.new()
 	_detail_track_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	detail_box.add_child(_detail_track_hint)
@@ -231,6 +234,8 @@ func _refresh_list() -> void:
 func _refresh_detail() -> void:
 	for child in _detail_objectives.get_children():
 		child.queue_free()
+	for child in _detail_rewards.get_children():
+		child.queue_free()
 
 	var list: Array = _current_list()
 	if list.is_empty() or _focus_index >= list.size():
@@ -261,6 +266,42 @@ func _refresh_detail() -> void:
 			line.text = prefix + obj_label
 		_detail_objectives.add_child(line)
 
+	_populate_rewards(QuestLogUiCalc.reward_rows(qdef.get("rewards", {})))
+
 	var tracked_id: String = QuestSystem.get_tracked()
 	_detail_track_hint.text = tr(&"ui.quest_log.tracking_on") if quest_id == tracked_id \
 		else tr(&"ui.quest_log.track_hint")
+
+
+## M4-2(D-181~183): "완료해도 보상이 안 보인다" 대응 — QuestLogUiCalc.reward_rows()
+## 결과를 [아이콘(있으면)|텍스트] 줄로 그린다(아이템은 ItemIcon.resolve 재사용).
+func _populate_rewards(rows: Array[Dictionary]) -> void:
+	if rows.is_empty():
+		return
+	var header := Label.new()
+	header.text = tr(&"ui.quest_log.reward_header")
+	_detail_rewards.add_child(header)
+	for row: Dictionary in rows:
+		var line_box := HBoxContainer.new()
+		_detail_rewards.add_child(line_box)
+		var text := ""
+		var icon: Texture2D = null
+		match String(row.get("kind", "")):
+			"gold":
+				text = "+%d %s" % [int(row.get("amount", 0)), tr(&"ui.hud.gold_unit")]
+			"exp":
+				text = tr(&"ui.quest_log.reward_exp_fmt") % int(row.get("amount", 0))
+			"item":
+				var item_id: String = String(row.get("item_id", ""))
+				var item_def: Dictionary = Data.get_value("items", item_id, {})
+				text = "%s x%d" % [tr(StringName(String(item_def.get("name_key", item_id)))), int(row.get("qty", 1))]
+				icon = ItemIcon.resolve(item_id)
+		if icon != null:
+			var tex := TextureRect.new()
+			tex.texture = icon
+			tex.custom_minimum_size = Vector2(16, 16)
+			tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			line_box.add_child(tex)
+		var label := Label.new()
+		label.text = text
+		line_box.add_child(label)
