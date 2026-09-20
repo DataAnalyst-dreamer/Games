@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud_script"]
 [ext_resource type="Theme" path="res://ui/theme.tres" id="2_theme"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/ui/hud_skill_slots.gd" id="5_hud_skill_slots_script"]
 [ext_resource type="Script" path="res://scripts/ui/hud_quest_tracker.gd" id="6_hud_quest_tracker_script"]
 [ext_resource type="Script" path="res://scripts/ui/hud_sp_bar.gd" id="7_hud_sp_bar_script"]
+[ext_resource type="Script" path="res://scripts/ui/hud_minimap.gd" id="8_hud_minimap_script"]
 
 [node name="Hud" type="CanvasLayer"]
 
@@ -147,6 +148,31 @@ offset_right = 60.0
 offset_bottom = 36.0
 color = Color(0.145098, 0.235294, 0.152941, 1)
 mouse_filter = 2
+
+[node name="MinimapViewportContainer" type="SubViewportContainer" parent="Root/TopRight/MinimapFrame"]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 60.0
+offset_bottom = 36.0
+mouse_filter = 2
+stretch = true
+
+[node name="MinimapViewport" type="SubViewport" parent="Root/TopRight/MinimapFrame/MinimapViewportContainer"]
+transparent_bg = true
+size = Vector2i(56, 32)
+render_target_update_mode = 1
+
+[node name="MinimapCamera" type="Camera2D" parent="Root/TopRight/MinimapFrame/MinimapViewportContainer/MinimapViewport"]
+
+[node name="MinimapMarkers" type="Control" parent="Root/TopRight/MinimapFrame"]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 60.0
+offset_bottom = 36.0
+mouse_filter = 2
+script = ExtResource("8_hud_minimap_script")
 
 [node name="LevelUpBanner" type="Control" parent="Root"]
 layout_mode = 1

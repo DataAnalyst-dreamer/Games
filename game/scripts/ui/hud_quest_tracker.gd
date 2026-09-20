@@ -6,11 +6,10 @@
 ## 전혀 건드리지 않는다 — Hud.tscn에 노드 1개만 추가). 좌표 계산은 quest_tracker_calc.gd
 ## (순수 함수)에 위임하고, 여기서는 카메라·퀘스트 상태 조회 + Label 갱신만 한다.
 ##
-## 대상 위치 조회: world_objects.json(kind: location/object/npc)을 훑어 quest_npc.gd/
-## quest_object.gd가 표식(▼) 판정에 쓰는 것과 같은 공개 API(QuestSystem.get_active_
-## reach/interact/talk_objective_keys + is_tracked_objective_key)로 현재 추적 목표와
-## 일치하는 항목을 찾는다. kill(몬스터) 목표는 world_objects에 없어 위치가 없으므로
-## 자동으로 화살표가 뜨지 않는다(요구사항 그대로).
+## 대상 위치 조회(world_objects.json 기반)는 M5-2(미니맵)와 공유하기 위해
+## quest_target_locator.gd(QuestTargetLocator.find_tracked_target_position())로 뺐다 —
+## kill(몬스터) 목표는 world_objects에 없어 위치가 없으므로 자동으로 화살표가 뜨지
+## 않는다(요구사항 그대로).
 class_name HudQuestTracker
 extends Control
 
@@ -45,7 +44,7 @@ func _process(delta: float) -> void:
 
 func _refresh() -> void:
 	var camera: Camera2D = get_viewport().get_camera_2d()
-	var target: Variant = _find_tracked_target_pos()
+	var target: Variant = QuestTargetLocator.find_tracked_target_position()
 	if camera == null or target == null:
 		_arrow.visible = false
 		return
@@ -62,29 +61,3 @@ func _refresh() -> void:
 	_arrow.rotation = deg_to_rad(float(result.get("angle_deg", 0.0)) + 90.0) # "▲" 기본 방향이 위쪽이라 90도 보정.
 	var meters := QuestTrackerCalc.distance_meters(float(result.get("distance_px", 0.0)), float(Tuning.TILE_SIZE_PROTOTYPE))
 	_arrow.text = "▲ %dm" % int(round(meters))
-
-
-## world_objects.json을 kind별로 훑어 현재 추적 목표와 일치하는 위치를 찾는다. 이
-## 조회 자체는 QuestSystem 살아있는 상태에 의존해 순수 함수가 아니다 — quest_npc.gd
-## _refresh_marker()와 같은 이유로 quest_tracker_calc.gd에 넣지 않았다(단순 순회 1회분,
-## 별도 순수 함수로 뺄 만큼의 분기가 없다 — ponytail).
-func _find_tracked_target_pos() -> Variant:
-	if QuestSystem.get_tracked().is_empty():
-		return null
-	var world_objects: Dictionary = Data.table("world_objects")
-	for id: String in world_objects.keys():
-		if id.begins_with("_"):
-			continue
-		var entry: Dictionary = world_objects[id]
-		var keys: Array[String] = []
-		match String(entry.get("kind", "")):
-			"location": keys = QuestSystem.get_active_reach_objective_keys(StringName(id))
-			"object": keys = QuestSystem.get_active_interact_objective_keys(StringName(id))
-			"npc": keys = QuestSystem.get_active_talk_objective_keys(StringName(id))
-			_: continue
-		if not QuestSystem.is_tracked_objective_key(keys):
-			continue
-		var pos: Array = entry.get("position", [])
-		if pos.size() >= 2:
-			return Vector2(float(pos[0]), float(pos[1]))
-	return null
