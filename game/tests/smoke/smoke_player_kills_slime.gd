@@ -16,6 +16,14 @@
 ## 시나리오 B(Slime2, HP를 스크립트에서 임시로 부풀림): 3타 콤보 전체(입력 버퍼 체이닝 →
 ## 피니셔 배율 1.5×)가 정상적으로 동작하는지 별도로 확인한다(monsters.json은 그대로 두고
 ## 검증용 인스턴스의 hp 필드만 조작).
+##
+## 결정성: Progression.roll_crit()은 시드 없는 randf()로 LUK 크리티컬(base 5%)을 굴리므로
+## 그대로 두면 시나리오 B의 "기대 HP=964" 검사가 약 14% 확률(3타 중 1타라도 크리)로
+## 실패하는 플레이크가 된다(실측: 3타 크리 → 964 대신 956). 이 테스트는 콤보 배율만
+## 검증하므로 _ready()에서 메모리상 stats 테이블의 base_crit_chance를 0으로 덮어써
+## 크리를 끈다(stats.json 파일은 건드리지 않음, LUK=0이라 per_point 항도 0). 고정 seed()
+## 방식은 3타 전에 다른 시스템이 randf()를 몇 번 부르느냐에 따라 결과가 바뀌어 채택하지
+## 않았다. 크리 자체의 동작은 smoke_stats_skills.gd(_check_luk_crit)가 따로 검증한다.
 extends Node
 
 var _main: Node
@@ -53,6 +61,7 @@ func _ready() -> void:
 	_slime_a.set_physics_process(false)
 	_slime_b.set_physics_process(false)
 	_slime_b.hp = 999 # 3타 전체를 관찰하기 위한 테스트 전용 임시 HP(실제 데이터 아님).
+	_disable_crit()
 	_slime_b.global_position = Vector2(500, 500) # 시나리오 A와 공간적으로 완전히 분리.
 
 	_player.global_position = Vector2.ZERO
@@ -118,6 +127,21 @@ func _process(delta: float) -> void:
 	if _elapsed > 8.0:
 		print("[TIMEOUT] 8초 초과 — 테스트가 끝나지 않음 (scenario=%s, target_hit=%d)" % [_scenario, _target_hit])
 		_finish()
+
+
+## 크리티컬을 결정적으로 끈다(파일 상단 "결정성" 주석 참고). Data.tables는 로드된 JSON의
+## 메모리 사본이므로 여기서 바꿔도 game/data/stats.json에는 영향이 없다.
+func _disable_crit() -> void:
+	var stats_table: Dictionary = Data.table("stats")
+	var luk: Dictionary = stats_table.get("luk", {})
+	luk["base_crit_chance"] = 0.0
+	luk["crit_chance_per_point"] = 0.0
+	stats_table["luk"] = luk
+	Data.tables["stats"] = stats_table
+	var chance: float = float(Progression.get_derived().get("crit_chance", -1.0))
+	print("[SETUP] 크리티컬 비활성화: crit_chance=%.3f (기대 0.000)" % chance)
+	if not is_zero_approx(chance):
+		print("[SETUP][FAIL] crit_chance가 0이 아님 — 시나리오 B의 HP 검사는 비결정적일 수 있음")
 
 
 func _press_attack() -> void:
