@@ -64,26 +64,26 @@
 ```
 SkillPanelTab (Control, script=skill_panel_tab.gd)
 └─ (VBoxContainer, 런타임 생성)
-   ├─ SubTabBar (HBoxContainer) — "스탯"/"스킬" 버튼 2개
-   ├─ StatBody (VBoxContainer) — PointsHeader + 6행(이름/값/+/미리보기줄) + DerivedFooter
+   ├─ SubTabBar (HBoxContainer) — "스탯"/"스킬" 버튼 2개(클릭 가능, M5-1)
+   ├─ StatBody (VBoxContainer) — PointsHeader + 6행(이름/값/+버튼/미리보기줄) + DerivedFooter
    └─ SkillTreeTab (Control, script=skill_tree_tab.gd)
-      ├─ SeriesBar (HBoxContainer) — "검"/"방패"/"기교" 버튼 3개
+      ├─ SeriesBar (HBoxContainer) — "검"/"방패"/"기교" 버튼 3개(클릭 가능, M5-1)
       └─ Body (HBoxContainer)
-         ├─ 3× VBoxContainer(tier 열, T1/T2/T3) — 노드 Label(이름+Lv.n/5+상태 마크)
-         └─ DetailBox (VBoxContainer) — 이름+레벨/타입/요구/레벨별 수치/힌트 + HudHotbarBar
+         ├─ 3× VBoxContainer(tier 열, T1/T2/T3) — 노드 Button(flat, 이름+Lv.n/5+상태 마크, M5-1: Label→Button)
+         └─ DetailBox (VBoxContainer) — 이름+레벨/타입/요구/레벨별 수치/힌트 + HudHotbarBar(칸도 Button, M5-1)
 ```
 
 ## 3. 입력 흐름 (패드/키마)
 
-| 동작 | 게임패드 | 키보드 | 결과 |
-|---|---|---|---|
-| 서브탭(스탯/스킬) 전환 | 왼쪽 스틱/십자키 좌우 | ←/→ | `SkillPanelTab._change_sub_tab()` |
-| 계열(검/방패/기교) 전환 | LT/RT | Z/C(`ui_filter_prev/next`) | `SkillTreeTab._change_series()`(스킬 서브탭 안에서만) |
-| 행/노드 이동 | 왼쪽 스틱/십자키 상하 | ↑/↓ | 스탯: 6행 순환. 스킬: tier1→2→3 이어붙인 목록 순환 |
-| 스탯 배분 | A(확인) | `ui_confirm` | 포커스 스탯에 `Progression.allocate_stat(key)` |
-| 스킬 습득/레벨업 | A(확인) | `ui_confirm` | `Progression.can_learn_skill(id).ok`(있으면, 없으면 `SkillTreeCalc.node_state` 폴백)면 `Progression.learn_skill(id)` |
-| 핫바 등록 | 숫자 패드 대응 | 1~9(`hotbar_N`) | 습득된 active/buff 노드만 `HotbarRegisterInput.try_assign` |
-| 닫기 | B/Start | Esc/Tab | InventoryMenu 공통 처리 |
+| 동작 | 게임패드 | 키보드 | 마우스(M5-1) | 결과 |
+|---|---|---|---|---|
+| 서브탭(스탯/스킬) 전환 | 왼쪽 스틱/십자키 좌우 | ←/→ | 서브탭 버튼 클릭 | `SkillPanelTab._change_sub_tab()`/`_on_sub_tab_pressed()` |
+| 계열(검/방패/기교) 전환 | LT/RT | Z/C(`ui_filter_prev/next`) | 계열 버튼 클릭 | `SkillTreeTab._change_series()`/`_on_series_pressed()`(스킬 서브탭 안에서만) |
+| 행/노드 이동 | 왼쪽 스틱/십자키 상하 | ↑/↓ | 스탯 행/스킬 노드 클릭 | 스탯: 6행 순환. 스킬: tier1→2→3 이어붙인 목록 순환 |
+| 스탯 배분 | A(확인) | `ui_confirm` | 행의 "+" 버튼 클릭 | 포커스 스탯에 `Progression.allocate_stat(key)` |
+| 스킬 습득/레벨업 | A(확인) | `ui_confirm` | 이미 포커스된 노드를 다시 클릭 | `Progression.can_learn_skill(id).ok`(있으면, 없으면 `SkillTreeCalc.node_state` 폴백)면 `Progression.learn_skill(id)` — 클릭 한 번은 포커스만 이동, 포커스된 노드를 또 클릭해야 확정(`_on_node_pressed()`) |
+| 핫바 등록 | 숫자 패드 대응 | 1~9(`hotbar_N`) | 핫바 미리보기 칸 클릭 | 습득된 active/buff 노드만 `HotbarRegisterInput.try_assign`(마우스는 `assign_now`로 클릭한 칸에 즉시) |
+| 닫기 | B/Start | Esc/Tab | 우클릭 또는 `CloseButton` 클릭 | InventoryMenu 공통 처리 |
 
 ## 4. 상태 목록
 

@@ -85,6 +85,7 @@ const COSTUME_SLOTS := [
 @onready var stat_rows: VBoxContainer = $ContentArea/InventoryTab/RightPanel/CompareTooltip/TooltipMargin/TooltipVBox/StatRows
 @onready var affix_note_label: Label = $ContentArea/InventoryTab/RightPanel/CompareTooltip/TooltipMargin/TooltipVBox/AffixNoteLabel
 @onready var guide_bar: Label = $GuideBar
+@onready var close_button: Button = $CloseButton # M5-1(마우스): 하단 도움말의 "닫기" 클릭 대상.
 
 var _tab_index: int = 0
 var _grade_filter_index: int = 0
@@ -127,7 +128,10 @@ func _ready() -> void:
 	header_label.get_parent().move_child(_description_label, 1)
 	_hotbar_bar = HudHotbarBar.new() # M4-2(D-181~183): 핫바 등록 미리보기(비교 툴팁에 얹는다).
 	_hotbar_bar.theme = theme
+	_hotbar_bar.slot_clicked.connect(_on_hotbar_slot_clicked) # M5-1(마우스).
 	affix_note_label.get_parent().add_child(_hotbar_bar)
+	close_button.text = tr(&"ui.inv.close_button") # flat/focus_mode는 씬에서 설정(M5-1).
+	close_button.pressed.connect(func() -> void: close_requested.emit())
 	quest_log_tab.theme = theme # 자식 Control은 부모 theme을 스크립트에서 자동 상속하지 않음(D-24류 관례).
 	skill_panel_tab.theme = theme
 	_apply_theme_frames()
@@ -560,6 +564,15 @@ func _poll_hotbar_register() -> void:
 		_hotbar_bar.highlight_slot("item", item_id)
 
 
+## M5-1(마우스): 핫바 칸 클릭 — 포커스된 아이템을 InventoryFocusCalc로 구해 바로 등록
+## (_poll_hotbar_register()와 동일 가드, 로직은 순수 함수로 이미 옮겨둠).
+func _on_hotbar_slot_clicked(slot: int) -> void:
+	var item_id: String = InventoryFocusCalc.focused_grid_item_id(
+		_focus_area, _focus_grid_index, _visible_indices, GameState.inventory.slots)
+	if HotbarRegisterInput.assign_now(slot, "item", item_id):
+		_hotbar_bar.highlight_slot("item", item_id)
+
+
 # --- 비교 툴팁 ---
 
 func _refresh_tooltip() -> void:
@@ -639,13 +652,14 @@ func _update_guide_bar() -> void:
 	var filter_k: String = "LT/RT" if pad else "Z/C"
 	var sort_k: String = "X" if pad else "Space"
 	var mark_k: String = "Y" if pad else "X"
-	guide_bar.text = "(%s)%s  (%s)%s  (%s)%s  (%s)%s  (%s)%s  (%s)%s" % [
+	guide_bar.text = "(%s)%s  (%s)%s  (%s)%s  (%s)%s  (%s)%s  (%s)%s  %s" % [
 		confirm_k, tr(&"ui.inv.guide.confirm"),
 		sort_k, tr(&"ui.inv.guide.sort"),
 		mark_k, tr(&"ui.inv.guide.mark"),
 		tab_k, tr(&"ui.inv.guide.tab"),
 		filter_k, tr(&"ui.inv.guide.filter"),
 		close_k, tr(&"ui.inv.guide.close"),
+		tr(&"ui.inv.guide.mouse"), # M5-1: 패드/키 힌트와 다른 형식(괄호 키 없음)이라 별도 부착.
 	]
 
 

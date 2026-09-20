@@ -62,6 +62,10 @@ Hud (CanvasLayer)
 HUD 자체는 비상호작용(포커스 이동 불필요)이라 위 두 토글 외에는 입력 맵 추가가 필요 없다
 (작업 지시 5번 확인 완료 — `map`, `debug_toggle` 모두 `project.godot` [input]에 등록됨).
 
+**M5-1(마우스, 선택, 게이트5 피드백)**: 하단 핫바 9칸(`HotbarSlot1~9`)만 예외로 좌클릭=사용을
+받는다(`hud.gd:_on_hotbar_slot_gui_input()`). 키보드 1~9와 같은 제약으로 Idle/Move 상태에서만
+동작하고, 메뉴가 열려 HUD가 숨겨지는 동안은 `visible` 가드로 자연히 막힌다.
+
 ## 3.5 성장 표시 (경험치바·레벨업, M3-2/D-153)
 
 `hud_progress.gd`(별도 파일 — hud.gd가 이미 500줄 상한 D-145에 가까워 분리)가

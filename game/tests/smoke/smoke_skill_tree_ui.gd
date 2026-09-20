@@ -72,7 +72,7 @@ func _ready() -> void:
 	_tree_tab._confirm_learn()
 	_tree_tab._refresh_node_states()
 	_check(int(_tree_tab._learned.get("blade_power_slash", 0)) >= 1, "확인 입력으로 blade_power_slash 습득(레벨>=1)")
-	var label: Label = _tree_tab._node_labels.get("blade_power_slash")
+	var label: Button = _tree_tab._node_labels.get("blade_power_slash") # M5-1: Label→Button.
 	_check(label != null and label.text.contains("1/5"), "노드 라벨이 Lv.1/5로 갱신: '%s'" % (label.text if label != null else "<null>"))
 	var t2_state_after: Dictionary = _tree_tab._node_state("blade_followup")
 	_check(String(t2_state_after.get("state", "")) == "locked", "Lv.1로는 아직 T2(요구 Lv.3) 잠김 유지")
