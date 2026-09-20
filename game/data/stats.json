@@ -1,63 +1,107 @@
 {
-  "_comment": "스탯 효과 계수 테이블(F1-2). 스키마: docs/specs/data_tables.md §3. 근거·계산 전 과정은 docs/specs/elite-and-farming-m2.md §3(D-45·D-78 예정)에 있다. dex.stamina_cost_reduction_formula 문자열은 combat-tuning-m1.md §3-3 / combat.json._comment와 반드시 동일해야 한다(data_tables.md §3 검증 규칙). luk 하위 _luck_formula_ref는 D-52/D-78(예정)에 따라 drop_tables.json._luck_formula를 참조만 하고 공식을 여기 다시 쓰지 않는다 — data_tables.md §3이 원래 요구하던 luk.drop_weight_formula(문자열 복제) 필드는 의도적으로 만들지 않았다(엔지니어 요청 3, elite-and-farming-m2.md §4-3).",
+  "_comment": "M4-0 v2(ro-mechanics-2026-09-20.md 벤치마크, D-167+ 결정 대기): 6스탯(STR/AGI/DEX/INT/VIT/LUK, AGI 신규). 스키마: docs/specs/ro-benchmark-progression-v1.md(이 문서가 data_tables.md §3을 대체·확장). 코드 리서치 문서의 경고대로 HIT/FLEE를 '확률로 데미지 0' 판정으로 이식하지 않고, 실시간 액션에 맞게 히트박스 보정·회피 프레임/이동속도 보정으로 번역했다(§1 참고). dex.stamina_cost_reduction_formula 문자열은 combat-tuning-m1.md §3-3 / combat.json._comment와 반드시 동일해야 한다(기존 검증 규칙 유지). luk 하위 _luck_formula_ref는 D-52/D-78에 따라 drop_tables.json._luck_formula를 참조만 하고 공식을 여기 다시 쓰지 않는다(불변).",
 
   "max_level": 50,
   "stat_points_per_levelup": 3,
+  "_stat_points_per_levelup_deprecated_note": "M4-0부터 레벨업 지급량은 exp_curve.csv.stat_points_gain 컬럼이 정본이다(레벨별 체증). 이 필드는 구버전 호환용 레거시 값으로 남기고 실제 지급 로직에는 쓰지 않는다(godot-engineer 확인 필요, D-167 후보).",
   "skill_points_per_levelup": 1,
 
   "allocation": {
-    "_comment": "M3-3(D-158): 수동 분배 규칙. initial은 이 파일이 관리하는 '분배 가능 자원'의 시작값일 뿐 캐릭터 기본 전투 스탯이 아니다(그건 characters.json 소관, 레벨업 자동 상승분과 동일 계층 — 여기 값과 합산해서 실제 전투 스탯이 됨). GDD 5.2/`docs/brd/03-features/01-캐릭터-성장.md` F1-2 어디에도 캐릭터별 시작 스탯 지급 언급이 없어 4캐릭터 공통 0으로 확정(D-158). max_per_stat=null은 F1-2 '사제 전체 리셋(D-02, 레벨×100G)'이 이미 한 스탯 몰빵 빌드를 전제하고 있어 스탯당 캡 근거가 없기 때문(D-158). 근거 문서: docs/specs/skills-m3.md §1.",
-    "initial": { "str": 0, "dex": 0, "int": 0, "vit": 0, "luk": 0 },
-    "max_per_stat": null
+    "_comment": "M4-0(ro-mechanics-2026-09-20.md §2 권장): 스탯 상승 비용이 현재값 10단위 구간마다 1씩 늘어나는 RO식 체증 곡선을 축소 적용. 연구 문서의 원본 RO 공식은 `floor((X-1)/10)+2`(1→99 총 628pt)이며, 우리는 만렙 50 규모에 맞춰 축소한 `floor(n/10)+1`을 채택(연구 문서 §121 '이 프로젝트에 바로 적용 가능한 권장' 표, 수치 그대로 이식 금지 경고 반영 — 계수 자체를 재산정했다). initial은 여전히 5키+AGI=6키 전부 0(D-158 유지, 시작 지급 없음). max_per_stat=null 유지(사제 리셋 전제, D-158).",
+    "initial": { "str": 0, "agi": 0, "dex": 0, "int": 0, "vit": 0, "luk": 0 },
+    "max_per_stat": null,
+    "point_cost_curve_formula": "cost(n -> n+1) = floor(n/10) + 1",
+    "point_cost_curve_examples": {
+      "0_to_1": "cost(0)=floor(0/10)+1=1",
+      "9_to_10": "cost(9)=floor(9/10)+1=1 (0~9구간 전부 1p)",
+      "10_to_11": "cost(10)=floor(10/10)+1=2 (10~19구간 2p)",
+      "49_to_50": "cost(49)=floor(49/10)+1=5 (40~49구간 5p)"
+    },
+    "worked_examples_lv50_198points": {
+      "_comment": "총 지급량 198(exp_curve.csv.stat_points_gain 합계, points(L)=2+floor((L-1)/10) 49회 합산) 기준. 계산 스크립트: docs/specs/ro-benchmark-progression-v1.md §2 부록.",
+      "단일_스탯_몰빵": "198포인트를 한 스탯에 전부 투입 시 도달값 = 58 (0→50 소모 150p, 50→58 소모 8*6=48p, 합계 198p). 과거 선형모델(1:1)의 몰빵 상한 147보다 실질적으로 낮아져 '전투력 60%는 장비' 목표(GDD 5.3)를 더 강하게 지킨다.",
+      "6스탯_균등분배": "198/6=33포인트 예산씩 → 각 스탯 약 21까지 상승(0→20 소모 30p, 20→21 소모 3p, 합계 33p)."
+    }
   },
 
   "str": {
-    "_comment": "GDD 5.2: 물리 공격력 + 무거운 무기 요구치(요구치 게이팅은 characters.json/items.json 소관, 여기는 데미지 계수만). effective_base_attack = combat.json 기준 player_base_attack(10, M1) + STR*physical_damage_per_point + weapon.atk. 계수 산정: 만렙 스탯 총량(3*49=147, 한 스탯 몰빵 가정) 중 STR 몰빵 시 +29.4 데미지로, GDD 5.3 '전투력 60%는 장비' 목표를 해치지 않는 수준(레벨15 rare급 무기 atk 중간값 16.9 대비 약 87% - 만렙까지 가면 무기도 더 좋아지므로 상대 비중은 계속 하락).",
+    "_comment": "GDD 5.2: 물리 공격력(ATK). 계수·근거는 M3 그대로 유지(체증 비용 곡선 도입으로 몰빵 상한 자체가 낮아졌으므로 계수 재계산 불필요, 위 worked_examples_lv50_198points 참고).",
     "physical_damage_per_point": 0.2,
-    "formula_note": "effective_base_attack = 10 + STR * 0.2 + weapon.atk",
+    "formula_note": "ATK(effective_base_attack) = combat.json.player_base_attack(10) + STR*physical_damage_per_point + weapon.atk",
     "_balance_todo": ["physical_damage_per_point"]
   },
 
+  "agi": {
+    "_comment": "신규(M4-0). ro-mechanics-2026-09-20.md §1 권장대로 '몸(회피·속도)'을 AGI가 전담하고 DEX는 '조준(명중·캐스팅/후딜 단축)'에 집중하도록 기존 DEX의 attack_speed_per_point 효과를 AGI로 이관했다. RO의 HIT/FLEE 확률 판정(명중 실패=데미지 0)은 실시간 액션에 조작감을 해치므로 그대로 쓰지 않고(연구 문서 '주의점'), FLEE를 '회피 판정 굴림'이 아니라 '구르기 무적시간 연장 + 이동속도 보정'으로 번역했다 — 플레이어가 여전히 직접 피해야 하되, AGI가 그 성공률을 물리적으로 높여준다.",
+    "aspd_frame_mult_per_point": 0.0028,
+    "aspd_frame_mult_floor": 0.65,
+    "formula_note_aspd": "combo_frame_mult = max(aspd_frame_mult_floor, 1 - AGI*aspd_frame_mult_per_point - DEX*aspd_frame_mult_per_point_dex(dex.post_recovery 참고 아님, 별도 계수 aspd_dex_secondary_per_point)). combat.json의 combo.input_buffer_sec/finisher_recovery_sec/공격 애니메이션 재생속도에 곱연산 — AGI 주, DEX 부(연구 문서 §1 역할 분담).",
+    "aspd_dex_secondary_per_point": 0.0008,
+    "roll_iframe_bonus_per_point": 0.001,
+    "roll_iframe_bonus_cap_sec": 0.15,
+    "formula_note_flee_iframe": "roll.iframes_sec(combat.json 기준 0.3) += min(roll_iframe_bonus_cap_sec, AGI*roll_iframe_bonus_per_point). 확률 회피가 아니라 '구르기 판정창'을 넓혀 같은 타이밍에도 더 잘 피하게 한다.",
+    "move_speed_pct_per_point": 0.0015,
+    "move_speed_pct_cap": 0.20,
+    "formula_note_flee_speed": "movement.walk_speed_px *= (1 + min(move_speed_pct_cap, AGI*move_speed_pct_per_point)). 회피의 두 번째 축(더 빨리 벗어나기).",
+    "_balance_todo": ["aspd_frame_mult_per_point", "aspd_frame_mult_floor", "aspd_dex_secondary_per_point", "roll_iframe_bonus_per_point", "roll_iframe_bonus_cap_sec", "move_speed_pct_per_point", "move_speed_pct_cap"],
+    "worked_examples": {
+      "AGI_50_DEX_0": "combo_frame_mult = 1 - 50*0.0028 = 0.86 (14% 빨라짐), roll_iframe = 0.3+0.05=0.35s, move_speed = +7.5%",
+      "AGI_58_몰빵": "combo_frame_mult = 1 - 58*0.0028 = 0.8376 (16.2%↑), roll_iframe = min(0.15, 0.058)=0.058 → 0.358s, move_speed=+8.7%"
+    }
+  },
+
   "dex": {
-    "_comment": "GDD 5.2: 공격속도/회피 스태미나 효율/원거리 데미지 3효과. stamina_cost_reduction_formula는 D-45 확정 문자열(구르기 전용, combat-tuning-m1.md §3-3과 완전 동일 - 절대 재작성 금지, 수정 시 두 문서 동시 갱신). D-82: 이 문자열은 ASCII 연산자(*, -)가 정본 — combat.json._comment/combat-tuning-m1.md §3-3의 수식도 이 문자열과 완전히 동일하게 ASCII로 통일했다(각 문서의 서술용 유니코드 기호(×,→,≤ 등)는 그대로 둠). attack_speed_per_point/ranged_damage_per_point는 M1 미구현 계수라 GDD 5.2 3효과 중 코드 반영이 안 된 2개를 메우는 M2 제안값(엔지니어 훅 없음, _balance_todo).",
+    "_comment": "M4-0: 기존 attack_speed_per_point는 agi.aspd_frame_mult_per_point로 이관(구 필드는 하위 호환용으로만 남기고 실제 계산엔 쓰지 않음). DEX는 '명중(HIT)'과 '캐스팅/후딜(모션 잠금 층) 단축'에 집중 — 연구 문서 §7의 '모션 잠금/애프터캐스트/쿨다운 3계층' 중 우리는 '모션 잠금+쿨다운' 2계층만 쓰기로 했고(D-167), DEX는 그중 모션 잠금(공격 후딜) 층을, INT의 cooldown_reduction_per_point는 쿨다운 층을 각각 전담한다 — 층이 겹치지 않아 계산이 단순해진다. HIT도 RO식 확률 판정(명중 실패=데미지 0)이 아니라 '내 공격 히트박스가 살짝 커진다'로 번역했다(연구 문서 경고 반영).",
     "stamina_cost_reduction_formula": "cost * (1 - min(0.5, DEX/300))",
     "stamina_cost_reduction_scope": "roll_only",
     "attack_speed_per_point": 0.0015,
+    "_attack_speed_per_point_deprecated_note": "M4-0부터 agi.aspd_frame_mult_per_point(+agi.aspd_dex_secondary_per_point로 DEX 소량 기여)가 정본. 이 필드는 레거시 호환용.",
     "ranged_damage_per_point": 0.15,
-    "_balance_todo": ["attack_speed_per_point", "ranged_damage_per_point"],
+    "post_recovery_mult_per_point": 0.0015,
+    "post_recovery_mult_floor": 0.70,
+    "formula_note_post_recovery": "post_attack_recovery_mult = max(post_recovery_mult_floor, 1 - DEX*post_recovery_mult_per_point). 공격/스킬 모션의 '후딜(모션 잠금)' 구간 길이에 곱연산 — 스킬 자체의 cooldown_sec에는 영향 없음(그건 int.cooldown_reduction_per_point 담당).",
+    "hit_hitbox_scale_per_point": 0.0015,
+    "hit_hitbox_scale_cap": 0.30,
+    "formula_note_hit": "hitbox_scale_mult = 1 + min(hit_hitbox_scale_cap, DEX*hit_hitbox_scale_per_point). 기본 공격·스킬 히트박스의 range_px/width_px에 곱연산(확률 명중 판정이 아니라 '더 넓게 맞는다' 방식, ro-mechanics-2026-09-20.md 주의점 반영).",
+    "_balance_todo": ["ranged_damage_per_point", "post_recovery_mult_per_point", "post_recovery_mult_floor", "hit_hitbox_scale_per_point", "hit_hitbox_scale_cap"],
     "worked_examples": {
-      "DEX_50": "roll_cost = 20 * (1 - min(0.5, 50/300)) = 20 * 0.8333 = 16.7 (16.7% 경감)",
-      "DEX_100": "20 * (1 - min(0.5, 100/300)) = 20 * 0.6667 = 13.3 (33.3% 경감)",
-      "DEX_150_이상": "20 * (1 - 0.5) = 10.0 (상한 50% 경감 고정)"
+      "DEX_50": "roll_cost 16.7(기존과 동일) / post_attack_recovery_mult = 1-50*0.0015=0.925(7.5%↓) / hitbox_scale=1.075(7.5%↑)",
+      "DEX_100": "post_attack_recovery_mult=1-0.15=0.85 / hitbox_scale=1.15",
+      "DEX_150_이상": "roll_cost 상한 50% 경감 고정(기존과 동일) / post_attack_recovery_mult=1-0.225=0.775 / hitbox_scale=min(1.30, 1.225)=1.225"
     }
   },
 
   "int": {
-    "_comment": "GDD 5.2: 마법 데미지 + 스킬 쿨타임 감소 2효과를 STR과 동일 예산(만렙 몰빵 기준)에서 나눠 가짐 - 데미지 계수를 STR보다 낮게(0.15) 잡고 남는 예산을 쿨감에 배정. cooldown_reduction_cap_pct는 스탯만으로 쿨타임을 0에 수렴시키는 것을 막는 상한(affixes.json의 cooldown_reduction_pct 2~6%/슬롯과 합산 후 이 상한에서 clamp).",
+    "_comment": "M4-0: 기존 마법 데미지·쿨감에 SP 자원(신규) 관련 2개 필드(max_sp_per_point, sp_regen_per_point)를 추가. cooldown_reduction_per_point는 '스킬 쿨다운' 층 전담(DEX의 post_recovery는 '모션 잠금' 층 — 두 층은 서로 다른 시간에 적용되어 중복 감산이 아니다). MDEF는 INT/VIT 절반씩(브리프 명시).",
     "magic_damage_per_point": 0.15,
-    "formula_note": "effective_base_magic_attack = 10 + INT * 0.15 + weapon.atk(지팡이류)",
+    "formula_note": "MATK(effective_base_magic_attack) = 10 + INT*magic_damage_per_point + weapon.atk(지팡이류)",
     "cooldown_reduction_per_point": 0.002,
     "cooldown_reduction_cap_pct": 0.30,
-    "_balance_todo": ["magic_damage_per_point", "cooldown_reduction_per_point", "cooldown_reduction_cap_pct"]
+    "mdef_per_point": 0.5,
+    "max_sp_per_point": 2.0,
+    "sp_regen_per_point": 0.03,
+    "_balance_todo": ["magic_damage_per_point", "cooldown_reduction_per_point", "cooldown_reduction_cap_pct", "mdef_per_point", "max_sp_per_point", "sp_regen_per_point"]
   },
 
   "vit": {
-    "_comment": "GDD 5.2: 최대 HP + 방어력. hp_per_point는 레벨업 자동 HP 증가(exp_curve.csv/characters.json 소관, 이 파일 범위 밖)와 별개로 스탯 포인트 투자분만 계산. defense_formula는 D-74(예정) 임시값 - items-and-drops-m2.md 결정 요청 A / data_tables.md 결정 요청 12의 제안식을 그대로 채택했으나 아직 상위 결정 미확정이라 _balance_todo로 유지(엔지니어: 이 공식이 확정되기 전까지 defense는 UI/드랍 스탯으로만 존재하고 실제 피해 계산에 연결하지 말 것).",
+    "_comment": "GDD 5.2 + D-162 확정: 최대 HP + 방어력(DEF). defense_formula는 D-162로 확정(더 이상 provisional 아님). MDEF 절반은 VIT 담당(mdef_per_point, INT와 합산).",
     "hp_per_point": 5.0,
     "defense_per_point": 1.0,
+    "mdef_per_point": 0.5,
     "defense_formula": "damage_taken = incoming_atk * 100 / (100 + defense)",
-    "defense_formula_status": "provisional_pending_D-74",
-    "_balance_todo": ["hp_per_point", "defense_per_point", "defense_formula"],
+    "defense_formula_status": "confirmed_D-162",
+    "_balance_todo": ["hp_per_point", "defense_per_point", "mdef_per_point"],
     "defense_formula_examples": {
       "defense_0": "reduction 0%",
       "defense_50": "reduction 33.3%",
       "defense_100": "reduction 50.0%",
-      "defense_150": "reduction 60.0%"
+      "defense_150": "reduction 60.0%",
+      "defense_58_몰빵(레벨50)": "reduction = 58/158 = 36.7%"
     }
   },
 
   "luk": {
-    "_comment": "GDD 5.2: 아이템 드랍률 + 크리티컬 확률. 드랍률 공식은 절대 여기서 재정의하지 않는다 - _luck_formula_ref만 남기고 실제 계수(luk_coefficient 등)는 drop_tables.json._luck_formula가 유일한 소스다(D-52, D-78 예정). crit_chance_per_point/crit_damage_multiplier는 이 파일이 처음 도입하는 M2 신규 값(combat.json.camera_shake 주석이 '진짜 크리티컬은 M2 LUK 도입 후'라고 예고했던 부분).",
+    "_comment": "변경 없음(D-162로 crit_chance_per_point=0.001이 정본으로 재확인됨). 드랍률 공식은 절대 여기서 재정의하지 않는다.",
     "_luck_formula_ref": "drop_tables.json",
     "base_crit_chance": 0.05,
     "crit_chance_per_point": 0.001,
@@ -67,7 +111,22 @@
     "worked_examples": {
       "LUK_0": "crit_chance = 5.0%",
       "LUK_20": "crit_chance = 5.0 + 20*0.1 = 7.0%",
-      "LUK_45_풀분배(레벨15)": "crit_chance = 5.0 + 45*0.1 = 9.5%"
+      "LUK_58_몰빵(레벨50)": "crit_chance = 5.0 + 58*0.1 = 10.8%"
+    }
+  },
+
+  "sp": {
+    "_comment": "신규(M4-0). 스킬 전용 자원 — 구르기/가드는 기존대로 stamina(combat.json) 소비, 액티브/버프 스킬(skills.json)은 SP만 소비한다(패시브는 자원 소비 없음). ro-mechanics-2026-09-20.md §3~4 권장: 'INT 비례 회복 + 정지 시 가속'. RO의 '앉기(sit)'는 실시간 액션에 안 맞아 '마지막 스킬 사용 후 경과시간'으로 대체했다(스태미나의 regen_delay_sec와 동일 패턴 재사용, combat-tuning-m1.md §3).",
+    "base_sp": 20.0,
+    "formula_note_max_sp": "max_sp = base_sp + INT*int.max_sp_per_point",
+    "regen_per_sec_base": 1.0,
+    "formula_note_regen": "regen_per_sec = (regen_per_sec_base + INT*int.sp_regen_per_point) * (regen_idle_multiplier if 마지막 스킬 사용 후 경과시간 >= regen_idle_delay_sec else 1.0)",
+    "regen_idle_delay_sec": 2.0,
+    "regen_idle_multiplier": 2.5,
+    "_balance_todo": ["base_sp", "regen_per_sec_base", "regen_idle_delay_sec", "regen_idle_multiplier"],
+    "worked_examples": {
+      "INT_0": "max_sp=20, 전투중 regen=1.0/s, 유휴(2초 이상 미사용) regen=2.5/s — T1 스킬(sp_cost 6~10)도 연속 2~3회면 고갈, 스킬을 전혀 안 키운 빌드는 스킬 스팸이 사실상 불가능(의도된 트레이드오프, D-167 결정 필요 항목 참고)",
+      "INT_58_몰빵(레벨50)": "max_sp=20+58*2=136, 전투중 regen=1.0+58*0.03=2.74/s, 유휴 regen=6.85/s — T3 궁극기(sp_cost 25~45)도 몇 차례 연속 사용 가능"
     }
   }
 }

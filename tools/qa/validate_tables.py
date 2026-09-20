@@ -20,6 +20,11 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List
 
+# D-157: 스탯/스킬트리/경험치 곡선(M4-0 v2) 검증은 이 파일이 이미 500줄을 넘어 별도
+# 모듈로 분리했다(validate_stats/validate_skills/validate_exp_curve, 관련 상수·헬퍼 포함).
+# 두 파일은 항상 같이 갱신할 것.
+from validate_progression import validate_exp_curve, validate_skills, validate_stats
+
 ITEM_GRADES = ["common", "uncommon", "rare", "epic", "legendary", "relic"]
 AFFIX_SLOT_BY_GRADE = {"common": 0, "uncommon": 1, "rare": 2, "epic": 3, "legendary": 3, "relic": 3}
 ITEM_CATEGORIES = {
@@ -28,20 +33,12 @@ ITEM_CATEGORIES = {
     "consumable", "material",
 }
 EQUIP_CATEGORIES = {"weapon", "sub", "head", "armor", "boots", "ring", "amulet"}
-DEX_ROLL_COST_FORMULA_CANONICAL = "cost * (1 - min(0.5, DEX/300))"
 FARMING_TYPE_RESPAWN_SECONDS = {
     "field": 0, "gathering": 0, "treasure_map": 0, "region_dungeon": 0,
     "elite": 1800, "mini_dungeon": 86400, "world_boss": 259200,
 }
 FARMING_MAP_ICON_TYPES = {"elite", "world_boss"}
 EPS = 1e-6
-SKILL_HITBOX_SHAPES = {"arc", "line", "circle"}
-SKILL_SELF_EFFECT_KEYS = {
-    frozenset({"invuln_sec"}),
-    frozenset({"move_speed_mult", "duration_sec"}),
-    frozenset({"dash_px", "invuln_sec"}),
-}
-STAT_KEYS = {"str", "dex", "int", "vit", "luk"}
 
 
 class Report:
@@ -280,122 +277,6 @@ def validate_enhance(enhance: Dict[str, Any], report: Report) -> None:
         prev_stone, prev_mat = y.get("stone_qty", 0), y.get("material_qty", 0)
 
 
-def validate_stats(stats: Dict[str, Any], report: Report) -> None:
-    """elite-and-farming-m2.md §4-3 규칙 1~3 (규칙4는 코드 리뷰 항목, 런타임/오프라인
-    검증 불가)."""
-    dex = stats.get("dex", {})
-    formula = dex.get("stamina_cost_reduction_formula")
-    if formula != DEX_ROLL_COST_FORMULA_CANONICAL:
-        report.error(
-            f"stats.dex.stamina_cost_reduction_formula='{formula}' 가 D-45 정본 문자열"
-            f"('{DEX_ROLL_COST_FORMULA_CANONICAL}')과 다름"
-        )
-
-    luk = stats.get("luk", {})
-    if luk.get("_luck_formula_ref") != "drop_tables.json":
-        report.error(
-            f"stats.luk._luck_formula_ref='{luk.get('_luck_formula_ref')}' "
-            "(D-52/D-78 예정: 'drop_tables.json' 고정값이어야 함)"
-        )
-    if "drop_weight_formula" in luk:
-        report.error("stats.luk.drop_weight_formula 필드가 존재함 — D-52/D-78(예정) 위반(공식 중복 정의 금지)")
-
-    if "crit_chance_cap" in luk and not (0.0 <= luk["crit_chance_cap"] <= 1.0):
-        report.error(f"stats.luk.crit_chance_cap={luk['crit_chance_cap']} 범위(0~1) 위반")
-    int_stat = stats.get("int", {})
-    if "cooldown_reduction_cap_pct" in int_stat and not (0.0 <= int_stat["cooldown_reduction_cap_pct"] <= 1.0):
-        report.error(f"stats.int.cooldown_reduction_cap_pct={int_stat['cooldown_reduction_cap_pct']} 범위(0~1) 위반")
-
-    max_points = float(stats.get("stat_points_per_levelup", 3)) * float(int(stats.get("max_level", 50)) - 1)
-    if {"base_crit_chance", "crit_chance_per_point", "crit_chance_cap"} <= luk.keys():
-        projected = luk["base_crit_chance"] + max_points * luk["crit_chance_per_point"]
-        if projected <= luk["crit_chance_cap"]:
-            report.warn(
-                f"stats.luk: 만렙 몰빵({max_points:.0f}포인트) crit_chance={projected:.4f} 가 "
-                f"상한({luk['crit_chance_cap']:.4f})에 못 미침 — 상한이 사실상 의미 없음"
-            )
-    if {"cooldown_reduction_per_point", "cooldown_reduction_cap_pct"} <= int_stat.keys():
-        projected_cd = max_points * int_stat["cooldown_reduction_per_point"]
-        if projected_cd <= int_stat["cooldown_reduction_cap_pct"]:
-            report.warn(
-                f"stats.int: 만렙 몰빵 cooldown_reduction={projected_cd:.4f} 가 "
-                f"상한({int_stat['cooldown_reduction_cap_pct']:.4f})에 못 미침 — 상한이 사실상 의미 없음"
-            )
-
-    allocation = stats.get("allocation")
-    if allocation is None:
-        report.error("stats.allocation 누락 (M3-3/D-158)")
-        return
-    initial = allocation.get("initial")
-    if not isinstance(initial, dict) or set(initial.keys()) != STAT_KEYS:
-        report.error(f"stats.allocation.initial 키가 {sorted(STAT_KEYS)} 5개와 정확히 일치해야 함 (현재 {initial})")
-    else:
-        for k, v in initial.items():
-            if not isinstance(v, (int, float)) or v < 0:
-                report.error(f"stats.allocation.initial.{k}={v} 는 0 이상의 숫자여야 함")
-    max_per_stat = allocation.get("max_per_stat")
-    if max_per_stat is not None and not (isinstance(max_per_stat, int) and max_per_stat > 0):
-        report.error(f"stats.allocation.max_per_stat={max_per_stat} 는 null 이거나 양의 정수여야 함")
-
-
-def validate_skills(skills: Dict[str, Any], report: Report) -> Dict[str, Any]:
-    """M3-3(D-141 최소 세트): docs/specs/skills-m3.md §2 스키마 검증. 참조 무결성(requires)·
-    순환 검출·필수 수치 유효성을 확인한다."""
-    data = entries(skills)
-    for skill_id, sk in data.items():
-        if sk.get("node_type") != "active":
-            report.error(f"skills.{skill_id}.node_type='{sk.get('node_type')}' — M3-3 범위는 'active'만 허용")
-        cd = sk.get("cooldown_sec")
-        if not isinstance(cd, (int, float)) or cd <= 0:
-            report.error(f"skills.{skill_id}.cooldown_sec={cd} 는 0보다 커야 함")
-        stamina = sk.get("stamina_cost")
-        if not isinstance(stamina, (int, float)) or stamina < 0:
-            report.error(f"skills.{skill_id}.stamina_cost={stamina} 는 0 이상이어야 함")
-        dmg = sk.get("damage_mult")
-        if not isinstance(dmg, (int, float)) or dmg < 0:
-            report.error(f"skills.{skill_id}.damage_mult={dmg} 는 0 이상이어야 함")
-        hitbox = sk.get("hitbox")
-        if hitbox is not None:
-            shape = hitbox.get("shape") if isinstance(hitbox, dict) else None
-            if shape not in SKILL_HITBOX_SHAPES:
-                report.error(f"skills.{skill_id}.hitbox.shape='{shape}' 는 {sorted(SKILL_HITBOX_SHAPES)} 중 하나여야 함")
-            elif not isinstance(hitbox.get("range_px"), (int, float)) or hitbox["range_px"] <= 0:
-                report.error(f"skills.{skill_id}.hitbox.range_px={hitbox.get('range_px')} 는 0보다 커야 함")
-        elif dmg and dmg > 0:
-            report.error(f"skills.{skill_id}: damage_mult={dmg} > 0 인데 hitbox가 null임")
-        self_effect = sk.get("self_effect")
-        if self_effect is not None:
-            if frozenset(self_effect.keys()) not in SKILL_SELF_EFFECT_KEYS:
-                report.error(
-                    f"skills.{skill_id}.self_effect 키 {sorted(self_effect.keys())} 는 고정된 3종 "
-                    f"({[sorted(s) for s in SKILL_SELF_EFFECT_KEYS]}) 중 하나와 정확히 일치해야 함"
-                )
-        for req in sk.get("requires", []):
-            if req not in data:
-                report.error(f"skills.{skill_id}.requires 참조 실패: '{req}' 없음")
-
-    # requires 순환 검출 (DFS)
-    WHITE, GRAY, BLACK = 0, 1, 2
-    color = {sid: WHITE for sid in data}
-
-    def visit(sid: str, stack: List[str]) -> None:
-        color[sid] = GRAY
-        for req in data.get(sid, {}).get("requires", []):
-            if req not in color:
-                continue
-            if color[req] == GRAY:
-                report.error(f"skills: requires 순환 감지 {' -> '.join(stack + [sid, req])}")
-            elif color[req] == WHITE:
-                visit(req, stack + [sid])
-        color[sid] = BLACK
-
-    for sid in data:
-        if color[sid] == WHITE:
-            visit(sid, [])
-
-    return data
-
-
 def validate_farming_sources(
     farming_sources: Dict[str, Any], drop_table_ids: Dict[str, Any], monsters: Dict[str, Any], report: Report
 ) -> None:
@@ -583,6 +464,27 @@ def validate_quests(quests: Dict[str, Any], todo_ids: Dict[str, list], monsters:
             if ref not in item_ids and ref not in todo_items:
                 report.error(f"quests.{quest_id}: rewards.items의 '{ref}' 가 items.json/_todo_ids.items 어디에도 없음")
 
+        # M4-0(§7-9): rewards.gold/exp 값 범위와 on_complete.events의 grant_skill_point:N
+        # 포맷·register_quest:<id> 참조를 검증. 이전에는 검증 대상이 아니었다.
+        rewards = quest.get("rewards", {})
+        gold = rewards.get("gold")
+        if gold is not None and (not isinstance(gold, (int, float)) or gold < 0):
+            report.error(f"quests.{quest_id}: rewards.gold={gold} 는 0 이상의 숫자여야 함")
+        exp = rewards.get("exp")
+        if exp is not None and (not isinstance(exp, (int, float)) or exp < 0):
+            report.error(f"quests.{quest_id}: rewards.exp={exp} 는 0 이상의 숫자여야 함")
+
+        for event in quest.get("on_complete", {}).get("events", []):
+            if not isinstance(event, str) or ":" not in event:
+                continue
+            verb, _, arg = event.partition(":")
+            if verb == "grant_skill_point":
+                if not arg.isdigit() or int(arg) <= 0:
+                    report.error(f"quests.{quest_id}: on_complete.events '{event}' 의 수량은 양의 정수여야 함")
+            elif verb == "register_quest":
+                if arg not in quests:
+                    report.error(f"quests.{quest_id}: on_complete.events '{event}' 가 존재하지 않는 퀘스트 id를 참조함")
+
         giver = quest.get("giver", "")
         if giver and giver != "system":
             _check_world_object_ref(report, quest_id, f"giver:{giver}", giver,
@@ -640,40 +542,6 @@ def validate_monsters_exp_reward(monsters: Dict[str, Any], report: Report) -> No
             report.error(f"monsters.{monster_id}: exp_reward={exp_reward!r} 는 양수여야 한다")
 
 
-def validate_exp_curve(exp_curve: Dict[str, Any], stats: Dict[str, Any], report: Report) -> None:
-    """exp_curve.csv 검증(M3-1, F1-2. data_tables.md §4 검증 규칙 1~3)."""
-    max_level = int(stats.get("max_level", 50))
-    prev_exp_to_next = 0
-    for level in range(1, max_level + 1):
-        row = exp_curve.get(str(level))
-        if row is None:
-            report.error(f"exp_curve: level {level} 행 누락(1~{max_level} 연속이어야 함)")
-            continue
-        if "exp_to_next" not in row:
-            report.error(f"exp_curve.{level}: 필수 키 누락 'exp_to_next'")
-            continue
-        exp_to_next = int(row["exp_to_next"])
-        # 단조 비감소·">0" 규칙은 "성장 중" 구간(레벨 1~max_level-1)에만 적용한다.
-        # max_level 행의 exp_to_next=0은 "더 오를 곳 없음" 종료 표식이라 그 앞 레벨(예:
-        # 49의 6860)보다 작아도 규칙 위반이 아니다(data_tables.md §4 "레벨50은 0 또는
-        # 공란" 예외 그대로).
-        if level < max_level:
-            if exp_to_next <= 0:
-                report.error(f"exp_curve.{level}: exp_to_next({exp_to_next})는 만렙({max_level}) 미만 레벨에서 반드시 >0")
-            if exp_to_next < prev_exp_to_next:
-                report.error(
-                    f"exp_curve.{level}: exp_to_next({exp_to_next})가 이전 레벨({prev_exp_to_next})보다 작음 "
-                    "— 단조 비감소 위반"
-                )
-            prev_exp_to_next = exp_to_next
-        for required_col in ("hp_bonus", "atk_bonus"):
-            if required_col not in row:
-                report.error(f"exp_curve.{level}: 필수 키 누락 '{required_col}'")
-    row_count = len(entries(exp_curve))
-    if row_count != max_level:
-        report.error(f"exp_curve: 행 수={row_count}, max_level({max_level})과 달라야 할 이유 없음(정확히 일치해야 함)")
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-dir", default=None, help="game/data 경로 (기본: 이 스크립트 기준 ../../game/data)")
@@ -706,8 +574,8 @@ def main() -> int:
     validate_enhance(enhance, report)
     validate_monsters_cross_ref(monsters, drop_table_ids, report)
     validate_monsters_exp_reward(monsters, report)
-    validate_exp_curve(exp_curve, stats, report)
-    validate_stats(stats, report)
+    total_stat_points = validate_exp_curve(exp_curve, stats, report)
+    validate_stats(stats, total_stat_points, report)
     skill_ids = validate_skills(skills, report)
     validate_farming_sources(farming_sources, drop_table_ids, monsters, report)
     blueprint_ids = validate_blueprints(blueprints, item_ids, report)

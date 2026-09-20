@@ -1,108 +1,1305 @@
 {
-  "_comment": "M3-3(D-141 최소 세트): 액티브 6개. GDD 4.3 '현재 액티브 슬롯 2개를 출발점' 방향만 구현 — docs/content-drafts/research-expansion/class-progression-v3.md(8계열·124노드, D-161: series/tier/node_type 필드만 호환, 미승인 설계는 미구현)와 필드 호환. 전부 tier 1·requires 빈 배열(D-159: 레벨 게이트 없음, F1-3 '레벨 제한 없음'과 정합). 전부 히트박스 배율·범위·넉백·자기 버프·짧은 무적으로만 구성(투사체/소환/상태이상 금지, 기존 Hitbox/Hurtbox 컴포넌트로 구현 가능). icon은 전부 null(D-161 합의 (b): 후속 작업, UI는 계열 첫 글자로 대체). 수치는 전부 _balance_todo. 스키마·self_effect 3종 고정값 설명: docs/specs/skills-m3.md.",
-
+  "_comment": "M4-0(D-141/D-161 v2, ro-mechanics-2026-09-20.md 벤치마크): 3계열(blade/guard/trick) x 8노드 = 24개, 스킬 레벨 1~5. RO의 '선행 스킬 N레벨 이상' 게이트 구조만 차용(이름·수치·아이콘은 우리 창작, D-167). 각 노드는 cost_skill_point_per_level=1(스킬 포인트, exp_curve.csv.skill_points_gain 소관과 별개 통화) x max_level=5 = 노드 하나를 만렙 찍는데 스킬 포인트 5 소모. sp_cost/cooldown_sec/damage_mult(또는 passive 'value', buff self_effect 수치)는 levels[] 배열의 레벨별 값. requires의 각 항목은 {skill, level} — 선행 스킬이 그 레벨 이상 습득되어야 해금(RO식, 구 스키마의 문자열 배열에서 변경). 딜레이는 연구 문서 권장대로 '모션 잠금(기존 애니메이션 길이 재사용, 별도 필드 없음) + 쿨다운' 2계층만 채택하고 RO의 애프터캐스트 딜레이 하한 계층은 도입하지 않는다(D-167). 모든 스킬은 스태미나 대신 SP를 소모한다(stats.json.sp 참조) — 구르기/가드는 기존대로 스태미나 유지. self_effect는 이제 항상 levels[i] 안에 있다(레벨별로 값이 고정이어도 구조 통일, 예: dash_px/invuln_sec 고정형도 5개 레벨에 동일값 반복). hitbox.range_px/width_px는 저장된 기준값이며, DEX 유래 hit_hitbox_scale_mult는 런타임에 곱연산(엔지니어 구현, stats.json.dex 참조) — 데이터에는 배율을 반영하지 않는다. vfx.kind는 slash_arc|thrust_line|ring|glow|dash_trail|speed_lines|none 중 하나.",
   "blade_power_slash": {
     "name_key": "skill.blade_power_slash.name",
     "desc_key": "skill.blade_power_slash.desc",
     "series": "blade",
-    "tier": 1,
     "node_type": "active",
-    "cost_sp": 1,
-    "cooldown_sec": 4.0,
-    "stamina_cost": 15.0,
-    "damage_mult": 1.8,
-    "hitbox": { "shape": "arc", "range_px": 60, "width_px": 90 },
-    "knockback_px": 14,
     "requires": [],
-    "icon": null,
-    "_balance_todo": ["cooldown_sec", "stamina_cost", "damage_mult", "hitbox", "knockback_px"]
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "hitbox": {
+      "shape": "arc",
+      "range_px": 65,
+      "width_px": 100
+    },
+    "knockback_px": 14,
+    "levels": [
+      {
+        "level": 1,
+        "sp_cost": 10,
+        "cooldown_sec": 4.5,
+        "damage_mult": 1.6
+      },
+      {
+        "level": 2,
+        "sp_cost": 12,
+        "cooldown_sec": 4.3,
+        "damage_mult": 1.8
+      },
+      {
+        "level": 3,
+        "sp_cost": 14,
+        "cooldown_sec": 4.1,
+        "damage_mult": 2.0
+      },
+      {
+        "level": 4,
+        "sp_cost": 16,
+        "cooldown_sec": 3.9,
+        "damage_mult": 2.2
+      },
+      {
+        "level": 5,
+        "sp_cost": 18,
+        "cooldown_sec": 3.7,
+        "damage_mult": 2.4
+      }
+    ],
+    "vfx": {
+      "kind": "slash_arc",
+      "color": "#e2544f",
+      "scale": 1.0
+    },
+    "icon": null
   },
-
   "blade_thrust": {
     "name_key": "skill.blade_thrust.name",
     "desc_key": "skill.blade_thrust.desc",
     "series": "blade",
-    "tier": 1,
     "node_type": "active",
-    "cost_sp": 1,
-    "cooldown_sec": 2.5,
-    "stamina_cost": 10.0,
-    "damage_mult": 1.3,
-    "hitbox": { "shape": "line", "range_px": 80, "width_px": 20 },
-    "knockback_px": 6,
     "requires": [],
-    "icon": null,
-    "_balance_todo": ["cooldown_sec", "stamina_cost", "damage_mult", "hitbox", "knockback_px"]
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "hitbox": {
+      "shape": "line",
+      "range_px": 85,
+      "width_px": 20
+    },
+    "knockback_px": 6,
+    "levels": [
+      {
+        "level": 1,
+        "sp_cost": 6,
+        "cooldown_sec": 2.2,
+        "damage_mult": 1.1
+      },
+      {
+        "level": 2,
+        "sp_cost": 7,
+        "cooldown_sec": 2.1,
+        "damage_mult": 1.25
+      },
+      {
+        "level": 3,
+        "sp_cost": 8,
+        "cooldown_sec": 2.0,
+        "damage_mult": 1.4
+      },
+      {
+        "level": 4,
+        "sp_cost": 9,
+        "cooldown_sec": 1.9,
+        "damage_mult": 1.55
+      },
+      {
+        "level": 5,
+        "sp_cost": 10,
+        "cooldown_sec": 1.8,
+        "damage_mult": 1.7
+      }
+    ],
+    "vfx": {
+      "kind": "thrust_line",
+      "color": "#e2544f",
+      "scale": 0.9
+    },
+    "icon": null
   },
-
+  "blade_focus": {
+    "name_key": "skill.blade_focus.name",
+    "desc_key": "skill.blade_focus.desc",
+    "series": "blade",
+    "node_type": "passive",
+    "requires": [],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "passive_stat": "atk_pct",
+    "levels": [
+      {
+        "level": 1,
+        "value": 2
+      },
+      {
+        "level": 2,
+        "value": 4
+      },
+      {
+        "level": 3,
+        "value": 6
+      },
+      {
+        "level": 4,
+        "value": 8
+      },
+      {
+        "level": 5,
+        "value": 10
+      }
+    ],
+    "vfx": {
+      "kind": "none",
+      "color": "#e2544f",
+      "scale": 1.0
+    },
+    "icon": null
+  },
+  "blade_followup": {
+    "name_key": "skill.blade_followup.name",
+    "desc_key": "skill.blade_followup.desc",
+    "series": "blade",
+    "node_type": "active",
+    "requires": [
+      {
+        "skill": "blade_power_slash",
+        "level": 3
+      }
+    ],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "hitbox": {
+      "shape": "line",
+      "range_px": 90,
+      "width_px": 30
+    },
+    "knockback_px": 10,
+    "levels": [
+      {
+        "level": 1,
+        "sp_cost": 14,
+        "cooldown_sec": 6.0,
+        "damage_mult": 1.8
+      },
+      {
+        "level": 2,
+        "sp_cost": 17,
+        "cooldown_sec": 5.7,
+        "damage_mult": 2.05
+      },
+      {
+        "level": 3,
+        "sp_cost": 20,
+        "cooldown_sec": 5.4,
+        "damage_mult": 2.3
+      },
+      {
+        "level": 4,
+        "sp_cost": 23,
+        "cooldown_sec": 5.1,
+        "damage_mult": 2.55
+      },
+      {
+        "level": 5,
+        "sp_cost": 26,
+        "cooldown_sec": 4.8,
+        "damage_mult": 2.8
+      }
+    ],
+    "vfx": {
+      "kind": "slash_arc",
+      "color": "#e2544f",
+      "scale": 1.1
+    },
+    "icon": null
+  },
+  "blade_edge": {
+    "name_key": "skill.blade_edge.name",
+    "desc_key": "skill.blade_edge.desc",
+    "series": "blade",
+    "node_type": "passive",
+    "requires": [
+      {
+        "skill": "blade_thrust",
+        "level": 3
+      }
+    ],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "passive_stat": "crit_damage_pct",
+    "levels": [
+      {
+        "level": 1,
+        "value": 3
+      },
+      {
+        "level": 2,
+        "value": 6
+      },
+      {
+        "level": 3,
+        "value": 9
+      },
+      {
+        "level": 4,
+        "value": 12
+      },
+      {
+        "level": 5,
+        "value": 15
+      }
+    ],
+    "vfx": {
+      "kind": "none",
+      "color": "#e2544f",
+      "scale": 1.0
+    },
+    "icon": null
+  },
+  "blade_bloodlust": {
+    "name_key": "skill.blade_bloodlust.name",
+    "desc_key": "skill.blade_bloodlust.desc",
+    "series": "blade",
+    "node_type": "buff",
+    "requires": [
+      {
+        "skill": "blade_focus",
+        "level": 3
+      }
+    ],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "levels": [
+      {
+        "level": 1,
+        "sp_cost": 18,
+        "cooldown_sec": 25,
+        "self_effect": {
+          "atk_buff_pct": 6,
+          "duration_sec": 5
+        }
+      },
+      {
+        "level": 2,
+        "sp_cost": 21,
+        "cooldown_sec": 24,
+        "self_effect": {
+          "atk_buff_pct": 10,
+          "duration_sec": 6
+        }
+      },
+      {
+        "level": 3,
+        "sp_cost": 24,
+        "cooldown_sec": 23,
+        "self_effect": {
+          "atk_buff_pct": 14,
+          "duration_sec": 7
+        }
+      },
+      {
+        "level": 4,
+        "sp_cost": 27,
+        "cooldown_sec": 22,
+        "self_effect": {
+          "atk_buff_pct": 18,
+          "duration_sec": 8
+        }
+      },
+      {
+        "level": 5,
+        "sp_cost": 30,
+        "cooldown_sec": 21,
+        "self_effect": {
+          "atk_buff_pct": 22,
+          "duration_sec": 9
+        }
+      }
+    ],
+    "vfx": {
+      "kind": "glow",
+      "color": "#e2544f",
+      "scale": 1.2
+    },
+    "icon": null
+  },
+  "blade_reflex": {
+    "name_key": "skill.blade_reflex.name",
+    "desc_key": "skill.blade_reflex.desc",
+    "series": "blade",
+    "node_type": "passive",
+    "requires": [
+      {
+        "skill": "blade_followup",
+        "level": 3
+      }
+    ],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "passive_stat": "aspd_pct",
+    "levels": [
+      {
+        "level": 1,
+        "value": 1.5
+      },
+      {
+        "level": 2,
+        "value": 3
+      },
+      {
+        "level": 3,
+        "value": 4.5
+      },
+      {
+        "level": 4,
+        "value": 6
+      },
+      {
+        "level": 5,
+        "value": 7.5
+      }
+    ],
+    "vfx": {
+      "kind": "none",
+      "color": "#e2544f",
+      "scale": 1.0
+    },
+    "icon": null
+  },
+  "blade_finishing_strike": {
+    "name_key": "skill.blade_finishing_strike.name",
+    "desc_key": "skill.blade_finishing_strike.desc",
+    "series": "blade",
+    "node_type": "active",
+    "requires": [
+      {
+        "skill": "blade_edge",
+        "level": 3
+      },
+      {
+        "skill": "blade_bloodlust",
+        "level": 3
+      }
+    ],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "hitbox": {
+      "shape": "line",
+      "range_px": 110,
+      "width_px": 40
+    },
+    "knockback_px": 20,
+    "levels": [
+      {
+        "level": 1,
+        "sp_cost": 25,
+        "cooldown_sec": 12.0,
+        "damage_mult": 2.6
+      },
+      {
+        "level": 2,
+        "sp_cost": 30,
+        "cooldown_sec": 11.5,
+        "damage_mult": 3.0
+      },
+      {
+        "level": 3,
+        "sp_cost": 35,
+        "cooldown_sec": 11.0,
+        "damage_mult": 3.4
+      },
+      {
+        "level": 4,
+        "sp_cost": 40,
+        "cooldown_sec": 10.5,
+        "damage_mult": 3.8
+      },
+      {
+        "level": 5,
+        "sp_cost": 45,
+        "cooldown_sec": 10.0,
+        "damage_mult": 4.2
+      }
+    ],
+    "vfx": {
+      "kind": "slash_arc",
+      "color": "#e2544f",
+      "scale": 1.5
+    },
+    "icon": null
+  },
   "guard_shield_bash": {
     "name_key": "skill.guard_shield_bash.name",
     "desc_key": "skill.guard_shield_bash.desc",
     "series": "guard",
-    "tier": 1,
     "node_type": "active",
-    "cost_sp": 1,
-    "cooldown_sec": 5.0,
-    "stamina_cost": 20.0,
-    "damage_mult": 1.0,
-    "hitbox": { "shape": "circle", "range_px": 40, "width_px": null },
-    "knockback_px": 24,
     "requires": [],
-    "icon": null,
-    "_balance_todo": ["cooldown_sec", "stamina_cost", "damage_mult", "hitbox", "knockback_px"]
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "hitbox": {
+      "shape": "circle",
+      "range_px": 45,
+      "width_px": null
+    },
+    "knockback_px": 24,
+    "levels": [
+      {
+        "level": 1,
+        "sp_cost": 10,
+        "cooldown_sec": 4.5,
+        "damage_mult": 1.6
+      },
+      {
+        "level": 2,
+        "sp_cost": 12,
+        "cooldown_sec": 4.3,
+        "damage_mult": 1.8
+      },
+      {
+        "level": 3,
+        "sp_cost": 14,
+        "cooldown_sec": 4.1,
+        "damage_mult": 2.0
+      },
+      {
+        "level": 4,
+        "sp_cost": 16,
+        "cooldown_sec": 3.9,
+        "damage_mult": 2.2
+      },
+      {
+        "level": 5,
+        "sp_cost": 18,
+        "cooldown_sec": 3.7,
+        "damage_mult": 2.4
+      }
+    ],
+    "vfx": {
+      "kind": "ring",
+      "color": "#5a7ea8",
+      "scale": 1.0
+    },
+    "icon": null
   },
-
   "guard_iron_wall": {
     "name_key": "skill.guard_iron_wall.name",
     "desc_key": "skill.guard_iron_wall.desc",
     "series": "guard",
-    "tier": 1,
     "node_type": "active",
-    "cost_sp": 1,
-    "cooldown_sec": 8.0,
-    "stamina_cost": 15.0,
-    "damage_mult": 0.0,
+    "requires": [],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
     "hitbox": null,
     "knockback_px": 0,
-    "self_effect": { "invuln_sec": 1.0 },
-    "requires": [],
-    "icon": null,
-    "_balance_todo": ["cooldown_sec", "stamina_cost", "self_effect"]
+    "levels": [
+      {
+        "level": 1,
+        "sp_cost": 10,
+        "cooldown_sec": 8.0,
+        "damage_mult": 0,
+        "self_effect": {
+          "invuln_sec": 0.8
+        }
+      },
+      {
+        "level": 2,
+        "sp_cost": 12,
+        "cooldown_sec": 7.6,
+        "damage_mult": 0,
+        "self_effect": {
+          "invuln_sec": 0.9
+        }
+      },
+      {
+        "level": 3,
+        "sp_cost": 14,
+        "cooldown_sec": 7.2,
+        "damage_mult": 0,
+        "self_effect": {
+          "invuln_sec": 1.0
+        }
+      },
+      {
+        "level": 4,
+        "sp_cost": 16,
+        "cooldown_sec": 6.8,
+        "damage_mult": 0,
+        "self_effect": {
+          "invuln_sec": 1.1
+        }
+      },
+      {
+        "level": 5,
+        "sp_cost": 18,
+        "cooldown_sec": 6.4,
+        "damage_mult": 0,
+        "self_effect": {
+          "invuln_sec": 1.2
+        }
+      }
+    ],
+    "vfx": {
+      "kind": "glow",
+      "color": "#5a7ea8",
+      "scale": 1.0
+    },
+    "icon": null
   },
-
+  "guard_bulwark": {
+    "name_key": "skill.guard_bulwark.name",
+    "desc_key": "skill.guard_bulwark.desc",
+    "series": "guard",
+    "node_type": "passive",
+    "requires": [],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "passive_stat": "defense_flat",
+    "levels": [
+      {
+        "level": 1,
+        "value": 2
+      },
+      {
+        "level": 2,
+        "value": 4
+      },
+      {
+        "level": 3,
+        "value": 6
+      },
+      {
+        "level": 4,
+        "value": 8
+      },
+      {
+        "level": 5,
+        "value": 10
+      }
+    ],
+    "vfx": {
+      "kind": "none",
+      "color": "#5a7ea8",
+      "scale": 1.0
+    },
+    "icon": null
+  },
+  "guard_shield_charge": {
+    "name_key": "skill.guard_shield_charge.name",
+    "desc_key": "skill.guard_shield_charge.desc",
+    "series": "guard",
+    "node_type": "active",
+    "requires": [
+      {
+        "skill": "guard_shield_bash",
+        "level": 3
+      }
+    ],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "hitbox": {
+      "shape": "line",
+      "range_px": 90,
+      "width_px": 36
+    },
+    "knockback_px": 18,
+    "levels": [
+      {
+        "level": 1,
+        "sp_cost": 14,
+        "cooldown_sec": 6.0,
+        "damage_mult": 1.8,
+        "self_effect": {
+          "dash_px": 70.0,
+          "invuln_sec": 0.1
+        }
+      },
+      {
+        "level": 2,
+        "sp_cost": 17,
+        "cooldown_sec": 5.7,
+        "damage_mult": 2.05,
+        "self_effect": {
+          "dash_px": 70.0,
+          "invuln_sec": 0.1
+        }
+      },
+      {
+        "level": 3,
+        "sp_cost": 20,
+        "cooldown_sec": 5.4,
+        "damage_mult": 2.3,
+        "self_effect": {
+          "dash_px": 70.0,
+          "invuln_sec": 0.1
+        }
+      },
+      {
+        "level": 4,
+        "sp_cost": 23,
+        "cooldown_sec": 5.1,
+        "damage_mult": 2.55,
+        "self_effect": {
+          "dash_px": 70.0,
+          "invuln_sec": 0.1
+        }
+      },
+      {
+        "level": 5,
+        "sp_cost": 26,
+        "cooldown_sec": 4.8,
+        "damage_mult": 2.8,
+        "self_effect": {
+          "dash_px": 70.0,
+          "invuln_sec": 0.1
+        }
+      }
+    ],
+    "vfx": {
+      "kind": "dash_trail",
+      "color": "#5a7ea8",
+      "scale": 1.1
+    },
+    "icon": null
+  },
+  "guard_steadfast": {
+    "name_key": "skill.guard_steadfast.name",
+    "desc_key": "skill.guard_steadfast.desc",
+    "series": "guard",
+    "node_type": "passive",
+    "requires": [
+      {
+        "skill": "guard_iron_wall",
+        "level": 3
+      }
+    ],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "passive_stat": "guard_damage_reduction_pct",
+    "levels": [
+      {
+        "level": 1,
+        "value": 2
+      },
+      {
+        "level": 2,
+        "value": 4
+      },
+      {
+        "level": 3,
+        "value": 6
+      },
+      {
+        "level": 4,
+        "value": 8
+      },
+      {
+        "level": 5,
+        "value": 10
+      }
+    ],
+    "vfx": {
+      "kind": "none",
+      "color": "#5a7ea8",
+      "scale": 1.0
+    },
+    "icon": null
+  },
+  "guard_fortify": {
+    "name_key": "skill.guard_fortify.name",
+    "desc_key": "skill.guard_fortify.desc",
+    "series": "guard",
+    "node_type": "buff",
+    "requires": [
+      {
+        "skill": "guard_bulwark",
+        "level": 3
+      }
+    ],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "levels": [
+      {
+        "level": 1,
+        "sp_cost": 20,
+        "cooldown_sec": 28,
+        "self_effect": {
+          "dmg_reduction_pct": 10,
+          "duration_sec": 6
+        }
+      },
+      {
+        "level": 2,
+        "sp_cost": 23,
+        "cooldown_sec": 27,
+        "self_effect": {
+          "dmg_reduction_pct": 13,
+          "duration_sec": 7
+        }
+      },
+      {
+        "level": 3,
+        "sp_cost": 26,
+        "cooldown_sec": 26,
+        "self_effect": {
+          "dmg_reduction_pct": 16,
+          "duration_sec": 8
+        }
+      },
+      {
+        "level": 4,
+        "sp_cost": 29,
+        "cooldown_sec": 25,
+        "self_effect": {
+          "dmg_reduction_pct": 19,
+          "duration_sec": 9
+        }
+      },
+      {
+        "level": 5,
+        "sp_cost": 32,
+        "cooldown_sec": 24,
+        "self_effect": {
+          "dmg_reduction_pct": 22,
+          "duration_sec": 10
+        }
+      }
+    ],
+    "vfx": {
+      "kind": "glow",
+      "color": "#5a7ea8",
+      "scale": 1.2
+    },
+    "icon": null
+  },
+  "guard_vitality": {
+    "name_key": "skill.guard_vitality.name",
+    "desc_key": "skill.guard_vitality.desc",
+    "series": "guard",
+    "node_type": "passive",
+    "requires": [
+      {
+        "skill": "guard_shield_charge",
+        "level": 3
+      }
+    ],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "passive_stat": "max_hp_pct",
+    "levels": [
+      {
+        "level": 1,
+        "value": 3
+      },
+      {
+        "level": 2,
+        "value": 6
+      },
+      {
+        "level": 3,
+        "value": 9
+      },
+      {
+        "level": 4,
+        "value": 12
+      },
+      {
+        "level": 5,
+        "value": 15
+      }
+    ],
+    "vfx": {
+      "kind": "none",
+      "color": "#5a7ea8",
+      "scale": 1.0
+    },
+    "icon": null
+  },
+  "guard_retribution": {
+    "name_key": "skill.guard_retribution.name",
+    "desc_key": "skill.guard_retribution.desc",
+    "series": "guard",
+    "node_type": "active",
+    "requires": [
+      {
+        "skill": "guard_steadfast",
+        "level": 3
+      },
+      {
+        "skill": "guard_fortify",
+        "level": 3
+      }
+    ],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "hitbox": {
+      "shape": "circle",
+      "range_px": 60,
+      "width_px": null
+    },
+    "knockback_px": 32,
+    "levels": [
+      {
+        "level": 1,
+        "sp_cost": 25,
+        "cooldown_sec": 12.0,
+        "damage_mult": 2.6
+      },
+      {
+        "level": 2,
+        "sp_cost": 30,
+        "cooldown_sec": 11.5,
+        "damage_mult": 3.0
+      },
+      {
+        "level": 3,
+        "sp_cost": 35,
+        "cooldown_sec": 11.0,
+        "damage_mult": 3.4
+      },
+      {
+        "level": 4,
+        "sp_cost": 40,
+        "cooldown_sec": 10.5,
+        "damage_mult": 3.8
+      },
+      {
+        "level": 5,
+        "sp_cost": 45,
+        "cooldown_sec": 10.0,
+        "damage_mult": 4.2
+      }
+    ],
+    "vfx": {
+      "kind": "ring",
+      "color": "#5a7ea8",
+      "scale": 1.5
+    },
+    "icon": null
+  },
+  "trick_quickslash": {
+    "name_key": "skill.trick_quickslash.name",
+    "desc_key": "skill.trick_quickslash.desc",
+    "series": "trick",
+    "node_type": "active",
+    "requires": [],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "hitbox": {
+      "shape": "line",
+      "range_px": 70,
+      "width_px": 18
+    },
+    "knockback_px": 4,
+    "levels": [
+      {
+        "level": 1,
+        "sp_cost": 6,
+        "cooldown_sec": 2.2,
+        "damage_mult": 1.1
+      },
+      {
+        "level": 2,
+        "sp_cost": 7,
+        "cooldown_sec": 2.1,
+        "damage_mult": 1.25
+      },
+      {
+        "level": 3,
+        "sp_cost": 8,
+        "cooldown_sec": 2.0,
+        "damage_mult": 1.4
+      },
+      {
+        "level": 4,
+        "sp_cost": 9,
+        "cooldown_sec": 1.9,
+        "damage_mult": 1.55
+      },
+      {
+        "level": 5,
+        "sp_cost": 10,
+        "cooldown_sec": 1.8,
+        "damage_mult": 1.7
+      }
+    ],
+    "vfx": {
+      "kind": "thrust_line",
+      "color": "#7fbf5f",
+      "scale": 0.9
+    },
+    "icon": null
+  },
   "trick_dash_strike": {
     "name_key": "skill.trick_dash_strike.name",
     "desc_key": "skill.trick_dash_strike.desc",
     "series": "trick",
-    "tier": 1,
     "node_type": "active",
-    "cost_sp": 1,
-    "cooldown_sec": 6.0,
-    "stamina_cost": 20.0,
-    "damage_mult": 1.4,
-    "hitbox": { "shape": "line", "range_px": 100, "width_px": 24 },
-    "knockback_px": 10,
-    "self_effect": { "dash_px": 80.0, "invuln_sec": 0.15 },
     "requires": [],
-    "icon": null,
-    "_balance_todo": ["cooldown_sec", "stamina_cost", "damage_mult", "hitbox", "knockback_px", "self_effect"]
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "hitbox": {
+      "shape": "line",
+      "range_px": 100,
+      "width_px": 24
+    },
+    "knockback_px": 10,
+    "levels": [
+      {
+        "level": 1,
+        "sp_cost": 10,
+        "cooldown_sec": 4.5,
+        "damage_mult": 1.6,
+        "self_effect": {
+          "dash_px": 80.0,
+          "invuln_sec": 0.15
+        }
+      },
+      {
+        "level": 2,
+        "sp_cost": 12,
+        "cooldown_sec": 4.3,
+        "damage_mult": 1.8,
+        "self_effect": {
+          "dash_px": 80.0,
+          "invuln_sec": 0.15
+        }
+      },
+      {
+        "level": 3,
+        "sp_cost": 14,
+        "cooldown_sec": 4.1,
+        "damage_mult": 2.0,
+        "self_effect": {
+          "dash_px": 80.0,
+          "invuln_sec": 0.15
+        }
+      },
+      {
+        "level": 4,
+        "sp_cost": 16,
+        "cooldown_sec": 3.9,
+        "damage_mult": 2.2,
+        "self_effect": {
+          "dash_px": 80.0,
+          "invuln_sec": 0.15
+        }
+      },
+      {
+        "level": 5,
+        "sp_cost": 18,
+        "cooldown_sec": 3.7,
+        "damage_mult": 2.4,
+        "self_effect": {
+          "dash_px": 80.0,
+          "invuln_sec": 0.15
+        }
+      }
+    ],
+    "vfx": {
+      "kind": "dash_trail",
+      "color": "#7fbf5f",
+      "scale": 1.0
+    },
+    "icon": null
   },
-
+  "trick_insight": {
+    "name_key": "skill.trick_insight.name",
+    "desc_key": "skill.trick_insight.desc",
+    "series": "trick",
+    "node_type": "passive",
+    "requires": [],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "passive_stat": "sp_regen_pct",
+    "levels": [
+      {
+        "level": 1,
+        "value": 4
+      },
+      {
+        "level": 2,
+        "value": 8
+      },
+      {
+        "level": 3,
+        "value": 12
+      },
+      {
+        "level": 4,
+        "value": 16
+      },
+      {
+        "level": 5,
+        "value": 20
+      }
+    ],
+    "vfx": {
+      "kind": "none",
+      "color": "#7fbf5f",
+      "scale": 1.0
+    },
+    "icon": null
+  },
+  "trick_flurry": {
+    "name_key": "skill.trick_flurry.name",
+    "desc_key": "skill.trick_flurry.desc",
+    "series": "trick",
+    "node_type": "active",
+    "requires": [
+      {
+        "skill": "trick_quickslash",
+        "level": 3
+      }
+    ],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "hitbox": {
+      "shape": "arc",
+      "range_px": 60,
+      "width_px": 110
+    },
+    "knockback_px": 6,
+    "levels": [
+      {
+        "level": 1,
+        "sp_cost": 14,
+        "cooldown_sec": 6.0,
+        "damage_mult": 1.8
+      },
+      {
+        "level": 2,
+        "sp_cost": 17,
+        "cooldown_sec": 5.7,
+        "damage_mult": 2.05
+      },
+      {
+        "level": 3,
+        "sp_cost": 20,
+        "cooldown_sec": 5.4,
+        "damage_mult": 2.3
+      },
+      {
+        "level": 4,
+        "sp_cost": 23,
+        "cooldown_sec": 5.1,
+        "damage_mult": 2.55
+      },
+      {
+        "level": 5,
+        "sp_cost": 26,
+        "cooldown_sec": 4.8,
+        "damage_mult": 2.8
+      }
+    ],
+    "vfx": {
+      "kind": "slash_arc",
+      "color": "#7fbf5f",
+      "scale": 1.1
+    },
+    "icon": null
+  },
+  "trick_precision": {
+    "name_key": "skill.trick_precision.name",
+    "desc_key": "skill.trick_precision.desc",
+    "series": "trick",
+    "node_type": "passive",
+    "requires": [
+      {
+        "skill": "trick_dash_strike",
+        "level": 3
+      }
+    ],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "passive_stat": "crit_chance_pct",
+    "levels": [
+      {
+        "level": 1,
+        "value": 0.5
+      },
+      {
+        "level": 2,
+        "value": 1
+      },
+      {
+        "level": 3,
+        "value": 1.5
+      },
+      {
+        "level": 4,
+        "value": 2
+      },
+      {
+        "level": 5,
+        "value": 2.5
+      }
+    ],
+    "vfx": {
+      "kind": "none",
+      "color": "#7fbf5f",
+      "scale": 1.0
+    },
+    "icon": null
+  },
   "trick_fleet_step": {
     "name_key": "skill.trick_fleet_step.name",
     "desc_key": "skill.trick_fleet_step.desc",
     "series": "trick",
-    "tier": 1,
+    "node_type": "buff",
+    "requires": [
+      {
+        "skill": "trick_insight",
+        "level": 3
+      }
+    ],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "levels": [
+      {
+        "level": 1,
+        "sp_cost": 12,
+        "cooldown_sec": 15.0,
+        "self_effect": {
+          "move_speed_mult": 1.2,
+          "duration_sec": 4
+        }
+      },
+      {
+        "level": 2,
+        "sp_cost": 14,
+        "cooldown_sec": 14.5,
+        "self_effect": {
+          "move_speed_mult": 1.25,
+          "duration_sec": 5
+        }
+      },
+      {
+        "level": 3,
+        "sp_cost": 16,
+        "cooldown_sec": 14.0,
+        "self_effect": {
+          "move_speed_mult": 1.3,
+          "duration_sec": 6
+        }
+      },
+      {
+        "level": 4,
+        "sp_cost": 18,
+        "cooldown_sec": 13.5,
+        "self_effect": {
+          "move_speed_mult": 1.35,
+          "duration_sec": 7
+        }
+      },
+      {
+        "level": 5,
+        "sp_cost": 20,
+        "cooldown_sec": 13.0,
+        "self_effect": {
+          "move_speed_mult": 1.4,
+          "duration_sec": 8
+        }
+      }
+    ],
+    "vfx": {
+      "kind": "speed_lines",
+      "color": "#7fbf5f",
+      "scale": 1.2
+    },
+    "icon": null
+  },
+  "trick_swift": {
+    "name_key": "skill.trick_swift.name",
+    "desc_key": "skill.trick_swift.desc",
+    "series": "trick",
+    "node_type": "passive",
+    "requires": [
+      {
+        "skill": "trick_flurry",
+        "level": 3
+      }
+    ],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "passive_stat": "move_speed_pct",
+    "levels": [
+      {
+        "level": 1,
+        "value": 1
+      },
+      {
+        "level": 2,
+        "value": 2
+      },
+      {
+        "level": 3,
+        "value": 3
+      },
+      {
+        "level": 4,
+        "value": 4
+      },
+      {
+        "level": 5,
+        "value": 5
+      }
+    ],
+    "vfx": {
+      "kind": "none",
+      "color": "#7fbf5f",
+      "scale": 1.0
+    },
+    "icon": null
+  },
+  "trick_execute": {
+    "name_key": "skill.trick_execute.name",
+    "desc_key": "skill.trick_execute.desc",
+    "series": "trick",
     "node_type": "active",
-    "cost_sp": 1,
-    "cooldown_sec": 12.0,
-    "stamina_cost": 10.0,
-    "damage_mult": 0.0,
-    "hitbox": null,
-    "knockback_px": 0,
-    "self_effect": { "move_speed_mult": 1.3, "duration_sec": 4.0 },
-    "requires": [],
-    "icon": null,
-    "_balance_todo": ["cooldown_sec", "stamina_cost", "self_effect"]
+    "requires": [
+      {
+        "skill": "trick_precision",
+        "level": 3
+      },
+      {
+        "skill": "trick_fleet_step",
+        "level": 3
+      }
+    ],
+    "cost_skill_point_per_level": 1,
+    "max_level": 5,
+    "hitbox": {
+      "shape": "line",
+      "range_px": 95,
+      "width_px": 22
+    },
+    "knockback_px": 8,
+    "levels": [
+      {
+        "level": 1,
+        "sp_cost": 25,
+        "cooldown_sec": 12.0,
+        "damage_mult": 2.6
+      },
+      {
+        "level": 2,
+        "sp_cost": 30,
+        "cooldown_sec": 11.5,
+        "damage_mult": 3.0
+      },
+      {
+        "level": 3,
+        "sp_cost": 35,
+        "cooldown_sec": 11.0,
+        "damage_mult": 3.4
+      },
+      {
+        "level": 4,
+        "sp_cost": 40,
+        "cooldown_sec": 10.5,
+        "damage_mult": 3.8
+      },
+      {
+        "level": 5,
+        "sp_cost": 45,
+        "cooldown_sec": 10.0,
+        "damage_mult": 4.2
+      }
+    ],
+    "vfx": {
+      "kind": "thrust_line",
+      "color": "#7fbf5f",
+      "scale": 1.4
+    },
+    "icon": null
   }
 }
