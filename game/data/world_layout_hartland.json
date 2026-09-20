@@ -1,0 +1,50 @@
+{
+  "_schema_version": "0.1",
+  "_source_doc": "docs/specs/quarter-view-migration-b-plan.md §3.3 (D-201, 단계 b2)",
+  "_comment": "하틀랜드 민들레 마을 입구 구역 배치. 좌표는 전부 **타일 좌표**(1타일 = Tuning.TILE_SIZE_PROTOTYPE = 32 월드단위)라 타일 규격이 바뀌어도 이 파일은 그대로다. scripts/systems/world.gd 가 읽어 Ground/Walls/Props 를 채운다. 애셋 이름은 game/assets/quarter/quarter_atlas.json 의 키다. 기존 퀘스트 트리거·NPC·비석(data/world_objects.json)과 몬스터 스폰 지점을 막지 않도록 배치했고, 이 불변은 tests/smoke/smoke_quarter_view_b.gd 가 검사한다.",
+
+  "ground": {
+    "_comment": "지면을 채우는 반경(타일). 카메라가 담는 범위(20×11타일)보다 넉넉하면 된다.",
+    "radius_tiles": 40,
+    "variant_ratio": 0.14
+  },
+
+  "paths": [
+    {"_comment": "마을로 들어가는 남북 진입로. 절벽 틈(x -1..0)을 지나간다.",
+     "rect": [-1, -11, 2, 12]}
+  ],
+
+  "water": [
+    {"_comment": "마을 서쪽 연못. 통행 불가(collision_band_px = 한 칸 전체).",
+     "rect": [-17, -3, 4, 4]}
+  ],
+
+  "cliffs": [
+    {"_comment": "마을을 두르는 낮은 흙 절벽. front_y 행이 정면(접지선), 그 위가 윗면, 아래가 그림자.",
+     "x": -14, "front_y": -12, "length": 13},
+    {"x": 2, "front_y": -12, "length": 13}
+  ],
+
+  "props": [
+    {"asset": "house_a", "tile": [-7, -8]},
+    {"asset": "house_a", "tile": [6, -8]},
+
+    {"asset": "tree_oak", "tile": [-11, -7]},
+    {"asset": "tree_oak", "tile": [-9, -4]},
+    {"asset": "tree_oak", "tile": [-4, -10]},
+    {"asset": "tree_oak", "tile": [4, -6]},
+    {"asset": "tree_oak", "tile": [8, -9]},
+    {"asset": "tree_oak", "tile": [10, -4]},
+
+    {"asset": "fence", "tile": [-2, -11], "variant": 0},
+    {"asset": "fence", "tile": [-2, -10], "variant": 0},
+    {"asset": "fence", "tile": [1, -11], "variant": 0},
+    {"asset": "fence", "tile": [1, -10], "variant": 0},
+
+    {"asset": "rock", "tile": [-12, -2]},
+    {"asset": "rock", "tile": [7, -3]},
+    {"asset": "bush", "tile": [3, -9]},
+    {"asset": "bush", "tile": [-8, -2]},
+    {"asset": "bush", "tile": [11, -7]}
+  ]
+}

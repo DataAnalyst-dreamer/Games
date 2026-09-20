@@ -27,6 +27,12 @@ script = ExtResource("19_main_bootstrap")
 [node name="World" parent="." instance=ExtResource("1_world")]
 z_index = -2
 
+[node name="Walls" type="TileMapLayer" parent="."]
+y_sort_enabled = true
+
+[node name="Props" type="Node2D" parent="."]
+y_sort_enabled = true
+
 [node name="Player" parent="." instance=ExtResource("2_player")]
 
 [node name="Slime1" parent="." instance=ExtResource("5_slime")]
