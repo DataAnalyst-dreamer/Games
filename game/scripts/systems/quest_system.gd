@@ -135,6 +135,34 @@ func get_active_interact_objective_keys(object_id: StringName) -> Array[String]:
 	return keys
 
 
+## get_active_interact_objective_keys()의 talk판(M3-4, D-155 확장). NPC 머리 위 "목표
+## 표식"(진행 중인 퀘스트가 giver 없이도 표시되도록) 판정에 쓴다. 이 조회도 이벤트를
+## 발신하지 않는다.
+func get_active_talk_objective_keys(npc_id: StringName) -> Array[String]:
+	var keys: Array[String] = []
+	for quest_id: String in _active:
+		var objectives: Array = _quest_def(quest_id).get("objectives", [])
+		var index := int((_active[quest_id] as Dictionary).get("objective_index", 0))
+		if index < 0 or index >= objectives.size(): continue
+		var objective: Dictionary = objectives[index]
+		if String(objective.get("type", "")) == "talk" and _resolve_objective_target(quest_id, objective) == "npc:" + String(npc_id):
+			keys.append("%s:%d" % [quest_id, index])
+	return keys
+
+
+## keys(get_active_talk/interact_objective_keys 반환값) 중 현재 추적 중인 퀘스트의
+## 항목이 있는지(M3-4). NPC/오브젝트 머리 위 "목표 표식"은 추적 중인 퀘스트로만
+## 범위를 좁힌다 — 모든 활성 퀘스트를 다 띄우면 화면이 표식으로 뒤덮인다.
+func is_tracked_objective_key(keys: Array[String]) -> bool:
+	var tracked := get_tracked()
+	if tracked.is_empty():
+		return false
+	for key: String in keys:
+		if key.begins_with(tracked + ":"):
+			return true
+	return false
+
+
 func _prerequisites_met(qdef: Dictionary) -> bool:
 	var prereq: Dictionary = qdef.get("prerequisites", {})
 	for qid: Variant in (prereq.get("quests_completed", []) as Array):

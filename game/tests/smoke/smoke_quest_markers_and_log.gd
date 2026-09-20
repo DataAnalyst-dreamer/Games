@@ -48,7 +48,13 @@ func _ready() -> void:
 
 	var accept_result: Dictionary = QuestSystem.accept(Q1)
 	_check("MQ01 수주 성공", accept_result.get("ok", false))
-	_check("수주 직후(available도 complete_ready도 아님)엔 표식 사라짐", not _teo.marker_visible())
+	# M3-4(D-163) 이전엔 이 시점에 표식이 완전히 사라졌다 — giver 스캔은 available/
+	# complete_ready만 보므로 accept 직후(active)는 아무 것도 안 걸렸다. 하지만 obj_01이
+	# "talk npc:teo"라 실제로는 테오에게 다시 가야 하는데 아무 표식도 없는 게 바로 데모
+	# 피드백 "퀘스트 표식이 안 보인다"의 근본 원인이었다. 지금은 "추적 중인 퀘스트의
+	# 목표 대상"으로 ▼가 뜬다(giver의 !/?와 별개 우선순위).
+	_check("수주 직후(active, talk npc:teo가 현재 목표)엔 ▼ 표식",
+		_teo.marker_visible() and _teo.marker_text() == "▼")
 
 	print("--- 퀘스트 로그 탭: active 상태에서 목록·자동 추적 ---")
 	_ui.open_menu()

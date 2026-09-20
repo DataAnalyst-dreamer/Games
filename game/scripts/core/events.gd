@@ -26,6 +26,19 @@ signal level_up(new_level: int, stat_gains: Dictionary)
 ## 발신 — HUD 경험치 바가 이 값만으로 항상 최신 상태를 그릴 수 있다. 만렙 캡 상태에서는
 ## exp_changed(0, 0, max_level)로 발신된다(D-152).
 signal exp_changed(current_exp: int, exp_to_next: int, level: int)
+## M3-4(F1-2/F1-3) 신설. 로직 브랜치(stage/m3-3-*)가 아직 병합 전이라 UI 스테이지가
+## 먼저 선언했다(exp_changed/level_up 선례와 동일 — 병합 시 중복되면 디렉터가 정리).
+## stats: {"str","dex","int","vit","luk"} 각 투자값. derived:
+## {attack,max_hp,defense,crit_chance,roll_cost_mult,cooldown_mult}(Progression.get_derived()
+## 결과 그대로). 스탯을 배분하거나 세이브 로드 직후 발신.
+signal stats_changed(stats: Dictionary, derived: Dictionary, stat_points: int)
+## learned: 습득한 skill_id 배열. slots: 장착 슬롯 2개(빈 문자열=미장착, 인덱스 0=Q/skill_1,
+## 1=R/skill_2). 스킬을 배우거나 슬롯을 바꾸거나 세이브 로드 직후 발신.
+signal skills_changed(learned: Array, slots: Array, skill_points: int)
+## 슬롯(0/1)의 스킬이 실제로 발동했을 때 — HUD 스킬 슬롯 쿨타임 오버레이 재생 트리거.
+signal skill_cast(slot: int, skill_id: StringName, cooldown_sec: float)
+## 쿨타임이 끝나(또는 INT 쿨감 등으로 조기에) 다시 사용 가능해졌을 때.
+signal skill_ready(slot: int)
 
 # --- 전투 ---
 ## is_advantage: 원소 상성 적중 여부(ElementCalc.get_multiplier() > 1.0). is_critical:

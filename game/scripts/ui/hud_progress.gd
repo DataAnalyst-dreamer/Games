@@ -79,7 +79,12 @@ func _on_level_up(new_level: int, stat_gains: Dictionary) -> void:
 
 func _show_banner(stat_gains: Dictionary) -> void:
 	banner_title.text = tr(&"ui.hud.level_up_banner") % _level
-	banner_stats.text = _format_stat_gains(stat_gains)
+	var stats_text: String = _format_stat_gains(stat_gains)
+	# M3-4: 레벨업으로 쌓인 스탯/스킬 포인트를 어디서 쓰는지 안내(D-153 데모 피드백
+	# "레벨업 후 할 행동이 필요" — GameState.stat_points는 이미 존재하는 실제 필드).
+	if GameState.stat_points > 0:
+		stats_text += "\n" + tr(&"ui.hud.level_up_points_hint") % GameState.stat_points
+	banner_stats.text = stats_text
 	banner.visible = true
 	banner.modulate.a = 1.0
 	if _banner_tween != null and _banner_tween.is_valid():

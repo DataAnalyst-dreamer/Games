@@ -65,6 +65,8 @@ const COSTUME_SLOTS := [
 ## "quest" 탭 실제 구현(M3-2, D-153) — 다른 형제 노드와 달리 이 스크립트에 로직을
 ## 넣지 않고 quest_log_tab.gd로 분리했다(500줄 상한 D-145, 이 파일이 이미 초과 상태).
 @onready var quest_log_tab: QuestLogTab = $ContentArea/QuestLogTab
+## "skill" 탭 실제 구현(M3-4, D-166) — quest_log_tab과 동일 분리 원칙.
+@onready var skill_panel_tab: SkillPanelTab = $ContentArea/SkillPanelTab
 @onready var equip_area: Control = $ContentArea/InventoryTab/LeftPanel/EquipArea
 @onready var costume_header: Label = $ContentArea/InventoryTab/LeftPanel/CostumeHeader
 @onready var costume_area: Control = $ContentArea/InventoryTab/LeftPanel/CostumeArea
@@ -123,6 +125,7 @@ func _ready() -> void:
 	header_label.get_parent().add_child(_description_label)
 	header_label.get_parent().move_child(_description_label, 1)
 	quest_log_tab.theme = theme # 자식 Control은 부모 theme을 스크립트에서 자동 상속하지 않음(D-24류 관례).
+	skill_panel_tab.theme = theme
 	_apply_theme_frames()
 	_build_tabs()
 	_build_filter_chips()
@@ -153,6 +156,7 @@ func open_menu() -> void:
 func close_menu() -> void:
 	visible = false
 	quest_log_tab.close()
+	skill_panel_tab.close()
 
 
 func is_open() -> bool:
@@ -228,14 +232,18 @@ func _apply_tab_visibility() -> void:
 	var tab_id: String = TABS[_tab_index]
 	var is_inventory: bool = tab_id == "inventory"
 	var is_quest: bool = tab_id == "quest"
+	var is_skill: bool = tab_id == "skill"
 	inventory_tab.visible = is_inventory
 	quest_log_tab.visible = is_quest
-	placeholder_tab.visible = not is_inventory and not is_quest
+	skill_panel_tab.visible = is_skill
+	placeholder_tab.visible = not is_inventory and not is_quest and not is_skill
 	if is_inventory:
 		_refresh_focus_visuals()
 		_refresh_tooltip()
 	elif is_quest:
 		quest_log_tab.open()
+	elif is_skill:
+		skill_panel_tab.open()
 	else:
 		placeholder_label.text = tr(&"ui.inv.placeholder_tab")
 	_update_tab_labels()
@@ -661,6 +669,10 @@ func _process(delta: float) -> void:
 
 	if TABS[_tab_index] == "quest":
 		quest_log_tab.handle_input(delta)
+		return
+
+	if TABS[_tab_index] == "skill":
+		skill_panel_tab.handle_input(delta)
 		return
 
 	if TABS[_tab_index] != "inventory":
