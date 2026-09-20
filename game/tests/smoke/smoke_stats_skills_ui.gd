@@ -1,12 +1,12 @@
-## 헤드리스 스모크 테스트: 스탯 분배 패널 + 스킬 패널 + HUD 스킬 쿨타임(M3-4).
+## 헤드리스 스모크 테스트: 스탯 분배 패널(v2, 6스탯) + HUD 스킬 쿨타임(M4-5).
 ##
 ## 실행: godot --headless --path game res://tests/smoke/SmokeStatsSkillsUi.tscn --quit-after 300
 ##
-## 로직 브랜치(stage/m3-3-*)의 Progression.allocate_stat/learn_skill/assign_hotbar가 아직
-## 병합 전이라 Events.stats_changed/hotbar_changed/skill_cast/skill_ready를 이 스모크가
-## 직접 emit해 UI만 독립적으로 검증한다(지시서 "개발 중엔 스모크에서 이 시그널을 직접
-## emit" 참고, smoke_progress_ui.gd와 동일 패턴). game/data/skills.json은 더미가 아니라
-## stage/m3-3-skill-data에서 병합해 온 실제 데이터(액티브 6종)를 그대로 쓴다.
+## 스킬 트리(계열×tier, 24노드) 자체의 검증은 `smoke_skill_tree_ui.gd`가 전담한다 — 이
+## 스모크는 v1 시절부터 있던 스탯 탭 + HUD 슬롯 쿨타임 오버레이 회귀만 계속 지킨다.
+## 로직 브랜치(stage/m4-4)의 Progression.allocate_stat 등이 아직 병합 전이라
+## Events.stats_changed/hotbar_changed/skill_cast/skill_ready를 이 스모크가 직접 emit해
+## UI만 독립적으로 검증한다.
 extends Node
 
 var _main: Node
@@ -25,7 +25,7 @@ func _check(cond: bool, label: String) -> void:
 
 
 func _ready() -> void:
-	print("=== SMOKE STATS/SKILLS UI: 스탯 탭 + 스킬 탭(실제 데이터) + HUD 슬롯 쿨타임 ===")
+	print("=== SMOKE STATS/SKILLS UI: 스탯 탭(v2, 6스탯) + HUD 슬롯 쿨타임 ===")
 	var scene: PackedScene = load("res://scenes/main/Main.tscn")
 	_main = scene.instantiate()
 	add_child(_main)
@@ -37,33 +37,25 @@ func _ready() -> void:
 	_menu.select_tab("skill")
 	_skill_tab = _menu.skill_panel_tab
 	_check(_skill_tab.visible, "skill 탭 전환 시 SkillPanelTab visible")
+	_check(_skill_tab._stat_rows.size() == 6, "스탯 행 6개(D-158 AGI 신설, actual=%d)" % _skill_tab._stat_rows.size())
 
-	# --- 스킬 목록: skills.json 실제 6종(D-158~D-161, 전부 icon:null) ---
-	_check(_skill_tab._skill_ids.size() == 6, "skills.json 실제 액티브 6종 로드(actual=%d)" % _skill_tab._skill_ids.size())
-	_check(_skill_tab._skill_ids.has("blade_power_slash") and _skill_tab._skill_ids.has("trick_fleet_step"),
-		"실제 skill_id(blade_power_slash/trick_fleet_step) 포함")
-	_skill_tab._sub_tab_index = 1 # 스킬 서브탭으로 전환(입력 대신 직접 지정 — 포커스 인덱스만 필요).
-	_skill_tab._skill_focus_index = 0
-	_skill_tab._refresh_skill_detail()
-	_check(_skill_tab._skill_detail_title.text == tr(&"skill.blade_power_slash.name"),
-		"상세 패널이 실제 로컬라이징(skill.blade_power_slash.name)을 보여줌: '%s'" % _skill_tab._skill_detail_title.text)
-
-	# --- 스탯 탭: Events.stats_changed 직접 emit ---
+	# --- 스탯 탭: Events.stats_changed 직접 emit(v2 6스탯 + D-195 파생치 키) ---
 	Events.stats_changed.emit(
-		{"str": 5, "dex": 0, "int": 0, "vit": 3, "luk": 0},
-		{"attack": 33.0, "max_hp": 115.0, "defense": 11.0, "crit_chance": 0.053, "roll_cost_mult": 1.0, "cooldown_mult": 1.0},
+		{"str": 5, "agi": 0, "dex": 0, "int": 0, "vit": 3, "luk": 0},
+		{"atk": 33.0, "max_hp": 115.0, "def": 11.0, "crit_chance": 0.053},
 		2)
 	print("Events.stats_changed 발신")
-	_skill_tab._sub_tab_index = 0
 	_skill_tab._refresh_stat_body()
 	_check(_skill_tab._points_header.text.contains("2"), "잔여 포인트 헤더에 2 반영: '%s'" % _skill_tab._points_header.text)
 	var str_row: Dictionary = _skill_tab._stat_rows[0]
 	_check((str_row["value"] as Label).text == "5", "STR 행 값이 5로 갱신")
-	var vit_row: Dictionary = _skill_tab._stat_rows[3]
-	_check(not (vit_row["preview"] as Label).text.is_empty(), "VIT 파생치 미리보기(HP/방어) 표시됨: '%s'" % (vit_row["preview"] as Label).text)
+	var vit_row: Dictionary = _skill_tab._stat_rows[4] # str/agi/dex/int/vit/luk 순서 4번째=vit.
+	_check(not (vit_row["preview"] as Label).text.is_empty(), "VIT 행 미리보기(효과 설명+HP/방어)가 비어있지 않음: '%s'" % (vit_row["preview"] as Label).text)
+	_check(_skill_tab._derived_footer.text.contains("11.0"), "파생치 푸터에 def=11.0 반영: '%s'" % _skill_tab._derived_footer.text)
+	_check(not _skill_tab._derived_footer.text.contains(tr(&"ui.stat.derived.max_sp")),
+		"get_derived()에 없는 키(max_sp)는 푸터에서 숨겨짐(원시값 덤프 금지, D-195): '%s'" % _skill_tab._derived_footer.text)
 
-	# --- 핫바 탭: Events.hotbar_changed 직접 emit(M4-1, D-175~D-177 — HUD는 이제
-	# skills_changed가 아니라 hotbar_changed로 슬롯 내용을 받는다) ---
+	# --- 핫바 탭: Events.hotbar_changed 직접 emit(M4-1, D-175~D-177) ---
 	Events.hotbar_changed.emit([{"kind": "skill", "id": "blade_power_slash"}, {"kind": "", "id": ""}])
 	print("Events.hotbar_changed 발신")
 	_check(_hud_slots._icon_labels[0].text == "B", "HUD HotbarSlot1 아이콘이 계열 첫 글자 'B'로 대체(icon:null 대체 규칙)")

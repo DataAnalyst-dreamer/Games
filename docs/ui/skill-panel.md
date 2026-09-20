@@ -1,18 +1,17 @@
-# 스탯 분배 · 스킬 패널 (F1-2/F1-3, M3-4)
+# 스탯 분배 · 스킬 트리 패널 (M4-5 v2)
 
-> 기준: `docs/GDD-도트액션RPG-기획안.md` 5.2(스탯)·4.3(스킬), `docs/ui/wireframes.md` 공통
-> 원칙(§0), `docs/specs/skills-m3.md`(액티브 6종 스키마), 결정 D-163~D-166.
-> 문서 버전: v0.1 (2026-09-20) / 작성: ui-ux-designer / 구현: `game/scripts/ui/skill_panel_tab.gd`
-> + `game/scripts/ui/stats_ui_calc.gd`, InventoryMenu의 기존 "skill" 탭(D-166: 신규 최상위
-> 탭이 아니라 이미 있던 placeholder 탭 자리에 좌우 서브탭 2개로 구현 — `quest_log_tab.gd`의
-> "메인/사이드/의뢰" 서브탭과 동일한 패턴).
+> 기준: `docs/specs/ro-benchmark-progression-v1.md`(§1 6스탯·파생치, §2 포인트 비용 곡선,
+> §3 SP, §4 스킬 트리 24노드), `docs/ui/wireframes.md` 공통 원칙(§0), 결정 D-161/D-184/
+> D-194/D-195. v0.1(M3-4, 5스탯·플랫 스킬 6종)을 **대체**한다.
+> 문서 버전: v0.2 (2026-09-20) / 작성: ui-ux-designer / 구현: `game/scripts/ui/skill_panel_tab.gd`
+> + `stats_ui_calc.gd`(순수, 스탯) + `skill_tree_tab.gd` + `skill_tree_calc.gd`(순수, 트리),
+> InventoryMenu의 기존 "skill" 탭(D-166 계승: 좌우 서브탭 2개, `quest_log_tab.gd`와 동일 패턴).
 
 ## 0. 진입 경로
 
-- Tab(키보드) / LB·RB 순환(패드) → 전체화면 메뉴 → "스킬" 탭(`TABS`엔 이미 "skill" 존재,
-  D-153 이전부터 있던 placeholder 슬롯을 이번에 실제 구현으로 교체).
-- 레벨업 배너(`hud_progress.gd`)에 `GameState.stat_points > 0`이면 "포인트 n 남음 — Tab"
-  힌트 한 줄이 추가로 붙어 이 화면으로 유도한다.
+- `[`/`]`(D-181, 구 Q/E) 또는 LB/RB 순환 → 전체화면 메뉴 → "스킬" 탭.
+- 레벨업 배너(`hud_progress.gd`)에 스탯/스킬 포인트 획득 토스트(D-195, `ui.hud.stat_gain_toast`/
+  `skill_gain_toast`) + 기존 "포인트 n 남음" 힌트가 이 화면으로 유도한다.
 
 ## 1. 레이아웃 개략도 (ContentArea 632×321, InventoryMenu와 같은 캔버스)
 
@@ -20,76 +19,92 @@
 +----------------------------------------------------------------+
 | [스탯] [스킬]                               <- 좌/우로 전환(패드/키보드) |
 +----------------------------------------------------------------+
- 스탯 서브탭:
+ 스탯 서브탭(6행, D-158 AGI 신설):
 | 잔여 포인트: 3                                                    |
-|  STR  12   [+]   공격 ▲+0.2                                      |
-|  DEX   4   [+]   (파생치 미리보기 없음)                             |
-|  INT   0   [+]   (파생치 미리보기 없음)                             |
-|  VIT   8   [+]   HP ▲+5.0  방어 ▲+1.0                             |
-|  LUK   0   [+]   크리 ▲+0.1%                                      |
-|  공격 32.0 / HP 130 / 방어 8.0 / 크리 5.0%  (현재값, 신호 수신 전 "-") |
+|  STR 12 [+]  다음 3포인트 · 물리 공격력이 오른다 · 공격 ▲0.20        |
+|  AGI  6 [+]  다음 1포인트 · 공격 속도와 회피가 좋아진다              |
+|  DEX  4 [+]  다음 1포인트 · 공격이 더 잘 맞고 후딜이 짧아진다        |
+|  INT  8 [+]  다음 1포인트 · 마법 공격력과 최대 SP...   MaxSP ▲2.00  |
+|  VIT 10 [+]  다음 2포인트 · 최대 체력과 방어력이 오른다  HP▲5 방어▲1 |
+|  LUK  2 [+]  다음 1포인트 · 치명타 확률이 오른다  치명 ▲0.1%         |
+|  공격 32.4 / 마공 21.2 / HP 150 / SP 36 / 방어 21.0 / 마방 9.0 /   |
+|  치명 5.2% / 명중 +0.6% / 회피 +0.01s / 이속 +0.9% / 공속 +1.7% /  |
+|  후딜 -0.6% / SP회복 1.24/s   (13개, 값 없으면 행 자체 숨김 — D-195) |
 +----------------------------------------------------------------+
- 스킬 서브탭 (스탯과 좌우 전환으로 이동):
-| 강타(blade)  [습득]     |  강타                                    |
-| 찌르기(blade)           |  정면 부채꼴 범위를 강하게 베어 넉백을 준다.  |
-| 방패 강타(guard)        |  계열 blade · SP 1 · 요구 없음             |
-| 철벽(guard)             |  [습득됨] Q/R로 슬롯 장착                  |
-| 쇄도(trick)             |                                          |
-| 축지(trick)             |                                          |
-|  (목록, 상/하로 포커스 이동) | 확인으로 습득 / Q·R로 장착 슬롯 지정      |
+ 스킬 서브탭(3계열 × tier 3열, LT/RT로 계열 전환):
+| [검] [방패] [기교]              <- ui_filter_prev/next(Z/C, LT/RT) |
++---------------+---------------+---------------+------------------+
+|  T1(3)        |  T2(3)        |  T3(2)        |  상세 패널        |
+| 강타 Lv1/5    | 연격 Lv0/5    | 검의반사 Lv0/5| 강타 Lv.1/5      |
+| [습득됨]      | (자물쇠)      | (자물쇠)      | 액티브           |
+| 찌르기 Lv0/5  | 예기 Lv0/5    | 종언의일격    | 요구: 없음        |
+| [습득]        | (자물쇠)      | Lv0/5(자물쇠) | sp_cost 10 ·     |
+| 칼끝집중Lv0/5 | 투기 Lv0/5    |               | cooldown_sec 4.5 |
+| [습득]        | (자물쇠)      |               | 확인=습득/레벨업  |
++---------------+---------------+---------------+------------------+
+|  (상/하로 노드 순회, tier1→2→3 이어붙인 1차원 목록)                  |
 +----------------------------------------------------------------+
 ```
 
-- 스탯 행의 "[+]"는 마우스로도 누를 수 있는 Button이지만 포커스 이동은 상/하 십자키만 쓴다
-  (다른 placeholder 탭과 동일 원칙 — 클릭 전용 기능 없음).
-- 파생치 미리보기(▲ 화살표)는 `InventoryUiCalc.format_delta()`를 그대로 재사용(신규 색
-  토큰 없음, `Inventory/colors/positive`). 공격/HP/방어/크리 4개만 다룬다(DEX/INT는 이
-  4개에 영향이 없어 미리보기가 비어 있다 — 공격속도/쿨감은 GDD 5.2에 있지만 이번 범위 밖).
-- 스킬 아이콘은 전부 `icon: null`이라 계열 첫 글자(B/G/T)로 대체한다(D-165 방침과 동일하게
-  "미완성 데이터는 텍스트로 대체"). 상세 패널의 "요구" 목록은 6종 전부 `requires: []`라
-  현재는 항상 "없음"으로 보인다.
+- 스탯 행의 "다음 N포인트"는 `Progression.next_stat_cost(key)`(있으면) 또는
+  `StatsUiCalc.next_point_cost()`(D-184 `floor(n/10)+1`) 폴백. 효과 한 줄 설명(D-195,
+  `ui.stat.effect.*`)은 6스탯 전부 항상 보인다 — AGI/DEX처럼 상한 있는 비선형 배율이라
+  숫자 미리보기가 없는 스탯도 이 텍스트로 "눈에 보이는 효과"를 전달한다.
+- 파생치 미리보기(▲ 화살표, str/vit/int/luk만)는 `InventoryUiCalc.format_delta()` 재사용.
+  파생치 절대값 13종(D-195 확정 키)은 `Progression.get_derived()`에 그 키가 있을 때만
+  줄에 나타난다(없으면 해당 행 자체를 숨김 — 원시값 덤프 금지, 병합 후 자동 표시).
+- 스킬 노드는 전부 `icon: null`이라 이름 텍스트 + Lv.n/5 + 상태 마크로만 표시한다.
+  선행 관계는 Line2D 대신 상세 패널 텍스트(`ui.skill.requires_fmt`, "X Lv.3 이상")로만
+  보여준다(스펙이 명시한 대안 — 24노드 규모에 커스텀 `_draw()`는 과함).
+- 계열 표시명(검/방패/기교, `ui.skill_tree.series.*`)은 D-195로 placeholder 승인된
+  값 — 최종 네이밍은 narrative-writer 후속 작업.
 
 ## 2. 노드 트리 (코드 생성, InventoryMenu.tscn엔 빈 `SkillPanelTab` 컨테이너만 있음)
 
 ```
-SkillPanelTab (Control, script=skill_panel_tab.gd, InventoryMenu의 ContentArea 형제)
-└─ (VBoxContainer, 런타임 생성 — quest_log_tab.gd와 동일 관례)
+SkillPanelTab (Control, script=skill_panel_tab.gd)
+└─ (VBoxContainer, 런타임 생성)
    ├─ SubTabBar (HBoxContainer) — "스탯"/"스킬" 버튼 2개
-   ├─ StatBody (VBoxContainer) — PointsHeader + 5행(StatRow: 이름/값/+버튼/미리보기) + DerivedFooter
-   └─ SkillBody (HBoxContainer)
-      ├─ ScrollContainer > ListBox (VBoxContainer) — 스킬 이름 + [습득]/[습득됨] 표시
-      └─ DetailBox (VBoxContainer) — 이름/설명/계열·SP·요구/상태·조작 힌트
+   ├─ StatBody (VBoxContainer) — PointsHeader + 6행(이름/값/+/미리보기줄) + DerivedFooter
+   └─ SkillTreeTab (Control, script=skill_tree_tab.gd)
+      ├─ SeriesBar (HBoxContainer) — "검"/"방패"/"기교" 버튼 3개
+      └─ Body (HBoxContainer)
+         ├─ 3× VBoxContainer(tier 열, T1/T2/T3) — 노드 Label(이름+Lv.n/5+상태 마크)
+         └─ DetailBox (VBoxContainer) — 이름+레벨/타입/요구/레벨별 수치/힌트 + HudHotbarBar
 ```
 
 ## 3. 입력 흐름 (패드/키마)
 
 | 동작 | 게임패드 | 키보드 | 결과 |
 |---|---|---|---|
-| 서브탭(스탯/스킬) 전환 | 왼쪽 스틱/십자키 좌우 | ←/→ | `_change_sub_tab()`, 포커스 인덱스 0으로 리셋 |
-| 행/목록 이동 | 왼쪽 스틱/십자키 상하 | ↑/↓ | 스탯: 5행 순환. 스킬: 목록 순환 |
-| 스탯 배분 | A(확인) | Enter/Space(`ui_confirm`) | 포커스 스탯에 `Progression.allocate_stat(key)`(있으면) |
-| 스킬 습득 | A(확인) | `ui_confirm` | 포커스 스킬이 습득 가능이면 `Progression.learn_skill(id)`(있으면) |
-| 슬롯 장착 | L숄더/R숄더 | Q/R(`skill_1`/`skill_2`, 기존 액션 재사용) | 포커스 스킬이 습득됨이면 `Progression.equip_skill(slot,id)`(있으면), 새 입력맵 추가 없음 |
+| 서브탭(스탯/스킬) 전환 | 왼쪽 스틱/십자키 좌우 | ←/→ | `SkillPanelTab._change_sub_tab()` |
+| 계열(검/방패/기교) 전환 | LT/RT | Z/C(`ui_filter_prev/next`) | `SkillTreeTab._change_series()`(스킬 서브탭 안에서만) |
+| 행/노드 이동 | 왼쪽 스틱/십자키 상하 | ↑/↓ | 스탯: 6행 순환. 스킬: tier1→2→3 이어붙인 목록 순환 |
+| 스탯 배분 | A(확인) | `ui_confirm` | 포커스 스탯에 `Progression.allocate_stat(key)` |
+| 스킬 습득/레벨업 | A(확인) | `ui_confirm` | `Progression.can_learn_skill(id).ok`(있으면, 없으면 `SkillTreeCalc.node_state` 폴백)면 `Progression.learn_skill(id)` |
+| 핫바 등록 | 숫자 패드 대응 | 1~9(`hotbar_N`) | 습득된 active/buff 노드만 `HotbarRegisterInput.try_assign` |
 | 닫기 | B/Start | Esc/Tab | InventoryMenu 공통 처리 |
 
 ## 4. 상태 목록
 
 | 상태 | 트리거 | 표시 |
 |---|---|---|
-| 탭 열림 | `_apply_tab_visibility()`가 "skill"로 전환 | `open()` — 최신 stats/skills 새로고침, 첫 서브탭(스탯)에 포커스 |
-| 잔여 포인트 있음 | `GameState.stat_points > 0` | 헤더에 강조 표시 + 레벨업 배너 힌트 |
-| 스탯 값 갱신 | `Events.stats_changed(stats, derived, stat_points)` | 5행 값 + 파생치 현재값 갱신(신호 수신 전엔 "-") |
-| 스킬 목록 갱신 | `Events.skills_changed(learned, slots, skill_points)` | 습득/장착 상태 갱신 |
-| 스킬 상태: 습득됨 | `learned.has(id)` | "[습득됨]" + 슬롯 장착 힌트 |
-| 스킬 상태: 습득 가능 | `skill_points >= cost_sp` and 요구 전부 습득 | "[습득]" 확인 가능 |
-| 스킬 상태: 잠김 | 그 외 | 회색, 확인 무시 |
-| 로직 미병합(M3-3) | `Progression.has_method(...)` == false | 입력해도 무동작(가드, `# ponytail: M3-3 병합 후 제거`) |
+| 탭 열림 | `_apply_tab_visibility()`가 "skill"로 전환 | `open()` — 스탯 서브탭·blade 계열·첫 노드에 포커스 |
+| 스탯 값 갱신 | `Events.stats_changed(stats, derived, stat_points)` | 6행 값 + 파생치 13종(있는 것만) 갱신 |
+| 노드 상태: locked/no_points | `skill_points < cost` | 회색, `ui.skill.reason_no_points` |
+| 노드 상태: locked/requires | 선행 레벨 미충족 | 회색, `ui.skill.reason_requires` |
+| 노드 상태: learnable | 선행 충족 + 포인트 충분 | 확인으로 습득/레벨업, `ui.skill.learn_hint` |
+| 노드 상태: maxed | `level >= max_level(5)` | `ui.skill.state.maxed`, `ui.skill.reason_maxed` |
+| 스킬 목록 갱신 | `Events.skills_changed(learned, slots, skill_points)` | learned가 Array(구)/Dictionary(신) 어느 쪽이든 `SkillTreeCalc.normalize_learned()`로 통일 |
+| 로직 미병합(M4-4) | `Progression.has_method(...)` == false | `SkillTreeCalc`/`StatsUiCalc` 로컬 계산으로 폴백(무동작 아님 — 같은 모양의 결과) |
 
 ## 5. 남은 이슈
 
-1. `Progression.allocate_stat/learn_skill/equip_skill`은 stage/m3-3(로직) 병합 전이라
-   `has_method` 가드로 무동작 처리했다 — 병합 후 디렉터가 가드 제거 여부 판단(D-165).
-2. 파생치 절대값(공격/HP/방어/크리)은 `Events.stats_changed`가 실제로 발신되기 전까지
-   "-"로 표시된다(경험치바가 겪었던 것과 동일한 선례, `docs/ui/hud.md` 3.5절).
-3. 계열별 노드 트리 시각화(GDD 4.3 v3, 8계열 124노드)는 이번 범위 밖 — 현재는 flat 목록
-   6종만 존재(`docs/specs/skills-m3.md`).
+1. 파생치 13종 중 `hit_scale`/`flee_iframe_bonus`/`move_speed_mult`/`combo_frame_mult`/
+   `post_recovery_mult`의 정확한 반환 단위는 stage/m4-4 병합 후 실측으로 재확인 필요
+   (현재는 D-195 지시 공식대로 서식화, `docs/specs/ro-benchmark-progression-v1.md` §1
+   worked examples와 대조해 맞춰 두었다).
+2. 레벨별 수치(상세 패널 하단)는 `levels[]` 필드를 이름 그대로 나열하는 일반화 텍스트다
+   (예: "sp_cost 18 · cooldown_sec 25 · atk_buff_pct 6 duration_sec 5") — 필드별 로컬라이징은
+   이번 범위 밖(placeholder 단계, D-167 아이콘 placeholder 관례와 동일 정신).
+3. 선행 관계 시각화(Line2D)는 텍스트로 대체했다 — 나중에 아트가 확정되면 재검토.

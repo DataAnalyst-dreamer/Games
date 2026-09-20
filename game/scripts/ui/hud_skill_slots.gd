@@ -4,6 +4,11 @@
 ## 형제 노드에 그대로 붙인다. 아이콘은 skills.json/items.json 전부 icon:null이라(D-161)
 ## 계열/이름 첫 글자로 대체한다(pixel-artist TODO). D-177: 소비품 재고 0이어도 슬롯은
 ## 유지하고 회색(modulate)으로만 표시한다.
+##
+## M4-5: 스킬 슬롯도 현재 SP가 다음 시전 비용보다 적으면 같은 회색으로 표시한다(요청
+## "기존 쿨다운 표시와 구분" — 쿨다운은 검은 오버레이 스윕, SP 부족은 modulate 회색이라
+## 시각 레이어가 달라 동시에 봐도 구분된다). `Events.sp_changed`(stage/m4-4, 병합 전엔
+## 없음)는 has_signal 가드 뒤에서만 정적 심볼을 참조한다.
 class_name HudSkillSlots
 extends Node
 
@@ -21,6 +26,8 @@ var _qty_labels: Array[Label] = []
 var _overlays: Array[ColorRect] = []
 var _tweens: Array[Tween] = []
 var _hotbar: Array = []
+var _learned: Dictionary = {} # M4-5: id -> level(SkillTreeCalc.normalize_learned).
+var _current_sp: float = -1.0 # -1: sp_changed 미수신(병합 전) — 이 상태에선 회색 판정을 하지 않는다.
 
 
 func _ready() -> void:
@@ -60,10 +67,14 @@ func _ready() -> void:
 
 	_apply_hotbar(GameState.hotbar if GameState.hotbar.size() == SLOT_COUNT else [])
 
+	_learned = SkillTreeCalc.normalize_learned(GameState.get("learned_skills"))
 	Events.hotbar_changed.connect(_apply_hotbar)
 	Events.skill_cast.connect(_on_skill_cast)
 	Events.skill_ready.connect(_on_skill_ready)
 	Events.inventory_changed.connect(_refresh_item_quantities)
+	Events.skills_changed.connect(_on_skills_changed)
+	if Events.has_signal(&"sp_changed"):
+		Events.sp_changed.connect(_on_sp_changed)
 
 
 func _apply_hotbar(hotbar: Array) -> void:
@@ -76,7 +87,7 @@ func _apply_hotbar(hotbar: Array) -> void:
 				var series: String = String(Data.get_value("skills", "%s.series" % id, ""))
 				_icon_labels[i].text = series.left(1).to_upper() if not series.is_empty() else ""
 				_qty_labels[i].text = ""
-				_panels[i].modulate = Color.WHITE
+				_panels[i].modulate = _skill_slot_modulate(id)
 			"item":
 				var id: String = String(entry.get("id", ""))
 				_icon_labels[i].text = id.left(1).to_upper() if id != "" else ""
@@ -100,6 +111,34 @@ func _update_item_quantity(i: int, item_id: String) -> void:
 	var qty: int = GameState.inventory.count_item(item_id)
 	_qty_labels[i].text = str(qty)
 	_panels[i].modulate = Color.WHITE if qty > 0 else GREY_OUT
+
+
+## M4-5: 슬롯의 스킬이 다음 시전에 필요한 SP보다 현재 SP가 적으면 회색. sp_changed를
+## 아직 못 받았으면(_current_sp<0, 병합 전) 판정을 보류하고 항상 흰색으로 둔다 — 없는
+## 정보로 오탐 회색 처리를 하지 않기 위해서다.
+func _skill_slot_modulate(skill_id: String) -> Color:
+	if _current_sp < 0.0:
+		return Color.WHITE
+	var level: int = int(_learned.get(skill_id, 0))
+	var cost: float = SkillTreeCalc.sp_cost_at(Data.table("skills"), skill_id, level)
+	return GREY_OUT if cost > _current_sp else Color.WHITE
+
+
+func _refresh_skill_sp_greying() -> void:
+	for i in SLOT_COUNT:
+		var entry: Dictionary = _hotbar[i] if i < _hotbar.size() else {}
+		if String(entry.get("kind", "")) == "skill":
+			_panels[i].modulate = _skill_slot_modulate(String(entry.get("id", "")))
+
+
+func _on_skills_changed(learned: Variant, _slots: Variant, _skill_points: int) -> void:
+	_learned = SkillTreeCalc.normalize_learned(learned)
+	_refresh_skill_sp_greying()
+
+
+func _on_sp_changed(current: float, _max_value: float) -> void:
+	_current_sp = current
+	_refresh_skill_sp_greying()
 
 
 func _on_skill_cast(slot: int, _skill_id: StringName, cooldown_sec: float) -> void:

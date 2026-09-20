@@ -74,6 +74,17 @@ HP/스태미나와 같은 "장식 없는 색 바"만 쓰고, 640×360 해상도 
 페이드, 스탯 상승은 `stat_gains` 키를 그대로 대문자로 나열한다(스탯 이름 로컬라이징은
 game-designer의 stats.json 확정 이후 범위).
 
+## 3.6 SP바 (M4-5, ro-benchmark-progression-v1.md §3)
+
+`hud_sp_bar.gd`(hud_progress.gd와 동일 분리 원칙)가 TopLeft의 StaminaBar와 ExpBar
+사이에 새로 넣은 SPBar(4px, 청색 계열 `HUD/colors/sp_fill`)를 담당한다. `Events.sp_changed
+(current, max)`는 stage/m4-4(로직)가 신설하는 시그널이라 아직 `core/events.gd`에 없다 —
+`Events.has_signal(&"sp_changed")` 가드 뒤에서만 정적 `Events.sp_changed.connect(...)`를
+호출한다(가드로 감싼 호출은 신호가 없어도 컴파일·실행이 깨지지 않음을 이 브랜치에서
+직접 확인). 병합 전엔 SP바가 항상 0으로 비어 있고, 병합 후 신호가 연결되면 자동으로
+채워진다. `hud_skill_slots.gd`도 같은 신호를 구독해 SP가 부족한 스킬 슬롯을 회색으로
+표시한다(쿨다운의 검은 오버레이 스윕과는 다른 레이어라 동시에 봐도 구분된다).
+
 ## 4. 상태 목록
 
 | 상태 | 트리거 | 표시 |
@@ -84,6 +95,7 @@ game-designer의 stats.json 확정 이후 범위).
 | HP 25% 이하 | `HudMath.is_hp_critical()` | HP 바 점멸(HUD/colors/hp_warning) + 화면 가장자리 비네트. 색약 모드면 비네트 대신 대각선 해치 패턴(`vignette_overlay.gd`) |
 | 스태미나 고갈 | `resources.stamina <= 0` (매 프레임 판정) | 스태미나 바 지속 빨간 점멸 |
 | 스태미나 액션 실패 | `Events.player_stamina_insufficient` | 스태미나 바 3회 급속 점멸(플래시) |
+| SP 변동(M4-5) | `Events.sp_changed`(has_signal 가드, 병합 전엔 미발신) | TopLeft SPBar 값 갱신, SP 부족한 핫바 스킬 슬롯 회색 |
 | 아이템/골드 획득 | `Events.item_picked_up`, `Events.gold_changed`(delta>0) | 좌하단 로그 1줄 추가, 3초 후 페이드, 최대 4줄 스택 |
 | 보스전 | `Events.boss_started` / `Events.boss_defeated` | 보스 HP바 표시/숨김. **주의**: 기획 지시문은 `Events.boss_encounter_started`를 언급하지만 실제 이벤트 버스(`core/events.gd`)에는 그 이름이 없고 동등한 `boss_started(boss_id)`/`boss_defeated(boss_id)`가 이미 존재해 그것을 사용했다(신규 시그널 중복 추가 대신 기존 시그널 재사용) |
 | 미니맵 토글 | `map` 액션 | TopRight 컨테이너 visible 반전 |

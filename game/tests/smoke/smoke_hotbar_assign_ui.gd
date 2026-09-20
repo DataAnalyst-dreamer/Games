@@ -38,16 +38,19 @@ func _ready() -> void:
 	_check(not Progression.has_method("assign_hotbar"), "Progression.assign_hotbar 아직 없음(m4-1 미병합, has_method 가드 전제)")
 
 	# --- 스킬 패널 미리보기: Events.hotbar_changed 직접 emit -> HudHotbarBar 반응 ---
+	# M4-5: 플랫 스킬 목록(_skill_ids)이 SkillTreeTab(계열×tier 트리)으로 바뀌었다 —
+	# blade_power_slash는 blade 계열 T1(기본 선택 계열)이라 open() 직후 바로 찾을 수 있다.
 	_ui_root.open_menu()
 	_ui_root.inventory_menu.select_tab("skill")
 	_skill_tab = _ui_root.inventory_menu.skill_panel_tab
+	var tree_tab: SkillTreeTab = _skill_tab._skill_tree_tab
 	Events.skills_changed.emit(["blade_power_slash"], ["blade_power_slash", ""], 0)
 	_skill_tab._sub_tab_index = 1
-	_skill_tab._skill_focus_index = _skill_tab._skill_ids.find("blade_power_slash")
-	_skill_tab._refresh_skill_detail()
+	tree_tab._focus_index = tree_tab._focus_ids.find("blade_power_slash")
+	tree_tab._refresh_detail()
 
-	var bar: HudHotbarBar = _skill_tab._hotbar_bar
-	_check(bar != null, "SkillPanelTab에 HudHotbarBar 미리보기 부착됨")
+	var bar: HudHotbarBar = tree_tab._hotbar_bar
+	_check(bar != null, "SkillTreeTab에 HudHotbarBar 미리보기 부착됨")
 	_check(_cell_color(bar, 2) != _focus_color(bar), "hotbar_changed 전에는 3번 칸이 강조색 아님")
 
 	Events.hotbar_changed.emit([
@@ -57,7 +60,7 @@ func _ready() -> void:
 		{"kind": "", "id": ""}, {"kind": "", "id": ""}, {"kind": "", "id": ""},
 	])
 	_check(bar._hotbar.size() == 9, "HudHotbarBar가 Events.hotbar_changed로 9칸 배열을 받음")
-	_skill_tab._refresh_skill_detail() # 포커스 유지 상태로 미리보기 재계산.
+	tree_tab._refresh_detail() # 포커스 유지 상태로 미리보기 재계산.
 	_check(_cell_color(bar, 2) == _focus_color(bar), "3번 칸(blade_power_slash 등록됨)이 강조색으로 표시")
 	_check(_cell_color(bar, 0) != _focus_color(bar), "등록 안 된 칸(0번)은 강조색 아님")
 
