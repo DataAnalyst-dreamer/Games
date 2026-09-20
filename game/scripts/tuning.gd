@@ -100,6 +100,13 @@ const DEATH_RESPAWN_DELAY_SEC: float = 1.0
 ## 동일한 이유) ATTACK_HIT_DURATION_SEC과 같은 값으로 임시 고정한다.
 const SKILL_HIT_DURATION_SEC: float = ATTACK_HIT_DURATION_SEC
 
+## 스킬 시전 선딜(anticipation) 시간(초, M4-3 "스킬 이펙트·시전 연출 개선" — 사용자
+## 피드백 "효과가 아직 어색하다"). docs/art/motion-design-reference.md 권장 선딜 범위
+## (80~200ms) 하단에 가깝게 잡은 제안값 — 6개 스킬 공용(SKILL_HIT_DURATION_SEC의 앞부분을
+## 이 값만큼 자세 고정에 쓰고, 나머지가 발동+후딜 구간이 된다). game-designer 확인 필요
+## (스킬별 차등 여지 있음, 결정 요청 목록 참고), `_balance_todo` 취급.
+const SKILL_ANTICIPATION_SEC: float = 0.1
+
 # --- 카메라 셰이크: 4단계 진폭·지속은 combat.json.camera_shake로 이관됨
 # (addendum §3-2, D-63 예정, _balance_todo — M1 게이트 실측 후 확정). 접근성 배율표만
 # settings.json 소유자 미배정(addendum §3-3 결정 요청 4)으로 잠정 여기 유지.

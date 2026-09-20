@@ -128,7 +128,11 @@ func _check_skill_cast_and_cooldown() -> void:
 	var cb := func(slot: int, id: String, cd: float) -> void: cast_events.append([slot, id, cd])
 	Events.skill_cast.connect(cb)
 	_press_action("hotbar_1")
-	await _wait_frames(6) # activate()의 call_deferred + area 재판정이 반영될 시간.
+	# M4-3: skill.gd가 Tuning.SKILL_ANTICIPATION_SEC만큼 선딜 지연 후에야 히트박스를
+	# activate()한다 — 그 시간만큼 먼저 기다린 뒤, activate()의 call_deferred + area
+	# 재판정이 반영될 여유(6프레임)를 추가로 준다.
+	await get_tree().create_timer(Tuning.SKILL_ANTICIPATION_SEC).timeout
+	await _wait_frames(6)
 	Events.skill_cast.disconnect(cb)
 
 	var dealt: int = hp_before - _dummy.hp

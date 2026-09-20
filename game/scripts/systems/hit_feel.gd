@@ -57,7 +57,7 @@ static func apply(defender_body: Node2D, flash_target: CanvasItem, hitbox: Hitbo
 		_apply_knockback(defender_body, _knockback_direction(defender_body, hitbox), hitbox.knockback_px)
 
 	if flash_target != null:
-		HitFlash.flash(flash_target)
+		HitFlash.flash(flash_target, hitbox.flash_color)
 
 	# D-162 (c): 데미지 숫자는 하나만 띄우되, 원소 상성이든 LUK 진짜 크리티컬이든 특별
 	# 타격이면 같은 강조 표시를 쓴다.

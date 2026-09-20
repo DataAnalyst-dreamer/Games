@@ -2,6 +2,9 @@
 ## 패턴을 재사용하되, 판정 모양(arc/line/circle)·배율·넉백·자기 버프는 전부 skills.json
 ## 값으로 채운다. 쿨타임 등록/조회는 Progression이 전담(state.gd:try_enter_skill()이 진입
 ## 전 can_cast_skill()로 이미 검증했으므로 여기서는 방어적으로만 다시 확인한다).
+##
+## M4-3(시전 연출 개선): 선딜(Tuning.SKILL_ANTICIPATION_SEC) → 발동(히트박스+SkillVfx
+## 동시 스폰) → 후딜(SkillVfx 자체 소멸) 3단 구조. vfx/feel은 skills.json v2 예정 필드.
 extends PlayerState
 
 var _elapsed: float = 0.0
@@ -12,6 +15,12 @@ var _duration: float = 0.0
 var _shape_node: CollisionShape2D = null
 var _orig_shape: Shape2D = null
 var _orig_shape_position: Vector2 = Vector2.ZERO
+
+## M4-3: 선딜(anticipation) 지연 콜백이 도착했을 때 이미 이 상태를 벗어났으면(피격·구르기
+## 캔슬 등 exit()가 먼저 불림) 히트박스를 켜지 않게 막는 가드. D-127(무기 tween 유실
+## 사례)과 같은 부류 — "상태를 나간 뒤 뒤늦게 도착하는 콜백"은 항상 상태 소유 여부를
+## 먼저 확인해야 한다.
+var _exited: bool = false
 
 
 func enter(_prev: StringName, data: Dictionary = {}) -> void:
@@ -34,15 +43,39 @@ func enter(_prev: StringName, data: Dictionary = {}) -> void:
 
 	_elapsed = 0.0
 	_duration = Tuning.SKILL_HIT_DURATION_SEC
+	_exited = false
 	player.velocity = Vector2.ZERO
 	player.play_anim("attack") # 전용 스킬 애니메이션 없음(pixel-artist TODO, icon도 skills.json 전부 null).
 	AudioManager.play_sfx(&"atk_swing_finisher", player.global_position)
 
 	_apply_self_effect(entry.get("self_effect", null))
-	_fire_hitbox(entry)
+
+	# M4-3(D-167~D-180 "시전 연출 개선"): 선딜 동안은 자세만 고정하고(velocity=0, 위),
+	# 색 예고 플래시만 즉시 준다 — 실제 판정+발동 이펙트는 anticipation_sec 뒤로 미뤄
+	# "선딜을 길게, 타격은 짧게" 3단 구조(motion-design-reference.md)를 흉내낸다.
+	# vfx/feel은 skills.json v2 예정 필드(game-designer 작업 중) — 없으면 더미로 안전하게
+	# 폴백(kind="none", 기존 히트스톱/셰이크/흰 플래시 그대로, 회귀 없음).
+	var vfx_variant: Variant = entry.get("vfx", null)
+	var vfx: Dictionary = vfx_variant if vfx_variant is Dictionary else {}
+	var hex: String = String(vfx.get("color", ""))
+	var base_color: Color = SkillVfx.base_color_from_hex(hex)
+	var flash_color: Color = SkillVfx.flash_color_from_hex(hex)
+	HitFlash.flash(player.sprite, flash_color)
+
+	var anticipation_sec: float = Tuning.SKILL_ANTICIPATION_SEC
+	var tree := player.get_tree()
+	if tree == null or anticipation_sec <= 0.0:
+		_fire(entry, vfx, base_color, flash_color)
+	else:
+		tree.create_timer(anticipation_sec).timeout.connect(func() -> void:
+			if _exited or not is_instance_valid(player):
+				return
+			_fire(entry, vfx, base_color, flash_color)
+		)
 
 
 func exit() -> void:
+	_exited = true
 	if player.hitbox != null:
 		player.hitbox.deactivate()
 	_restore_hitbox_shape()
@@ -99,9 +132,20 @@ func _apply_speed_buff(mult: float, duration_sec: float) -> void:
 	)
 
 
+## 선딜 종료 시점(즉시 또는 anticipation_sec 뒤)에 히트박스 판정과 발동 이펙트를 같은
+## 콜백에서 함께 시작한다 — "히트박스 활성 프레임과 이펙트 타격 프레임을 동일 타이머로
+## 동기화"(M4-3 요구사항 2)를 이 한 함수로 만족시킨다.
+func _fire(entry: Dictionary, vfx: Dictionary, base_color: Color, flash_color: Color) -> void:
+	_fire_hitbox(entry, flash_color)
+	var hb_variant: Variant = entry.get("hitbox", null)
+	var range_px: float = float((hb_variant as Dictionary).get("range_px", 40.0)) if hb_variant is Dictionary else 40.0
+	var scale: float = float(vfx.get("scale", 1.0))
+	SkillVfx.spawn(String(vfx.get("kind", "none")), player, base_color, range_px * scale)
+
+
 ## hitbox가 null이면(damage_mult=0, 순수 자기 버프 스킬) 히트박스를 활성화하지 않는다
 ## (skills-m3.md §2). 크리티컬은 attack.gd와 동일하게 Progression.roll_crit()을 공유한다.
-func _fire_hitbox(entry: Dictionary) -> void:
+func _fire_hitbox(entry: Dictionary, flash_color: Color) -> void:
 	var hitbox := player.hitbox
 	if hitbox == null:
 		return
@@ -115,9 +159,17 @@ func _fire_hitbox(entry: Dictionary) -> void:
 	hitbox.damage = int(crit_result.get("damage", base_damage))
 	hitbox.is_critical = bool(crit_result.get("is_critical", false))
 	hitbox.knockback_px = float(entry.get("knockback_px", 0.0))
-	# skills-m3.md §2: 스킬 전용 히트스톱 값은 범위 밖 — combat.json.hitstop.normal_sec 재사용.
-	hitbox.hitstop_sec = float(Data.get_value("combat", "hitstop.normal_sec", 0.05))
-	hitbox.is_heavy = false
+
+	# M4-3(D-178): feel.shake_tier 기본 "normal", 데이터가 "heavy"를 명시한 스킬(각 계열
+	# 4번째 액티브=피니셔 성격)만 hit_feel.gd의 기존 crit/heavy 후보 비교 로직
+	# (_pick_larger_shake_tier)에서 "heavy" 후보가 되게 hitbox.is_heavy로 넘긴다 — 새 분기
+	# 없이 기존 카메라 셰이크 배선을 그대로 재사용.
+	var feel_variant: Variant = entry.get("feel", null)
+	var feel: Dictionary = feel_variant if feel_variant is Dictionary else {}
+	hitbox.is_heavy = String(feel.get("shake_tier", "normal")) == "heavy"
+	# skills-m3.md §2 기본값(combat.json.hitstop.normal_sec) 유지, feel.hitstop_sec가 있으면 덮어쓴다.
+	hitbox.hitstop_sec = float(feel.get("hitstop_sec", Data.get_value("combat", "hitstop.normal_sec", 0.05)))
+	hitbox.flash_color = flash_color
 	hitbox.element = &""
 	hitbox.source = player
 	hitbox.position = Vector2.ZERO
