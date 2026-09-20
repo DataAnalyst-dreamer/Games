@@ -255,8 +255,7 @@ func _confirm() -> void:
 func _on_stat_plus_pressed(stat_key: String) -> void:
 	_stat_focus_index = StatsUiCalc.STAT_KEYS.find(stat_key)
 	_refresh_stat_body()
-	if Progression.has_method("allocate_stat"): # ponytail: M3-3 병합 후 제거
-		Progression.call("allocate_stat", stat_key)
+	Progression.allocate_stat(stat_key)
 
 
 func _learn_focused_skill() -> void:
@@ -265,8 +264,7 @@ func _learn_focused_skill() -> void:
 	var id: String = _skill_ids[_skill_focus_index]
 	if _skill_state(id) != "learnable":
 		return
-	if Progression.has_method("learn_skill"): # ponytail: M3-3 병합 후 제거
-		Progression.call("learn_skill", id)
+	Progression.learn_skill(id)
 
 
 func _equip_focused_skill(slot: int) -> void:
@@ -275,8 +273,7 @@ func _equip_focused_skill(slot: int) -> void:
 	var id: String = _skill_ids[_skill_focus_index]
 	if not _learned.has(id):
 		return
-	if Progression.has_method("equip_skill"): # ponytail: M3-3 병합 후 제거
-		Progression.call("equip_skill", slot, id)
+	Progression.equip_skill(slot, id)
 
 
 # --- 표시 갱신: 스탯 ---
