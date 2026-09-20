@@ -164,3 +164,19 @@ const SPORE_PATCH_DURATION_SEC: float = 2.0
 ## 이탈형 몬스터전 템포(몬스터 히트 간격 수 초)를 기준으로 잡은 제안값 — game-designer
 ## 확인 필요(완료 보고 질문 목록 참고), `_balance_todo`.
 const IN_COMBAT_SAVE_LOCK_SEC: float = 5.0
+
+# --- 쿼터뷰 이관 단계 (a): 발밑 그림자 (D-204) ---
+## 발밑 타원 그림자 반지름(px). 16px 아트 기준 고정값 - 파일럿
+## (prototypes/quarter-view-lab/actor.gd:_draw)의 24px를 4배 확대 좌표계에서
+## 본편 배율로 환산한 값(24 / 4 = 6). 단계 (b)에서 32px 타일로 전환하면 12로
+## 함께 올린다(다른 px 상수와 동일한 ×2 규칙, quarter-view-migration-v1.md §3.2).
+## 순수 연출값이라 combat.json 이관 대상이 아니다.
+const FOOT_SHADOW_RADIUS_PX: float = 6.0
+
+## 그림자를 타원으로 만드는 세로 눌림 배율. 파일럿이 사용자 승인을 받은 값 0.42를
+## 그대로 쓴다 - 이 값이 곧 "바닥 평면을 얼마나 비스듬히 보고 있는가"의 시각적 선언이다.
+## 아트가 실제 비스듬 원화로 바뀌는 단계 (c)에서 원화의 시점각과 재대조한다.
+const FOOT_SHADOW_Y_SCALE: float = 0.42
+
+## 그림자 색. 검정이 아니라 지면에 살짝 푸른 기가 도는 반투명 - 파일럿과 동일.
+const FOOT_SHADOW_COLOR: Color = Color(0.05, 0.08, 0.09, 0.3)
