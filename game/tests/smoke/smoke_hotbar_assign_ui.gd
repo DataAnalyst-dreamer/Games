@@ -28,14 +28,12 @@ func _ready() -> void:
 	add_child(_main)
 	_ui_root = _main.get_node("UiRoot") as UiRoot
 
-	# --- D-182: 이 브랜치엔 project.godot에 hotbar_1~9 액션이 없다(m4-1 미병합) ---
+	# --- D-182: 핫바 액션은 m4-1이 소유(병합됨). UI는 이름만 참조하고 has_action 가드로 읽는다 ---
 	for i in range(1, 10):
-		_check(not InputMap.has_action("hotbar_%d" % i), "project.godot에 hotbar_%d 액션 없음(m4-1 소유, D-182)" % i)
-	_check(HotbarRegisterInput.poll_pressed_slot() == -1, "액션이 없으니 poll_pressed_slot()은 항상 -1(has_action 가드)")
-	_check(not HotbarRegisterInput.try_assign("skill", "blade_power_slash"), "액션 없으면 try_assign도 조용히 false")
-
-	# --- Progression.assign_hotbar도 아직 없다(m4-1 미병합) -> has_method 가드 확인 ---
-	_check(not Progression.has_method("assign_hotbar"), "Progression.assign_hotbar 아직 없음(m4-1 미병합, has_method 가드 전제)")
+		_check(InputMap.has_action("hotbar_%d" % i), "project.godot에 hotbar_%d 액션 존재(m4-1 병합)" % i)
+	_check(HotbarRegisterInput.poll_pressed_slot() == -1, "아무 키도 안 눌렀으면 poll_pressed_slot()은 -1")
+	_check(not HotbarRegisterInput.try_assign("skill", "blade_power_slash"), "키 입력 없으면 try_assign은 false")
+	_check(Progression.has_method("assign_hotbar"), "Progression.assign_hotbar 존재(m4-1 병합)")
 
 	# --- 스킬 패널 미리보기: Events.hotbar_changed 직접 emit -> HudHotbarBar 반응 ---
 	# M4-5: 플랫 스킬 목록(_skill_ids)이 SkillTreeTab(계열×tier 트리)으로 바뀌었다 —
