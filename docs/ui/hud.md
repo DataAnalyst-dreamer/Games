@@ -85,6 +85,59 @@ game-designer의 stats.json 확정 이후 범위).
 채워진다. `hud_skill_slots.gd`도 같은 신호를 구독해 SP가 부족한 스킬 슬롯을 회색으로
 표시한다(쿨다운의 검은 오버레이 스윕과는 다른 레이어라 동시에 봐도 구분된다).
 
+## 3.7 미니맵 v1 (M5-2, D-172 후속)
+
+게이트5 피드백 "미니맵은 아직 아무것도 안 나온다" 대응. D-172에서 "미니맵은 후속"으로
+미뤄둔 것을 이번에 채웠다 — `MinimapFrame`(TopRight, 기존 자리·크기 그대로) 안에
+SubViewport+전용 Camera2D를 두어 월드를 그대로 축소 렌더하고, 그 위에 마커 오버레이
+Control(`hud_minimap.gd`)이 얇게 그린다.
+
+**구조(Hud.tscn, MinimapFrame 하위)**:
+```
+MinimapFrame (Panel, wood_frame)
+├─ MinimapPlaceholder (ColorRect, 배경색 — SubViewport 렌더 전/투명 영역 대비)
+├─ MinimapViewportContainer (SubViewportContainer, stretch=true)
+│  └─ MinimapViewport (SubViewport, 56×32, transparent_bg)
+│     └─ MinimapCamera (Camera2D, 플레이어 추적 전용, 메인 카메라와 별개 Viewport)
+└─ MinimapMarkers (Control, hud_minimap.gd — 마커만 _draw())
+```
+
+**핵심 구현 메모(Godot 4 실측)**: SubViewport는 기본적으로 메인 뷰포트의 World2D를
+공유하지 않는다(3D의 `own_world_2d` 같은 토글이 2D엔 없음 — 대입 없이 두면 미니맵에
+회색 배경만 나오는 것을 실측 확인). `hud_minimap.gd`의 `_ready()`에서
+`viewport.world_2d = get_viewport().world_2d`를 명시적으로 대입해야 TileMapLayer·
+몬스터·NPC가 그대로 보인다. 렌더 비용 절감을 위해 `render_target_update_mode`를
+상시 `UPDATE_ALWAYS`로 두지 않고, `Tuning.MINIMAP_UPDATE_INTERVAL_SEC`(0.15초,
+≈6.7fps) 주기로 카메라 위치 갱신·`UPDATE_ONCE` 재대입·마커 `queue_redraw()`를 한
+번에 묶어 처리한다(터레인과 마커가 서로 다른 시점 값으로 어긋나지 않도록).
+
+**재사용(복붙 금지)**:
+- 좌표 변환+가장자리 clamp: `minimap_calc.gd`가 기존 `QuestTrackerCalc.edge_arrow()`
+  (M4-2 퀘스트 화살표가 쓰던 것)를 그대로 위임 — 카메라중심/뷰포트크기/줌만 다르게
+  넘기면 동일 수식이 성립함을 실측 확인했다.
+- 추적 퀘스트 목표(▼, location/object/npc 공통) 월드 위치 조회: 원래
+  `hud_quest_tracker.gd`의 사설 메서드였던 것을 `quest_target_locator.gd`
+  (`QuestTargetLocator.find_tracked_target_position()`)로 승격해 두 UI가 공유한다
+  (quest_system.gd는 이미 D-157 파일 상한을 넘어 그쪽으로 옮기지 않았다).
+- NPC `!`/`?`, 오브젝트 `▼`: `QuestNpc`/`QuestObject`에 이미 있는 공개 API
+  `marker_text()`/`marker_visible()`를 그대로 읽는다(신규 판정 로직 없음). 두
+  스크립트에 `add_to_group(&"quest_markers")` 한 줄씩만 추가했다.
+- 워프 비석: `waystone.gd`가 이미 속해 있던 `"waystones"` 그룹을 그대로 순회(추가
+  변경 없음).
+
+**표시 규칙**: 플레이어는 항상 미니맵 중앙(카메라가 플레이어를 따라가므로). 워프
+비석·NPC `!`/`?`는 미니맵 시야 밖이면 그냥 숨김(클램프 안 함). 추적 중인 퀘스트
+목표(▼)만 미니맵 밖이어도 테두리에 점으로 clamp해서 항상 보여준다(퀘스트 화살표와
+같은 원칙). 접근성: 토글 키(`map`, 기존 M/패드 select)는 hud.gd 변경 없이 그대로
+재사용 — `TopRight` 컨테이너가 숨겨지면 `hud_minimap.gd`도 `is_visible_in_tree()`
+가드로 카메라 이동·렌더·그리기를 쉰다.
+
+**임시값(`tuning.gd`, `_balance_todo`, game-designer 확인 필요)**:
+`MINIMAP_VIEW_RADIUS_PX`(120, 미니맵이 보여주는 월드 반경) ·
+`MINIMAP_UPDATE_INTERVAL_SEC`(0.15) · `MINIMAP_EDGE_MARGIN_PX`(3, clamp 여백).
+마커는 pixel-artist 정식 아이콘 전까지 색이 있는 원(placeholder)이다 — 워프비석용
+신규 색 `HUD/colors/minimap_waystone`(보라색 계열) 1개만 theme.tres에 추가했다.
+
 ## 4. 상태 목록
 
 | 상태 | 트리거 | 표시 |
@@ -96,6 +149,7 @@ game-designer의 stats.json 확정 이후 범위).
 | 스태미나 고갈 | `resources.stamina <= 0` (매 프레임 판정) | 스태미나 바 지속 빨간 점멸 |
 | 스태미나 액션 실패 | `Events.player_stamina_insufficient` | 스태미나 바 3회 급속 점멸(플래시) |
 | SP 변동(M4-5) | `Events.sp_changed`(has_signal 가드, 병합 전엔 미발신) | TopLeft SPBar 값 갱신, SP 부족한 핫바 스킬 슬롯 회색 |
+| 미니맵 갱신(M5-2) | `hud_minimap.gd`의 0.15초 타이머(폴링, 신호 아님) | 미니맵 카메라가 플레이어를 따라가고, 워프비석·NPC `!`/`?`·추적목표 `▼` 마커가 다시 그려짐 |
 | 아이템/골드 획득 | `Events.item_picked_up`, `Events.gold_changed`(delta>0) | 좌하단 로그 1줄 추가, 3초 후 페이드, 최대 4줄 스택 |
 | 보스전 | `Events.boss_started` / `Events.boss_defeated` | 보스 HP바 표시/숨김. **주의**: 기획 지시문은 `Events.boss_encounter_started`를 언급하지만 실제 이벤트 버스(`core/events.gd`)에는 그 이름이 없고 동등한 `boss_started(boss_id)`/`boss_defeated(boss_id)`가 이미 존재해 그것을 사용했다(신규 시그널 중복 추가 대신 기존 시그널 재사용) |
 | 미니맵 토글 | `map` 액션 | TopRight 컨테이너 visible 반전 |
@@ -105,7 +159,8 @@ game-designer의 stats.json 확정 이후 범위).
 
 ## 5. 아트 placeholder 현황
 
-- 초상·미니맵 내용물·퀵슬롯 아이콘: 단색 `ColorRect` placeholder (규격만 확정).
+- 초상·퀵슬롯 아이콘: 단색 `ColorRect` placeholder (규격만 확정).
+- 미니맵 내용물: 실제 월드 축소 렌더(SubViewport, §3.7). 마커(플레이어·워프비석·NPC `!`/`?`·추적목표 `▼`)는 색이 있는 원 placeholder — pixel-artist 정식 아이콘 대기.
 - 나무 프레임: `ninja_adventure/Ui/Theme/Theme Wood/nine_path_panel.png` 실제 나인패치 사용(placeholder 아님, 이미 라이선스 확인됨 — `docs/art/LICENSES.md`).
 - 퀵슬롯/스킬 슬롯 셀: 동일 팩 `inventory_cell.png` 나인패치.
 - 양피지 배경(디버그 패널 등): `parchment_gui/panels.png` 중앙 패널 영역(48,0,48,48) 크롭.
