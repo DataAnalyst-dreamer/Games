@@ -76,9 +76,18 @@ func _ready() -> void:
 		float(Data.get_value("combat", "stamina.exhausted_penalty_sec", 1.0)),
 	)
 	hurtbox.hurt.connect(_on_hurtbox_hurt)
+	queue_redraw() # D-204: 발밑 그림자 최초 그리기.
 	Events.player_spawned.emit(self)
 	Events.player_hp_changed.emit(resources.hp, resources.max_hp)
 	Events.player_stamina_changed.emit(resources.stamina, resources.max_stamina)
+
+
+## 발밑 타원 그림자(D-204). CanvasItem._draw()는 자식 노드(AnimatedSprite2D)보다 먼저
+## 그려지므로, 여기서 그리면 전용 노드 없이도 그림자가 스프라이트 아래에 깔린다.
+## 본체 좌표계에 그리므로 이동할 때마다 다시 그릴 필요가 없다 - _ready()의 queue_redraw()
+## 한 번이면 충분하다(씬 진입 시의 최초 NOTIFICATION_DRAW를 놓치지 않기 위한 보험).
+func _draw() -> void:
+	FootShadow.draw(self)
 
 
 func _unhandled_input(event: InputEvent) -> void:

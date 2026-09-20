@@ -21,9 +21,11 @@
 [ext_resource type="Script" path="res://scripts/world/main_bootstrap.gd" id="19_main_bootstrap"]
 
 [node name="Main" type="Node2D"]
+y_sort_enabled = true
 script = ExtResource("19_main_bootstrap")
 
 [node name="World" parent="." instance=ExtResource("1_world")]
+z_index = -2
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
 
@@ -68,6 +70,7 @@ position = Vector2(-70, -100)
 position = Vector2(-10, -100)
 
 [node name="HartlandQuestLayer" type="Node2D" parent="."]
+y_sort_enabled = true
 script = ExtResource("18_quest_layout_spawner")
 
 [node name="Camera2D" type="Camera2D" parent="."]
@@ -81,6 +84,7 @@ script = ExtResource("4_pcam_2d")
 priority = 10
 follow_mode = 2
 follow_target = NodePath("../Player")
+follow_offset = Vector2(0, -12)
 zoom = Vector2(2, 2)
 snap_to_pixel = true
 tween_on_load = false

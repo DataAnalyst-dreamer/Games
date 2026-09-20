@@ -199,7 +199,16 @@ func _ready() -> void:
 	if tier == "elite":
 		_setup_nameplate()
 	_rng.randomize()
+	queue_redraw() # D-204: 발밑 그림자 최초 그리기.
 	_enter_state(State.IDLE)
+
+
+## 발밑 타원 그림자(D-204). Player._draw()와 같은 규칙 - CanvasItem._draw()가 자식
+## (AnimatedSprite2D)보다 먼저 그려지는 것을 이용해 전용 노드 없이 그림자를 깐다.
+## 몬스터는 종별 스프라이트 배율만큼 그림자도 커진다(D-204 "크기별 배율 허용") -
+## _attack_vfx_offset_px()가 이미 sprite.scale.x로 크기를 읽는 것과 같은 방식이다.
+func _draw() -> void:
+	FootShadow.draw(self, sprite.scale.x if sprite != null else 1.0)
 
 
 func _load_stats() -> void:
