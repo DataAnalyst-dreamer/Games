@@ -65,6 +65,8 @@ func _check_skill_slot() -> void:
 
 	var hp_before: int = _dummy.hp
 	_press_action("hotbar_5")
+	# M4-3: 선딜(Tuning.SKILL_ANTICIPATION_SEC) 뒤에야 히트박스가 켜진다.
+	await get_tree().create_timer(Tuning.SKILL_ANTICIPATION_SEC).timeout
 	await _wait_frames(6) # activate()의 call_deferred + area 재판정이 반영될 시간.
 	_check(_dummy.hp < hp_before, "hotbar_5 입력으로 실제 시전(더미 HP 감소, %d -> %d)" % [hp_before, _dummy.hp])
 	_check(not Progression.can_cast_skill(4), "시전 직후 슬롯4 쿨타임 중이라 재시전 불가")
