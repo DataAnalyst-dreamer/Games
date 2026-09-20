@@ -1,0 +1,193 @@
+{
+  "_comment": "쿼터뷰 애셋 계약(D-207). tools/art/gen_quarter_tiles.py 가 생성한 기초 도형 placeholder 의 규격이며, 정식 애셋은 같은 경로·같은 크기로 PNG 만 덮어쓰면 된다. pivot 은 발 기준점(px), collision_band_px 는 셀 하단에서 이만큼만 충돌을 건다(0이면 통과 가능).",
+  "_generated_by": "tools/art/gen_quarter_tiles.py",
+  "_palette_source": "docs/art/art-bible.md §3 (하틀랜드 32색)",
+  "_tile_px": 32,
+  "_oblique_squash": 0.42,
+  "assets": {
+    "tile_grass_a": {
+      "path": "game/assets/quarter/ground/tile_grass_a.png",
+      "width": 32,
+      "height": 32,
+      "kind": "ground",
+      "cell": [
+        32,
+        32
+      ],
+      "grid": [
+        1,
+        1
+      ]
+    },
+    "tile_grass_b": {
+      "path": "game/assets/quarter/ground/tile_grass_b.png",
+      "width": 32,
+      "height": 32,
+      "kind": "ground",
+      "cell": [
+        32,
+        32
+      ],
+      "grid": [
+        1,
+        1
+      ]
+    },
+    "tile_grass_c": {
+      "path": "game/assets/quarter/ground/tile_grass_c.png",
+      "width": 32,
+      "height": 32,
+      "kind": "ground",
+      "cell": [
+        32,
+        32
+      ],
+      "grid": [
+        1,
+        1
+      ]
+    },
+    "tile_dirt_auto": {
+      "path": "game/assets/quarter/ground/tile_dirt_auto.png",
+      "width": 96,
+      "height": 96,
+      "kind": "ground",
+      "cell": [
+        32,
+        32
+      ],
+      "grid": [
+        3,
+        3
+      ]
+    },
+    "water_auto": {
+      "path": "game/assets/quarter/ground/water_auto.png",
+      "width": 96,
+      "height": 96,
+      "kind": "ground_solid",
+      "cell": [
+        32,
+        32
+      ],
+      "grid": [
+        3,
+        3
+      ],
+      "collision_band_px": 32
+    },
+    "cliff_auto": {
+      "path": "game/assets/quarter/walls/cliff_auto.png",
+      "width": 96,
+      "height": 96,
+      "kind": "wall",
+      "cell": [
+        32,
+        32
+      ],
+      "grid": [
+        3,
+        3
+      ],
+      "collision_band_px": 10,
+      "front_row": 1,
+      "top_row": 0,
+      "shadow_row": 2
+    },
+    "tree_oak": {
+      "path": "game/assets/quarter/props/tree_oak.png",
+      "width": 64,
+      "height": 96,
+      "kind": "prop",
+      "cell": [
+        64,
+        96
+      ],
+      "grid": [
+        1,
+        1
+      ],
+      "pivot": [
+        32,
+        88
+      ],
+      "collision_band_px": 8
+    },
+    "bush": {
+      "path": "game/assets/quarter/props/bush.png",
+      "width": 32,
+      "height": 32,
+      "kind": "prop",
+      "cell": [
+        32,
+        32
+      ],
+      "grid": [
+        1,
+        1
+      ],
+      "pivot": [
+        16,
+        30
+      ],
+      "collision_band_px": 0
+    },
+    "rock": {
+      "path": "game/assets/quarter/props/rock.png",
+      "width": 32,
+      "height": 32,
+      "kind": "prop",
+      "cell": [
+        32,
+        32
+      ],
+      "grid": [
+        1,
+        1
+      ],
+      "pivot": [
+        16,
+        30
+      ],
+      "collision_band_px": 6
+    },
+    "fence": {
+      "path": "game/assets/quarter/props/fence.png",
+      "width": 96,
+      "height": 32,
+      "kind": "prop",
+      "cell": [
+        32,
+        32
+      ],
+      "grid": [
+        3,
+        1
+      ],
+      "pivot": [
+        16,
+        30
+      ],
+      "collision_band_px": 6
+    },
+    "house_a": {
+      "path": "game/assets/quarter/buildings/house_a.png",
+      "width": 96,
+      "height": 96,
+      "kind": "prop",
+      "cell": [
+        96,
+        96
+      ],
+      "grid": [
+        1,
+        1
+      ],
+      "pivot": [
+        48,
+        92
+      ],
+      "collision_band_px": 20
+    }
+  }
+}
