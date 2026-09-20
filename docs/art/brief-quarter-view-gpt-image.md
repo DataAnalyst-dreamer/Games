@@ -7,7 +7,7 @@
 
 ## 0. 먼저 알아둘 것
 
-- **"쿼터뷰"의 정체는 좌표계가 아니라 그림이다.** 지면은 위에서 내려다본 모습, 벽·나무줄기·건물 정면 같은 수직면은 남쪽(화면 아래) 면이 보이는 **비스듬한 3/4 시점**으로 그린다. 원근 수렴 없음(직교). 빛은 좌상단.
+- **"쿼터뷰"의 정체는 좌표계가 아니라 그림이다.** 지면은 위에서 내려다본 모습, 수직 물체는 **정면 + 오른쪽 측면 두 면**이 보이는 디오라마식 3/4 시점으로 그린다(파일럿 배경 `prototypes/quarter-view-lab/assets/village-gate.png`가 기준 — 정면 한 면만 그리면 탑뷰로 읽힌다). 높이는 발자국의 2~2.5배. 원근 수렴 없음(직교). 빛은 좌상단.
 - **GPT 이미지는 정확한 픽셀 격자를 못 지킨다.** 그래서 큰 캔버스(1024×1024 또는 1536×1024)에 "pixel art 느낌"으로 생성한 뒤, 우리가 **최근접 축소 + 팔레트 양자화**로 규격에 맞춘다(§4). 프롬프트에 "각 도트를 8×8 화면 픽셀로" 같은 지시를 넣어도 대략만 맞는다 — 기대하지 말 것.
 - **한 프롬프트에 한 애셋(또는 한 세트)만.** 여러 종류를 한 장에 넣으면 크기·시점이 흔들린다.
 - **투명 배경**: 이미지 생성 옵션에서 배경 투명(PNG)을 켠다. 안 되면 프롬프트의 `solid magenta background (#FF00FF)`를 쓰고 후처리에서 뺀다(`--bg-color ff00ff`).
@@ -17,7 +17,7 @@
 ## 1. 공통 스타일 블록 — 모든 프롬프트 맨 앞에 그대로 붙인다
 
 ```
-STYLE: 16-bit style pixel art for a cozy medieval fantasy island RPG. 3/4 top-down oblique view (orthographic, no perspective convergence): the ground is seen from above, and the south-facing vertical surfaces of objects (walls, tree trunks, house fronts) are visible. Light comes from the top-left. Crisp hard-edged pixels, NO anti-aliasing, NO blur, NO gradients, NO glow. Flat shading with exactly 3 tones per surface (base, one shadow, one highlight). Limited warm palette, roughly 32 colors: ink outline #141b1b (never pure black), grass #74a334 / #adbc3a / #5f7160, dirt path #d2b37d / #965340, wood #a3754e / #bd7959 / #c69469 / #61372e, roof orange #e66a3a / #ffad5d / #d78b4a, stone #b3957f / #8d977f / #8e7c73, water #79b8ce / #71ddee / #548789, straw #eecf9b, accent red #e0394c. Characters and props have a 1px dark outline; ground tiles have NO outline. Cute but sturdy proportions, warm and hand-made feel. No text, no watermark, no signature, no UI. Transparent background.
+STYLE: 16-bit style pixel art for a cozy medieval fantasy island RPG. 3/4 top-down oblique "diorama" view (orthographic, no perspective convergence), camera tilted about 45 degrees: the ground is seen from above, and every vertical object shows TWO faces — its south-facing FRONT face and a narrower RIGHT SIDE face (about a quarter of the front width, slightly darker) — so walls, houses, fences, posts and stones read as solid volumes. Tall objects are about 2 to 2.5 times taller than their ground footprint. Light comes from the top-left. Crisp hard-edged pixels, NO anti-aliasing, NO blur, NO gradients, NO glow. Flat shading with exactly 3 tones per surface (base, one shadow, one highlight). Limited warm palette, roughly 32 colors: ink outline #141b1b (never pure black), grass #74a334 / #adbc3a / #5f7160, dirt path #d2b37d / #965340, wood #a3754e / #bd7959 / #c69469 / #61372e, roof orange #e66a3a / #ffad5d / #d78b4a, stone #b3957f / #8d977f / #8e7c73, water #79b8ce / #71ddee / #548789, straw #eecf9b, accent red #e0394c. Characters and props have a 1px dark outline; ground tiles have NO outline. Cute but sturdy proportions, warm and hand-made feel. No text, no watermark, no signature, no UI. Transparent background.
 ```
 
 캐릭터·몬스터용 추가 블록(스타일 블록 뒤에 붙임):
