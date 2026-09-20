@@ -106,6 +106,9 @@
 
 ## 3. stats.json — 스탯 효과 계수
 
+> **[v2로 대체됨, M4-0]** 아래 5스탯 스키마는 `docs/specs/ro-benchmark-progression-v1.md`(AGI 추가 6스탯·체증 포인트 비용 곡선·SP 자원)로 대체됐다. 이력 보존용.
+
+
 **용도**: F1-2(레벨·스탯 성장).
 **소유**: game-designer.
 
@@ -151,6 +154,9 @@
 ---
 
 ## 5. skills.json — 캐릭터별 스킬 트리
+
+> **[v2로 대체됨, M4-0]** 아래 "캐릭터×계열×단계×노드=144개" 스키마는 실제로 구현된 적 없는 구상안이었다. 실제 스키마는 `docs/specs/skills-m3.md`(6종 액티브, M3) → `docs/specs/ro-benchmark-progression-v1.md`(24노드, M4-0, 현재 정본) 순으로 대체됐다. 이력 보존용.
+
 
 **용도**: F1-3.
 **소유**: game-designer.

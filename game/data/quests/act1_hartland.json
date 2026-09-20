@@ -42,8 +42,8 @@
       "fail_conditions": [],
       "rewards": {
         "_balance_todo": true,
-        "gold": 0,
-        "exp": 5,
+        "gold": 10,
+        "exp": 8,
         "items": [],
         "affinity": []
       },
@@ -90,8 +90,8 @@
       "fail_conditions": [],
       "rewards": {
         "_balance_todo": true,
-        "gold": 0,
-        "exp": 5,
+        "gold": 12,
+        "exp": 9,
         "items": [],
         "affinity": []
       },
@@ -131,8 +131,8 @@
       "fail_conditions": [],
       "rewards": {
         "_balance_todo": true,
-        "gold": 10,
-        "exp": 15,
+        "gold": 25,
+        "exp": 20,
         "items": [],
         "affinity": []
       },
@@ -179,14 +179,15 @@
       "fail_conditions": [],
       "rewards": {
         "_balance_todo": true,
-        "gold": 0,
-        "exp": 5,
+        "gold": 35,
+        "exp": 30,
         "items": [],
         "affinity": []
       },
       "on_complete": {
         "events": [
-          "register_quest:quest_main_a1_05_reclaim"
+          "register_quest:quest_main_a1_05_reclaim",
+          "grant_skill_point:1"
         ]
       },
       "template": false,
@@ -229,8 +230,8 @@
       "fail_conditions": [],
       "rewards": {
         "_balance_todo": true,
-        "gold": 40,
-        "exp": 30,
+        "gold": 90,
+        "exp": 72,
         "items": [
           {
             "id": "wool_soft",
@@ -303,12 +304,12 @@
       "fail_conditions": [],
       "rewards": {
         "_balance_todo": true,
-        "gold": 30,
-        "exp": 25,
+        "gold": 140,
+        "exp": 118,
         "items": [
           {
             "id": "iron_ore",
-            "qty": 1
+            "qty": 2
           }
         ],
         "affinity": []
@@ -358,11 +359,11 @@
       "fail_conditions": [],
       "rewards": {
         "_balance_todo": true,
-        "gold": 20,
-        "exp": 20,
+        "gold": 270,
+        "exp": 227,
         "items": [
           {
-            "id": "horn_shard",
+            "id": "weapon_uncommon_2",
             "qty": 1
           }
         ],
@@ -371,7 +372,8 @@
       "on_complete": {
         "events": [
           "unlock_worldmap",
-          "register_main_act2_regions"
+          "register_main_act2_regions",
+          "grant_skill_point:1"
         ],
         "cutscene_key": "main_a1_s08_heartland_teo_01"
       },
@@ -435,11 +437,11 @@
       "fail_conditions": [],
       "rewards": {
         "_balance_todo": true,
-        "gold": 15,
-        "exp": 10,
+        "gold": 13,
+        "exp": 11,
         "items": [
           {
-            "id": "stew_basic",
+            "id": "potion_hp_small",
             "qty": 1
           }
         ],
@@ -496,8 +498,8 @@
       "fail_conditions": [],
       "rewards": {
         "_balance_todo": true,
-        "gold": 35,
-        "exp": 20,
+        "gold": 38,
+        "exp": 32,
         "items": [
           {
             "id": "ribbon_charm",
@@ -564,8 +566,8 @@
       "fail_conditions": [],
       "rewards": {
         "_balance_todo": true,
-        "gold": 35,
-        "exp": 20,
+        "gold": 41,
+        "exp": 34,
         "items": [
           {
             "id": "iron_ore",
@@ -631,7 +633,7 @@
       "rewards": {
         "_balance_todo": true,
         "gold": 25,
-        "exp": 15,
+        "exp": 21,
         "items": [
           {
             "id": "stew_basic",
@@ -689,8 +691,8 @@
       "fail_conditions": [],
       "rewards": {
         "_balance_todo": true,
-        "gold": 15,
-        "exp": 10,
+        "gold": 11,
+        "exp": 9,
         "items": [],
         "affinity": []
       },
@@ -730,8 +732,8 @@
       "fail_conditions": [],
       "rewards": {
         "_balance_todo": true,
-        "gold": 20,
-        "exp": 10,
+        "gold": 26,
+        "exp": 22,
         "items": [],
         "affinity": []
       },
@@ -776,8 +778,8 @@
       "fail_conditions": [],
       "rewards": {
         "_balance_todo": true,
-        "gold": 15,
-        "exp": 5,
+        "gold": 19,
+        "exp": 16,
         "items": [],
         "affinity": []
       },
@@ -822,8 +824,8 @@
       "fail_conditions": [],
       "rewards": {
         "_balance_todo": true,
-        "gold": 20,
-        "exp": 10,
+        "gold": 26,
+        "exp": 22,
         "items": [],
         "affinity": []
       },
@@ -842,5 +844,6 @@
       "foreshadowing_refs": [],
       "repeatable": true
     }
-  ]
+  ],
+  "_reward_design_ref": "M4-0(D-167+): 보상 수치 산출 근거는 docs/specs/ro-benchmark-progression-v1.md §6. 메인 퀘스트 exp = round(exp_curve.csv[기준레벨].exp_to_next * 0.3~0.5), 기준레벨은 그 퀘스트를 완료할 무렵 기대 캐릭터 레벨(01/02=Lv1, 03=Lv2, 04=Lv3, 05=Lv4, 06=Lv6, 07=Lv8). 사이드는 0.15~0.2, 데일리는 0.07~0.1(반복 파밍이라 낮게). 골드는 exp*1.1~1.25 비율. grant_skill_point:N 이벤트(on_complete.events, 기존 06_echocave에 이미 있던 D-112 포맷 그대로 재사용)는 04/06(기존)/07 총 3개 퀘스트에만 부여(브리프 '일부')."
 }
