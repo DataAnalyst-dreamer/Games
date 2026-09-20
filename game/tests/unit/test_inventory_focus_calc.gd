@@ -78,3 +78,25 @@ func test_grid_is_leftmost_col() -> void:
 func test_enter_indices_are_stable() -> void:
 	assert_eq(FocusCalcScript.grid_enter_index_from_equip(), 0)
 	assert_eq(FocusCalcScript.equip_enter_slot_from_grid(), "weapon")
+
+
+# --- focused_grid_item_id(M5-1 마우스: 핫바 미리보기 칸 클릭) ---
+
+func test_focused_grid_item_id_returns_item_id_when_grid_focused() -> void:
+	var slots := [{"item_id": "potion_hp_small"}, {"item_id": "rabbit_horn"}]
+	assert_eq(FocusCalcScript.focused_grid_item_id("grid", 1, [0, 1], slots), "rabbit_horn")
+
+
+func test_focused_grid_item_id_empty_when_equip_focused() -> void:
+	var slots := [{"item_id": "potion_hp_small"}]
+	assert_eq(FocusCalcScript.focused_grid_item_id("equip", 0, [0], slots), "")
+
+
+func test_focused_grid_item_id_empty_when_focus_past_visible_indices() -> void:
+	var slots := [{"item_id": "potion_hp_small"}]
+	assert_eq(FocusCalcScript.focused_grid_item_id("grid", 5, [0], slots), "")
+
+
+func test_focused_grid_item_id_empty_when_slot_has_no_item_id() -> void:
+	var slots := [{"quantity": 1}]
+	assert_eq(FocusCalcScript.focused_grid_item_id("grid", 0, [0], slots), "")

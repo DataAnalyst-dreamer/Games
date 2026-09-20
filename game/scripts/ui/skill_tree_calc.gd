@@ -210,3 +210,16 @@ static func level_detail_rows(entry: Dictionary, level: int) -> Array[Dictionary
 			continue
 		rows.append(_row(field, float(self_effect[field]), next_self_effect.get(field)))
 	return rows
+
+
+## M5-1(마우스): 핫바 미리보기 칸 클릭 시 등록할 skill_id. 포커스된 노드가 있고
+## active/buff 타입이며 실제로 배운(level>0) 상태일 때만 값을 준다(skill_tree_tab.gd의
+## 기존 1~9 키 폴링 `_try_hotbar_register()`와 동일 가드) — 그 외에는 ""를 반환해
+## 호출부가 등록을 시도하지 않게 한다.
+static func assignable_skill_id(focused_id: String, skills_table: Dictionary, learned: Dictionary) -> String:
+	if focused_id.is_empty():
+		return ""
+	var node_type: String = String(skills_table.get(focused_id, {}).get("node_type", ""))
+	if node_type not in ["active", "buff"] or int(learned.get(focused_id, 0)) <= 0:
+		return ""
+	return focused_id

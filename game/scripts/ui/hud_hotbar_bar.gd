@@ -5,22 +5,32 @@
 ##
 ## GameState.hotbar/Events.hotbar_changed는 stage/m4-1(로직, 미병합) 소유 — get()/
 ## 신호 존재 여부로 방어한다(skill_panel_tab.gd의 기존 관례와 동일).
+##
+## M5-1(마우스): 칸을 Label 대신 Button(flat)으로 그려 클릭을 받는다 — `pressed`만
+## 연결하면 되어 gui_input 좌표 파싱보다 코드가 덜 든다(작업 지시 원칙). 클릭하면
+## `slot_clicked(i)`만 emit하고, "무엇을 등록할지"는 이 컴포넌트를 붙인 화면
+## (inventory_menu.gd/skill_tree_tab.gd)이 자신의 포커스 상태로 판단한다 — 이 컴포넌트는
+## 핫바 배열 표시만 책임진다는 기존 원칙을 그대로 유지.
 class_name HudHotbarBar
 extends HBoxContainer
 
+signal slot_clicked(slot: int)
+
 const SLOT_COUNT := 9
 
-var _cells: Array[Label] = []
+var _cells: Array[Button] = []
 var _hotbar: Array = []
 
 
 func _ready() -> void:
 	add_theme_constant_override("separation", 2)
 	for i in SLOT_COUNT:
-		var cell := Label.new()
+		var cell := Button.new()
 		cell.text = str(i + 1)
+		cell.flat = true
+		cell.focus_mode = Control.FOCUS_NONE
 		cell.custom_minimum_size = Vector2(14, 14)
-		cell.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		cell.pressed.connect(_on_cell_pressed.bind(i))
 		add_child(cell)
 		_cells.append(cell)
 
@@ -28,6 +38,10 @@ func _ready() -> void:
 	_hotbar = hotbar_variant if typeof(hotbar_variant) == TYPE_ARRAY else []
 	Events.hotbar_changed.connect(_on_hotbar_changed)
 	_redraw(-1)
+
+
+func _on_cell_pressed(slot: int) -> void:
+	slot_clicked.emit(slot)
 
 
 func _on_hotbar_changed(hotbar: Array) -> void:

@@ -55,3 +55,12 @@ static func try_assign(kind: String, id: String) -> bool:
 	if slot < 0:
 		return false
 	return Progression.assign_hotbar(slot, kind, id)
+
+
+## M5-1(마우스): 핫바 미리보기 칸을 클릭하면 어느 슬롯인지는 클릭 좌표가 이미 알려주므로
+## (try_assign처럼 1~9 키를 폴링할 필요가 없다) slot을 그대로 받아 등록한다. Progression
+## 싱글턴 의존은 try_assign과 동일 이유로 GUT 대상에서 제외(스모크 SmokeMenuMouse가 확인).
+static func assign_now(slot: int, kind: String, id: String) -> bool:
+	if id.is_empty() or slot < 0:
+		return false
+	return Progression.assign_hotbar(slot, kind, id)
