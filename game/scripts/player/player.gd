@@ -57,6 +57,9 @@ var _weapon_tween: Tween = null
 
 
 func _ready() -> void:
+	# M5-2(미니맵): NodePath export는 중첩 인스턴싱에서 깨진 전례가 있어(hud_progress.gd
+	# 주석 참고) 그룹 조회로 찾게 한다 — hud_minimap.gd가 이 그룹으로 플레이어를 찾는다.
+	add_to_group(&"player")
 	# QA 리뷰 Minor-2(docs/qa/review-m1-1-m1-2.md): fallback을 80.0(RELEASE_FALLBACKS와
 	# 동일한 확정값)으로 맞춘다 — 예전엔 0.0이라 키가 사라지면 플레이어가 완전히
 	# 움직이지 못하는 최악의 실패 모드가 조용히 발생했다.

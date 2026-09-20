@@ -73,6 +73,19 @@ const FACING_AXIS_SWITCH_MIN_INTERVAL_SEC: float = 0.1
 ## 전 placeholder 승인값(D-183) — 아이콘 크기 확정 후 재조정 가능.
 const QUEST_ARROW_MARGIN_PX: float = 24.0
 
+# --- UI: 미니맵 v1(M5-2, D-172 후속). 셋 다 순수 UX 감으로 잡은 제안값 — game-designer
+# 확인 필요(완료 보고 질문 목록 참고), `_balance_todo` 취급. ---
+## 미니맵이 보여주는 월드 반경(px). 640x360/줌2.0 기준 화면에 보이는 절반 폭(160px)보다
+## 약간 좁게 잡아 "바로 근처"만 보이는 레이더에 가깝게 했다.
+const MINIMAP_VIEW_RADIUS_PX: float = 120.0
+## 미니맵 카메라 위치·SubViewport 렌더·마커 갱신 주기(초). 1/0.15 ≈ 6.7fps — 지시받은
+## 5~10fps 범위 안.
+const MINIMAP_UPDATE_INTERVAL_SEC: float = 0.15
+## 추적 목표가 미니맵 밖일 때 테두리로 clamp하는 여백(px). 미니맵 자체가 56x32로
+## 작아 QUEST_ARROW_MARGIN_PX(24px, 640x360 전체 화면 기준)를 그대로 쓰면 표시 영역이
+## 거의 안 남는다 — 훨씬 작은 값을 별도로 둔다.
+const MINIMAP_EDGE_MARGIN_PX: float = 3.0
+
 ## 공격 상태 중 이동 입력 블렌딩 비율(D-124). 타격당 짧은 전진(lunge) 속도가 감쇠되는
 ## 동안 이동 입력이 있으면 완전한 정지 대신 `walk_speed * 이 비율`로 수렴시켜, lunge
 ## 종료 후 저속 이동으로 자연스럽게 이어지게 한다. 콤보 판정·히트박스 타이밍과는 무관.

@@ -46,6 +46,7 @@ var _marker_tween: Tween
 
 
 func _ready() -> void:
+	add_to_group(&"quest_markers") # M5-2: 미니맵이 marker_text()/marker_visible()를 재사용.
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 	Events.quest_accepted.connect(_on_quest_accepted)
