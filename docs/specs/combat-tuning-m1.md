@@ -1,5 +1,10 @@
 # M1 전투 수치 확정안
 
+> **단위 주의 (2026-09-20, D-206):** 이 문서의 px 수치는 전부 **1타일 = 16 월드단위** 시절 값이다.
+> 쿼터뷰 이관 단계 (b1)에서 1타일이 32 월드단위가 되면서 `combat.json`·`monsters.json`의 월드 거리·속도가
+> 일괄 ×2 됐다 — **타일 기준 거리와 모든 비율은 그대로**이므로 이 문서의 설계 근거는 유효하고 숫자만 2배로
+> 읽으면 된다. 검증: `game/tests/unit/test_unit_scale_invariants.gd`.
+
 > 기준 문서: `docs/GDD-도트액션RPG-기획안.md` 4장(전투)·5장(성장), `docs/brd/03-features/02-전투.md`(R2), `docs/brd/04-decisions.md`(D-05·D-08)
 > 대상 데이터: `game/data/combat.json` (읽기 전용 참조, 반영은 godot-engineer)
 > 목적: `combat.json`의 `_balance_todo` 제안값을 M1 게이트(외부 테스터 10인 "타격감 4/5 이상") 기준으로 확정 또는 유예한다.

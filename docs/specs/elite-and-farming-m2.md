@@ -1,5 +1,10 @@
 # M2 정예 몬스터 · 파밍 소스 · 스탯 계수 설계
 
+> **단위 주의 (2026-09-20, D-206):** 이 문서의 px 수치는 전부 **1타일 = 16 월드단위** 시절 값이다.
+> 쿼터뷰 이관 단계 (b1)에서 1타일이 32 월드단위가 되면서 `combat.json`·`monsters.json`의 월드 거리·속도가
+> 일괄 ×2 됐다 — **타일 기준 거리와 모든 비율은 그대로**이므로 이 문서의 설계 근거는 유효하고 숫자만 2배로
+> 읽으면 된다. 검증: `game/tests/unit/test_unit_scale_invariants.gd`.
+
 > 기준: GDD 5.2(스탯)·6.5(파밍 콘텐츠 소스)·8.1(몬스터 설계 기준) / `docs/brd/03-features/03-아이템-파밍.md` F3-5 /
 > `docs/brd/03-features/06-몬스터-보스.md` F6-3 / `docs/levels/hartland.md` ⑤(정예 2종·월드 보스 제단·스폰 존) /
 > `docs/specs/combat-tuning-m1.md` §8-3(공격력 역산 방법론)·`combat-tuning-m1-addendum.md` §4(AI 공통 5필드) /

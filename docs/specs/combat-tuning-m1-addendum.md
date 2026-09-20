@@ -1,5 +1,10 @@
 # M1 전투 수치 확정안 — 추가분 (넉백/피격 무적/카메라 셰이크/몬스터 AI/공격 프레임/드랍 자리표시자/가드·사망)
 
+> **단위 주의 (2026-09-20, D-206):** 이 문서의 px 수치는 전부 **1타일 = 16 월드단위** 시절 값이다.
+> 쿼터뷰 이관 단계 (b1)에서 1타일이 32 월드단위가 되면서 `combat.json`·`monsters.json`의 월드 거리·속도가
+> 일괄 ×2 됐다 — **타일 기준 거리와 모든 비율은 그대로**이므로 이 문서의 설계 근거는 유효하고 숫자만 2배로
+> 읽으면 된다. 검증: `game/tests/unit/test_unit_scale_invariants.gd`.
+
 > 기준 문서: `docs/GDD-도트액션RPG-기획안.md` 4.1~4.2(전투)·8.1(몬스터)·11장(UI·접근성·사망 페널티), `docs/brd/03-features/02-전투.md`(F2-1~F2-3), `docs/brd/03-features/06-몬스터-보스.md`(F6-1), `docs/brd/04-decisions.md`(D-05, D-08, D-25, D-42~D-52), 선행 문서 `docs/specs/combat-tuning-m1.md`
 > 대상 데이터: `game/data/combat.json`, `game/data/monsters.json` (읽기 전용 참조, 반영은 godot-engineer) / `game/scripts/tuning.gd`(엔지니어가 남긴 임시 상수·주석)
 > 범위: 브랜치 `stage/m1-1-combat-core` 진행 중 godot-engineer가 남긴 임시 상수 7항목(넉백/피격 스턴·무적/카메라 셰이크/몬스터 AI 공통값/공격 히트 지속) + `drop_table_id` 자리표시자 규칙 + M1-2(가드·사망) 선반영 3항목을 확정한다.
