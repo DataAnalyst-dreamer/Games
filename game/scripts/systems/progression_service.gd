@@ -232,7 +232,9 @@ func assign_hotbar(slot: int, kind: String, id: String) -> bool:
 			return false
 		GameState.skill_slots[slot] = id
 	elif kind == "item":
-		if id == "":
+		# 소비품만 핫바 대상(장비·재료는 조용히 거부). UI 두 경로(스킬 패널·인벤토리)가
+		# 모두 여기를 거치므로 판정은 이 한 곳에만 둔다.
+		if id == "" or String(Data.get_value("items", id, {}).get("category", "")) != "consumable":
 			return false
 		GameState.skill_slots[slot] = "" # 이 슬롯에 스킬이 있었다면 해제.
 	else:

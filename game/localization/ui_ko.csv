@@ -12,6 +12,7 @@ ui.quest_npc.accept,수주하기
 ui.quest_npc.complete,완료 보고
 ui.quest_npc.active,목표 진행 중
 ui.quest_npc.close,닫기
+ui.quest_npc.reward_prefix,보상:
 ui.hud.level_prefix,레벨
 ui.hud.gold_unit,골드
 ui.hud.save_icon,저장됨
@@ -250,6 +251,8 @@ ui.quest_log.empty,표시할 퀘스트가 없습니다
 ui.quest_log.tracking_mark,[추적]
 ui.quest_log.tracking_on,현재 추적 중인 퀘스트입니다
 ui.quest_log.track_hint,확인 버튼으로 이 퀘스트를 추적합니다
+ui.quest_log.reward_header,보상
+ui.quest_log.reward_exp_fmt,EXP +%d
 skill.blade_power_slash.name,강타
 skill.blade_power_slash.desc,정면 부채꼴 범위를 강하게 베어 넉백을 준다.
 skill.blade_thrust.name,찌르기
@@ -280,6 +283,6 @@ ui.skill.state.learnable,[습득]
 ui.skill.requires_none,없음
 ui.skill.meta_fmt,계열 %s · SP %d · 요구 %s
 ui.skill.learn_hint,확인 버튼으로 습득합니다
-ui.skill.slot_hint,Q 또는 R로 슬롯에 장착합니다
+ui.skill.slot_hint,1~9 키로 핫바에 등록합니다
 ui.skill.locked_hint,포인트가 부족하거나 선행 스킬이 필요합니다
 ui.hud.level_up_points_hint,포인트 %d 남음 — Tab

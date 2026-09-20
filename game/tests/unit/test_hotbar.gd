@@ -51,6 +51,7 @@ func test_assign_hotbar_allows_duplicate_skill_slots() -> void:
 
 func test_assign_hotbar_item_requires_non_empty_id_and_clears_skill_slot() -> void:
 	assert_false(Progression.assign_hotbar(2, "item", ""), "빈 id는 실패")
+	assert_false(Progression.assign_hotbar(2, "item", "weapon_common_1"), "소비품이 아니면 실패(장비·재료)")
 	Progression.assign_hotbar(2, "skill", REAL_SKILL_ID)
 	assert_true(Progression.assign_hotbar(2, "item", "potion_hp_small"))
 	assert_eq(GameState.hotbar[2], {"kind": "item", "id": "potion_hp_small"})

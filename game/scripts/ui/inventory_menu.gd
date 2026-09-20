@@ -106,6 +106,7 @@ var _lock_hold_triggered: bool = false
 
 var _last_input_was_pad: bool = false
 var _description_label: Label
+var _hotbar_bar: HudHotbarBar # M4-2(D-181~183): 핫바 등록 미리보기.
 
 
 func _ready() -> void:
@@ -124,6 +125,9 @@ func _ready() -> void:
 	_description_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	header_label.get_parent().add_child(_description_label)
 	header_label.get_parent().move_child(_description_label, 1)
+	_hotbar_bar = HudHotbarBar.new() # M4-2(D-181~183): 핫바 등록 미리보기(비교 툴팁에 얹는다).
+	_hotbar_bar.theme = theme
+	affix_note_label.get_parent().add_child(_hotbar_bar)
 	quest_log_tab.theme = theme # 자식 Control은 부모 theme을 스크립트에서 자동 상속하지 않음(D-24류 관례).
 	skill_panel_tab.theme = theme
 	_apply_theme_frames()
@@ -544,17 +548,31 @@ func _toggle_locked() -> void:
 	_rebuild_grid()
 
 
+## M4-2(D-181~183): 그리드 포커스 항목을 1~9 입력으로 핫바에 등록. 등록 가능 여부
+## (아이템 종류 등)는 Progression.assign_hotbar(로직, has_method 가드)가 판단한다 —
+## 여기서는 포커스된 item_id만 넘긴다.
+func _poll_hotbar_register() -> void:
+	if _focus_area != "grid" or _focus_grid_index >= _visible_indices.size():
+		return
+	var slot_index: int = _visible_indices[_focus_grid_index]
+	var item_id: String = String(GameState.inventory.slots[slot_index].get("item_id", ""))
+	if HotbarRegisterInput.try_assign("item", item_id):
+		_hotbar_bar.highlight_slot("item", item_id)
+
+
 # --- 비교 툴팁 ---
 
 func _refresh_tooltip() -> void:
 	if TABS[_tab_index] != "inventory" or _focus_area != "grid" or _focus_grid_index >= _visible_indices.size():
 		compare_tooltip.visible = false
+		_hotbar_bar.highlight_slot("item", "")
 		return
 
 	var slot_index: int = _visible_indices[_focus_grid_index]
 	var slot: Dictionary = GameState.inventory.slots[slot_index]
 	var item_def: Dictionary = Data.get_value("items", String(slot.get("item_id", "")), {})
 	var category: String = String(item_def.get("category", ""))
+	_hotbar_bar.highlight_slot("item", String(slot.get("item_id", "")))
 	var grade_enum: Rarity.Grade = Rarity.from_string(String(slot.get("grade", item_def.get("grade", "common"))))
 	var grade_color: Color = Rarity.color_of(grade_enum, theme)
 	var name_key: String = String(item_def.get("name_key", slot.get("item_id", "")))
@@ -701,24 +719,7 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed(&"ui_confirm"):
 		_handle_confirm()
 
-	if _focus_area == "grid":
-		for slot in 9:
-			if Input.is_action_just_pressed("hotbar_%d" % (slot + 1)):
-				_assign_focused_item_to_hotbar(slot)
-				break
-
+	_poll_hotbar_register() # M4-2(D-181~183): 그리드 포커스 항목을 1~9로 핫바 등록.
 	_update_lock_hold(delta)
 
 
-## M4-1(D-175~D-177) 신설. 포커스된 그리드 칸이 소비품이면 hotbar_N으로 그 슬롯에
-## 배정한다(스킬 패널의 동일 관례 — Progression.assign_hotbar). 장비/재료 등은 핫바 대상이
-## 아니므로 조용히 무시한다.
-func _assign_focused_item_to_hotbar(slot: int) -> void:
-	if _focus_grid_index >= _visible_indices.size():
-		return
-	var slot_index: int = _visible_indices[_focus_grid_index]
-	var item_slot: Dictionary = GameState.inventory.slots[slot_index]
-	var item_def: Dictionary = Data.get_value("items", String(item_slot.get("item_id", "")), {})
-	if String(item_def.get("category", "")) != "consumable":
-		return
-	Progression.assign_hotbar(slot, "item", String(item_slot.get("item_id", "")))
