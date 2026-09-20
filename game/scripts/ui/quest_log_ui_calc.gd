@@ -66,3 +66,25 @@ static func objective_status(idx: int, current_index: int) -> String:
 	if idx == current_index:
 		return "current"
 	return "pending"
+
+
+## 퀘스트 보상 표시용 행 목록(M4-2, D-181~183 — "완료해도 보상이 안 보인다" 대응).
+## rewards: quests.json의 "rewards" Dictionary 그대로(gold/exp/items[]/affinity[]).
+## gold/exp는 0 이하면 행을 만들지 않는다(0골드/0경험치는 보여줄 필요 없음). affinity는
+## 이번 UI 범위 밖(호감도 화면 별도 예정)이라 행에 넣지 않는다. 순서는 항상 gold ->
+## exp -> items(데이터 순서) 고정 — 호출부 3곳(quest_log_tab/quest_npc_panel/hud 토스트)
+## 이 전부 이 순서를 그대로 표시에 쓴다.
+static func reward_rows(rewards: Dictionary) -> Array[Dictionary]:
+	var rows: Array[Dictionary] = []
+	var gold: int = int(rewards.get("gold", 0))
+	if gold > 0:
+		rows.append({"kind": "gold", "amount": gold})
+	var exp: int = int(rewards.get("exp", 0))
+	if exp > 0:
+		rows.append({"kind": "exp", "amount": exp})
+	for item: Dictionary in (rewards.get("items", []) as Array):
+		var item_id: String = String(item.get("id", ""))
+		if item_id.is_empty():
+			continue
+		rows.append({"kind": "item", "item_id": item_id, "qty": int(item.get("qty", 1))})
+	return rows

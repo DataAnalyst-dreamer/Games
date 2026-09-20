@@ -19,6 +19,10 @@ var is_heavy: bool = false
 ## LUK 기반 진짜 크리티컬 발동 여부(M3-3, Progression.roll_crit()이 세팅). hit_feel.gd가
 ## 셰이크 tier·SFX·데미지 숫자 강조에 쓴다.
 var is_critical: bool = false
+## 피격 시 흰 플래시 색(기본 HitFlash.FLASH_COLOR = 흰 오버브라이트). 스킬 vfx.color가
+## 있으면 skill.gd가 여기에 덮어써 "이 스킬로 맞으면 그 색으로 번쩍인다"를 구현한다
+## (M4-3, D-179 — 시각 전용, Hurtbox 판정 로직에는 영향 없음).
+var flash_color: Color = HitFlash.FLASH_COLOR
 ## 가드 불가 공격(잡기 등, S2-1c 예외). true면 가드/저스트 가드 로직을 건너뛰고 항상
 ## 정상 피해가 들어간다. 몬스터 쪽에서 이 값을 true로 세팅한 공격은 예고 연출도 구분해야
 ## 한다(붉은 예고 이펙트 — 현재 M1 몬스터 3종엔 해당 패턴이 없어 실제 연출 훅은 미구현,

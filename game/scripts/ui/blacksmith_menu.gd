@@ -968,7 +968,7 @@ func _update_guide_bar() -> void:
 	var pad: bool = _last_input_was_pad
 	var confirm_k: String = "A" if pad else "Enter"
 	var close_k: String = "B" if pad else "Backspace"
-	var tab_k: String = "LB/RB" if pad else "Q/E"
+	var tab_k: String = "LB/RB" if pad else "[/]"
 	var filter_k: String = "LT/RT" if pad else "Z/C"
 	var select_all_k: String = "X" if pad else "Space"
 	var hold_k: String = "Y" if pad else "X"

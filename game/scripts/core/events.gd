@@ -30,13 +30,16 @@ signal exp_changed(current_exp: int, exp_to_next: int, level: int)
 ## 그대로(attack/max_hp/defense/crit_chance/roll_cost_mult/cooldown_mult). 스탯 분배·레벨업·
 ## 세이브 로드 직후 발신.
 signal stats_changed(stats: Dictionary, derived: Dictionary, stat_points: int)
-## M3-3 신설. learned: 배운 skill_id 배열, slots: 크기 2("" = 빈 슬롯). 학습·장착/해제·
-## 세이브 로드 직후 발신.
+## M3-3 신설, M4-1에서 slots 9칸으로 확장. learned: 배운 skill_id 배열, slots: 크기 9
+## ("" = 빈 슬롯, 핫바의 kind="skill"인 칸만 채워짐). 학습·장착/해제·세이브 로드 직후 발신.
 signal skills_changed(learned: Array, slots: Array, skill_points: int)
 ## M3-3 신설. 스킬 시전 성공 시(쿨타임 시작) 1회 — HUD가 슬롯 쿨타임 UI를 채운다.
 signal skill_cast(slot: int, skill_id: String, cooldown_sec: float)
 ## M3-3 신설. 해당 슬롯 쿨타임이 다 돌았을 때 1회.
 signal skill_ready(slot: int)
+## M4-1(D-175~D-177) 신설. hotbar: 크기 9, 각 {"kind":"skill"|"item"|"", "id":String}.
+## assign_hotbar/clear_hotbar 호출·세이브 로드 마이그레이션 직후 발신.
+signal hotbar_changed(hotbar: Array)
 
 # --- 전투 ---
 ## is_advantage: 원소 상성 적중 여부(ElementCalc.get_multiplier() > 1.0). is_critical:

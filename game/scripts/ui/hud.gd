@@ -34,12 +34,12 @@ var _npc_visit_lines: Dictionary = {} # Presentation only; not quest/save progre
 @onready var boss_hp_bar: ProgressBar = $BossBar/BossFrame/BossVBox/BossHPBar
 @onready var boss_phase_label: Label = $BossBar/BossFrame/BossVBox/BossPhase
 
-@onready var skill_slot_1: Panel = $BottomCenter/SkillSlot1
-@onready var skill_slot_2: Panel = $BottomCenter/SkillSlot2
-@onready var slot_up: Panel = $BottomCenter/QuickCross/SlotUp
-@onready var slot_right: Panel = $BottomCenter/QuickCross/SlotRight
-@onready var slot_down: Panel = $BottomCenter/QuickCross/SlotDown
-@onready var slot_left: Panel = $BottomCenter/QuickCross/SlotLeft
+## M4-1(D-175~D-177): 옛 스킬 슬롯 2개+퀵크로스 4개를 핫바 9칸(HotbarSlot1~9)으로 대체.
+@onready var hotbar_slots: Array[Panel] = [
+	$BottomCenter/HotbarSlot1, $BottomCenter/HotbarSlot2, $BottomCenter/HotbarSlot3,
+	$BottomCenter/HotbarSlot4, $BottomCenter/HotbarSlot5, $BottomCenter/HotbarSlot6,
+	$BottomCenter/HotbarSlot7, $BottomCenter/HotbarSlot8, $BottomCenter/HotbarSlot9,
+]
 
 @onready var log_list: VBoxContainer = $BottomLeft/LogList
 
@@ -121,6 +121,7 @@ func _ready() -> void:
 	Events.quest_accepted.connect(_on_quest_progress_changed)
 	Events.quest_objective_updated.connect(_on_quest_progress_changed)
 	Events.quest_completed.connect(_on_quest_progress_changed)
+	Events.quest_completed.connect(_on_quest_completed_rewards_toast) # M4-2: "보상이 안 보인다" 대응.
 	_refresh_quest_line()
 
 	# Player._ready()가 Hud보다 먼저(트리 순서상) 초기 시그널을 이미 쏜 뒤일 수 있어
@@ -162,7 +163,7 @@ func _apply_theme_frames() -> void:
 	minimap_frame.add_theme_stylebox_override("panel", wood)
 	boss_frame.add_theme_stylebox_override("panel", wood)
 	debug_bg.add_theme_stylebox_override("panel", parchment)
-	for slot: Panel in [skill_slot_1, skill_slot_2, slot_up, slot_right, slot_down, slot_left]:
+	for slot: Panel in hotbar_slots:
 		slot.add_theme_stylebox_override("panel", cell)
 
 
@@ -295,6 +296,25 @@ func _on_item_picked_up(item_id: StringName, quantity: int) -> void:
 func _on_gold_changed(_new_amount: int, delta: int) -> void:
 	if delta > 0:
 		_push_log_line("+%d %s" % [delta, tr(&"ui.hud.gold_unit")])
+
+
+## M4-2(D-181~D-183): "퀘스트 완료해도 보상이 안 보인다" 대응 — 완료 시 받은 골드/
+## 경험치/아이템을 좌하단 획득 로그(기존 _push_log_line, 3초 페이드)에 그대로 나열한다.
+## 실제 지급(GameState.add_gold/Progression.grant_exp/GameState.pickup_item)은 이미
+## QuestSystem._grant_rewards()가 하고 있어(스모크로 실측 확인) 이 핸들러는 표시만 한다.
+func _on_quest_completed_rewards_toast(quest_id: StringName) -> void:
+	var rewards: Dictionary = Data.get_value("quests", "%s.rewards" % String(quest_id), {})
+	for row: Dictionary in QuestLogUiCalc.reward_rows(rewards):
+		match String(row.get("kind", "")):
+			"gold":
+				_push_log_line("+%d %s" % [int(row.get("amount", 0)), tr(&"ui.hud.gold_unit")])
+			"exp":
+				_push_log_line(tr(&"ui.quest_log.reward_exp_fmt") % int(row.get("amount", 0)))
+			"item":
+				var item_id: String = String(row.get("item_id", ""))
+				var item_def: Dictionary = Data.get_value("items", item_id, {})
+				_push_log_line("%s x%d" % [tr(StringName(String(item_def.get("name_key", item_id)))), int(row.get("qty", 1))],
+					null, ItemIcon.resolve(item_id))
 
 
 ## M2-8(QuestNpc). "npc.<id>.greeting" key가 없으면(신규 NPC 배치 전 등) key 문자열

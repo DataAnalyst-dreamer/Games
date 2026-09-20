@@ -57,7 +57,16 @@ var level_stat_bonus: Dictionary = {"max_hp": 0, "attack": 0.0}
 ## 원칙, 위 주석과 동일). stats 키는 str/dex/int/vit/luk 5개 고정(stats.json.allocation).
 var stats: Dictionary = {"str": 0, "dex": 0, "int": 0, "vit": 0, "luk": 0}
 var learned_skills: Array[String] = []
-var skill_slots: Array[String] = ["", ""]
+## M4-1(D-175~D-177) 9칸으로 확장(옛 2칸 세이브는 Progression._on_load_completed()가
+## hotbar로 승격 마이그레이션한다 — 이 파일은 필드 선언·직렬화만 담당).
+var skill_slots: Array[String] = ["", "", "", "", "", "", "", "", ""]
+## 핫바(스킬·아이템 혼용) 9칸. 각 {"kind":"skill"|"item"|"", "id":String}. 새 게임 기본값은
+## 이미 9칸으로 채워 두어(로드 이벤트 없이도) HUD/입력이 항상 안전하게 인덱싱할 수 있다.
+var hotbar: Array = [
+	{"kind": "", "id": ""}, {"kind": "", "id": ""}, {"kind": "", "id": ""},
+	{"kind": "", "id": ""}, {"kind": "", "id": ""}, {"kind": "", "id": ""},
+	{"kind": "", "id": ""}, {"kind": "", "id": ""}, {"kind": "", "id": ""},
+]
 
 ## M2-7(F5-2 게시판 일일 의뢰) 신설. "게임 내 날짜" 정수 카운터 — QuestSystem이 일일
 ## 의뢰 재추첨 시드로 쓴다. 새 게임은 0에서 시작. D-111(확정, M2-7 후속): 게임플레이
@@ -301,6 +310,17 @@ func use_item(index: int) -> bool:
 		slot["quantity"] = remaining
 	Events.inventory_changed.emit()
 	return true
+
+
+## M4-1(핫바) 신설. 핫바 아이템 슬롯은 uid가 아니라 item_id로 배정되므로(D-177: 0개
+## 도달해도 슬롯 유지, 재획득 시 다른 슬롯/uid로 다시 쌓여도 계속 동작) 매번 첫 매칭
+## 슬롯을 다시 찾는다. 재고가 없으면(find_first_by_item_id==-1) 아무 일도 하지 않고
+## false — 핫바 슬롯 자체는 그대로 남는다(회색 표시만 UI 몫).
+func use_item_by_id(item_id: String) -> bool:
+	var index: int = inventory.find_first_by_item_id(item_id)
+	if index == -1:
+		return false
+	return use_item(index)
 
 
 func unequip_item(slot_name: String) -> bool:
@@ -548,6 +568,7 @@ func to_dict() -> Dictionary:
 		"stats": stats.duplicate(),
 		"learned_skills": learned_skills.duplicate(),
 		"skill_slots": skill_slots.duplicate(),
+		"hotbar": hotbar.duplicate(true),
 	}
 
 
@@ -575,11 +596,14 @@ func from_dict(data: Dictionary) -> void:
 	for id_v: Variant in (data.get("learned_skills", []) as Array):
 		loaded_skills.append(String(id_v))
 	learned_skills = loaded_skills
-	var loaded_slots: Array[String] = ["", ""]
-	var slots_data: Array = data.get("skill_slots", ["", ""])
+	var loaded_slots: Array[String] = ["", "", "", "", "", "", "", "", ""]
+	var slots_data: Array = data.get("skill_slots", [])
 	for i in range(mini(loaded_slots.size(), slots_data.size())):
 		loaded_slots[i] = String(slots_data[i])
 	skill_slots = loaded_slots
+	# hotbar 키가 없는 옛 세이브는 의도적으로 빈 배열로 남긴다(9칸 기본값과 구분해
+	# Progression._on_load_completed()가 마이그레이션 필요 여부를 판단하는 신호로 쓴다).
+	hotbar = (data.get("hotbar", []) as Array).duplicate(true)
 	_apply_equipment_stats_to_player()
 	_restore_waystones()
 

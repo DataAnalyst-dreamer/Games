@@ -1,25 +1,33 @@
-## HUD 하단 스킬 슬롯 2개(Q/R) 아이콘·쿨타임 오버레이(M3-4, F1-3). `hud_progress.gd`와
-## 동일 분리 원칙 — hud.gd가 이미 466/500줄(D-145 상한)이라 hud.gd를 전혀 건드리지 않고
-## Hud.tscn의 형제 노드로 새 스크립트를 붙였다(NodePath는 하드코딩, hud_progress.gd
-## 클래스 주석의 "여러 겹 인스턴싱 시 @export NodePath가 깨진 사례" 이유 그대로 재사용).
-##
-## `Events.skills_changed/skill_cast/skill_ready`는 stage/m3-3(로직) 병합 전이라 UI가
-## 먼저 선언했다(exp_changed/level_up 선례, D-165 방침과 동일 — 병합 후 디렉터가 정리).
-## 아이콘은 skills.json 전부 icon:null이라(D-161) 계열 첫 글자(B/G/T)로 대체한다.
+## HUD 하단 핫바 9칸(스킬·아이템 혼용, M4-1 D-175~D-177) 아이콘·쿨타임·수량 오버레이.
+## 옛 스킬 전용 2칸(Q/R)을 GameState.hotbar(9칸, {"kind":"skill"|"item"|"", "id":String})로
+## 교체했다 — hud_progress.gd와 동일 분리 원칙(hud.gd 500줄 상한, D-145)으로 Hud.tscn의
+## 형제 노드에 그대로 붙인다. 아이콘은 skills.json/items.json 전부 icon:null이라(D-161)
+## 계열/이름 첫 글자로 대체한다(pixel-artist TODO). D-177: 소비품 재고 0이어도 슬롯은
+## 유지하고 회색(modulate)으로만 표시한다.
 class_name HudSkillSlots
 extends Node
 
-const SLOT_PATHS := ["../BottomCenter/SkillSlot1", "../BottomCenter/SkillSlot2"]
+const SLOT_COUNT := 9
+const SLOT_PATHS := [
+	"../BottomCenter/HotbarSlot1", "../BottomCenter/HotbarSlot2", "../BottomCenter/HotbarSlot3",
+	"../BottomCenter/HotbarSlot4", "../BottomCenter/HotbarSlot5", "../BottomCenter/HotbarSlot6",
+	"../BottomCenter/HotbarSlot7", "../BottomCenter/HotbarSlot8", "../BottomCenter/HotbarSlot9",
+]
+const GREY_OUT := Color(0.5, 0.5, 0.5)
 
+var _panels: Array[Panel] = []
 var _icon_labels: Array[Label] = []
+var _qty_labels: Array[Label] = []
 var _overlays: Array[ColorRect] = []
-var _tweens: Array[Tween] = [null, null]
-var _slots: Array = ["", ""]
+var _tweens: Array[Tween] = []
+var _hotbar: Array = []
 
 
 func _ready() -> void:
 	for path in SLOT_PATHS:
 		var panel: Panel = get_node(path)
+		_panels.append(panel)
+
 		var icon := Label.new()
 		icon.name = "IconLabel"
 		icon.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -27,7 +35,7 @@ func _ready() -> void:
 		icon.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		panel.add_child(icon)
-		panel.move_child(icon, 0) # 키 힌트(Q/R) 라벨보다 뒤(아래)에 그려지게.
+		panel.move_child(icon, 0) # 키 힌트(1~9) 라벨보다 뒤(아래)에 그려지게.
 		_icon_labels.append(icon)
 
 		var overlay := ColorRect.new()
@@ -40,24 +48,58 @@ func _ready() -> void:
 		panel.move_child(overlay, 1)
 		_overlays.append(overlay)
 
-	var slots_variant: Variant = GameState.get("skill_slots")
-	_apply_slots(slots_variant if typeof(slots_variant) == TYPE_ARRAY and (slots_variant as Array).size() >= 2 else ["", ""])
+		var qty := Label.new()
+		qty.name = "QtyLabel"
+		qty.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+		qty.add_theme_font_size_override("font_size", 8)
+		qty.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(qty)
+		_qty_labels.append(qty)
 
-	Events.skills_changed.connect(_on_skills_changed)
+		_tweens.append(null)
+
+	_apply_hotbar(GameState.hotbar if GameState.hotbar.size() == SLOT_COUNT else [])
+
+	Events.hotbar_changed.connect(_apply_hotbar)
 	Events.skill_cast.connect(_on_skill_cast)
 	Events.skill_ready.connect(_on_skill_ready)
+	Events.inventory_changed.connect(_refresh_item_quantities)
 
 
-func _on_skills_changed(_learned: Array, slots: Array, _skill_points: int) -> void:
-	_apply_slots(slots)
+func _apply_hotbar(hotbar: Array) -> void:
+	_hotbar = hotbar
+	for i in SLOT_COUNT:
+		var entry: Dictionary = hotbar[i] if i < hotbar.size() else {}
+		match String(entry.get("kind", "")):
+			"skill":
+				var id: String = String(entry.get("id", ""))
+				var series: String = String(Data.get_value("skills", "%s.series" % id, ""))
+				_icon_labels[i].text = series.left(1).to_upper() if not series.is_empty() else ""
+				_qty_labels[i].text = ""
+				_panels[i].modulate = Color.WHITE
+			"item":
+				var id: String = String(entry.get("id", ""))
+				_icon_labels[i].text = id.left(1).to_upper() if id != "" else ""
+				_update_item_quantity(i, id)
+			_:
+				_icon_labels[i].text = ""
+				_qty_labels[i].text = ""
+				_panels[i].modulate = Color.WHITE
 
 
-func _apply_slots(slots: Array) -> void:
-	_slots = slots
-	for i in _icon_labels.size():
-		var skill_id: String = String(slots[i]) if i < slots.size() else ""
-		var series: String = String(Data.get_value("skills", "%s.series" % skill_id, ""))
-		_icon_labels[i].text = series.left(1).to_upper() if not series.is_empty() else ""
+## 소비품 사용/획득(Events.inventory_changed)마다 아이템 슬롯 수량만 다시 조회한다
+## (스킬 슬롯은 hotbar_changed로만 바뀌므로 여기서 건드릴 필요가 없다).
+func _refresh_item_quantities() -> void:
+	for i in SLOT_COUNT:
+		var entry: Dictionary = _hotbar[i] if i < _hotbar.size() else {}
+		if String(entry.get("kind", "")) == "item":
+			_update_item_quantity(i, String(entry.get("id", "")))
+
+
+func _update_item_quantity(i: int, item_id: String) -> void:
+	var qty: int = GameState.inventory.count_item(item_id)
+	_qty_labels[i].text = str(qty)
+	_panels[i].modulate = Color.WHITE if qty > 0 else GREY_OUT
 
 
 func _on_skill_cast(slot: int, _skill_id: StringName, cooldown_sec: float) -> void:

@@ -68,6 +68,11 @@ const FACING_AXIS_SWITCH_BIAS: float = 1.3
 ## 중간값 - game-designer 확인 필요(완료 보고 질문 목록 참고), `_balance_todo`.
 const FACING_AXIS_SWITCH_MIN_INTERVAL_SEC: float = 0.1
 
+# --- UI: 퀘스트 추적 화살표(M4-2, D-183) ---
+## 화면 가장자리 화살표 여백(px, 640x360 내부 해상도 기준). pixel-artist 정식 확인
+## 전 placeholder 승인값(D-183) — 아이콘 크기 확정 후 재조정 가능.
+const QUEST_ARROW_MARGIN_PX: float = 24.0
+
 ## 공격 상태 중 이동 입력 블렌딩 비율(D-124). 타격당 짧은 전진(lunge) 속도가 감쇠되는
 ## 동안 이동 입력이 있으면 완전한 정지 대신 `walk_speed * 이 비율`로 수렴시켜, lunge
 ## 종료 후 저속 이동으로 자연스럽게 이어지게 한다. 콤보 판정·히트박스 타이밍과는 무관.
@@ -94,6 +99,13 @@ const DEATH_RESPAWN_DELAY_SEC: float = 1.0
 ## 판정창 필드가 없어(docs/specs/skills-m3.md §2 "스킬 전용 히트스톱 값은 이번 범위 밖"과
 ## 동일한 이유) ATTACK_HIT_DURATION_SEC과 같은 값으로 임시 고정한다.
 const SKILL_HIT_DURATION_SEC: float = ATTACK_HIT_DURATION_SEC
+
+## 스킬 시전 선딜(anticipation) 시간(초, M4-3 "스킬 이펙트·시전 연출 개선" — 사용자
+## 피드백 "효과가 아직 어색하다"). docs/art/motion-design-reference.md 권장 선딜 범위
+## (80~200ms) 하단에 가깝게 잡은 제안값 — 6개 스킬 공용(SKILL_HIT_DURATION_SEC의 앞부분을
+## 이 값만큼 자세 고정에 쓰고, 나머지가 발동+후딜 구간이 된다). game-designer 확인 필요
+## (스킬별 차등 여지 있음, 결정 요청 목록 참고), `_balance_todo` 취급.
+const SKILL_ANTICIPATION_SEC: float = 0.1
 
 # --- 카메라 셰이크: 4단계 진폭·지속은 combat.json.camera_shake로 이관됨
 # (addendum §3-2, D-63 예정, _balance_todo — M1 게이트 실측 후 확정). 접근성 배율표만

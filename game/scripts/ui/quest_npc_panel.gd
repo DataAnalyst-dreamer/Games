@@ -72,6 +72,11 @@ func _refresh() -> void:
 	body_label.text = tr(StringName(definition.get("desc_key", "")))
 	confirm_button.disabled = state not in ["available", "complete_ready"]
 	confirm_button.text = tr(&"ui.quest_npc.accept" if state == "available" else (&"ui.quest_npc.complete" if state == "complete_ready" else &"ui.quest_npc.active"))
+	if state == "available":
+		# M4-2(D-181~183): "퀘스트를 수락하면 어떤 보상을 받는지 안 보인다" 대응.
+		var reward_line := _format_reward_summary(definition.get("rewards", {}))
+		if not reward_line.is_empty():
+			body_label.text += "\n\n" + tr(&"ui.quest_npc.reward_prefix") + " " + reward_line
 	if state == "active":
 		var index := QuestSystem.get_active_objective_index(quest_id)
 		var objectives: Array = definition.get("objectives", [])
@@ -79,6 +84,24 @@ func _refresh() -> void:
 			body_label.text += "\n\n" + tr(StringName(objectives[index].get("text_key", "")))
 	if confirm_button.disabled: close_button.grab_focus()
 	else: confirm_button.grab_focus()
+
+
+## QuestLogUiCalc.reward_rows()를 한 줄 요약으로 합친다("+10 골드, EXP +15"). 이
+## 패널은 공간이 좁아(376x214) 아이콘 없이 텍스트만 쓴다(icon 표시는 quest_log_tab.gd
+## 상세/hud.gd 완료 토스트 쪽에서 ItemIcon.resolve로 처리).
+func _format_reward_summary(rewards: Dictionary) -> String:
+	var parts := PackedStringArray()
+	for row: Dictionary in QuestLogUiCalc.reward_rows(rewards):
+		match String(row.get("kind", "")):
+			"gold":
+				parts.append("+%d %s" % [int(row.get("amount", 0)), tr(&"ui.hud.gold_unit")])
+			"exp":
+				parts.append(tr(&"ui.quest_log.reward_exp_fmt") % int(row.get("amount", 0)))
+			"item":
+				var item_id: String = String(row.get("item_id", ""))
+				var item_def: Dictionary = Data.get_value("items", item_id, {})
+				parts.append("%s x%d" % [tr(StringName(String(item_def.get("name_key", item_id)))), int(row.get("qty", 1))])
+	return ", ".join(parts)
 
 
 func _confirm() -> void:

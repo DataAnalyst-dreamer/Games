@@ -119,14 +119,14 @@ JSON을 **덮어쓰기 저장**하고(파일명은 세션 시작 시각 1개로 
 | `heavy_attack` | 마우스 우 | RT |
 | `roll` | Space | B |
 | `guard` | Shift | LT |
-| `skill_1` / `skill_2` | Q / R | LB / RB |
-| `quick_1~4` | 1~4 | 십자키 상/우/하/좌 |
+| `hotbar_1~9`(M4-1, D-175~D-177: 스킬·아이템 혼용 9칸) | 1~9 | 1~4만 십자키 상/우/하/좌, 5~9는 패드 미배정(D-176) |
 | `interact` | E | A |
 | `menu` | Tab | Back(Select) |
 | `quest_log` | J (퀘스트 로그 바로가기, D-153) | 미배정 — `menu` 진입 후 LB/RB로 quest 탭 이동 |
 | `pause` | Esc | Start |
 | `map` | M | 우스틱 클릭(R3) |
 | `mount_call` | H | 왼스틱 클릭(L3) |
+| `ui_tab_prev` / `ui_tab_next`(메뉴 탭 이동) | `[` / `]`(M4-1: 옛 Q가 스킬 등록 단축키(skill_1)와 겹쳐 등록이 막히던 문제로 D-175~D-177 교체) | LB / RB |
 
 ## 플레이어 상태머신
 
@@ -211,7 +211,7 @@ JSON을 **덮어쓰기 저장**하고(파일명은 세션 시작 시각 1개로 
 `scenes/ui/Hud.tscn` + `scripts/ui/hud.gd`가 `DebugHud`를 대체해 Main.tscn에 배치된다. 좌상단
 HP·스태미나 바(HP 25% 이하 점멸+화면 비네트, 색약 모드는 대각선 해치 패턴)와 버프 아이콘 빈 컨테이너,
 상단 중앙 추적 퀘스트 한 줄(현재 빈 문자열), 우상단 미니맵 토글(`map` 액션, M키/패드 select),
-하단 스킬 슬롯 2개+퀵슬롯 4개(십자키 배치 — 상=1/우=2/하=3/좌=4, D-47), 좌하단 획득 로그(`item_picked_up`/
+하단 핫바 9칸(M4-1, D-175~D-177: 스킬·아이템 혼용, `hotbar_1~9` 키 — 옛 스킬 슬롯 2개+퀵슬롯 4개 UI를 대체), 좌하단 획득 로그(`item_picked_up`/
 `gold_changed` 이벤트, 3초 페이드, 최대 4줄), 보스 HP바(평시 숨김, `Events.boss_started`/`boss_defeated`
 로 표시/숨김 — 지시문의 `boss_encounter_started`는 존재하지 않아 기존 시그널을 재사용, `docs/ui/hud.md`
 참고)를 담당한다. `F3`로 여닫는 디버그 패널이 옛 DebugHud의 HP/스태미나/콤보/상태/사망수 텍스트를
