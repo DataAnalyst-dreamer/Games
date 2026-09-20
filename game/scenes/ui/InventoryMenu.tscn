@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/inventory_menu.gd" id="1_inv_script"]
 [ext_resource type="Theme" path="res://ui/theme.tres" id="2_theme"]
+[ext_resource type="Script" path="res://scripts/ui/quest_log_tab.gd" id="3_quest_log_tab_script"]
 
 [node name="InventoryMenu" type="CanvasLayer"]
 layer = 10
@@ -173,6 +174,14 @@ mouse_filter = 2
 [node name="AffixNoteLabel" type="Label" parent="Root/ContentArea/InventoryTab/RightPanel/CompareTooltip/TooltipMargin/TooltipVBox"]
 layout_mode = 2
 mouse_filter = 2
+
+[node name="QuestLogTab" type="Control" parent="Root/ContentArea"]
+layout_mode = 0
+offset_right = 632.0
+offset_bottom = 321.0
+mouse_filter = 2
+visible = false
+script = ExtResource("3_quest_log_tab_script")
 
 [node name="PlaceholderTab" type="Control" parent="Root/ContentArea"]
 layout_mode = 0

@@ -238,3 +238,15 @@ blueprint_iron_plate_name,강철 갑옷 도면
 blueprint_iron_plate_desc,철광석과 늪 이끼로 강철 갑옷을 만드는 도면
 blueprint_iron_greaves_name,사슬 장화 도면
 blueprint_iron_greaves_desc,철광석과 슬라임 젤리로 사슬 장화를 만드는 도면
+ui.hud.level_up_banner,레벨 업! Lv.%d
+ui.hud.level_up_stat_fmt,%s +%s
+ui.quest_log.tab.main,메인
+ui.quest_log.tab.side,사이드
+ui.quest_log.tab.daily,의뢰
+ui.quest_log.state.active,진행 중
+ui.quest_log.state.complete_ready,완료 보고 가능
+ui.quest_log.state.completed,완료
+ui.quest_log.empty,표시할 퀘스트가 없습니다
+ui.quest_log.tracking_mark,[추적]
+ui.quest_log.tracking_on,현재 추적 중인 퀘스트입니다
+ui.quest_log.track_hint,확인 버튼으로 이 퀘스트를 추적합니다

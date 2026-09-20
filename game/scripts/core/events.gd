@@ -126,6 +126,10 @@ signal quest_objective_updated(quest_id: StringName, objective_id: StringName, c
 ## 사이드/일일 의뢰 전부 포함 — 메인 퀘스트 완료는 main_quest_stage_completed(아래
 ## 월드 섹션, M2-6 기존 신호)도 함께 emit해 SaveManager 오토세이브를 건다.
 signal quest_completed(quest_id: StringName)
+## QuestSystem.set_tracked()로 HUD 추적 대상이 "목표 진행 없이" 수동으로 바뀌었을 때만
+## emit(D-156, 퀘스트 로그의 추적 토글). 진행도 변화 자체는 quest_objective_updated가
+## 이미 커버한다.
+signal quest_tracked_changed(quest_id: StringName)
 
 # --- 월드 ---
 signal chunk_loaded(chunk_coord: Vector2i)

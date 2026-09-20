@@ -123,6 +123,7 @@ JSON을 **덮어쓰기 저장**하고(파일명은 세션 시작 시각 1개로 
 | `quick_1~4` | 1~4 | 십자키 상/우/하/좌 |
 | `interact` | E | A |
 | `menu` | Tab | Back(Select) |
+| `quest_log` | J (퀘스트 로그 바로가기, D-153) | 미배정 — `menu` 진입 후 LB/RB로 quest 탭 이동 |
 | `pause` | Esc | Start |
 | `map` | M | 우스틱 클릭(R3) |
 | `mount_call` | H | 왼스틱 클릭(L3) |
