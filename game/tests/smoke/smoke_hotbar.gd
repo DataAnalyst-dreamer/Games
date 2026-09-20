@@ -29,7 +29,7 @@ func _ready() -> void:
 	_dummy.global_position = _player.global_position + Vector2(12, 0)
 
 	await _check_skill_slot()
-	_check_item_slot()
+	await _check_item_slot()
 
 	print("=== SMOKE HOTBAR 종료: %s ===" % ("FAIL(%d)" % _fail_count if _fail_count > 0 else "ALL PASS"))
 	get_tree().quit(1 if _fail_count > 0 else 0)
@@ -52,6 +52,16 @@ func _press_action(action: String) -> void:
 
 func _wait_frames(n: int) -> void:
 	for i in range(n):
+		await get_tree().physics_frame
+
+
+## 핫바 입력은 Idle/Move 상태에서만 소비된다(state.gd try_use_hotbar). 직전 스킬 시전의
+## 후딜이나 살아있는 몬스터의 접촉 공격(Hurt) 중에 누르면 조용히 무시돼 간헐 실패가 났으므로
+## Idle로 돌아올 때까지(상한 120프레임) 기다린 뒤 누른다 — 로직이 아니라 테스트 타이밍 문제였다.
+func _wait_idle(max_frames: int = 120) -> void:
+	for i in range(max_frames):
+		if _player.state_machine.current_state != null and _player.state_machine.current_state.name == &"Idle":
+			return
 		await get_tree().physics_frame
 
 
@@ -88,14 +98,17 @@ func _check_item_slot() -> void:
 		"소비품 획득(2개) + 핫바 슬롯6(hotbar_7) 배정")
 
 	_player.resources.hp = 1 # heal_hp 효과가 실제로 적용됐는지 눈에 띄게 미리 깎아 둔다.
+	await _wait_idle()
 	_press_action("hotbar_7")
 	_check(GameState.inventory.count_item(ITEM_ID) == 1, "1회 사용 후 재고 2 -> 1")
 	_check(_player.resources.hp > 1, "heal_hp 효과 실제 적용(HP 회복, actual=%d)" % _player.resources.hp)
 
+	await _wait_idle()
 	_press_action("hotbar_7")
 	_check(GameState.inventory.count_item(ITEM_ID) == 0, "2회 사용 후 재고 1 -> 0")
 	_check(GameState.hotbar[6] == {"kind": "item", "id": ITEM_ID},
 		"D-177: 재고 0이어도 핫바 슬롯 배정은 그대로 유지된다")
 
+	await _wait_idle()
 	_press_action("hotbar_7") # 재고 없음 -> 조용히 무시(크래시 없이 통과해야 함).
 	_check(GameState.inventory.count_item(ITEM_ID) == 0, "재고 0에서 다시 눌러도 에러 없이 0 유지")
