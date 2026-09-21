@@ -117,7 +117,14 @@ func _apply_layout(walls: Node2D, props: Node2D, elevated: TileMapLayer) -> void
 	for path: Variant in layout.get("paths", []):
 		_fill_rect(ground, "tile_dirt", (path as Dictionary).get("rect", []))
 	for pond: Variant in layout.get("water", []):
-		_fill_rect(ground, "tile_water", (pond as Dictionary).get("rect", []))
+		var pond_dict: Dictionary = pond as Dictionary
+		# D-236(M6-3): "asset" 생략 시 기존과 동일하게 tile_water — 같은 물 계열인
+		# tile_stream(개울)도 이 배열에 항목만 더해 재사용한다(신규 최상위 키 불필요).
+		var water_asset: String = String(pond_dict.get("asset", "tile_water"))
+		var water_rect: Array = pond_dict.get("rect", [])
+		_fill_rect(ground, water_asset, water_rect)
+		if walls != null:
+			_add_ground_solid_collision(walls, water_asset, water_rect)
 	for plateau: Variant in layout.get("elevated", []):
 		_fill_elevated(elevated, (plateau as Dictionary).get("rect", []))
 	if walls != null:
@@ -154,6 +161,25 @@ func _fill_rect(layer: TileMapLayer, asset: String, rect: Array) -> void:
 	for dy in range(size.y):
 		for dx in range(size.x):
 			layer.set_cell(origin + Vector2i(dx, dy), source_id, Vector2i.ZERO)
+
+
+## D-236(M6-3): 물/개울(kind=ground_solid) 은 지금까지 시각효과일 뿐 실제 충돌이
+## 없었다 — iso_atlas.json 의 collision_band 는 절벽·소품(_place_cliff/_place_prop)
+## 에서만 읽혔지 지면 채우기(_fill_rect)에서는 무시됐다. 절벽과 같은 마름모 콜리전을
+## 칸마다 하나씩 걸어 "통행 불가"를 실제로 만든다. band<=0 인 지면 애셋(잔디·흙길)은
+## 스킵된다.
+func _add_ground_solid_collision(parent: Node, asset: String, rect: Array) -> void:
+	if rect.size() != 4:
+		return
+	var band: float = float(_assets.get(asset, {}).get("collision_band", 0.0))
+	if band <= 0.0:
+		return
+	var origin := Vector2i(int(rect[0]), int(rect[1]))
+	var size := Vector2i(int(rect[2]), int(rect[3]))
+	for dy in range(size.y):
+		for dx in range(size.x):
+			var cell := origin + Vector2i(dx, dy)
+			_add_diamond_body(parent, IsoMath.cell_to_screen(cell), band)
 
 
 ## 절벽 한 줄. 등각에서 벽은 격자 행이고, 높이는 **고도 블록 스프라이트**가 표현한다
