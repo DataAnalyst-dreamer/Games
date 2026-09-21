@@ -153,7 +153,7 @@
     ],
     "one_shot": false,
     "region_id": "bridgeport",
-    "sprite": "res://assets/third_party/ninja_adventure/Actor/Character/Inspector/SpriteSheet.png",
+    "sprite": "npc_teo",
     "_comment": "유물 조사단 안내역 - MQ01(브릿지포트 부두, 첫 인상이 가장 중요한 튜토리얼) 위치를 우선해 부두 근처에 배치. MQ06/MQ07에서도 동일 위치의 teo에게 다시 말을 걸어야 해(장면마다 재배치하지 않는 단일 정적 NPC 프로토타입 한계) 그 두 시점에는 약간의 지리적 비약이 있다 - hartland.md 10절 결정 필요 항목(D-115) 참고."
   },
   "meru": {
@@ -166,7 +166,7 @@
     ],
     "one_shot": false,
     "region_id": "heartland",
-    "sprite": "res://assets/third_party/ninja_adventure/Actor/Character/OldWoman/SpriteSheet.png"
+    "sprite": "npc_meru"
   },
   "pinto": {
     "id": "pinto",
@@ -179,7 +179,7 @@
     ],
     "one_shot": false,
     "region_id": "heartland",
-    "sprite": "res://assets/third_party/ninja_adventure/Actor/Character/Boy/SpriteSheet.png"
+    "sprite": "npc_pinto"
   },
   "rozel": {
     "id": "rozel",
@@ -191,7 +191,7 @@
     ],
     "one_shot": false,
     "region_id": "heartland",
-    "sprite": "res://assets/third_party/ninja_adventure/Actor/Character/Villager2/SpriteSheet.png"
+    "sprite": "npc_rozel"
   },
   "dami": {
     "id": "dami",
@@ -203,6 +203,6 @@
     ],
     "one_shot": false,
     "region_id": "heartland",
-    "sprite": "res://assets/third_party/ninja_adventure/Actor/Character/Child/SpriteSheet.png"
+    "sprite": "npc_dami"
   }
 }

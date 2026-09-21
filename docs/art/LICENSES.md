@@ -41,6 +41,23 @@ placeholder 시트다. 위 타일 생성기와 같은 원칙이다 — 외부 �
 - 성격: **정식 원화 전 자리표시자**. PixelLab 파이프라인의 정식 핀 8방향 시트가 나오면 같은 경로에 PNG만
   덮어써 교체한다(행 순서·프레임 열 배치가 같으므로 JSON·코드 변경 없음). 최종 게임 아트 승인이 아니다.
 
+### 프로젝트 신규 생성물: 등각 NPC 대역 placeholder 시트 (2026-09-21, D-228~D-234 NPC 확장)
+
+`tools/art/gen_iso_npcs.py`가 위 액터 생성기와 같은 원칙(Pillow 기초 도형만, 외부 이미지·AI 생성물·립
+스프라이트 미사용, art-bible.md §3 팔레트 직접 파싱)으로 만든 **퀘스트 NPC 6인**(teo·blacksmith·meru·
+pinto·rozel·dami) placeholder 시트다. CC0 팩과 무관한 독립 저작물이며 저작권은 프로젝트 소유, 크레딧
+불필요다.
+
+- 산출물: `game/assets/iso/actors/npc_*.png` (6장, 4방향 s/w/n/e) + 같은 `iso_actor_atlas.json`에
+  actors 항목만 병합(기존 핀·몬스터 8종은 그대로 유지)
+- 규격: 위 액터 생성기와 동일 계약(셀 96×128, 발 기준점 (48,112), 18열) — 단 NPC는 전투하지 않으므로
+  attack 6열은 실제 동작 없이 idle 프레임을 반복해 채운다
+- 재생성: `python3 tools/art/gen_iso_npcs.py` (난수 없음, 결정적, 기존 atlas.json을 읽어 병합)
+- **교체 대상**: `QuestNpc.tscn`(teo/meru/pinto/rozel/dami)과 `BlacksmithNpc.tscn`이 쓰던
+  `game/assets/third_party/ninja_adventure/` 16px 탑다운 캐릭터 시트를 대체한다. 해당 CC0 팩 자체는
+  그대로 두고(다른 용도가 남아 있을 수 있다), NPC 시각만 자체 생성물로 바뀐 것이다.
+- 성격: **정식 원화 전 자리표시자**. 같은 경로에 PNG만 덮어써 교체한다. 최종 게임 아트 승인이 아니다.
+
 ### 외부 팩
 
 정면 실행 시험(2026-09-12): `prototypes/fin-front-test/assets/`는 선택된 신규 생성 정면 B를 사용자 승인된 코드 방식으로 부위 분리·후처리한 시험 에셋이다. `tools/build_fin_front_test.py`, 에셋 `manifest.json`에 재현·출처 기록. 기존 게임이나 외부 팩의 라이선스를 변경하지 않는다.

@@ -133,7 +133,9 @@ func test_spawner_instantiates_all_entries_with_correct_kind_and_position() -> v
 	assert_not_null(teo, "teo NPC가 스폰되어야 한다")
 	assert_true(teo is QuestNpc)
 	assert_eq(String(teo.npc_id), "teo")
-	assert_not_null(teo.sprite_texture, "teo에게 스프라이트 텍스처가 배정되어야 한다")
+	# iso-3 NPC 확장(D-228~D-234): sprite 키는 텍스처 경로가 아니라 iso_actor_atlas.json
+	# 액터 id다 - QuestNpc._ready()가 ActorSheet.apply()로 직접 조립한다.
+	assert_eq(String(teo.actor_id), "npc_teo", "teo에게 액터 id가 배정되어야 한다")
 
 
 func test_spawner_spawn_all_is_idempotent() -> void:

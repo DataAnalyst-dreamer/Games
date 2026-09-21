@@ -114,6 +114,60 @@
         40
       ],
       "shadow_scale": 1.7
+    },
+    "npc_teo": {
+      "path": "game/assets/iso/actors/npc_teo.png",
+      "directions": 4,
+      "body_px": [
+        64,
+        96
+      ],
+      "shadow_scale": 1.8
+    },
+    "npc_blacksmith": {
+      "path": "game/assets/iso/actors/npc_blacksmith.png",
+      "directions": 4,
+      "body_px": [
+        64,
+        96
+      ],
+      "shadow_scale": 1.8
+    },
+    "npc_meru": {
+      "path": "game/assets/iso/actors/npc_meru.png",
+      "directions": 4,
+      "body_px": [
+        64,
+        96
+      ],
+      "shadow_scale": 1.8
+    },
+    "npc_pinto": {
+      "path": "game/assets/iso/actors/npc_pinto.png",
+      "directions": 4,
+      "body_px": [
+        64,
+        96
+      ],
+      "shadow_scale": 1.8
+    },
+    "npc_rozel": {
+      "path": "game/assets/iso/actors/npc_rozel.png",
+      "directions": 4,
+      "body_px": [
+        64,
+        96
+      ],
+      "shadow_scale": 1.8
+    },
+    "npc_dami": {
+      "path": "game/assets/iso/actors/npc_dami.png",
+      "directions": 4,
+      "body_px": [
+        64,
+        96
+      ],
+      "shadow_scale": 1.8
     }
   }
 }
