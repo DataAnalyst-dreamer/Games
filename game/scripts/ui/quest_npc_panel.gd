@@ -1,10 +1,11 @@
-## Narrow existing Act1 Teo main-quest adapter. Backend owns eligibility/rewards.
+## NPC별 수락/완료 UI(D-258). 후보 선정은 QuestNpcPanelCalc(giver 기준 데이터 테이블
+## 스캔, D-244 우선순위)에 위임한다 — 특정 quest_id 하드코딩 목록 없이 game/data/quests/
+## 전체가 대상이라 신규 퀘스트 추가 시 이 파일을 고칠 필요가 없다. Backend owns
+## eligibility/rewards.
 class_name QuestNpcPanel
 extends Control
 
 signal close_requested
-const SUPPORTED := ["quest_main_a1_01_arrival", "quest_main_a1_02_firstlook",
-	"quest_main_a1_06_echocave", "quest_main_a1_07_fiveroads"]
 var quest_id := ""
 var npc_id := ""
 var title_label: Label
@@ -52,13 +53,11 @@ func _ready() -> void:
 
 func open_for_npc(id: StringName) -> bool:
 	npc_id = String(id)
-	quest_id = ""
-	for candidate in SUPPORTED:
-		var definition: Dictionary = Data.get_value("quests", candidate, {})
-		if definition.get("giver", "") != npc_id: continue
-		if QuestSystem.get_state(candidate) in ["available", "active", "complete_ready"]:
-			quest_id = candidate
-			break
+	var quest_defs: Dictionary = Data.table("quests")
+	var states: Dictionary = {}
+	for candidate: String in quest_defs.keys():
+		states[candidate] = QuestSystem.get_state(candidate)
+	quest_id = QuestNpcPanelCalc.candidate_quest_id(npc_id, quest_defs, states)
 	if quest_id.is_empty(): return false
 	visible = true
 	_refresh()
