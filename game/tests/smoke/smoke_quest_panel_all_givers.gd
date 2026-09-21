@@ -137,9 +137,9 @@ func _run_montsil_objectives() -> void:
 	await _choose_response(0) # "그냥 놓아준다" = release
 
 
-## 선택지 대사에서 index번째 응답을 고르고, 이어지는 반응 줄까지 정상 확인으로 넘긴다.
-## 여기서는 skip_all()을 쓰면 안 된다 — 전체 스킵은 DMConstants.ID_END로 점프하므로
-## 반응 줄 뒤의 `do resolve_branch_outcome(...)` 변이가 실행되지 않는다(아래 TODO).
+## 선택지 대사에서 index번째 응답을 고르고, 이어지는 반응 줄은 스킵으로 넘긴다.
+## D-272로 스킵이 fast-forward라 반응 줄 뒤의 `do resolve_branch_outcome(...)` 변이는
+## 그대로 실행된다 — 그게 실행되지 않으면 아래 complete_ready 단언이 바로 깨진다.
 func _choose_response(index: int) -> void:
 	var balloon: DialogueBalloon = _ui.npc_dialogue_controller.balloon
 	for i in range(120):
@@ -148,9 +148,11 @@ func _choose_response(index: int) -> void:
 		await get_tree().process_frame
 	balloon.response_chosen.emit(balloon.responses_menu.responses[index])
 	for i in range(120):
-		if balloon.is_typing(): balloon.skip_typing()
+		if not balloon.responses_menu.visible: break
+		await get_tree().process_frame
+	_ui.npc_dialogue_controller.skip_all() # 반응 줄 스킵(= ui_cancel)
+	for i in range(120):
 		if not _ui.npc_dialogue_controller.is_dialogue_open(): break
-		balloon.advanced.emit(false) # 반응 줄 확인 -> do절 실행 -> END
 		await get_tree().process_frame
 
 
