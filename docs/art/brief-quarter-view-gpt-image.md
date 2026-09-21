@@ -1,13 +1,15 @@
-# 쿼터뷰 애셋 — GPT 이미지 생성 프롬프트 브리프 (2026-09-20)
+# 등각(아이소메트릭) 애셋 — GPT 이미지 생성 프롬프트 브리프 (2026-09-21 개정)
 
-본편 쿼터뷰 이관(D-198)에 필요한 애셋을 ChatGPT 이미지 생성(GPT Image)으로 만들기 위한 프롬프트 모음.
+본편 **등각(2:1 다이메트릭)** 이관(D-219)에 필요한 애셋을 ChatGPT 이미지 생성(GPT Image)으로 만들기 위한 프롬프트 모음.
+
+> **2026-09-21 개정(D-219~D-226):** 비스듬 고정 2D(D-199)는 폐기됐다. 목표는 라그나로크·디아블로 계열 **진짜 등각**이다. 스타일 블록·크기 표·타일 프롬프트를 전부 등각 기준으로 바꿨다. 규격 정본은 `game/assets/iso/iso_atlas.json` 이고, `tools/art/gen_iso_tiles.py` 가 같은 이름·같은 크기로 기초 도형 placeholder 를 이미 깔아 뒀다 — 정식 애셋은 **같은 경로에 PNG 만 덮어쓰면** 코드 변경 없이 교체된다.
 규격 근거: `docs/art/art-bible.md`(32×32 타일, 팔레트 32색, 외곽선·명암 규칙), `docs/art/fin-64-production-spec.md`(핀 64×96, 캔버스 96×128, 발 기준점 (48,112)),
-`docs/specs/quarter-view-migration-v1.md`(D-199~D-204: 비스듬 고정 2D, 세로 감쇠 없음, 4방향, 32px 타일).
+`docs/specs/isometric-migration-v1.md`(D-219~D-226: 2:1 다이메트릭, 64×32 마름모 격자, 8방향, 고도 레이어).
 파이프라인 규칙: `docs/art/ai-sprite-pipeline.md`, 기록 규칙: D-138.
 
 ## 0. 먼저 알아둘 것
 
-- **"쿼터뷰"의 정체는 좌표계가 아니라 그림이다.** 지면은 위에서 내려다본 모습, 벽·나무줄기·건물 정면 같은 수직면은 남쪽(화면 아래) 면이 보이는 **비스듬한 3/4 시점**으로 그린다. 원근 수렴 없음(직교). 빛은 좌상단.
+- **등각의 정체는 "45도 돌아간 격자"다.** 지면 한 칸은 화면에서 **64×32 마름모**이고, 모든 수직 물체는 **남서면과 남동면 두 면을 같은 넓이로** 보여준다. 정면 한 면만 그리면(비스듬 2D) 탑뷰로 읽힌다 — 실제로 그렇게 만들었다가 사용자가 "이건 쿼터뷰라기보다 탑뷰 아니야?"라고 지적해 폐기했다. 원근 수렴 없음(직교). 빛은 좌상단이라 남서면이 밝고 남동면이 어둡다.
 - **GPT 이미지는 정확한 픽셀 격자를 못 지킨다.** 그래서 큰 캔버스(1024×1024 또는 1536×1024)에 "pixel art 느낌"으로 생성한 뒤, 우리가 **최근접 축소 + 팔레트 양자화**로 규격에 맞춘다(§4). 프롬프트에 "각 도트를 8×8 화면 픽셀로" 같은 지시를 넣어도 대략만 맞는다 — 기대하지 말 것.
 - **한 프롬프트에 한 애셋(또는 한 세트)만.** 여러 종류를 한 장에 넣으면 크기·시점이 흔들린다.
 - **투명 배경**: 이미지 생성 옵션에서 배경 투명(PNG)을 켠다. 안 되면 프롬프트의 `solid magenta background (#FF00FF)`를 쓰고 후처리에서 뺀다(`--bg-color ff00ff`).
@@ -17,49 +19,55 @@
 ## 1. 공통 스타일 블록 — 모든 프롬프트 맨 앞에 그대로 붙인다
 
 ```
-STYLE: 16-bit style pixel art for a cozy medieval fantasy island RPG. 3/4 top-down oblique view (orthographic, no perspective convergence): the ground is seen from above, and the south-facing vertical surfaces of objects (walls, tree trunks, house fronts) are visible. Light comes from the top-left. Crisp hard-edged pixels, NO anti-aliasing, NO blur, NO gradients, NO glow. Flat shading with exactly 3 tones per surface (base, one shadow, one highlight). Limited warm palette, roughly 32 colors: ink outline #141b1b (never pure black), grass #74a334 / #adbc3a / #5f7160, dirt path #d2b37d / #965340, wood #a3754e / #bd7959 / #c69469 / #61372e, roof orange #e66a3a / #ffad5d / #d78b4a, stone #b3957f / #8d977f / #8e7c73, water #79b8ce / #71ddee / #548789, straw #eecf9b, accent red #e0394c. Characters and props have a 1px dark outline; ground tiles have NO outline. Cute but sturdy proportions, warm and hand-made feel. No text, no watermark, no signature, no UI. Transparent background.
+STYLE: 16-bit style pixel art for a cozy medieval fantasy island RPG. TRUE ISOMETRIC view: 2:1 dimetric projection on a 45-degree diamond grid, exactly like classic isometric RPGs. One ground tile is a 64x32 diamond. Every upright object is a box rotated 45 degrees so that TWO faces are visible with EQUAL width - the south-west face and the south-east face - plus its top surface as a diamond. Orthographic, NO perspective convergence, NO vanishing point. Light comes from the top-left, so the south-west face is lighter and the south-east face is darker. Crisp hard-edged pixels, NO anti-aliasing, NO blur, NO gradients, NO glow. Flat shading with exactly 3 tones per surface (base, one shadow, one highlight). Limited warm palette, roughly 32 colors: ink outline #141b1b (never pure black), grass #74a334 / #adbc3a / #5f7160, dirt path #d2b37d / #965340, wood #a3754e / #bd7959 / #c69469 / #61372e, roof orange #e66a3a / #ffad5d / #d78b4a, stone #b3957f / #8d977f / #8e7c73, water #79b8ce / #71ddee / #548789, straw #eecf9b, accent red #e0394c. Objects have a 1px dark outline; ground tiles have NO outline. Cute but sturdy proportions, warm and hand-made feel. No text, no watermark, no signature, no UI. Transparent background.
 ```
 
 캐릭터·몬스터용 추가 블록(스타일 블록 뒤에 붙임):
 
 ```
-CHARACTER RULES: 2.5-head-tall chibi proportions, big readable silhouette, small feet planted on the ground, feet at the exact bottom-center of the figure. Front view faces the camera (south). Weapon and shield may extend outside the body box. One figure only, centered, filling about 60% of the canvas height.
+CHARACTER RULES: 2.5-head-tall chibi proportions, big readable silhouette, small feet planted on the ground, feet at the exact bottom-center of the figure. Poses are for an ISOMETRIC 8-direction set (S, SW, W, NW, N, NE, E, SE) - the "south" pose faces the bottom of the screen, the "south-east" pose faces down-right along the diamond grid. Weapon and shield may extend outside the body box. One figure only, centered, filling about 60% of the canvas height.
 ```
 
 타일용 추가 블록:
 
 ```
-TILE RULES: Seamless, tileable, no outline, no vignette, no lighting hotspot, uniform brightness across the whole tile so copies can repeat without visible seams. Subtle texture only.
+TILE RULES: Draw ONE single 2:1 diamond (twice as wide as tall) centred on a solid magenta (#FF00FF) background, with nothing outside the diamond. Seamless and tileable: NO outline on the diamond edge, no vignette, no lighting hotspot, uniform brightness across the whole tile so copies repeat without visible seams or a visible grid. Subtle texture only - a few grass tufts, pebbles or flowers well inside the diamond, never touching its edge.
 ```
 
 ## 2. 애셋 목록과 우선순위
 
-> **파일명 열은 코드와의 계약이다 (D-207).** 엔진은 `game/assets/quarter/`의 이 이름들과
-> `quarter_atlas.json`(발 기준점·접지 띠·충돌 여부)만 알고 있다. 단계 (b2)의
-> `tools/art/gen_quarter_tiles.py`가 **같은 이름·같은 크기**로 기초 도형 placeholder를 먼저
-> 깔아두므로, 여기서 생성한 정식 애셋은 **같은 경로에 덮어쓰기만 하면** 코드 변경 없이 교체된다.
-> 크기가 다르면 발 기준점이 어긋나 Y-sort 가림이 깨진다 — 논리 크기를 먼저 맞출 것.
+> **파일명·크기 열은 코드와의 계약이다 (D-226).** 엔진은 `game/assets/iso/` 의 이 이름들과
+> `iso_atlas.json`(발 기준점·마름모 footprint 칸 수·충돌 여부)만 알고 있다. `tools/art/gen_iso_tiles.py`
+> 가 **같은 이름·같은 크기**로 기초 도형 placeholder 를 이미 깔아 뒀으므로, 정식 애셋은 **같은 경로에
+> 덮어쓰기만 하면** 코드 변경 없이 교체된다. 크기가 다르면 발 기준점이 어긋나 Y-sort 가림이 깨진다.
+> 아래 표는 `iso_atlas.json` 에서 생성했다 — 규격이 바뀌면 생성기를 돌리고 이 표를 다시 뽑는다.
+> 격자 한 칸 = 64×32 마름모, 고도 한 단 = 32px.
 
-| 우선 | 애셋 | 파일명 (`game/assets/quarter/…`) | 논리 크기 | 생성 캔버스 | 용도 |
+| 우선 | 애셋 | 파일명 (`game/assets/iso/…`) | 논리 크기 | 생성 캔버스 | 용도 |
 |---|---|---|---|---|---|
-| 1 | 잔디 지면(3종 변형) | `ground/tile_grass_a.png` `_b` `_c` | 32×32 ×3 | 1024×1024(4×4 그리드 요청) | 하트랜드 필드 바닥 |
-| 1 | 흙길 오토타일(3×3) | `ground/tile_dirt_auto.png` | 96×96 | 768×768 | 마을·필드 길 |
-| 1 | 절벽/벽 세트(윗면+정면+모서리) | `walls/cliff_auto.png` (돌담 변형 `walls/stonewall_auto.png`) | 32×32 ×9 | 1024×1024 | 높이감의 핵심 |
-| 1 | 물 가장자리(3×3) + 물 2프레임 | `ground/water_auto.png` · `ground/water_anim.png` | 96×96 + 32×64 | 768×768 | 호수·강 |
-| 1 | 나무(큰 참나무) | `props/tree_oak.png` | 64×96 | 1024×1024 | Y-sort 가림의 대표 |
-| 1 | 수풀·바위·울타리·표지판 | `props/bush.png` `props/rock.png` `props/fence.png`(3종 96×32) `props/sign.png` | 32×32 / 32×48 | 1024×1024(한 종류씩) | 장식·충돌 |
-| 1 | 민들레 마을 집 A/B | `buildings/house_a.png` · `house_b.png` | 96×96 / 128×112 | 1024×1024 | 거점 |
-| 1 | 대장간(작업장) | `buildings/smithy.png` | **128×96** (발 기준점 64,92) | 1024×1024 | 상호작용 오브젝트 |
-| 1 | 퀘스트 게시판 | `props/board.png` | **48×64** (24,60) | 1024×1024 | 상호작용 오브젝트 |
-| 1 | 우편함 | `props/mailbox.png` | **32×48** (16,44) | 1024×1024 | 상호작용 오브젝트 |
-| 1 | 워프 비석 | `props/waystone.png` | **48×80** (24,76) | 1024×1024 | 상호작용 오브젝트 |
-| 1 | 우물 | `props/well.png` | **64×64** (32,60) | 1024×1024 | 마을 장식 |
-| 1 | 퀘스트 오브젝트 — 짐 보따리 | `props/cargo_pile.png` | **48×48** (24,44) | 1024×1024 | QuestObject 변형 |
-| 1 | 퀘스트 오브젝트 — 표식 돌(기본) | `props/marker_stone.png` | **32×48** (16,44) | 1024×1024 | QuestObject 기본 변형 |
-| 2 | 핀 4방향 정지 포즈(대기) | `actors/fin_idle_<dir>.png` | 64×96 (캔버스 96×128) | 1024×1024 ×4 | 시안·PixelLab 입력 |
-| 2 | 몬스터 6종 정면·측면 정지 | `actors/<monster_id>_<dir>.png` | 32~64 | 1024×1024 | 시안·PixelLab 입력 |
-| 2 | NPC 테오·대장장이·우편배달부 정면 | `actors/npc_<id>_down.png` | 64×96 | 1024×1024 | 시안 |
-| 3 | 메아리 굴(동굴) 바닥·벽·발광 버섯 | `dungeon/echo_cave_*.png` | 32×32 세트 | 1024×1024 | 던전 |
+| 1 | 잔디 지면 A | `ground/tile_grass_a.png` | **64×32** (마름모 1칸) | 1024×1024 | 하트랜드 필드 바닥 |
+| 1 | 잔디 지면 B(풀 뭉치) | `ground/tile_grass_b.png` | **64×32** (마름모 1칸) | 1024×1024 | 변형 |
+| 1 | 잔디 지면 C(들꽃) | `ground/tile_grass_c.png` | **64×32** (마름모 1칸) | 1024×1024 | 변형 |
+| 1 | 흙길 | `ground/tile_dirt.png` | **64×32** (마름모 1칸) | 1024×1024 | 마을·필드 길 |
+| 1 | 물 | `ground/tile_water.png` | **64×32** (마름모 1칸) | 1024×1024 | 호수·강(통행 불가) |
+| 1 | 절벽 블록 1단 | `walls/cliff_block_32.png` | **64×64** (발 기준점 (32,48) · 1칸) | 1024×1024 | 고도 표현의 핵심(D-224) |
+| 1 | 절벽 블록 2단 | `walls/cliff_block_64.png` | **64×96** (발 기준점 (32,80) · 1칸) | 1024×1024 | 고도 2단 |
+| 1 | 민들레 마을 집 A | `buildings/house_a.png` | **128×144** (발 기준점 (64,112) · 2칸) | 1024×1024 | 거점 |
+| 1 | 대장간 | `buildings/smithy.png` | **128×148** (발 기준점 (64,116) · 2칸) | 1024×1024 | 상호작용 |
+| 1 | 큰 참나무 | `props/tree_oak.png` | **64×118** (발 기준점 (32,102) · 1칸) | 1024×1024 | Y-sort 가림의 대표 |
+| 1 | 수풀 | `props/bush.png` | **64×50** (발 기준점 (32,34) · 1칸) | 1024×1024 | 장식 |
+| 1 | 바위 | `props/rock.png` | **39×37** (발 기준점 (19.5,21) · 1칸) | 1024×1024 | 장식·충돌 |
+| 1 | 울타리(남서 방향) | `props/fence_sw.png` | **64×58** (발 기준점 (32,42) · 1칸) | 1024×1024 | 격자 한 축 |
+| 1 | 울타리(남동 방향) | `props/fence_se.png` | **64×58** (발 기준점 (32,42) · 1칸) | 1024×1024 | 격자 다른 축 |
+| 1 | 퀘스트 게시판 | `props/board.png` | **64×76** (발 기준점 (32,60) · 1칸) | 1024×1024 | 상호작용 |
+| 1 | 우편함 | `props/mailbox.png` | **64×68** (발 기준점 (32,52) · 1칸) | 1024×1024 | 상호작용 |
+| 1 | 워프 비석 | `props/waystone.png` | **64×90** (발 기준점 (32,74) · 1칸) | 1024×1024 | 상호작용 |
+| 1 | 우물 | `props/well.png` | **64×80** (발 기준점 (32,64) · 1칸) | 1024×1024 | 마을 장식 |
+| 1 | 짐 보따리 | `props/cargo_pile.png` | **64×62** (발 기준점 (32,46) · 1칸) | 1024×1024 | QuestObject 변형 |
+| 1 | 표식 돌(기본) | `props/marker_stone.png` | **64×62** (발 기준점 (32,46) · 1칸) | 1024×1024 | QuestObject 기본 변형 |
+| 2 | 핀 8방향 정지 포즈 | `actors/fin_idle_<dir>.png` | 64×96 (캔버스 96×128, 발 기준점 48,112) | 1024×1024 ×5 | D-223 8방향(S·SE·E·NE·N + 좌우 반전) |
+| 2 | 몬스터 6종 8방향 정지 | `actors/<monster_id>_<dir>.png` | 32~64 | 1024×1024 | 시안·PixelLab 입력 |
+| 3 | 메아리 굴 바닥·벽·발광 버섯 | `dungeon/echo_cave_*.png` | 64×32 세트 | 1024×1024 | 던전 |
 
 ## 3. 프롬프트
 
@@ -69,26 +77,26 @@ TILE RULES: Seamless, tileable, no outline, no vignette, no lighting hotspot, un
 
 ```
 [STYLE] [TILE RULES]
-A 4x4 grid of square ground tiles, each tile a seamless meadow grass texture, all 16 tiles nearly identical so any two can sit next to each other without a seam. In 3 of the 16 tiles add a tiny accent: a few small white/pink wildflowers (#f2eaf1, #bc84b5) or a little dry-grass patch (#a8a129). Top-down ground only, no objects, no shadows. Thin 2px magenta (#FF00FF) gutter lines between tiles so the grid can be cut precisely.
+A single isometric ground tile: one 2:1 diamond (twice as wide as tall) of seamless meadow grass, centred on a solid magenta (#FF00FF) background. Nothing outside the diamond. The grass texture must be uniform so that copies tile without a visible grid. Add a few tiny grass tufts well inside the diamond.
 ```
 
-후처리: 1024/4 = 256px 셀 → 32px로 8배 축소. 변형 3종만 골라 `tile_grass_a/b/c.png`.
+후처리: 마젠타 배경을 빼고 마름모를 64×32 로 최근접 축소 → `ground/tile_grass_a.png`. 변형 B(풀 뭉치)·C(들꽃)는 같은 프롬프트에서 마지막 문장만 바꿔 각각 생성한다.
 
 ### 3.2 흙길 오토타일 (3×3)
 
 ```
 [STYLE] [TILE RULES]
-A 3x3 grid of square tiles forming a dirt-path autotile set on meadow grass: top-left corner, top edge, top-right corner, left edge, full dirt center, right edge, bottom-left corner, bottom edge, bottom-right corner. Dirt is #d2b37d with #965340 shadow flecks; grass around it is #74a334. The grass-to-dirt boundary is slightly irregular with small grass tufts overlapping the dirt, but each edge tile must continue seamlessly into its neighbors. Thin 2px magenta (#FF00FF) gutter lines between tiles.
+A single isometric ground tile: one 2:1 diamond of packed dirt path (#d2b37d with #965340 shadow flecks and a few small pebbles), centred on a solid magenta (#FF00FF) background. Nothing outside the diamond. Uniform brightness so copies tile seamlessly with no visible grid.
 ```
 
 ### 3.3 절벽 / 벽 세트 (높이의 핵심)
 
 ```
-[STYLE] [TILE RULES]
-A 3x3 grid of square tiles for a low earthen cliff seen in 3/4 oblique view. Row 1: the grassy TOP surface of the cliff with its back edge (north edge) as a soft grass rim. Row 2: the FRONT FACE of the cliff — a vertical wall of layered brown earth and embedded stones (#965340 base, #61372e shadow, #b3957f stones), seen from the south, with a thin strip of grass at its top edge. Row 3: the BOTTOM of the cliff meeting the flat meadow, with a small cast shadow (#5f7160) on the grass just below the wall. Left column = left end cap, middle column = repeating middle, right column = right end cap. Each tile continues seamlessly into its horizontal neighbors. Thin 2px magenta (#FF00FF) gutter lines between tiles.
+[STYLE]
+A single isometric cliff block, one grid cell wide: a 2:1 diamond of grassy top surface sitting on a cube of layered brown earth, drawn so that BOTH the south-west face and the south-east face are visible with equal width (#965340 base, #61372e shadow, #b3957f embedded stones), the south-west face lighter than the south-east. The block is 32 pixels tall below the diamond top. 1px #141b1b outline on the silhouette only. Centred on a solid magenta (#FF00FF) background.
 ```
 
-돌벽 변형(마을 담장)은 같은 본문에서 `low earthen cliff` → `low mortared stone wall (#b3957f / #8d977f / #8e7c73 with #141b1b joints)`로 바꿔 한 번 더 생성한다.
+2단 절벽(`cliff_block_64`)은 같은 본문에서 `32 pixels tall` → `64 pixels tall` 로 바꿔 한 번 더 생성한다. 돌담 변형은 `layered brown earth` → `mortared stone (#b3957f / #8d977f / #8e7c73 with #141b1b joints)`.
 
 ### 3.4 물 (가장자리 3×3 + 물결 2프레임)
 

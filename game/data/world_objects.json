@@ -85,7 +85,7 @@
     "id": "cargo_pile",
     "kind": "object",
     "scene": "res://scenes/world/QuestObject.tscn",
-    "sprite": "res://assets/quarter/props/cargo_pile.png",
+    "sprite": "res://assets/iso/props/cargo_pile.png",
     "position": [
       -1130,
       -215

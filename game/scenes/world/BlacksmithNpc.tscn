@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/blacksmith_npc.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/quarter/buildings/smithy.png" id="2_sprite"]
+[ext_resource type="Texture2D" path="res://assets/iso/buildings/smithy.png" id="2_sprite"]
 
 [sub_resource type="RectangleShape2D" id="solid_band"]
 size = Vector2(76, 18)
@@ -22,7 +22,7 @@ shape = SubResource("area_shape")
 texture_filter = 1
 texture = ExtResource("2_sprite")
 centered = false
-offset = Vector2(-64, -92)
+offset = Vector2(-64, -116)
 
 [node name="SolidBand" type="StaticBody2D" parent="."]
 collision_layer = 1

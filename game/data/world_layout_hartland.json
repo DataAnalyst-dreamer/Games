@@ -1,53 +1,56 @@
 {
-  "_schema_version": "0.1",
-  "_source_doc": "docs/specs/quarter-view-migration-b-plan.md §3.3 (D-201, 단계 b2)",
-  "_comment": "하틀랜드 민들레 마을 입구 구역 배치. 좌표는 전부 **타일 좌표**(1타일 = Tuning.TILE_SIZE_PROTOTYPE = 32 월드단위)라 타일 규격이 바뀌어도 이 파일은 그대로다. scripts/systems/world.gd 가 읽어 Ground/Walls/Props 를 채운다. 애셋 이름은 game/assets/quarter/quarter_atlas.json 의 키다. 기존 퀘스트 트리거·NPC·비석(data/world_objects.json)과 몬스터 스폰 지점을 막지 않도록 배치했고, 이 불변은 tests/smoke/smoke_quarter_view_b.gd 가 검사한다.",
+  "_schema_version": "0.2",
+  "_source_doc": "docs/specs/isometric-migration-v1.md §7 (D-219~D-226, 단계 iso-2)",
+  "_comment": "하틀랜드 민들레 마을 입구 배치. 좌표는 전부 **격자 셀 좌표**(한 칸 = Tuning.TILE_SIZE_PROTOTYPE = 32 월드단위, 화면 64×32 마름모)라 투영이 바뀌어도 이 파일은 그대로다 - 실제로 등각 이관에서 변환 없이 살아남았다. scripts/systems/world.gd 가 읽어 Ground/Elev1/Walls/Props 를 채운다. 애셋 이름은 game/assets/iso/iso_atlas.json 의 키다. 기존 퀘스트 트리거·NPC·비석(data/world_objects.json)과 몬스터 스폰을 막지 않도록 배치했고, 그 불변은 tests/smoke/smoke_quarter_view_b.gd §1·§8 이 검사한다.",
 
   "ground": {
-    "_comment": "지면을 채우는 반경(타일). 카메라가 담는 범위(20×11타일)보다 넉넉하면 된다.",
+    "_comment": "지면을 채우는 격자 반경(칸). 등각은 같은 칸 수로도 화면을 더 넓게 덮는다.",
     "radius_tiles": 40,
-    "variant_ratio": 0.14
+    "variant_ratio": 0.35
   },
 
   "paths": [
-    {"_comment": "마을로 들어가는 남북 진입로. 절벽 틈(x -1..0)을 지나간다.",
-     "rect": [-1, -11, 2, 12]}
+    {"_comment": "마을로 들어가는 진입로. 절벽 틈(격자 x = -1..0)을 지난다.",
+     "rect": [-1, -10, 2, 13]}
   ],
 
   "water": [
-    {"_comment": "마을 서쪽 연못. 통행 불가(collision_band_px = 한 칸 전체).",
-     "rect": [-17, -3, 4, 4]}
+    {"_comment": "마을 서쪽 연못. 통행 불가.",
+     "rect": [-11, -2, 3, 3]}
   ],
 
   "cliffs": [
-    {"_comment": "마을을 두르는 낮은 흙 절벽. front_y 행이 정면(접지선), 그 위가 윗면, 아래가 그림자.",
-     "x": -14, "front_y": -12, "length": 13},
-    {"x": 2, "front_y": -12, "length": 13}
+    {"_comment": "마을을 두르는 절벽 한 단(고도 1). 격자 행이라 화면에서는 대각선으로 뻗는다.",
+     "x": -9, "front_y": -11, "length": 8, "height": 32},
+    {"x": 2, "front_y": -11, "length": 8, "height": 32}
+  ],
+
+  "elevated": [
+    {"_comment": "절벽 위 대지(고도 1단). Elev1 레이어에 32px 올려 깐다.",
+     "rect": [-9, -15, 19, 4]}
   ],
 
   "props": [
-    {"asset": "house_a", "tile": [-7, -8]},
-    {"asset": "house_a", "tile": [6, -8]},
+    {"_comment": "대장간·게시판·우편함·워프 비석은 Main.tscn 의 상호작용 씬 노드(BlacksmithNpc1/BoardNpc1/MailboxNpc1/Waystone1)가 이미 세우므로 여기서 또 놓으면 그림이 두 개 겹친다 - 배치용 소품은 상호작용이 없는 것만 둔다.",
+     "asset": "house_a", "tile": [-6, -8]},
+    {"asset": "house_a", "tile": [4, -8]},
+    {"asset": "well", "tile": [2, -3]},
 
-    {"asset": "tree_oak", "tile": [-11, -7]},
-    {"asset": "tree_oak", "tile": [-9, -4]},
-    {"asset": "tree_oak", "tile": [-4, -10]},
-    {"asset": "tree_oak", "tile": [4, -6]},
-    {"asset": "tree_oak", "tile": [8, -9]},
-    {"asset": "tree_oak", "tile": [10, -4]},
+    {"asset": "tree_oak", "tile": [-8, -6]},
+    {"asset": "tree_oak", "tile": [-7, 1]},
+    {"asset": "tree_oak", "tile": [6, -5]},
+    {"asset": "tree_oak", "tile": [7, 1]},
+    {"asset": "tree_oak", "tile": [-3, -10]},
 
-    {"asset": "fence", "tile": [-2, -11], "variant": 0},
-    {"asset": "fence", "tile": [-2, -10], "variant": 0},
-    {"asset": "fence", "tile": [1, -11], "variant": 0},
-    {"asset": "fence", "tile": [1, -10], "variant": 0},
+    {"asset": "fence_sw", "tile": [-2, -9]},
+    {"asset": "fence_sw", "tile": [-2, -8]},
+    {"asset": "fence_se", "tile": [1, -9]},
+    {"asset": "fence_se", "tile": [2, -9]},
 
-    {"_comment": "마을 우물. 퀘스트가 붙지 않은 장식이라 접지 띠 충돌을 준다(D-214).",
-     "asset": "well", "tile": [-5, -3]},
-
-    {"asset": "rock", "tile": [-12, -2]},
-    {"asset": "rock", "tile": [7, -3]},
-    {"asset": "bush", "tile": [3, -9]},
-    {"asset": "bush", "tile": [-8, -2]},
-    {"asset": "bush", "tile": [11, -7]}
+    {"asset": "rock", "tile": [-9, 2]},
+    {"asset": "rock", "tile": [6, 3]},
+    {"asset": "bush", "tile": [-4, -1]},
+    {"asset": "bush", "tile": [2, 2]},
+    {"asset": "bush", "tile": [-8, -3]}
   ]
 }

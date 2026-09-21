@@ -1,19 +1,19 @@
 ## 단계 (b2) 육안 확인용 스크린샷 — 마을 입구 구역. Xvfb 필요(--headless 아님).
 ##
 ## 실행: xvfb-run -a godot --path game res://tests/smoke/SmokeQuarterViewBCapture.tscn --quit-after 900
-## 출력: docs/art/preview/quarter-view-b-village.png
+## 출력: docs/art/preview/iso-2-village.png
 ##
 ## (a) 캡처와 달리 **캡처 전용 줌을 쓰지 않는다** — 32px 아트가 들어온 뒤로는 실제 게임
 ## 화면 그대로가 근거여야 한다.
 extends Node
 
-## 플레이어를 놓을 지점(타일). 마을 허브(대장간·비석·우편함·게시판)와 절벽 틈이 한
-## 화면에 들어오는 구도 — b3 에서 상호작용 오브젝트 5종이 실제로 바뀐 걸 보여준다.
-const VIEW_TILE := Vector2(-1.5, -7.0)
+## 플레이어를 놓을 격자 셀. 마을 허브(대장간·비석·우편함·게시판)와 절벽 틈이 한
+## 화면에 들어오는 구도 — 등각 마을이 라그나로크 계열로 읽히는지 확인한다.
+const VIEW_CELL := Vector2i(-1, -7)
 
 
 func _ready() -> void:
-	print("=== CAPTURE 쿼터뷰 (b2): 마을 입구 ===")
+	print("=== CAPTURE 등각 (iso-2): 마을 입구 ===")
 	if DisplayServer.get_name() == "headless":
 		print("[SKIP] 렌더러 없음 - xvfb-run 으로 실행해야 캡처된다")
 		print("=== CAPTURE 종료 ===")
@@ -30,14 +30,14 @@ func _ready() -> void:
 		if child is MonsterBase:
 			child.set_physics_process(false)
 	player.set_physics_process(false)
-	player.global_position = VIEW_TILE * float(Tuning.TILE_SIZE_PROTOTYPE)
+	player.global_position = IsoMath.cell_to_screen(VIEW_CELL)
 	player.facing = Vector2.UP
 	player.play_anim("idle")
 	for _i in range(12):
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 
-	var path := out_dir.path_join("quarter-view-b-village.png")
+	var path := out_dir.path_join("iso-2-village.png")
 	var saved := get_viewport().get_texture().get_image().save_png(path) == OK
 	print("%s 마을 입구 -> %s" % ["[PASS]" if saved else "[FAIL]", path])
 	print("=== CAPTURE 종료 ===")

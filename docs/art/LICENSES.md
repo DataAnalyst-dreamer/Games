@@ -8,16 +8,18 @@
 
 내장 이미지 생성 도구로 신규 콘셉트와 걷기 초안을 생성하고, 사용자 승인하에 `tools/prepare_fin_sprites.py`로 후처리했다. 입력 참조는 이 프로젝트에서 생성한 승인 콘셉트이며 CQ 원작 이미지나 립 스프라이트를 사용하지 않았다. `docs/art/preview/fin-cq-*` 및 `game/assets/sprites/characters/fin/fin-walk-v1.*`에 보관. 프롬프트는 `docs/art/fin-cq-*-prompt.txt`, 처리·검증 이력은 `docs/qa/fin-postprocess-2026-09-12.md` 참고. 외부 CC0 팩으로 분류하지 않으며 독점권/상용 법률 검토 완료를 주장하지 않는다. 게임 런타임 교체 전 후보 에셋이다.
 
-### 프로젝트 신규 생성물: 쿼터뷰 placeholder 타일셋 (2026-09-20, D-213)
+### 프로젝트 신규 생성물: 등각 placeholder 애셋 (2026-09-21, D-226)
 
-`tools/art/gen_quarter_tiles.py`가 **Pillow로 기초 도형만 그려서** 생성한 32px 오블리크 placeholder다.
+`tools/art/gen_iso_tiles.py`가 **Pillow로 기초 도형만 그려서** 생성한 2:1 등각 placeholder다.
 외부 이미지·AI 생성물·립 스프라이트를 입력하지 않았고, 색은 `docs/art/art-bible.md` §3 하틀랜드 32색 표를
 스크립트가 직접 파싱해 쓴다 — 외부 팔레트를 복사하지 않았다. 따라서 CC0 팩과 무관한 독립 저작물이며
 저작권은 프로젝트 소유, 크레딧 불필요다.
 
-- 산출물: `game/assets/quarter/{ground,walls,props,buildings}/*.png` + 규격 계약 `game/assets/quarter/quarter_atlas.json`
-  (b2: 지면 3·흙길·물·절벽·나무·수풀·바위·울타리·집A / b3 추가: 대장간·게시판·우편함·워프 비석·우물·짐 보따리·표식 돌 — D-214~D-218)
-- 재생성: `python3 tools/art/gen_quarter_tiles.py` (시드 고정, 결정적)
+- 산출물: `game/assets/iso/{ground,walls,props,buildings}/*.png` + 규격 계약 `game/assets/iso/iso_atlas.json`
+  (마름모 지면 3종·흙길·물 / 절벽 블록 1·2단 / 집 A·대장간 / 나무·수풀·바위·울타리 2방향·게시판·우편함·워프 비석·우물·짐 보따리·표식 돌 — 총 20종)
+- 재생성: `python3 tools/art/gen_iso_tiles.py` (시드 고정, 결정적)
+- **폐기**: 비스듬 2D 시절의 `game/assets/quarter/**` 와 `tools/art/gen_quarter_tiles.py` 산출물은
+  D-219(등각 채택)로 폐기해 삭제했다. 생성기 스크립트는 b1~b3 재현용으로 남겨 둔다.
 - 성격: **정식 애셋 전 자리표시자**. `docs/art/brief-quarter-view-gpt-image.md` §2의 같은 파일명·논리 크기로
   정식 애셋이 나오면 같은 경로에 PNG만 덮어써 교체한다. 최종 게임 아트 승인이 아니다.
 

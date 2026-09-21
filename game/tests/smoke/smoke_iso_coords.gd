@@ -117,7 +117,9 @@ func _check_move_speed_isotropy() -> void:
 ## 5) 타일맵이 등각인가.
 func _check_tilemap_is_isometric() -> void:
 	print("-- 5. 타일맵 등각 설정 --")
-	for path: String in ["World/Ground", "Walls"]:
+	# iso-2(D-224): Walls 는 고도 블록 **스프라이트** 컨테이너라 TileMapLayer 가 아니다.
+	# 타일맵은 지면(Ground)과 고도 1단 대지(Elev1) 둘이다.
+	for path: String in ["World/Ground", "Elev1"]:
 		var layer: TileMapLayer = _main.get_node_or_null(path) as TileMapLayer
 		if layer == null or layer.tile_set == null:
 			_fail("%s 에 TileSet 이 없다" % path)

@@ -142,20 +142,28 @@ func _push_towards_wall(player: Player, start_cell: Vector2i) -> void:
 ## 3) 절벽 남쪽의 플레이어가 벽보다 앞에 정렬된다.
 func _check_occlusion() -> void:
 	print("-- 3. 가림(Y-sort) --")
-	var walls: TileMapLayer = _main.get_node_or_null("Walls") as TileMapLayer
+	# iso-2(D-224): 절벽은 고도 블록 **스프라이트**라 Walls 는 TileMapLayer 가 아니라
+	# Node2D 다. 걸어 다니는 윗면은 Elev1 TileMapLayer 가 맡는다.
+	var walls: Node2D = _main.get_node_or_null("Walls") as Node2D
 	var props: Node2D = _main.get_node_or_null("Props") as Node2D
-	if walls == null or props == null:
-		_fail("Walls/Props 노드를 찾지 못했다")
+	var elevated: TileMapLayer = _main.get_node_or_null("Elev1") as TileMapLayer
+	if walls == null or props == null or elevated == null:
+		_fail("Walls/Props/Elev1 노드를 찾지 못했다")
 		return
-	if walls.get_used_cells().is_empty():
-		_fail("Walls 레이어가 비었다 — 절벽이 그려지지 않는다")
+	if walls.get_child_count() == 0:
+		_fail("Walls 가 비었다 — 절벽이 그려지지 않는다")
 	if props.get_child_count() == 0:
 		_fail("Props 가 비었다 — 나무·집이 배치되지 않았다")
+	if elevated.get_used_cells().is_empty():
+		_fail("Elev1 이 비었다 — 절벽 위 대지가 깔리지 않았다")
+	if not is_equal_approx(elevated.position.y, -32.0):
+		_fail("Elev1.position.y=%.1f (고도 한 단 -32 기대)" % elevated.position.y)
 	if not _main.is_y_sort_enabled() or not walls.y_sort_enabled or not props.y_sort_enabled:
 		_fail("Main/Walls/Props 중 y_sort 가 꺼진 노드가 있다")
 	else:
-		print("  Walls %d칸, Props %d개, y_sort 전부 켜짐" \
-			% [walls.get_used_cells().size(), props.get_child_count()])
+		print("  Walls %d개(절벽 블록+콜리전), Props %d개, Elev1 %d칸(y=%.0f), y_sort 켜짐" \
+			% [walls.get_child_count(), props.get_child_count(),
+				elevated.get_used_cells().size(), elevated.position.y])
 
 
 ## 5) 실지형에서의 세이브 마이그레이션.
