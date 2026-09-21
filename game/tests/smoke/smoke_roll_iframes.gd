@@ -7,6 +7,16 @@
 ## ACTIVE_SEC=0.2)를 다 덮으려면 t0<=T 이고 t0+0.3>=T+A, 즉 t0 in [T+A-0.3, T].
 ## T=0.5, A=0.2 기준 유효 구간은 [0.4, 0.5](폭 0.1s)로 좁으므로, 프레임 단위 오차에 안전한
 ## 여유를 두기 위해 그 한가운데인 t0=T-0.05를 쓴다(양쪽에 0.05s씩 여유).
+##
+## **시간은 물리 프레임으로 잰다(_physics_process).** 몬스터 상태 타이머(_state_timer)와
+## 플레이어 무적은 _physics_process 에서 흐르는데, 관측을 _process(렌더 프레임)에서 하면
+## 씬 로드가 무거운 초반에 물리 프레임 여러 개가 렌더 한 프레임 안에 몰려 돌아 **전이를
+## 최대 5 물리프레임(0.083s) 늦게 본다**. 그러면 측정한 예고 시간이 실제보다 그만큼 짧게
+## 나온다 - iso-2 에서 씬이 무거워지며 실제로 이 오차가 허용치를 넘어 오탐이 났다
+## (물리 프레임 기준 실측은 31프레임=0.517s 로 정상이었다).
+##
+## 이 스모크는 유효 구간이 0.1s 밖에 안 되므로(위 계산) 관측 지연에 특히 취약하다 -
+## 구르기 발사 시점도 벽시계가 아니라 **물리 프레임 수**로 센다.
 extends Node
 
 var _main: Node
@@ -17,6 +27,9 @@ var _elapsed: float = 0.0
 var _last_state: int = -1
 var _telegraph_started_at: float = -1.0
 var _roll_target_time: float = -1.0
+## 예고 시작 물리 프레임과, 구르기를 쏠 물리 프레임.
+var _telegraph_started_frame: int = -1
+var _roll_target_frame: int = -1
 var _roll_pressed: bool = false
 var _saw_roll_state: bool = false
 var _saw_player_damaged: bool = false
@@ -51,17 +64,23 @@ func _ready() -> void:
 	Events.player_damaged.connect(_on_player_damaged)
 
 
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	_elapsed += delta
 
 	if _slime.state != _last_state:
 		if _slime.state == MonsterBase.State.TELEGRAPH:
 			_telegraph_started_at = _elapsed
-			_roll_target_time = _telegraph_started_at + maxf(_slime.telegraph_sec - 0.05, 0.0)
-			print("t=%.3f 슬라임 예고 시작 (구르기 목표 시각=%.3f)" % [_elapsed, _roll_target_time])
+			_telegraph_started_frame = Engine.get_physics_frames()
+			var lead: float = maxf(_slime.telegraph_sec - 0.05, 0.0)
+			_roll_target_frame = _telegraph_started_frame \
+				+ int(round(lead * float(Engine.physics_ticks_per_second)))
+			_roll_target_time = _telegraph_started_at + lead
+			print("t=%.3f 슬라임 예고 시작 (구르기 목표 물리프레임=%d, +%d프레임)" \
+				% [_elapsed, _roll_target_frame, _roll_target_frame - _telegraph_started_frame])
 		_last_state = _slime.state
 
-	if _telegraph_started_at >= 0.0 and not _roll_pressed and _elapsed >= _roll_target_time:
+	if _roll_target_frame >= 0 and not _roll_pressed \
+			and Engine.get_physics_frames() >= _roll_target_frame:
 		_press_roll()
 		_roll_pressed = true
 		print("t=%.3f 구르기 입력 발사" % _elapsed)

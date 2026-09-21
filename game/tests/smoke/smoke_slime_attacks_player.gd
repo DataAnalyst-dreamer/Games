@@ -5,6 +5,13 @@
 ## Slime1을 플레이어의 인지 범위 안(monsters.json.slime.aggro_range_px=64) 겸 근접
 ## 사거리 밖에 두어 AI가 스스로 idle→patrol/chase→telegraph→attack까지 진행하게 둔다
 ## (수동으로 상태를 강제하지 않고 실제 상태머신 전이를 그대로 관찰).
+##
+## **시간은 물리 프레임으로 잰다(_physics_process).** 몬스터 상태 타이머(_state_timer)와
+## 플레이어 무적은 _physics_process 에서 흐르는데, 관측을 _process(렌더 프레임)에서 하면
+## 씬 로드가 무거운 초반에 물리 프레임 여러 개가 렌더 한 프레임 안에 몰려 돌아 **전이를
+## 최대 5 물리프레임(0.083s) 늦게 본다**. 그러면 측정한 예고 시간이 실제보다 그만큼 짧게
+## 나온다 - iso-2 에서 씬이 무거워지며 실제로 이 오차가 허용치를 넘어 오탐이 났다
+## (물리 프레임 기준 실측은 31프레임=0.517s 로 정상이었다).
 extends Node
 
 var _main: Node
@@ -12,6 +19,8 @@ var _player: Player
 var _slime: MonsterBase
 
 var _elapsed: float = 0.0
+## 예고 시작 시점의 물리 프레임 번호. 지속시간은 프레임 차이로 잰다.
+var _telegraph_started_frame: int = -1
 var _last_state: int = -1
 var _saw_telegraph: bool = false
 var _telegraph_started_at: float = -1.0
@@ -43,7 +52,7 @@ func _ready() -> void:
 	Events.player_damaged.connect(_on_player_damaged)
 
 
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	_elapsed += delta
 
 	if _slime.state != _last_state:
@@ -52,10 +61,13 @@ func _process(delta: float) -> void:
 		if _slime.state == MonsterBase.State.TELEGRAPH:
 			_saw_telegraph = true
 			_telegraph_started_at = _elapsed
-		elif _last_state == MonsterBase.State.TELEGRAPH and _telegraph_started_at >= 0.0:
+			_telegraph_started_frame = Engine.get_physics_frames()
+		elif _last_state == MonsterBase.State.TELEGRAPH and _telegraph_started_frame >= 0:
 			_telegraph_ended_at = _elapsed
-			var duration: float = _telegraph_ended_at - _telegraph_started_at
-			print("  예고 지속시간 실측=%.3f s (데이터 telegraph_sec=%.3f)" % [duration, _slime.telegraph_sec])
+			var frames: int = Engine.get_physics_frames() - _telegraph_started_frame
+			var duration: float = float(frames) / float(Engine.physics_ticks_per_second)
+			print("  예고 지속시간 실측=%.3f s (%d 물리프레임, 데이터 telegraph_sec=%.3f)" \
+				% [duration, frames, _slime.telegraph_sec])
 			if duration >= _slime.telegraph_sec - 0.05:
 				print("  [PASS] GDD 4.2 최소 예고 0.5s 요구를 만족")
 			else:
