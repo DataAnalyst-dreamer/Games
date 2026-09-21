@@ -1,0 +1,12 @@
+STYLE: 16-bit style pixel art for a cozy medieval fantasy island RPG. TRUE ISOMETRIC view: 2:1 dimetric projection on a 45-degree diamond grid. Orthographic, NO perspective convergence, NO vanishing point. Light comes from the top-left. Crisp hard-edged pixels, NO anti-aliasing, NO blur, NO gradients, NO glow. Flat shading with exactly 3 tones per surface. Cute-but-sneaky, not scary, confident proportions, warm and hand-made feel. No text, no watermark, no signature, no UI. Transparent background.
+
+CHARACTER IDENTITY (reuse the goblin scout skeleton, `docs/art/mon-goblin-scout-iso-prompt.txt`): SAME silhouette, SAME body proportions, SAME 48x48 logical canvas, SAME pose set (S, SW, W, NW, N — mirrored later for NE/E/SE) and SAME olive-green skin (#a8a129 / #5f7160) as the base goblin scout. This is a palette-swap + accessory variant, NOT a new creature design.
+
+Differences from the base goblin scout, "고블린 정찰대장" (goblin scout captain), an elite version:
+- A dented iron cap (#8e7c73 base, #4e484a shadow) instead of the ragged hood.
+- A red cloth armband tied around the upper arm (#e0394c) as a rank marker.
+- A notched cleaver (wider blade, #8e7c73) instead of the plain dagger, still held in the RIGHT hand.
+- A small round wooden shield (#a3754e base, #61372e rim) strapped on the LEFT arm, visible in the SW/W/NW poses on the near side (same "shield forward when facing that way" rule as the player character).
+- Slightly broader shoulders and a more confident, standing posture (less hunched than the scout) to read as a leader at a glance, but the same overall body height and canvas size — this is a recolor/accessory variant, not a bigger creature (elite scale-up is handled by the engine's existing 1.3x runtime scale, not by drawing a larger canvas).
+
+Deliver the same five headings as the base goblin scout (S, SW, W, NW, N), each a separate 1024x1024 image at the same scale as the base scout.

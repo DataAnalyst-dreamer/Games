@@ -1,0 +1,12 @@
+STYLE: 16-bit style pixel art for a cozy medieval fantasy island RPG. TRUE ISOMETRIC view: 2:1 dimetric projection on a 45-degree diamond grid. Orthographic, NO perspective convergence, NO vanishing point. Light comes from the top-left. Crisp hard-edged pixels, NO anti-aliasing, NO blur, NO gradients, NO glow. Flat shading with exactly 3 tones per surface. Cute, mischievous-but-harmless proportions, warm and hand-made feel. No text, no watermark, no signature, no UI. Transparent background.
+
+CREATURE RULES: This creature has directional features (a single forward horn, ears, a hunched charging posture) so it needs a full isometric 8-direction set, but only 5 poses are drawn — the other 3 are made later by horizontal mirroring. Deliver FIVE separate 1024x1024 images, each an ISOMETRIC pose on a 32x32 logical pixel canvas (creature fills about 70% of canvas height, feet/paws at the bottom-center), using ONLY these headings:
+1. S (south) — facing the camera, horn pointing forward-down, both ears up, mischievous eyes visible.
+2. SW (south-west) — three-quarter facing camera-left, horn angled toward the viewer's left.
+3. W (west) — full side profile facing screen-left, horn silhouette clearly visible in profile, one ear forward one back.
+4. NW (north-west) — three-quarter facing away and to the left, mostly back and haunches, horn barely visible past the head silhouette.
+5. N (north) — full back view, tail and haunches only, ears visible from behind, no face.
+
+A small fluffy rabbit monster, "뿔토끼" (horn rabbit), native to the Hartland fields. Single short ivory horn (#eecf9b) centered on its forehead. Cream-brown fur using #c69469 (base), #bd7959 (shadow), #eecf9b (highlight/belly). Long upright ears, round stubby body, small paws, a short fluffy tail. Mischievous but not scary eyes. Keep the same scale and colors across all five poses so they read as one rotating creature.
+
+Variant note for `horn_rabbit_big` (elite): reuse this exact same artwork unscaled — the elite is produced by the engine applying a 1.3x sprite scale at runtime (no new art, matches `monsters.json`'s existing convention for this monster). Do not generate a separate bigger version.

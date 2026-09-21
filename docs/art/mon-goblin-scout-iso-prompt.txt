@@ -1,0 +1,10 @@
+STYLE: 16-bit style pixel art for a cozy medieval fantasy island RPG. TRUE ISOMETRIC view: 2:1 dimetric projection on a 45-degree diamond grid. Orthographic, NO perspective convergence, NO vanishing point. Light comes from the top-left. Crisp hard-edged pixels, NO anti-aliasing, NO blur, NO gradients, NO glow. Flat shading with exactly 3 tones per surface. Cute-but-sneaky, not scary, 2-head-tall proportions, warm and hand-made feel. No text, no watermark, no signature, no UI. Transparent background.
+
+CREATURE RULES: This is a humanoid biped with a weapon and a ranged throwing attack, so it needs a full isometric 8-direction set, but only 5 poses are drawn — the other 3 are made later by horizontal mirroring. It holds its dagger in its RIGHT hand. Deliver FIVE separate 1024x1024 images, each an ISOMETRIC pose on a 48x48 logical pixel canvas (creature fills about 65% of canvas height, feet at the bottom-center), using ONLY these headings:
+1. S (south) — facing the camera, hunched sneaky stance, dagger visible in the right hand held low.
+2. SW (south-west) — three-quarter facing camera-left, dagger arm forward and visible.
+3. W (west) — full side profile facing screen-left, dagger-holding arm hidden behind the torso (dagger arm is on the far/east side in this pose).
+4. NW (north-west) — three-quarter facing away and to the left, ragged hood covering most of the head, dagger mostly hidden.
+5. N (north) — full back view, hood and tunic back only, no face, dagger hand hidden behind the body.
+
+A small goblin scout, "고블린 정찰병" (goblin scout), a Hartland field enemy that whistles to call allies. Olive-green skin (#a8a129 base, #5f7160 shadow), pointed ears, a ragged brown hood and tunic (#965340 base, #61372e shadow), a crude short dagger with a dull grey blade (#8e7c73) in the RIGHT hand. Hunched, sneaky, alert posture — cartoonish and non-threatening despite the weapon (this game never shows scary or grotesque silhouettes). Keep the same scale, colors and hood shape across all five poses.

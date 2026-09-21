@@ -183,7 +183,7 @@ Fin, a cheerful apprentice knight: open silver helmet with a coral-red feather p
 | `mushroom` | `A walking mushroom monster: a wide red cap with pale spots (#e0394c cap, #f2eaf1 spots, #a26a83 underside), a short stumpy pale stalk body (#eecf9b) with tiny feet and sleepy eyes.` |
 | `goblin_scout` | `A small goblin scout: olive-green skin (#a8a129 / #5f7160), pointed ears, a ragged brown hood and tunic (#965340 / #61372e), a crude short dagger, hunched sneaky pose.` |
 | `elite_goblin_captain` | `A goblin captain: same olive-green goblin but taller and broader, a dented iron cap (#8e7c73), a red cloth armband (#e0394c), a notched cleaver and a small wooden shield, confident stance.` |
-| `elite_bunchi_spawn` | `A small shadowy spirit-fox spawn: dark plum body (#4e484a / #a26a83 highlight) with wisps trailing from its tail, two glowing pale eyes (#d4f5fa), low crouching pose.` |
+| `elite_bunchi_spawn` | **(D-227 정정, 2026-09-21)** `A small slime monster like the base slime, but ash-tainted: dull grey-plum jelly with dark grey blotches (#4e484a / #a26a83 patches over the base #79b8ce teal), slightly larger and lumpier than the base slime, two dim glowing pale eyes (#d4f5fa), same flattened bottom where it touches the ground.` (이전 "그림자 정령 여우" 서술은 디렉터 오기 — `game/data/monsters.json`의 `elite_base_monster_id: "slime"` 및 `on_death_split_monster_id: "slime"`대로 **슬라임 골격 재사용 + 재/잿빛 얼룩 recolor**가 정본이다. 새 골격이 아니므로 art-bible §9 매트릭스에도 slime→elite_bunchi_spawn 행으로 올린다.) |
 
 ### 3.11 NPC 정면 시안
 
