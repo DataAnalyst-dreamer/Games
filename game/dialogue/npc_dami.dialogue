@@ -1,0 +1,32 @@
+using QuestSystem
+
+~ quest_side_heartland_montsil_offer
+다미: 몽실이가 안 보여요. [ID:quest_side_heartland_montsil_offer_01]
+다미: 목초지 쪽으로 간 것 같은데... [ID:quest_side_heartland_montsil_offer_02]
+다미: 같이 찾아 줄래요? [ID:quest_side_heartland_montsil_offer_03]
+=> END
+
+~ quest_side_heartland_montsil_active
+다미: 몽실이 찾았어요? [ID:quest_side_heartland_montsil_active_01]
+=> END
+
+~ quest_side_heartland_montsil_ready
+다미: 정말요? 어디 있었어요? [ID:quest_side_heartland_montsil_ready_01]
+=> END
+
+~ dami_everyday
+if QuestSystem.get_state("quest_side_heartland_montsil") == "completed"
+    if visit_count("dami") % 3 == 0
+        다미: 함께 찾아줘 고마워요. [ID:npc.dami.after_montsil.1]
+    elif visit_count("dami") % 3 == 1
+        다미: 잠깐 쉬고 갈래요. [ID:npc.dami.after_montsil.2]
+    else
+        다미: 오늘은 여기 있을게요. [ID:npc.dami.after_montsil.3]
+else
+    if visit_count("dami") % 3 == 0
+        다미: 몽실이 못 봤어요? [ID:npc.dami.everyday.1]
+    elif visit_count("dami") % 3 == 1
+        다미: 어디로 간 걸까요. [ID:npc.dami.everyday.2]
+    else
+        다미: 같이 찾아줄래요? [ID:npc.dami.everyday.3]
+=> END

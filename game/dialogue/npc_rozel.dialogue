@@ -1,0 +1,42 @@
+using QuestSystem
+
+~ quest_side_heartland_festival_prep_offer
+로젤: 일손이 모자라서.../ 혹시 좀 도와줄래? [ID:quest_side_heartland_festival_prep_line_01]
+=> END
+
+~ quest_side_heartland_festival_prep_active
+로젤: 아직 다 못 모았죠? [ID:quest_side_heartland_festival_prep_active_01]
+=> END
+
+~ quest_side_heartland_festival_prep_ready
+로젤: 오, 다 됐네요, 고마워요. [ID:quest_side_heartland_festival_prep_ready_01]
+=> END
+
+~ quest_daily_heartland_01_offer
+로젤: 목초지 좀 부탁해요. [ID:quest_daily_heartland_01_offer_01]
+=> END
+
+~ quest_daily_heartland_01_active
+로젤: 아직인가요? [ID:quest_daily_heartland_01_active_01]
+=> END
+
+~ quest_daily_heartland_01_ready
+로젤: 덕분에 조용해졌어요. [ID:quest_daily_heartland_01_ready_01]
+=> END
+
+~ rozel_everyday
+if QuestSystem.get_state("quest_daily_heartland_01") == "completed"
+    if visit_count("rozel") % 3 == 0
+        로젤: 오늘도 고마워요. [ID:quest_daily_heartland_01_done_01]
+    elif visit_count("rozel") % 3 == 1
+        로젤: 덕분에 마음이 놓여요. [ID:quest_daily_heartland_01_done_02]
+    else
+        로젤: 또 부탁드려도 될까요? [ID:quest_daily_heartland_01_done_03]
+else
+    if visit_count("rozel") % 3 == 0
+        로젤: 목초지 다녀왔어. [ID:npc.rozel.everyday.1]
+    elif visit_count("rozel") % 3 == 1
+        로젤: 울타리도 살펴봐야지. [ID:npc.rozel.everyday.2]
+    else
+        로젤: 풀밭에선 발밑을 봐. [ID:npc.rozel.everyday.3]
+=> END

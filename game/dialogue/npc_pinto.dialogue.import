@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://2jpufgxsnyhx"
+path="res://.godot/imported/npc_pinto.dialogue-77049c9b444f6c1605c585b4551cb986.tres"
+
+[deps]
+
+source_file="res://dialogue/npc_pinto.dialogue"
+dest_files=["res://.godot/imported/npc_pinto.dialogue-77049c9b444f6c1605c585b4551cb986.tres"]
+
+[params]
+
+defaults=true
