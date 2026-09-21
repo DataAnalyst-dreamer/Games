@@ -413,6 +413,41 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 | D-238 | 계단식 진입로 | `cliff_ramp` placeholder로 근사. 필드 두 번째 워프 지점은 범위 밖(후보 좌표만 hartland.md ⑪) | 필드 지형 계획 | gen_iso_tiles_field.py |
 | D-239 | 레이아웃 검증기 | `tools/qa/validate_layout.py`: 시작점→퀘스트 목표·고정 스폰 BFS 도달성 + 오브젝트 묻힘 검사를 validate_tables.py에 통합. 배치 변경은 이 검사를 통과해야 한다 | 필드 지형 구현 | validate_layout.py |
 
+## AI. M7-0 대사 시스템 스펙 승인 + 애셋 인덱스·스킬 계열명·등각 밸런스 (2026-09-21, 워크플로 3안 심사·반박 검증 결과 채택)
+
+스펙: `docs/specs/dialogue-system-v1.md`(각도 A "애드온 최대 활용" 채택, 심사 23/30 동점 중 접목 용이성으로 선택). 번호는 스펙 §11의 제안 번호를 그대로 쓴다(D-252·D-264 결번).
+
+| ID | 항목 | 결정 | 출처 | 반영 |
+|---|---|---|---|---|
+| D-240 | 대사 중 이동·전투 입력 차단 | 차단. 구현은 D-257 방식 | 스펙 §11 | player.gd |
+| D-241 | 잡담 스킵 | `ui_cancel`로 선택지 없는 잡담만 스킵 허용, 분기 대사는 무효 | 스펙 §11 | dialogue_balloon.gd |
+| D-242 | 완료 후 대사 | 기존 `after_*` 3줄 로테이션 재현(`visit_count` 헬퍼) | 스펙 §11 | npc_dialogue_controller.gd |
+| D-243 | 몽실이 E2E 스모크 | ⑪-1 미포함, GUT 단위 테스트로 대체. 헤드리스 대사 진행 스모크(렌더 없이 get_next_dialogue_line 순회)는 포함 | 스펙 §11 | tests |
+| D-244 | 복수 퀘스트 NPC 우선순위 | 완료 보고 > 수주 가능 > 진행 중 > 잡담 | 스펙 §11 | npc_dialogue_controller.gd |
+| D-245 | QuestNpcPanel 통합 | 보류, 병렬 유지(⑪-3에서 재검토) | 스펙 §11 | — |
+| D-246 | interact 키 | 대사 중 `ui_confirm`과 동일 취급 | 스펙 §11 | dialogue_balloon.gd |
+| D-247 | 자동 진행 지연 | `tuning.gd` 임시 상수(2.5s, `_balance_todo`), Settings 필드는 접근성 옵션 단계에서 | 스펙 §11 | tuning.gd |
+| D-248 | 대사 중 pause | `get_tree().paused` 안 걸음(배경·AI 계속) | 스펙 §11 | — |
+| D-249 | `dialogue_path` 필드 | 몽실이 1건에만 우선 적용, 스키마 일반화는 2막 | 스펙 §11 | world_objects.json |
+| D-250 | 대사 진행 경로 | 대안 A: 컨트롤러가 `get_next_dialogue_line()` 직접 호출(`dialogue_started` 미발생 감수) | 스펙 §11 | npc_dialogue_controller.gd |
+| D-251/D-253 | 대사 참조 무결성 검사 | `tools/qa/validate_dialogue.py` 분리 신설, validate_tables.py에서 호출. D-157은 tools/*.py에도 적용 | 스펙 §11 | validate_dialogue.py |
+| D-254 | 패널·풍선 동시 열림 입력 | `UiRoot.is_quest_npc_open()` 동안 풍선은 입력 소비 안 함 | 스펙 §11 | dialogue_balloon.gd |
+| D-255 | 풍선 범위 예외 | `docs/ui/dialogue-balloon.md` §3-4를 개정해 "브리지 어휘를 통해 퀘스트 상태를 바꾸는 분기 대사"를 예외 카테고리로 허용 | 스펙 §11 | dialogue-balloon.md |
+| D-256 | UiRoot 상호배타 | `is_dialogue_open()` 추가(5종) | 스펙 §11 | ui_root.gd |
+| D-257 | 입력 차단 구현 | `player.dialogue_active` 플래그: `get_move_input()` 가드 + `_unhandled_input()` 최상단 얼리리턴(공격·구르기·가드 차단) | 스펙 §11 | player.gd |
+| D-258 | 수락/완료 UI 부재 8퀘스트 | **QuestNpcPanel.SUPPORTED를 1막 15퀘스트 전부로 확장**(가장 싼 해소안). 실제 플레이로 수락·완료가 불가능하던 게임플레이 블로커라 ⑪-1에 포함 | 스펙 §4.5 | quest_npc_panel.gd |
+| D-259 | 재진입 규칙 | 패널 close 1프레임 입력 유예 + 세대 카운터로 즉시 재시작 | 스펙 §11 | npc_dialogue_controller.gd |
+| D-260 | 잡담 진입 경로 | `call_group("open_npc_dialogue")` 단일 경로 | 스펙 §11 | quest_npc.gd |
+| D-261 | 파일·title 매핑 | giver당 .dialogue 1개, `<quest_id>_<offer|active|ready|done>` / `<npc_id>_everyday` | 스펙 §11 | game/dialogue/*.dialogue |
+| D-262 | 몽실이 분기 타이밍 | `resolve_branch_outcome(choice_id)`로 emit/queue_free를 선택 이후로, 퀘스트 active일 때만 대사 열림 | 스펙 §11 | quest_object.gd |
+| D-263 | 패널+풍선 시각 규칙 | 패널 열림 동안 풍선 `visible=false`, 풍선 레이어는 HUD 위·메뉴 아래. Hud 토스트와 중복 시 풍선 우선 | 스펙 §11 | ui_root.gd |
+| D-265 | 완료 기준 | GUT 단위 테스트 3개 + 헤드리스 대사 진행 스모크를 1차 게이트로. Windows 경로 게이트 스모크 3종의 격리 경로 이식은 별도 과제 | 스펙 §11 | tests |
+| D-266 | 스킬 계열 표시명 확정 | **맞섬(blade)·지킴(guard)·노림(trick)**(세트 A). D-195 placeholder 대체. `ui.skill_tree.series.*` 갱신 | skill-series-names.md | ui_ko.csv |
+| D-267 | 등각 밸런스 사후 확인 | R5/R6 유지(TTK·예고 무영향). horn_rabbit_big(40/160) 불변 가드를 test_unit_scale_invariants에 추가. 원칙 명문화: **사거리·인식·이동은 지면 거리, 겹침 도형은 발밑 footprint 근사(플레이어 공격은 지면 원, 몬스터 접촉·허트박스는 화면 사각형 유지)**. 남북 접근 시 화면상 더 붙는 것은 2:1 등각의 표준 체감으로 수용 | iso-balance-review | test_unit_scale_invariants.gd, 스펙 §2.3 |
+| D-268 | 애셋 인덱스 참조 수집 | 기존 `tools/build/compute_exclude.py`의 스캐너(.gd/.tscn/.tres/project.godot)를 공용 모듈로 빼서 재사용 + atlas JSON(`path` 키)·audio(`file`)·quests 하위 JSON을 추가 규칙으로 | asset-index-v1 §8 | tools/build, tools/qa |
+| D-269 | 애셋 인덱스 형식·범위 | `game/assets/assets.json`: 자체 제작·프로젝트 애셋은 파일 단위, 서드파티 팩은 **팩 단위 + 참조된 파일 목록**만(전체 열거 금지). `.import`·`assets_local/` 제외, checksum 없음, referenced_by 파일 단위. 등급 enum `A|B|C|project`(asset-sources.md에 `project`=자체 제작 추가) | asset-index-v1 §8 | build_asset_index.py |
+| D-270 | 애셋 인덱스 검증 | `tools/qa/validate_asset_index.py` 독립 파일(미참조=경고, 미등록·인덱스 stale=오류), validate_tables.py에서 호출. exclude_filter는 compute_exclude.py가 계속 단일 출처 | asset-index-v1 §8 | validate_asset_index.py |
+
 ## 변경 이력(계속)
 - 2026-09-13 **D-143 후속 플레이 피드백:** 사용자가 샘플의 조작·공간감은 좋으나 공격 모션이 어색하고 타격이 늦다고 평가했다. 같은 독립 샘플의 공격 반응·검 표현을 조정한다. 준비50ms/타격85ms/회수140ms는 이 피드백에 대한 구현 조정안이며 본편 수치의 사용자 확정이 아니다. 이동·맵·배경과 본편/저장은 유지하고, 새 핀 원화·본편 시점 이관 승인은 여전히 별개다. 후속 검증: `docs/qa/quarter-view-attack-feedback-20260913.md`.
 - 2026-09-13 **D-143 — 쿼터뷰 비교 샘플 제작 승인:** 사용자 “너의 추천대로 해보자”에 따라 기존 본편·저장을 보존하고 별도 2D 고정 쿼터뷰 마을 입구/이동/기본 공격/슬라임/가림 샘플을 제작한다. FHD·승인 핀 외형/몸체64×96 목표를 유지한다. 새 핀 방향별 완성 모션 확보와 시점 시험의 성공은 별개다. 본편 전체 이관·3D·회전 카메라·정확한 등각 타일 구조를 확정한 것은 아니다. 범위: `docs/plans/quarter-view-pilot-20260913.md`.
@@ -475,3 +510,4 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 - 2026-09-20: 등각 이관 스펙 결정 7건(D-220~D-226) 확정, iso-1 착수.
 - 2026-09-21: 애셋 생성 전 준비 결정 8건(D-227~D-234) 확정.
 - 2026-09-21: 필드 전역 등각 지형 결정 5건(D-235~D-239) 확정.
+- 2026-09-21: M7-0 대사 시스템 스펙(D-240~D-265)·스킬 계열명(D-266)·등각 밸런스(D-267)·애셋 인덱스(D-268~D-270) 확정.
