@@ -1,0 +1,7 @@
+STYLE: 16-bit style pixel art for a cozy medieval fantasy island RPG. TRUE ISOMETRIC view: 2:1 dimetric projection on a 45-degree diamond grid. Orthographic, NO perspective convergence, NO vanishing point. Light comes from the top-left. Crisp hard-edged pixels, NO anti-aliasing, NO blur, NO gradients, NO glow. Flat shading with exactly 3 tones per surface. Cute, sleepy, stationary proportions, warm and hand-made feel. No text, no watermark, no signature, no UI. Transparent background.
+
+CREATURE RULES: This creature is a fixed-spot guardian (it does not patrol — `patrol_radius_px=0` in game data) and its cap is nearly symmetric from any side, so we only need a FRONT (S) pose and a RIGHT-side (E) pose — the other directions reuse these two via engine-side flips. Ground contact at the bottom-center of a 32x32 logical pixel canvas, creature fills about 70% of canvas height, centered.
+
+A walking mushroom monster, "버섯돌이" (mushroom fellow), a stationary field guardian in the Hartland region. A wide red cap with pale spots: cap base #e0394c, pale spots #f2eaf1, cap underside/gills #a26a83. A short stumpy pale stalk body (#eecf9b base, #d2b37d shadow) with two tiny stubby feet peeking out from under the cap. Sleepy half-closed eyes visible only on the front face, tucked under the cap rim. No arms.
+
+Deliver two separate 1024x1024 images: (1) FRONT view facing the camera (S), sleepy eyes visible under the cap rim; (2) RIGHT side view facing east (E), cap silhouette and stalk only, no face needed. Both at the same scale and same colors.

@@ -202,6 +202,17 @@ fx_<이름>_<프레임수>f.png               예) fx_hit_spark_4f.png
 - 이 표는 지역별 정예/변종을 "고유 이름 + 강화 패턴 1개"로 골격 재사용하라는 GDD 8.1 원칙을
   구현 단위로 옮긴 것이다. 새 지역 몬스터를 배정할 때마다 이 표에 행을 추가한다.
 
+### 9.1 정예 변종 — 신규 골격 없이 재사용 (등각 8방향 전개, D-227)
+
+| 베이스 골격 | 정예/변종 몬스터 | 차별화 방식 | 근거 |
+|---|---|---|---|
+| `horn_rabbit`(뿔토끼) | `horn_rabbit_big`(덩치 뿔토끼) | 팔레트 불변, **엔진 스케일 1.3배**만(신규 아트 없음) | `monsters.json` D-95 주석, `monster-attack-anchor.md` |
+| `goblin_scout`(고블린 정찰병) | `elite_goblin_captain`(고블린 정찰대장) | 같은 캔버스, 팔레트 스왑(붉은/금색 계급 표식 추가) + 엔진 스케일 1.3배 | `monster-attack-anchor.md`, `brief-monsters-iso.md` |
+| `slime`(방울 슬라임) | `elite_bunchi_spawn`(뭉치의 새끼) | 같은 캔버스, 팔레트 스왑(재/잿빛 얼룩 recolor) + 엔진 스케일 1.4배(**D-227** — 이전 "그림자 정령 여우" 서술은 오기, `monsters.json`의 `elite_base_monster_id`/`on_death_split_monster_id` 대로 슬라임 골격이 정본) | `monster-attack-anchor.md`, `docs/brd/04-decisions.md` D-227 |
+
+- 정예는 별도 캔버스를 새로 만들지 않는다 — 이미 엔진이 `AnimatedSprite2D.scale` 오버라이드로
+  키우는 관행이 있으므로(위 표 근거 문서), 아트 물량은 팔레트 스왑만으로 해결한다.
+
 ---
 
 ## 변경 이력

@@ -68,6 +68,7 @@ GDD 아트 스펙은 32×32 타일 / 32×48 캐릭터(640×360 내부 렌더)다
 2. A등급 → `game/assets/third_party/<팩>/` + `LICENSE` 커밋. B등급 → `game/assets_local/<팩>/`(gitignore) + `LICENSES.md`에 출처만 기록.
 3. pixel-artist 에이전트가 `tools/art/`에 규격 변환 스크립트(2× 확대, 시트 슬라이스, 네이밍 규칙 적용)를 두고 `game/assets/sprites/`로 가공본을 생성한다. 가공본도 원본 라이선스를 따른다.
 4. 출시 전 체크: `third_party/`·`assets_local/`에 남은 외부 애셋 목록 → 원작 교체 여부 결정 → 크레딧 화면 생성.
+5. **등각 8방향 AI 생성 시트**(D-219/D-223)는 `docs/art/brief-fin-pixellab-8dir.md`/`brief-monsters-iso.md` 절차를 따르고, 스크립트가 반전 생성한 NE/E/SE 프레임도 원본 5(또는 2)방향과 동일하게 `LICENSES.md` 기록 의무(D-138, 아래)가 적용된다 — "반전은 우리 쪽 후처리니 기록 불필요"라고 보지 않는다.
 
 ## 5. 코드·툴 리소스 (애셋 외)
 
