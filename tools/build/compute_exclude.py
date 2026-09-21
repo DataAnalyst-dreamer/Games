@@ -2,14 +2,12 @@
 """웹 내보내기 exclude_filter 재계산: game/ 안의 .gd/.tscn/.tres/.json/project.godot가 참조하지
 않는 assets/third_party·assets/fonts 파일/폴더 목록을 만든다. 결과를 export_presets.web.cfg의
 exclude_filter에 붙여 넣는다(tests/* 포함). 사용: python3 tools/build/compute_exclude.py"""
-import re, os, glob
+import os
+from asset_scan import collect_references
+
 root = os.path.join(os.path.dirname(__file__), '..', '..', 'game')
-refs = set()
-for pat in ('**/*.gd', '**/*.tscn', '**/*.tres', '**/*.json', 'project.godot'):
-    for f in glob.glob(os.path.join(root, pat), recursive=True):
-        t = open(f, encoding='utf-8', errors='ignore').read()
-        for m in re.findall(r'res://assets/(?:third_party|fonts)/[^"\')\n]+', t):
-            refs.add(m[len('res://'):].rstrip())
+all_refs = collect_references(root)
+refs = {r[len('res://'):] for r in all_refs if '/third_party/' in r or '/fonts/' in r}
 def used(p): return any(p == r or p.startswith(r.rstrip('/') + '/') for r in refs)
 excl = []
 def walk(d):

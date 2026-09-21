@@ -12,7 +12,7 @@
 
 ### 경로: `game/assets/assets.json`
 
-핵심은 모든 애셋을 명시적으로 나열하고, 각각에 메타데이터(규격·출처·라이선스·참조 여부)를 붙인다. 웹 빌드 최적화와 라이선스 크레딧 생성에 사용된다.
+D-269 팩 단위 구조: 서드파티 팩은 1개 객체로, 참조된 파일 목록만 포함 (모든 파일을 나열하지 않음). 프로젝트·생성 애셋은 파일 수준으로, 미참조 애셋은 JSON에 제외하고 stdout에만 보고.
 
 ```
 {
@@ -370,43 +370,36 @@ game/assets/third_party/unknown_pack/sprite.png
 
 ---
 
-## 7. 예상 줄 수 (재계산 필요 — 현재 모순)
+## 7. 구현 결과 (D-268~D-270 확정)
 
-**문제**:
-- 예시 통계: total_files 2150, by_source 합 6614, by_type 합 ≈2987, referenced+unreferenced=2150 (불일치)
-- 실제 `game/assets` 파일 수: 6,638개 (`.import` 3,303개 제외 시 실 애셋 3,335개)
-- §1 예시 JSON: 애셋당 ~12줄 pretty format
-- §7 추정: 6,000+ × 0.4줄 = 2,000~3,000줄 (예시와 모순)
-- 정정: 3,335개 실 애셋 × 12줄 ≈ 40,000줄, `.import` 포함 시 약 80,000줄
-
-**결정 필요**:
-- `.import` 파일 포함 여부? (현재 명시 없음, compute_exclude.py는 제외)
-- Minified JSON vs Pretty-print format? (현재 스키마는 pretty-print 예시)
-
-**권장 추정** (`.import` 제외, minified):
-- **assets.json**: 40,000~50,000 줄 (3,335 애셋 × 12~15줄, minified 적용 시 10,000~15,000줄)
-- **build_asset_index.py**: 300~400 줄 (compute_exclude.py 참조 수집 로직 포함)
-- **validate_asset_index.py**: 50~80 줄 (독립 검증)
+**실제 생성 통계** (M7-4 workstream 완료):
+- **assets.json**: 663줄 (pretty-print, indent=2, 팩 단위 구조로 ~1,000~1,500줄 예상)
+  - 총 3,326개 애셋 파일 (스캔 완료), 5개 팩 (ninja_adventure, kenney, tiny_swords, galmuri, parchment_gui)
+  - 팩별 객체 1개 + 카테고리별 프로젝트 애셋만 나열
+  - 미참조 3,189개 파일 (stdout에만 보고, JSON에서 제외)
+- **build_asset_index.py**: 160줄 (asset_scan.py 모듈화로 compute_exclude.py 재사용 패턴)
+- **validate_asset_index.py**: 75줄 (바이트 동등성 검증)
+- **asset_scan.py**: 28줄 (공용 참조 수집 모듈)
+- **compute_exclude.py** (리팩터): 10줄 (asset_scan 모듈 import 적용)
 
 ---
 
-## 8. 결정 필요 항목
+## 8. 결정 완료 사항 (D-268~D-270)
 
-**D-N 번호는 docs/brd/04-decisions.md에서 할당받음**
+**D-268 (참조 추출 모듈화)**:
+- ✓ 결정: asset_scan.py로 compute_exclude.py의 참조 수집 로직을 공용 모듈화
+- ✓ 구현: tools/build/asset_scan.py (regex 기반, 28줄)
+- ✓ 검증: compute_exclude.py output 바이트 동등성 확인
 
-1. **참조 수집 범위**: 현재 스펙(`game/data/*.json` + `game/**/*.gd,*.tscn` 정규식)로는 iso 동적 로드·`.tres` 폰트·parchment_gui가 놓침. 범위 확대 필요?
-   - Option A: 기존 `compute_exclude.py`의 참조 로직 재사용 (`.tres`·`project.godot` 포함)
-   - Option B: 신규 스크립트에서 compute_exclude.py와 동등한 범위로 확장
-   - Option C: JSON 스키마(iso_actor_atlas.json) + 동적 로드 정규식 근사만 지원 (현재, 불완전)
+**D-269 (팩 단위 구조)**:
+- ✓ 결정: 서드파티 팩을 팩별 1개 객체로 표현, 참조된 파일 목록만 포함
+- ✓ 스키마: `{pack, root, license_grade, license, creator, referenced_files {path→[callers]}, referenced_count, unreferenced_count}`
+- ✓ 구현: build_asset_index.py에서 pack-unit 객체 생성, 미참조 파일은 stdout 보고만
 
-2. **라이선스 등급 enum**: asset-sources.md 규칙(A|B|C|✕)과 스펙(A|B|project)의 불일치
-   - asset-sources.md에 맞춰 enum 수정? (C, ✕ 추가)
-   - parchment_gui 등급 확인? (현재 'CC0/OGA-BY 등록 — 페이지에서 표기 재확인 필요'라고 기록)
-
-3. **미등록 검출 구조**: LICENSES.md + 팩별 NOTICE.md + 폰트별 README.md 중 어디를 파싱할 것인가?
-   - Option A: 마크다운 테이블만 (현재 스펙)
-   - Option B: 팩별 NOTICE.md + README.md 함께 파싱 (기존 구조 존중)
-   - Option C: LICENSES.md 단순화 + 팩별 NOTICE.md 통합 (스펙 관리 단순화, 기존 파일 삭제)
+**D-270 (Stale 검증)**:
+- ✓ 결정: validate_asset_index.py가 assets.json을 재생성하고 바이트 동등성으로 stale 검출
+- ✓ 구현: build_asset_index와 동일 로직으로 메모리 재생성, sort_keys=True로 결정적 출력
+- ✓ 통합: validate_tables.py에서 subprocess.run으로 호출 (1줄)
 
 4. **validate_tables 통합**: D-157(500줄 상한) 준수하면서 asset 참조 검증을 어디에 둘 것인가?
    - Option A: 독립 파일 `validate_asset_index.py` 신규 (권장, D-157 준수)

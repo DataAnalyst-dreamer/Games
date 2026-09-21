@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Dict, List
@@ -555,6 +556,11 @@ def main() -> int:
 
     report = Report()
     print(f"[validate_tables] data dir = {data_dir}")
+
+    # D-270: Validate asset index (independent module)
+    asset_validation = subprocess.run([sys.executable, str(Path(__file__).with_name('validate_asset_index.py'))], check=False)
+    if asset_validation.returncode != 0:
+        return asset_validation.returncode
 
     items = load_json(data_dir / "items.json", report)
     affixes = load_json(data_dir / "affixes.json", report)
