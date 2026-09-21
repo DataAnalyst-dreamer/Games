@@ -124,7 +124,9 @@ func test_horn_rabbit_dash_fields_match_addendum() -> void:
 	assert_almost_eq(float(entry.get("dash_speed_px")), 400.0, 0.0001)
 	assert_almost_eq(float(entry.get("dash_duration_sec")), 0.3, 0.0001)
 	assert_almost_eq(float(entry.get("aggro_range_px")), 160.0, 0.0001)
-	assert_almost_eq(float(entry.get("melee_range_px")), 32.0, 0.0001)
+	# iso-3 R6(승인): 등각 액터 시트로 몸이 커지며 32 -> 36. addendum 원문이 아니라
+	# 이 재튜닝이 기준이다(monsters.json.horn_rabbit._comment 참고).
+	assert_almost_eq(float(entry.get("melee_range_px")), 36.0, 0.0001)
 	assert_almost_eq(float(entry.get("attack_recovery_sec")), 0.7, 0.0001)
 	assert_almost_eq(float(entry.get("patrol_radius_px")), 192.0, 0.0001)
 	assert_almost_eq(float(entry.get("leash_range_px")), 360.0, 0.0001)

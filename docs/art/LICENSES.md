@@ -23,6 +23,24 @@
 - 성격: **정식 애셋 전 자리표시자**. `docs/art/brief-quarter-view-gpt-image.md` §2의 같은 파일명·논리 크기로
   정식 애셋이 나오면 같은 경로에 PNG만 덮어써 교체한다. 최종 게임 아트 승인이 아니다.
 
+### 프로젝트 신규 생성물: 등각 8방향 액터 placeholder 시트 (2026-09-21, D-228~D-234)
+
+`tools/art/gen_iso_actors.py`가 **Pillow로 기초 등각 도형(구·원기둥·상자)만 그려서** 생성한 캐릭터·몬스터
+placeholder 시트다. 위 타일 생성기와 같은 원칙이다 — 외부 이미지·AI 생성물·립 스프라이트를 입력하지 않았고,
+색은 `docs/art/art-bible.md` §3 하틀랜드 32색 표를 스크립트가 직접 파싱해 쓴다(사본 없음). CC0 팩과 무관한
+독립 저작물이며 저작권은 프로젝트 소유, 크레딧 불필요다.
+
+- 산출물: `game/assets/iso/actors/*.png` (핀 + 몬스터 7종 = 8장) + 규격 계약
+  `game/assets/iso/iso_actor_atlas.json`
+- 규격: 셀 96×128 · 발 기준점 (48,112) · 행=방향 · 열=프레임(idle 4 / walk 8 / attack 6) —
+  `tools/art/normalize_ai_sheet.py` 기본값 및 `docs/art/fin-64-production-spec.md`(D-140)와 동일
+- 재생성: `python3 tools/art/gen_iso_actors.py` (난수 없음, 결정적)
+- **교체 대상**: 이 시트들은 `game/assets/third_party/ninja_adventure/` 의 16px 캐릭터·몬스터 스프라이트를
+  본편 플레이어·몬스터 씬에서 **대체**한다. 해당 CC0 팩 자체는 그대로 두고(아이템/무기 등 다른 용도가 남아
+  있다 — 예: 플레이어 무기 오버레이 `Items/Weapons/Sword/Sprite.png`), 액터 시트만 자체 생성물로 바뀐 것이다.
+- 성격: **정식 원화 전 자리표시자**. PixelLab 파이프라인의 정식 핀 8방향 시트가 나오면 같은 경로에 PNG만
+  덮어써 교체한다(행 순서·프레임 열 배치가 같으므로 JSON·코드 변경 없음). 최종 게임 아트 승인이 아니다.
+
 ### 외부 팩
 
 정면 실행 시험(2026-09-12): `prototypes/fin-front-test/assets/`는 선택된 신규 생성 정면 B를 사용자 승인된 코드 방식으로 부위 분리·후처리한 시험 에셋이다. `tools/build_fin_front_test.py`, 에셋 `manifest.json`에 재현·출처 기록. 기존 게임이나 외부 팩의 라이선스를 변경하지 않는다.

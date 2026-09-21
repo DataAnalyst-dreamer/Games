@@ -1,0 +1,119 @@
+{
+  "_comment": "등각 액터 시트 계약(D-228~D-234, 단계 iso-3). tools/art/gen_iso_actors.py 가 만든 기초 도형 placeholder 의 규격이며, 정식 시트는 **같은 경로에 PNG 만 덮어쓰면** 이 JSON 도 코드도 바뀌지 않는다. 행=방향(dir_rows_8/_4 순서), 열=프레임(clips 의 [시작열, 개수]), pivot 은 셀 안의 발 기준점이다. 규격은 tools/art/normalize_ai_sheet.py 기본값과 동일하다.",
+  "_generated_by": "tools/art/gen_iso_actors.py",
+  "_palette_source": "docs/art/art-bible.md §3 (하틀랜드 32색)",
+  "_spec_source": "docs/art/fin-64-production-spec.md (D-140), GDD D-133 (프레임 수)",
+  "_cell": [
+    96,
+    128
+  ],
+  "_pivot": [
+    48,
+    112
+  ],
+  "_cols": 18,
+  "dir_rows_8": [
+    "s",
+    "sw",
+    "w",
+    "nw",
+    "n",
+    "ne",
+    "e",
+    "se"
+  ],
+  "dir_rows_4": [
+    "s",
+    "w",
+    "n",
+    "e"
+  ],
+  "clips": {
+    "idle": [
+      0,
+      4
+    ],
+    "walk": [
+      4,
+      8
+    ],
+    "attack": [
+      12,
+      6
+    ]
+  },
+  "actors": {
+    "fin": {
+      "path": "game/assets/iso/actors/fin.png",
+      "directions": 8,
+      "body_px": [
+        64,
+        96
+      ],
+      "shadow_scale": 2.2
+    },
+    "slime": {
+      "path": "game/assets/iso/actors/slime.png",
+      "directions": 4,
+      "body_px": [
+        40,
+        32
+      ],
+      "shadow_scale": 1.4
+    },
+    "horn_rabbit": {
+      "path": "game/assets/iso/actors/horn_rabbit.png",
+      "directions": 8,
+      "body_px": [
+        44,
+        44
+      ],
+      "shadow_scale": 1.6
+    },
+    "horn_rabbit_big": {
+      "path": "game/assets/iso/actors/horn_rabbit_big.png",
+      "directions": 8,
+      "body_px": [
+        60,
+        60
+      ],
+      "shadow_scale": 2.0
+    },
+    "mushroom": {
+      "path": "game/assets/iso/actors/mushroom.png",
+      "directions": 4,
+      "body_px": [
+        44,
+        56
+      ],
+      "shadow_scale": 1.7
+    },
+    "goblin_scout": {
+      "path": "game/assets/iso/actors/goblin_scout.png",
+      "directions": 8,
+      "body_px": [
+        48,
+        72
+      ],
+      "shadow_scale": 1.8
+    },
+    "elite_goblin_captain": {
+      "path": "game/assets/iso/actors/elite_goblin_captain.png",
+      "directions": 8,
+      "body_px": [
+        64,
+        96
+      ],
+      "shadow_scale": 2.4
+    },
+    "elite_bunchi_spawn": {
+      "path": "game/assets/iso/actors/elite_bunchi_spawn.png",
+      "directions": 8,
+      "body_px": [
+        48,
+        40
+      ],
+      "shadow_scale": 1.7
+    }
+  }
+}

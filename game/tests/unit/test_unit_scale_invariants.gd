@@ -52,8 +52,12 @@ func test_monster_aggro_over_move_speed() -> void:
 			float(pair[1]), EPS, "%s 인식 범위 : 이동 속도" % id)
 
 
+## slime·horn_rabbit 은 iso-3(R5/R6)에서 **의도적으로** 재튜닝됐다 - 액터가 등각 시트로
+## 커지면서 지면 원 몸 콜리전(R1/R2) 반경 합보다 사거리가 짧아 "닿아 보이는데 안 맞는"
+## 구간이 생겼기 때문이다. 단위 전환 불변식이 아니라 승인된 값 변경이므로, 그 둘만
+## 새 기준으로 옮기고 나머지 4종은 단계 (a) 기준 비율을 그대로 지킨다(가드 유지).
 func test_monster_melee_over_aggro() -> void:
-	for pair: Array in [["slime", 14.0 / 64.0], ["horn_rabbit", 16.0 / 80.0],
+	for pair: Array in [["slime", 32.0 / 128.0], ["horn_rabbit", 36.0 / 160.0],
 			["mushroom", 20.0 / 96.0], ["goblin_scout", 90.0 / 110.0],
 			["elite_goblin_captain", 90.0 / 132.0], ["elite_bunchi_spawn", 14.0 / 77.0]]:
 		var id: String = pair[0]

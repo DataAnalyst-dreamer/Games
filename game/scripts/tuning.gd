@@ -93,6 +93,11 @@ const ATTACK_MOVE_INPUT_BLEND_RATIO: float = 0.35
 
 ## 몬스터 머리 위 소형 체력바(D-123)가 마지막 피격 후 노출을 유지하는 시간(초).
 ## 이 시간이 지나면 페이드아웃을 시작해 완전히 숨긴다.
+## 머리 위 표시(HP바·정예 이름표)를 액터 정수리에서 얼마나 띄울지(px, R13).
+## 높이 자체는 시트 계약(iso_actor_atlas.json 의 body_px)이 주므로 여기엔 여백만 둔다 -
+## 예전의 고정 -20/-24/-44 는 16px×2 스프라이트 전제라 96px 몸에서는 배에 붙었다.
+const MONSTER_OVERHEAD_MARGIN_PX: float = 8.0
+
 const MONSTER_HP_BAR_FADE_DELAY_SEC: float = 2.5
 ## 페이드아웃 자체에 걸리는 시간(초, 위 지연 이후).
 const MONSTER_HP_BAR_FADE_DURATION_SEC: float = 0.4

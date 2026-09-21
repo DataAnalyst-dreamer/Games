@@ -15,6 +15,10 @@ var _duration: float = 0.0
 var _shape_node: CollisionShape2D = null
 var _orig_shape: Shape2D = null
 var _orig_shape_position: Vector2 = Vector2.ZERO
+## 씬의 기본 공격 히트박스는 **지면 원**이라 노드에 (1, 0.5) 배율이 걸려 있다(R3).
+## 스킬은 자기 모양을 직접 만들므로 그 배율을 벗겨 두고(안 벗기면 모든 스킬 판정이
+## 조용히 세로로 반이 된다) 복원 시 되돌린다.
+var _orig_shape_scale: Vector2 = Vector2.ONE
 
 ## M4-3: 선딜(anticipation) 지연 콜백이 도착했을 때 이미 이 상태를 벗어났으면(피격·구르기
 ## 캔슬 등 exit()가 먼저 불림) 히트박스를 켜지 않게 막는 가드. D-127(무기 tween 유실
@@ -185,34 +189,39 @@ func _ensure_shape_cached() -> void:
 	if _shape_node != null:
 		_orig_shape = _shape_node.shape
 		_orig_shape_position = _shape_node.position
+		_orig_shape_scale = _shape_node.scale
 
 
-## 4방향(facing) 고정 전제로 arc/line/circle을 근사한다 — ponytail: 실제 부채꼴 판정은
-## 이번 범위 밖(godot-engineer TODO, 완료 보고 질문 목록). circle은 자기 중심 AoE,
-## line은 facing 축에 맞춰 폭/길이를 바꾼 사각형, arc는 facing 쪽으로 치우친 원으로 대체한다.
+## arc/line/circle 근사. D-228(8방향)부터 line 은 **회전**으로 방향을 잡는다 - 예전의
+## "facing 이 LEFT/RIGHT 면 가로, 아니면 세로" 분기는 대각 facing 이 두 조건 어디에도
+## 맞지 않아 else(세로)로 떨어지는 버그였다. 회전은 8방향뿐 아니라 임의 방향에도 맞고
+## 분기 자체가 사라진다.
+## ponytail: arc 는 여전히 facing 쪽으로 치우친 원 근사다(실제 부채꼴 판정은
+## CollisionPolygon2D 가 필요해지는 시점에). circle 은 자기 중심 AoE.
 func _apply_hitbox_shape(shape_name: String, range_px: float, width_px_variant: Variant) -> void:
 	_ensure_shape_cached()
 	if _shape_node == null:
 		return
 	var width_px: float = float(width_px_variant) if width_px_variant != null else range_px
+	_shape_node.scale = Vector2.ONE
 	match shape_name:
 		"line":
 			var rect := RectangleShape2D.new()
-			if player.facing == Vector2.LEFT or player.facing == Vector2.RIGHT:
-				rect.size = Vector2(range_px, width_px)
-			else:
-				rect.size = Vector2(width_px, range_px)
+			rect.size = Vector2(range_px, width_px)
 			_shape_node.shape = rect
+			_shape_node.rotation = player.facing.angle()
 			_shape_node.position = _orig_shape_position + player.facing * (range_px * 0.5)
 		"circle":
 			var circle := CircleShape2D.new()
 			circle.radius = range_px
 			_shape_node.shape = circle
+			_shape_node.rotation = 0.0
 			_shape_node.position = _orig_shape_position
 		_: # "arc" 근사
 			var arc_circle := CircleShape2D.new()
 			arc_circle.radius = range_px * 0.5
 			_shape_node.shape = arc_circle
+			_shape_node.rotation = 0.0
 			_shape_node.position = _orig_shape_position + player.facing * (range_px * 0.5)
 
 
@@ -220,3 +229,5 @@ func _restore_hitbox_shape() -> void:
 	if _shape_node != null and _orig_shape != null:
 		_shape_node.shape = _orig_shape
 		_shape_node.position = _orig_shape_position
+		_shape_node.rotation = 0.0
+		_shape_node.scale = _orig_shape_scale

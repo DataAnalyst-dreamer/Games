@@ -70,6 +70,16 @@ enum State { IDLE, PATROL, CHASE, TELEGRAPH, ATTACK, RECOVER, STUNNED, HURT, DEA
 
 var state: State = State.IDLE
 
+## 바라보는 방향(8방향, D-228). 시트가 4행이면 ActorSheet 가 수평으로 접는다(D-230).
+var facing: Vector2 = Vector2.DOWN
+
+## 발밑 그림자 배율(D-232 로 sprite.scale 이 1이 된 뒤의 크기 단서). 시트 계약이 준다.
+var shadow_scale: float = 1.0
+
+## 현재 재생 중인 클립의 기본 이름(idle/walk/attack). 방향이 바뀌면 같은 클립의 다른
+## 행으로 갈아탄다.
+var _clip: String = "idle"
+
 var hp: int = 1
 var atk: int = 1
 var move_speed_px: float = 40.0
@@ -199,6 +209,12 @@ func _ready() -> void:
 	if tier == "elite":
 		_setup_nameplate()
 	_rng.randomize()
+	# 등각 액터 시트(D-228~D-234). 몬스터는 monster_id 가 곧 액터 id 라 씬에 새 export 가
+	# 필요 없다 - "데이터+씬 상속만으로 신규 몬스터 추가"(F6-1) 원칙 그대로다.
+	ActorSheet.apply(sprite, monster_id)
+	shadow_scale = ActorSheet.shadow_scale(monster_id)
+	ActorSheet.set_speeds(sprite, Tuning.ANIM_IDLE_FPS, Tuning.ANIM_WALK_FPS,
+		Tuning.MONSTER_ATTACK_ACTIVE_SEC)
 	queue_redraw() # D-204: 발밑 그림자 최초 그리기.
 	_enter_state(State.IDLE)
 
@@ -208,7 +224,7 @@ func _ready() -> void:
 ## 몬스터는 종별 스프라이트 배율만큼 그림자도 커진다(D-204 "크기별 배율 허용") -
 ## _attack_vfx_offset_px()가 이미 sprite.scale.x로 크기를 읽는 것과 같은 방식이다.
 func _draw() -> void:
-	FootShadow.draw(self, sprite.scale.x if sprite != null else 1.0)
+	FootShadow.draw(self, shadow_scale)
 
 
 func _load_stats() -> void:
@@ -295,6 +311,8 @@ func _physics_process(delta: float) -> void:
 
 func _enter_state(next: State) -> void:
 	state = next
+	# 상태 -> 클립은 여기 한 곳에서만 정한다(전이는 전부 이 함수를 지난다).
+	_play_clip(_clip_for(state))
 	match state:
 		State.IDLE:
 			velocity = Vector2.ZERO
@@ -312,6 +330,7 @@ func _enter_state(next: State) -> void:
 			velocity = Vector2.ZERO
 			_state_timer = telegraph_sec
 			_attack_dir = _direction_to_player()
+			_face_towards(_attack_dir) # 예고 중에 어디를 치는지 스프라이트로도 읽히게.
 			_start_telegraph_flash()
 		State.ATTACK:
 			match attack_pattern_id:
@@ -560,10 +579,15 @@ func _setup_nameplate() -> void:
 	# 폰트 크기는 화면 px 이라 월드 배율을 안 타므로 scale 로 키운다(D-206).
 	_elite_nameplate.add_theme_font_size_override("font_size", 8)
 	_elite_nameplate.scale = Vector2(2.0, 2.0)
-	_elite_nameplate.position = Vector2(-_ELITE_HP_BAR_WIDTH_PX * 0.5, -44.0)
+	_elite_nameplate.position = Vector2(-_ELITE_HP_BAR_WIDTH_PX * 0.5, _overhead_y() - 16.0)
 	_elite_nameplate.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_elite_nameplate.custom_minimum_size = Vector2(_ELITE_HP_BAR_WIDTH_PX * 0.5, 10.0)
 	add_child(_elite_nameplate)
+
+
+## 머리 위 표시의 y(발밑 원점 기준, 음수). 시트의 body_px 높이 + 여백.
+func _overhead_y() -> float:
+	return -(ActorSheet.body_height(monster_id) + Tuning.MONSTER_OVERHEAD_MARGIN_PX)
 
 
 ## 머리 위 소형 체력바(D-123). 모든 티어에 생성하되 정예는 기존 스타일(골드 테두리,
@@ -575,7 +599,8 @@ func _setup_hp_bar() -> void:
 	var width: float = _ELITE_HP_BAR_WIDTH_PX if is_elite else _HP_BAR_WIDTH_PX
 	var height: float = _ELITE_HP_BAR_HEIGHT_PX if is_elite else _HP_BAR_HEIGHT_PX
 	var bg_color: Color = Color(1.0, 0.85, 0.2) if is_elite else Color(0.05, 0.05, 0.05, 0.85)
-	var y_pos: float = -24.0 if is_elite else -20.0 # D-206 단위 전환 ×2.
+	# R13: 머리 위 위치는 시트 계약의 body_px 높이에서 온다 - 고정값은 16px×2 전제였다.
+	var y_pos: float = _overhead_y()
 	var inset: float = 2.0 if is_elite else 1.0
 
 	_hp_bar_bg = ColorRect.new()
@@ -647,9 +672,37 @@ func _start_cast_flash() -> void:
 		tween.tween_property(sprite, "modulate", original, 0.15)
 
 
+## 상태별 클립. 예고·시전은 공격 자세를 쓴다(예고 0.5초 규칙이 자세로도 보이게).
+func _clip_for(value: State) -> String:
+	match value:
+		State.PATROL, State.CHASE:
+			return "walk"
+		State.TELEGRAPH, State.ATTACK, State.WHISTLE, State.WAVE:
+			return "attack"
+		_:
+			return "idle"
+
+
+## 바라보는 방향을 8방향으로 양자화하고 현재 클립의 해당 행으로 갈아탄다.
+## 플레이어와 달리 완충/디바운스를 쓰지 않는다 - 몬스터는 AI 가 정한 목표를 향해 한
+## 방향으로만 돌아서 입력 흔들림 자체가 없다(D-121 의 문제는 아날로그 입력 고유의 것).
 func _face_towards(dir: Vector2) -> void:
-	if dir.length() > 0.01 and sprite != null:
-		sprite.flip_h = dir.x < 0.0
+	if dir.length() <= 0.01:
+		return
+	facing = FacingCalc.sector_vector(FacingCalc.sector_of(dir))
+	_play_clip(_clip)
+
+
+## 상태에 맞는 클립을 방향 행과 함께 재생한다. 같은 애니메이션이면 재시작하지 않는다.
+func _play_clip(base: String) -> void:
+	_clip = base
+	if sprite == null or sprite.sprite_frames == null:
+		return
+	var anim := StringName(ActorSheet.anim_name(monster_id, base, facing))
+	if not sprite.sprite_frames.has_animation(anim):
+		return
+	if sprite.animation != anim or not sprite.is_playing():
+		sprite.play(anim)
 
 
 func _direction_to_player() -> Vector2:
@@ -700,7 +753,8 @@ func _fire_hitbox(duration_sec: float = -1.0) -> void:
 	hitbox.ignores_iframes = false
 	hitbox.element = StringName(element)
 	hitbox.source = self
-	hitbox.position = _attack_dir * _attack_vfx_offset_px()
+	# R4/D-222 와 같은 이유: attack_vfx_offset_px 도 monsters.json 의 *_px = 지면 거리.
+	hitbox.position = IsoMath.offset_for_ground_distance(_attack_dir, _attack_vfx_offset_px())
 	var active_duration: float = duration_sec if duration_sec > 0.0 else Tuning.MONSTER_ATTACK_ACTIVE_SEC
 	hitbox.activate(active_duration)
 	AudioManager.play_sfx(StringName("%s_attack" % monster_id), global_position)
@@ -725,7 +779,8 @@ func _attack_vfx_offset_px() -> float:
 func _activate_spore_patch() -> void:
 	if _spore_hitbox == null:
 		return
-	_spore_hitbox.global_position = global_position + _attack_dir * melee_range_px
+	_spore_hitbox.global_position = global_position \
+		+ IsoMath.offset_for_ground_distance(_attack_dir, melee_range_px)
 	_spore_hitbox.reset_hits()
 	_spore_hitbox.activate(-1.0) # 자동 비활성화 없음 — _deactivate_spore_patch()가 끈다.
 	if _spore_tick_timer != null:
