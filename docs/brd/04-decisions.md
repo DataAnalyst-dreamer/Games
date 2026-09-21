@@ -407,6 +407,11 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 | D-232 | 전투 판정 볼륨 | **지면 평면(발밑) 유지**(RO·디아블로 방식). 스프라이트 3배 확대에도 실루엣 판정 아님. 지면 원 콜리전(R1~R3)·공격 오프셋 지면 단위(R4), melee_range slime 32·rabbit 36·big 40(R5·R6, 피해 불변). 통로 폭 2칸·배치 간격 유지 | iso-3 재튜닝 표 | combat.json, monsters.json, tuning.gd |
 | D-233 | SmokeSpriteAxis | 삭제(16px region 하드코딩, SmokeIsoActors가 흡수) | iso-3 계획 | tests/smoke |
 | D-234 | 검 오버레이 | WeaponPivot 유지(D-127 회귀 가드), 피벗 y −48·배율 조정 | iso-3 계획 | Player.tscn |
+| D-235 | 정예 스포너 등각 좌표 | `SPAWN_POS_GLOBAL_TILE` 원시 곱셈 → `IsoMath.cell_to_screen` 경유(iso-1 누락분 수정) | 필드 지형 계획 | elite_spawner.gd |
+| D-236 | 물/개울 충돌 | ground_solid 종류에 실제 마름모 콜리전 부여(기존엔 시각만). 연못이 퀘스트 트리거를 막지 않게 rect 조정(world_objects 좌표 불변) | 필드 지형 계획 | world.gd, world_layout_hartland.json |
+| D-237 | 고도 2단 표현 | Elev2 레이어 신설 없이 `cliff_block_64` 벽으로. 실제 보행 가능한 2단 대지는 후속 | 필드 지형 계획 | world_layout_hartland.json |
+| D-238 | 계단식 진입로 | `cliff_ramp` placeholder로 근사. 필드 두 번째 워프 지점은 범위 밖(후보 좌표만 hartland.md ⑪) | 필드 지형 계획 | gen_iso_tiles_field.py |
+| D-239 | 레이아웃 검증기 | `tools/qa/validate_layout.py`: 시작점→퀘스트 목표·고정 스폰 BFS 도달성 + 오브젝트 묻힘 검사를 validate_tables.py에 통합. 배치 변경은 이 검사를 통과해야 한다 | 필드 지형 구현 | validate_layout.py |
 
 ## 변경 이력(계속)
 - 2026-09-13 **D-143 후속 플레이 피드백:** 사용자가 샘플의 조작·공간감은 좋으나 공격 모션이 어색하고 타격이 늦다고 평가했다. 같은 독립 샘플의 공격 반응·검 표현을 조정한다. 준비50ms/타격85ms/회수140ms는 이 피드백에 대한 구현 조정안이며 본편 수치의 사용자 확정이 아니다. 이동·맵·배경과 본편/저장은 유지하고, 새 핀 원화·본편 시점 이관 승인은 여전히 별개다. 후속 검증: `docs/qa/quarter-view-attack-feedback-20260913.md`.
@@ -469,3 +474,4 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 - 2026-09-20: 본편 시점을 진짜 등각(RO·디아블로 계열)으로 재확정(D-219, D-199·D-200 폐기).
 - 2026-09-20: 등각 이관 스펙 결정 7건(D-220~D-226) 확정, iso-1 착수.
 - 2026-09-21: 애셋 생성 전 준비 결정 8건(D-227~D-234) 확정.
+- 2026-09-21: 필드 전역 등각 지형 결정 5건(D-235~D-239) 확정.
