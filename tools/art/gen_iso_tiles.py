@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""등각(2:1 다이메트릭) placeholder 애셋 생성기 (D-219~D-226, 단계 iso-2).
+"""등각(2:1 다이메트릭) placeholder 애셋 생성기 — 마을 (D-219~D-226, 단계 iso-2).
 
 기초 도형 + 하틀랜드 32색으로 라그나로크·디아블로 계열 등각 애셋을 만든다. 정식 애셋
 (docs/art/brief-quarter-view-gpt-image.md)이 나오면 **같은 경로에 PNG 만 덮어쓰면** 코드
@@ -17,156 +17,26 @@ iso_atlas.json 이다.
   * 발 기준점 = **바닥 마름모의 중심**. world.gd 가 셀 중심에 노드를 놓고 이 pivot 만큼
     그림을 끌어올린다(Y-sort 가 발밑 기준으로 걸리게).
 
-팔레트는 art-bible.md §3 표를 직접 파싱한다 - 사본을 만들면 art-bible 과 갈라진다.
+M6-3: 공용 프리미티브(팔레트 파싱·iso_box·diamond 등)는 `iso_shapes.py`로 분리했다
+(500줄 상한, 필드 지형용 `gen_iso_tiles_field.py`와 함께 씀). 이 파일은 마을 애셋만
+남는다.
 
 사용: python3 tools/art/gen_iso_tiles.py [--out game/assets/iso]
 """
 import argparse
 import json
 import random
-import re
 from pathlib import Path
 
-from PIL import Image, ImageDraw
+from iso_shapes import (
+    CELL_H, CELL_W, ELEV_STEP, SHADE_SE, SHADE_SE_ROOF, SHADE_SW, diamond,
+    ground_shadow, iso_box, load_palette, make_ground, make_simple_box,
+    new_image, role_colors, shade, speck,
+)
+from PIL import ImageDraw
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-ART_BIBLE = ROOT / "docs" / "art" / "art-bible.md"
-CELL_W, CELL_H = 64, 32
-SHADE_SW = 0.92   # 남서면: 좌상단 빛을 더 받는다
-SHADE_SE = 0.72   # 남동면: 그늘
-## 지붕은 채도가 높아 SHADE_SE(0.72)를 그대로 먹이면 진흙색으로 읽힌다.
-SHADE_SE_ROOF = 0.84
-SHADE_TOP = 1.0
-ELEV_STEP = 32    # 고도 한 단(D-224)
 SEED = 20260921
-
-
-def load_palette():
-    text = ART_BIBLE.read_text(encoding="utf-8")
-    section = text.split("## 3. 지역 팔레트")[1].split("\n## ")[0]
-    pairs = re.findall(r"\|\s*`(#[0-9a-fA-F]{6})`\s*\|\s*([^|]+?)\s*\|", section)
-    if len(pairs) < 20:
-        raise SystemExit(f"art-bible §3 팔레트를 읽지 못했다({len(pairs)}색).")
-    return {name: hex_to_rgb(code) for code, name in pairs}
-
-
-def hex_to_rgb(code):
-    code = code.lstrip("#")
-    return tuple(int(code[i:i + 2], 16) for i in (0, 2, 4))
-
-
-def shade(color, factor):
-    return tuple(max(0, min(255, int(c * factor))) for c in color[:3])
-
-
-def role_colors(by_name):
-    def find(*keywords):
-        for name, rgb in by_name.items():
-            if all(k in name for k in keywords):
-                return rgb
-        raise SystemExit(f"팔레트에서 '{' '.join(keywords)}' 색을 찾지 못했다.")
-    return {
-        "ink": find("잉크"), "grass": find("잔디", "베이스"),
-        "grass_hi": find("잔디", "하이라이트"), "grass_sh": find("그림자"),
-        "dirt": find("길"), "dirt_sh": find("흙"),
-        "stone": find("돌·벽"), "stone_sh": find("다크 그레이"),
-        "wood": find("나무줄기 /"), "wood_sh": find("나무줄기 그림자"),
-        "wood_hi": find("목조 벽 하이라이트"), "leaf": find("나뭇잎"),
-        "roof": find("지붕 베이스"), "roof_hi": find("지붕·소품"),
-        "water": find("물 하이라이트"), "water_sh": find("물 그림자"),
-        "straw": find("모래"), "paper": find("연분홍"), "accent": find("레드"),
-        "rune": find("물 최상단"), "moss": find("이끼"),
-    }
-
-
-def new_image(w, h):
-    return Image.new("RGBA", (w, h), (0, 0, 0, 0))
-
-
-# --- 등각 프리미티브 ---
-
-def diamond(cx, cy, cells_w=1, cells_d=1):
-    """footprint 중심 (cx,cy) 의 마름모 꼭짓점 N,E,S,W."""
-    half_w = CELL_W * 0.5 * max(cells_w, cells_d)
-    half_h = CELL_H * 0.5 * max(cells_w, cells_d)
-    return [(cx, cy - half_h), (cx + half_w, cy), (cx, cy + half_h), (cx - half_w, cy)]
-
-
-def draw_top(d, cx, cy, color, ink=None, cells=1):
-    pts = diamond(cx, cy, cells, cells)
-    d.polygon(pts, fill=color)
-    if ink:
-        d.polygon(pts, outline=ink)
-    return pts
-
-
-def iso_box(d, bx, by, height, base, ink, cells=1, top_color=None,
-            outline_top=True):
-    """바닥 마름모 중심 (bx,by) 에서 height 만큼 솟은 등각 상자.
-
-    남서면과 남동면을 **같은 넓이로** 그린다 - 이게 등각 입체의 핵심이다.
-    """
-    half_w = CELL_W * 0.5 * cells
-    half_h = CELL_H * 0.5 * cells
-    top_cy = by - height
-    west = (bx - half_w, top_cy)
-    south = (bx, top_cy + half_h)
-    east = (bx + half_w, top_cy)
-    west_b = (bx - half_w, by)
-    south_b = (bx, by + half_h)
-    east_b = (bx + half_w, by)
-    d.polygon([west, south, south_b, west_b], fill=shade(base, SHADE_SW))
-    d.polygon([south, east, east_b, south_b], fill=shade(base, SHADE_SE))
-    draw_top(d, bx, top_cy, top_color or shade(base, SHADE_TOP),
-             ink if outline_top else None, cells)
-    d.polygon([west, south, south_b, west_b], outline=ink)
-    d.polygon([south, east, east_b, south_b], outline=ink)
-    return top_cy
-
-
-def ground_shadow(d, bx, by, cells=1):
-    pts = diamond(bx, by + 2, cells, cells)
-    d.polygon(pts, fill=(0, 0, 0, 55))
-
-
-def speck(d, rng, pts_box, color, count):
-    x0, y0, x1, y1 = pts_box
-    for _ in range(count):
-        d.point((rng.randrange(x0, x1), rng.randrange(y0, y1)), fill=color)
-
-
-def in_diamond(x, y, cx, cy, half_w, half_h):
-    return abs(x + 0.5 - cx) / half_w + abs(y + 0.5 - cy) / half_h <= 1.0
-
-
-# --- 지면 타일 ---
-
-def make_ground(rng, c, base, variant):
-    """64×32 마름모 지면. 가장자리를 어둡게 하지 않아 이어 붙여도 격자선이 안 보인다."""
-    img = new_image(CELL_W, CELL_H)
-    d = ImageDraw.Draw(img)
-    draw_top(d, CELL_W * 0.5, CELL_H * 0.5, base)
-    box = (6, 4, CELL_W - 6, CELL_H - 4)
-    if variant == 0:
-        speck(d, rng, box, shade(base, 1.10), 10)
-        speck(d, rng, box, shade(base, 0.90), 6)
-    elif variant == 1:      # 풀 뭉치
-        speck(d, rng, box, shade(base, 1.10), 6)
-        for _ in range(3):
-            x, y = rng.randrange(12, CELL_W - 12), rng.randrange(8, CELL_H - 6)
-            d.line([(x, y), (x + rng.choice([-1, 1]), y - 4)], fill=shade(base, 0.78))
-    elif variant == 2:      # 들꽃
-        speck(d, rng, box, shade(base, 1.10), 8)
-        for _ in range(3):
-            x, y = rng.randrange(14, CELL_W - 14), rng.randrange(10, CELL_H - 8)
-            d.point((x, y), fill=(255, 255, 255))
-            d.point((x + 1, y + 1), fill=c["accent"])
-    else:                   # 자갈
-        speck(d, rng, box, shade(base, 1.08), 6)
-        for _ in range(3):
-            x, y = rng.randrange(12, CELL_W - 14), rng.randrange(8, CELL_H - 8)
-            d.ellipse([x, y, x + 4, y + 2], fill=c["stone"])
-    return img
 
 
 # --- 고도: 절벽 블록 ---
@@ -210,18 +80,6 @@ def make_tree(rng, c):
           shade(c["leaf"], 0.8), 22)
     d.ellipse([bx - 28, top_cy - canopy, bx + 28, top_cy + 12], outline=c["ink"])
     return img
-
-
-def make_simple_box(rng, c, height, base, cells=1.0, top_color=None, speckle=None):
-    span = int(CELL_W * cells)
-    img = new_image(span, int(CELL_H * cells) + height)
-    d = ImageDraw.Draw(img)
-    bx, by = span * 0.5, CELL_H * cells * 0.5 + height
-    ground_shadow(d, bx, by, cells)
-    iso_box(d, bx, by, height, base, c["ink"], cells=cells, top_color=top_color)
-    if speckle:
-        speck(d, rng, (4, int(by - height) + 4, span - 4, int(by) + 6), speckle, 18)
-    return img, d, bx, by
 
 
 def make_bush(rng, c):
@@ -406,6 +264,22 @@ def make_marker(rng, c):
     return img
 
 
+def emit(assets, out_root, out_arg, category, name, image, **meta):
+    folder = out_root / category
+    folder.mkdir(parents=True, exist_ok=True)
+    image.save(folder / f"{name}.png")
+    assets[name] = dict(path=f"{out_arg}/{category}/{name}.png",
+                        width=image.width, height=image.height, **meta)
+    print(f"  {category}/{name}.png  {image.width}×{image.height}")
+
+
+def prop(assets, out_root, out_arg, category, name, image, cells=1.0, band=0.0):
+    """발 기준점 = 바닥 마름모 중심. 그림 높이에서 역산한다."""
+    pivot_y = image.height - CELL_H * cells * 0.5
+    emit(assets, out_root, out_arg, category, name, image, kind="prop",
+         footprint_cells=cells, pivot=[image.width * 0.5, pivot_y], collision_band=band)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", default="game/assets/iso")
@@ -415,58 +289,51 @@ def main():
     c = role_colors(load_palette())
     assets = {}
 
-    def emit(category, name, image, **meta):
-        folder = out_root / category
-        folder.mkdir(parents=True, exist_ok=True)
-        image.save(folder / f"{name}.png")
-        assets[name] = dict(path=f"{args.out}/{category}/{name}.png",
-                            width=image.width, height=image.height, **meta)
-        print(f"  {category}/{name}.png  {image.width}×{image.height}")
+    def e(*a, **kw):
+        emit(assets, out_root, args.out, *a, **kw)
 
-    def prop(category, name, image, cells=1.0, band=0.0):
-        """발 기준점 = 바닥 마름모 중심. 그림 높이에서 역산한다."""
-        pivot_y = image.height - CELL_H * cells * 0.5
-        emit(category, name, image, kind="prop", footprint_cells=cells,
-             pivot=[image.width * 0.5, pivot_y], collision_band=band)
+    def p(*a, **kw):
+        prop(assets, out_root, args.out, *a, **kw)
 
     print("지면 타일(64×32 마름모):")
     for index, suffix in enumerate("abc"):
-        emit("ground", f"tile_grass_{suffix}", make_ground(rng, c, c["grass"], index),
-             kind="ground", cell=[CELL_W, CELL_H])
-    emit("ground", "tile_dirt", make_ground(rng, c, c["dirt"], 3),
-         kind="ground", cell=[CELL_W, CELL_H])
-    emit("ground", "tile_water", make_ground(rng, c, c["water_sh"], 0),
-         kind="ground_solid", cell=[CELL_W, CELL_H], collision_band=1.0)
+        e("ground", f"tile_grass_{suffix}", make_ground(rng, c, c["grass"], index),
+          kind="ground", cell=[CELL_W, CELL_H])
+    e("ground", "tile_dirt", make_ground(rng, c, c["dirt"], 3),
+      kind="ground", cell=[CELL_W, CELL_H])
+    e("ground", "tile_water", make_ground(rng, c, c["water_sh"], 0),
+      kind="ground_solid", cell=[CELL_W, CELL_H], collision_band=1.0)
 
     print("고도(D-224):")
     for height in (ELEV_STEP, ELEV_STEP * 2):
-        prop("walls", f"cliff_block_{height}", make_cliff_block(rng, c, height),
-             cells=1.0, band=1.0)
+        p("walls", f"cliff_block_{height}", make_cliff_block(rng, c, height),
+          cells=1.0, band=1.0)
 
     print("건물:")
-    prop("buildings", "house_a", make_house(rng, c), cells=2.0, band=1.0)
-    prop("buildings", "smithy", make_smithy(rng, c), cells=2.0, band=1.0)
+    p("buildings", "house_a", make_house(rng, c), cells=2.0, band=1.0)
+    p("buildings", "smithy", make_smithy(rng, c), cells=2.0, band=1.0)
 
     print("소품:")
-    prop("props", "tree_oak", make_tree(rng, c), band=0.5)
-    prop("props", "bush", make_bush(rng, c))
-    prop("props", "rock", make_rock(rng, c), band=0.5)
-    prop("props", "fence_sw", make_fence(rng, c, True), band=0.4)
-    prop("props", "fence_se", make_fence(rng, c, False), band=0.4)
-    prop("props", "board", make_board(rng, c))
-    prop("props", "mailbox", make_mailbox(rng, c))
-    prop("props", "waystone", make_waystone(rng, c))
-    prop("props", "well", make_well(rng, c), band=0.7)
-    prop("props", "cargo_pile", make_cargo(rng, c))
-    prop("props", "marker_stone", make_marker(rng, c))
+    p("props", "tree_oak", make_tree(rng, c), band=0.5)
+    p("props", "bush", make_bush(rng, c))
+    p("props", "rock", make_rock(rng, c), band=0.5)
+    p("props", "fence_sw", make_fence(rng, c, True), band=0.4)
+    p("props", "fence_se", make_fence(rng, c, False), band=0.4)
+    p("props", "board", make_board(rng, c))
+    p("props", "mailbox", make_mailbox(rng, c))
+    p("props", "waystone", make_waystone(rng, c))
+    p("props", "well", make_well(rng, c), band=0.7)
+    p("props", "cargo_pile", make_cargo(rng, c))
+    p("props", "marker_stone", make_marker(rng, c))
 
     atlas = {
-        "_comment": ("등각 애셋 계약(D-219~D-226). tools/art/gen_iso_tiles.py 가 만든 기초 "
-                     "도형 placeholder 의 규격이며, 정식 애셋은 같은 경로·같은 크기로 PNG 만 "
-                     "덮어쓰면 된다. pivot 은 **바닥 마름모 중심**(발 기준점), footprint_cells 는 "
-                     "차지하는 마름모 칸 수, collision_band 는 그 비율만큼 마름모 콜리전을 "
-                     "건다(0이면 통과 가능)."),
-        "_generated_by": "tools/art/gen_iso_tiles.py",
+        "_comment": ("등각 애셋 계약(D-219~D-226). tools/art/gen_iso_tiles.py(마을)와 "
+                     "gen_iso_tiles_field.py(필드 지형)가 만든 기초 도형 placeholder 의 "
+                     "규격이며, 정식 애셋은 같은 경로·같은 크기로 PNG 만 덮어쓰면 된다. "
+                     "pivot 은 **바닥 마름모 중심**(발 기준점), footprint_cells 는 차지하는 "
+                     "마름모 칸 수, collision_band 는 그 비율만큼 마름모 콜리전을 건다"
+                     "(0이면 통과 가능)."),
+        "_generated_by": "tools/art/gen_iso_tiles.py + gen_iso_tiles_field.py",
         "_palette_source": "docs/art/art-bible.md §3 (하틀랜드 32색)",
         "_cell": [CELL_W, CELL_H],
         "_elevation_step": ELEV_STEP,

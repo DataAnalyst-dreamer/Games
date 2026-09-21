@@ -79,9 +79,11 @@ func test_respawns_after_play_time_exhausts_the_timer() -> void:
 func test_respawn_position_matches_hartland_fixed_spawn_point() -> void:
 	var sp := _make_spawner()
 	var captain: MonsterBase = sp._instances["elite_goblin_captain"]
-	var expected: Vector2 = EliteSpawnerScript.SPAWN_POS_GLOBAL_TILE["elite_goblin_captain"] \
-		* float(Tuning.TILE_SIZE_PROTOTYPE)
-	assert_eq(captain.global_position, expected, "hartland.md ⑤ 고정 스폰 지점(임시 상수)이어야 한다")
+	# D-235: 정사각 격자 시절의 원시 곱셈이 아니라 IsoMath.cell_to_screen() 을 거친
+	# 값이어야 한다(등각 이관 iso-1 누락분 수정, world.gd 의 다른 배치와 공식을 맞춤).
+	var expected: Vector2 = IsoMath.cell_to_screen(
+		Vector2i(EliteSpawnerScript.SPAWN_POS_GLOBAL_TILE["elite_goblin_captain"]))
+	assert_eq(captain.global_position, expected, "hartland.md ⑤ 고정 스폰 지점(임시 상수, IsoMath 경유)이어야 한다")
 
 
 func test_game_state_serializes_play_time_and_elite_respawn_timers() -> void:

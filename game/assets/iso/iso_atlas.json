@@ -1,6 +1,6 @@
 {
-  "_comment": "등각 애셋 계약(D-219~D-226). tools/art/gen_iso_tiles.py 가 만든 기초 도형 placeholder 의 규격이며, 정식 애셋은 같은 경로·같은 크기로 PNG 만 덮어쓰면 된다. pivot 은 **바닥 마름모 중심**(발 기준점), footprint_cells 는 차지하는 마름모 칸 수, collision_band 는 그 비율만큼 마름모 콜리전을 건다(0이면 통과 가능).",
-  "_generated_by": "tools/art/gen_iso_tiles.py",
+  "_comment": "등각 애셋 계약(D-219~D-226). tools/art/gen_iso_tiles.py(마을)와 gen_iso_tiles_field.py(필드 지형)가 만든 기초 도형 placeholder 의 규격이며, 정식 애셋은 같은 경로·같은 크기로 PNG 만 덮어쓰면 된다. pivot 은 **바닥 마름모 중심**(발 기준점), footprint_cells 는 차지하는 마름모 칸 수, collision_band 는 그 비율만큼 마름모 콜리전을 건다(0이면 통과 가능).",
+  "_generated_by": "tools/art/gen_iso_tiles.py + gen_iso_tiles_field.py",
   "_palette_source": "docs/art/art-bible.md §3 (하틀랜드 32색)",
   "_cell": [
     64,
@@ -236,6 +236,65 @@
       "pivot": [
         32.0,
         46.0
+      ],
+      "collision_band": 0.0
+    },
+    "tile_stream": {
+      "path": "game/assets/iso/ground/tile_stream.png",
+      "width": 64,
+      "height": 32,
+      "kind": "ground_solid",
+      "cell": [
+        64,
+        32
+      ],
+      "collision_band": 1.0
+    },
+    "cave_entrance": {
+      "path": "game/assets/iso/walls/cave_entrance.png",
+      "width": 64,
+      "height": 64,
+      "kind": "prop",
+      "footprint_cells": 1.0,
+      "pivot": [
+        32.0,
+        48.0
+      ],
+      "collision_band": 0.0
+    },
+    "cliff_ramp": {
+      "path": "game/assets/iso/walls/cliff_ramp.png",
+      "width": 64,
+      "height": 64,
+      "kind": "prop",
+      "footprint_cells": 1.0,
+      "pivot": [
+        32.0,
+        48.0
+      ],
+      "collision_band": 0.0
+    },
+    "bridge": {
+      "path": "game/assets/iso/props/bridge.png",
+      "width": 64,
+      "height": 44,
+      "kind": "prop",
+      "footprint_cells": 1.0,
+      "pivot": [
+        32.0,
+        28.0
+      ],
+      "collision_band": 0.0
+    },
+    "signpost": {
+      "path": "game/assets/iso/props/signpost.png",
+      "width": 64,
+      "height": 86,
+      "kind": "prop",
+      "footprint_cells": 1.0,
+      "pivot": [
+        32.0,
+        70.0
       ],
       "collision_band": 0.0
     }
