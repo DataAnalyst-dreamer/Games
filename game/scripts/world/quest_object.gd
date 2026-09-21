@@ -27,9 +27,24 @@ const HUD_THEME: Theme = preload("res://ui/theme.tres")
 @export var vanish_on_complete: bool = false
 @export var branch_quest_id: StringName = &""
 @export var branch_choice_id: StringName = &""
+## 대사 분기 경로(D-262). 비어 있으면 기존 branch_choice_id 즉시 확정 경로(하위호환).
+## 값이 있으면 branch_quest_id가 "active"일 때만 이 리소스를 열어 플레이어가 직접
+## 고르게 하고, emit/vanish는 응답의 do절이 resolve_branch_outcome()으로 미룬다.
+@export var dialogue_path: String = ""
 
-@onready var _visual: Node2D = $Placeholder
-@onready var _visual_used: Node2D = get_node_or_null("PlaceholderUsed")
+## world_objects.json 의 `sprite` 키로 종류별 외형을 바꾼다(D-218). 비우면 씬 기본값
+## (marker_stone)을 쓴다 — quest_layout_spawner.gd 가 instantiate() 직후, 즉 @onready
+## 가 돌기 전에 대입하므로 값만 보관하고 _ready() 에서 한 번 더 적용한다(quest_npc.gd 와
+## 동일 패턴).
+@export var sprite_texture: Texture2D:
+	set(value):
+		sprite_texture = value
+		_apply_sprite_texture()
+
+## 이미 사용한 오브젝트의 탈색. 전용 "사용됨" 그림을 종류마다 따로 만들지 않는다.
+const USED_TINT := Color(0.45, 0.45, 0.45, 0.75)
+
+@onready var _visual: CanvasItem = $Placeholder
 @onready var _marker: Label = $MarkerLabel
 
 var _used: bool = false
@@ -39,7 +54,7 @@ var _player_inside: Player = null
 ## 머리 위 "목표 표식"(M3-4, D-163) — quest_npc.gd의 ▼ 표식과 같은 바운스 연출을
 ## 그대로 복제한다(공용 헬퍼로 뽑기엔 두 곳뿐이라 과함, 판정 로직만
 ## QuestSystem.is_tracked_objective_key()로 공유한다).
-const MARKER_BOUNCE_PX := 6.0
+const MARKER_BOUNCE_PX := 12.0 # D-206 단위 전환 ×2.
 const MARKER_BOUNCE_SEC := 0.8
 var _marker_base_y: float = 0.0
 var _marker_tween: Tween
@@ -54,8 +69,8 @@ func _ready() -> void:
 	Events.quest_objective_updated.connect(_on_any_quest_signal)
 	Events.quest_completed.connect(_on_any_quest_signal)
 	Events.quest_tracked_changed.connect(_on_any_quest_signal)
-	if _visual_used != null:
-		_visual_used.visible = false
+
+	_apply_sprite_texture()
 	_marker_base_y = _marker.position.y
 	_marker.visible = false
 	_refresh_marker()
@@ -92,9 +107,28 @@ func interact() -> void:
 	if one_shot and _used and not pending: return
 	for key in active_keys: _emitted_objectives[key] = true
 	_used = true
+	# D-262: dialogue_path가 있으면 emit/분기/vanish를 여기서 하지 않는다 — 대사 응답의
+	# do절(resolve_branch_outcome)이 플레이어 선택 이후로 미뤄서 대신 수행한다. 몽실이가
+	# 선택 전에 사라지거나 퀘스트 수락 전에 분기 플래그가 확정되는 사고를 막는다.
+	if not dialogue_path.is_empty():
+		if QuestSystem.get_state(branch_quest_id) == "active":
+			get_tree().call_group("npc_dialogue_ui", "open_dialogue_resource", load(dialogue_path), "start", self)
+		return
 	Events.object_interacted.emit(object_id)
 	if not branch_quest_id.is_empty() and not branch_choice_id.is_empty():
 		QuestSystem.choose_branch(branch_quest_id, branch_choice_id)
+	if vanish_on_complete:
+		queue_free()
+	elif one_shot:
+		_swap_to_used_visual()
+
+
+## 대사 응답의 do절이 접두어 없이 호출한다(§3.3과 동일한 self-injection 패턴,
+## `NpcDialogueController.open_dialogue_resource(res, title, self)`가 이 인스턴스를
+## extra_game_states로 주입해 준다). D-262: emit/분기/vanish를 여기 한 곳에 모은다.
+func resolve_branch_outcome(choice_id: String) -> void:
+	QuestSystem.choose_branch(branch_quest_id, choice_id)
+	Events.object_interacted.emit(object_id)
 	if vanish_on_complete:
 		queue_free()
 	elif one_shot:
@@ -181,11 +215,16 @@ func _on_load_completed(_slot: int, _kind: StringName, ok: bool) -> void:
 	# Deliberately do not interact: the next explicit player input is required.
 
 
+func _apply_sprite_texture() -> void:
+	if sprite_texture != null and _visual is Sprite2D:
+		(_visual as Sprite2D).texture = sprite_texture
+
+
 func _swap_to_used_visual() -> void:
+	# 전용 "사용됨" 스프라이트를 따로 두는 대신 같은 그림을 탈색한다 — 종류별 변형이
+	# 생기면서(D-218) 변형마다 used 그림을 하나씩 더 만드는 비용이 실익보다 크다.
 	if _visual != null:
-		_visual.visible = false
-	if _visual_used != null:
-		_visual_used.visible = true
+		_visual.modulate = USED_TINT
 
 
 func _on_body_entered(body: Node) -> void:

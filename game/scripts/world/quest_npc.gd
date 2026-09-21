@@ -6,10 +6,10 @@
 ## "npc.<id>.greeting" 로컬라이징 key 한 줄을 좌하단 로그 토스트로 띄운다
 ## (scripts/ui/hud.gd:_on_npc_talked 참고). id별 문구는 `game/localization/ui_ko.csv`.
 ##
-## 스프라이트는 정지 상태(idle-down 프레임 1장)만 쓴다 — NPC가 걸어 다니지 않는
-## 프로토타입 배치라 걷기 애니메이션 자원은 불필요(art-bible.md §1.1 예외 규정,
-## CC0 Ninja Adventure 캐릭터 시트 재사용). sprite_texture는 world_objects.json이
-## NPC별로 다른 시트를 배정하고, quest_layout_spawner.gd가 인스턴스화 직후 대입한다.
+## 등각 액터 시트(D-228~D-234 NPC 확장, iso-3). 정지 상태(idle_s)만 재생한다 — NPC가
+## 걸어 다니지 않는 프로토타입 배치라 walk 클립은 조립만 되고 쓰이지 않는다. actor_id는
+## world_objects.json이 NPC별로 배정하고(quest_layout_spawner.gd가 인스턴스화 직후
+## 대입), 씬 단독 배치 시에는 "npc_<npc_id>" 관례로 보정한다(greeting_key와 동일 패턴).
 class_name QuestNpc
 extends Area2D
 
@@ -21,22 +21,23 @@ const HUD_THEME: Theme = preload("res://ui/theme.tres")
 ## 비워두면 "npc.<npc_id>.greeting"을 사용한다(quest_layout_spawner.gd가 기본값을
 ## 대입하지만, 씬 단독 배치 시에도 동작하도록 _ready()에서 한 번 더 보정한다).
 @export var greeting_key: StringName = &""
-## Ninja Adventure 등 CC0 캐릭터 시트(64x112 또는 64x32, 16px 셀) — 좌상단 16x16을
-## idle-down 프레임으로 그대로 오려 쓴다(Player.tscn의 Knight 시트와 동일 레이아웃 가정,
-## 더 작은 시트도 좌상단은 항상 유효한 정지 프레임이다).
-@export var sprite_texture: Texture2D:
+## iso_actor_atlas.json 의 액터 id. 비워두면 "npc_<npc_id>"를 쓴다.
+@export var actor_id: StringName = &"":
 	set(value):
-		sprite_texture = value
-		_apply_sprite_texture()
+		actor_id = value
+		_apply_actor_sheet()
 
-@onready var _sprite: Sprite2D = $Sprite2D
+@onready var _sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var _marker: Label = $MarkerLabel
+
+## 발밑 그림자 배율(D-232). sprite.scale 이 1이 된 뒤 크기 단서를 시트 계약이 준다.
+var shadow_scale: float = 1.0
 
 var _player_inside: Player = null
 
 ## D-155(M3-2): 스프라이트 없이 폰트 라벨(! 수주 가능/? 완료 보고 가능)로 시작.
 ## 위아래 바운스 6px, 0.8초 주기 — 색약 대비는 모양 자체가 다르므로 별도 대체 없음.
-const MARKER_BOUNCE_PX := 6.0
+const MARKER_BOUNCE_PX := 12.0 # D-206 단위 전환 ×2.
 const MARKER_BOUNCE_SEC := 0.8
 var _marker_base_y: float = 0.0
 var _marker_tween: Tween
@@ -48,8 +49,14 @@ func _ready() -> void:
 	body_exited.connect(_on_body_exited)
 	if greeting_key.is_empty() and not npc_id.is_empty():
 		greeting_key = StringName("npc.%s.greeting" % npc_id)
-	_apply_sprite_texture()
+	if actor_id.is_empty() and not npc_id.is_empty():
+		actor_id = StringName("npc_%s" % npc_id)
+	else:
+		_apply_actor_sheet() # setter가 이미 처리했지만 npc_id 보정 경로도 한 번 더 확실히.
 
+	# 머리 위 표식 y는 액터 실제 키(R13과 같은 계산, monster_base.gd:590 참고)를 따른다 -
+	# 고정값을 쓰면 정식 시트로 교체될 때마다(키가 바뀔 때마다) 다시 손봐야 한다.
+	_marker.position.y = -(ActorSheet.body_height(String(actor_id)) + Tuning.MONSTER_OVERHEAD_MARGIN_PX)
 	_marker_base_y = _marker.position.y
 	_marker.visible = false
 	# 이 NPC가 giver인 퀘스트 중 하나라도 상태가 바뀔 만한 신호를 모두 구독해
@@ -65,6 +72,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not get_tree().paused and _player_inside != null and event.is_action_pressed("interact") and not event.is_echo():
 		get_viewport().set_input_as_handled()
 		talk()
+		get_tree().call_group("npc_dialogue_ui", "open_npc_dialogue", npc_id) # D-260
 		get_tree().call_group("quest_npc_ui", "open_quest_npc", npc_id)
 
 
@@ -74,13 +82,21 @@ func talk() -> void:
 	Events.npc_talked.emit(npc_id)
 
 
-func _apply_sprite_texture() -> void:
-	if _sprite == null or sprite_texture == null:
+func _apply_actor_sheet() -> void:
+	if _sprite == null or actor_id.is_empty():
 		return
-	var atlas := AtlasTexture.new()
-	atlas.atlas = sprite_texture
-	atlas.region = Rect2(0, 0, 16, 16)
-	_sprite.texture = atlas
+	if not ActorSheet.apply(_sprite, String(actor_id)):
+		return
+	shadow_scale = ActorSheet.shadow_scale(String(actor_id))
+	ActorSheet.set_speeds(_sprite, Tuning.ANIM_IDLE_FPS, Tuning.ANIM_WALK_FPS, 0.0)
+	_sprite.play(ActorSheet.anim_name(String(actor_id), "idle", Vector2.DOWN))
+	queue_redraw() # D-204와 동일 패턴: 발밑 그림자 최초 그리기.
+
+
+## 발밑 타원 그림자(D-204). Player/MonsterBase의 _draw()와 같은 규칙 - CanvasItem._draw()가
+## 자식(AnimatedSprite2D)보다 먼저 그려지는 것을 이용해 전용 노드 없이 그림자를 깐다.
+func _draw() -> void:
+	FootShadow.draw(self, shadow_scale)
 
 
 func _on_body_entered(body: Node) -> void:

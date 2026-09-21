@@ -7,8 +7,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      -380,
-      160
+      -1080,
+      -220
     ],
     "one_shot": true,
     "region_id": "bridgeport"
@@ -18,8 +18,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      -160,
-      -20
+      -280,
+      -180
     ],
     "one_shot": true,
     "region_id": "heartland"
@@ -29,8 +29,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      -30,
-      -90
+      120,
+      -120
     ],
     "one_shot": false,
     "region_id": "heartland",
@@ -41,8 +41,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      -40,
-      -100
+      120,
+      -140
     ],
     "one_shot": true,
     "region_id": "heartland",
@@ -53,8 +53,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      280,
-      -180
+      920,
+      100
     ],
     "one_shot": true,
     "region_id": "heartland"
@@ -64,8 +64,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      260,
-      60
+      400,
+      320
     ],
     "one_shot": true,
     "region_id": "heartland"
@@ -75,8 +75,8 @@
     "kind": "location",
     "scene": "res://scenes/world/QuestTrigger.tscn",
     "position": [
-      60,
-      -260
+      640,
+      -200
     ],
     "one_shot": true,
     "region_id": "heartland"
@@ -85,9 +85,10 @@
     "id": "cargo_pile",
     "kind": "object",
     "scene": "res://scenes/world/QuestObject.tscn",
+    "sprite": "res://assets/iso/props/cargo_pile.png",
     "position": [
-      -390,
-      175
+      -1130,
+      -215
     ],
     "one_shot": true,
     "region_id": "bridgeport"
@@ -96,9 +97,10 @@
     "id": "ward_stone_dandelion",
     "kind": "object",
     "scene": "res://scenes/world/QuestObject.tscn",
+    "_comment": "D-28은 결계석과 워프 비석을 같은 물리적 위치로 규정하지만, b3에서 둘 다 실제 그림이 생기면서 4px 간격이면 스프라이트가 그대로 겹쳐 보인다(사각형 placeholder 시절엔 드러나지 않던 문제). 비석 Waystone1(-80,-200) 바로 옆으로 물려 둘 다 읽히게 했다 — 여전히 같은 결계석 터다. level-designer 확인 대상.",
     "position": [
-      -42,
-      -96
+      24,
+      -164
     ],
     "one_shot": false,
     "region_id": "heartland"
@@ -108,8 +110,8 @@
     "kind": "object",
     "scene": "res://scenes/world/QuestObject.tscn",
     "position": [
-      290,
-      -190
+      960,
+      100
     ],
     "one_shot": true,
     "region_id": "heartland",
@@ -120,23 +122,23 @@
     "kind": "object",
     "scene": "res://scenes/world/QuestObject.tscn",
     "position": [
-      300,
-      90
+      420,
+      390
     ],
     "one_shot": true,
     "vanish_on_complete": true,
     "branch_quest_id": "quest_side_heartland_montsil",
-    "branch_choice_id": "release",
+    "dialogue_path": "res://dialogue/obj_montsil_rabbit.dialogue",
     "region_id": "heartland",
-    "_comment": "상호작용 즉시 queue_free (D-94: 선택 UI 없음 → 첫 상호작용=release 고정, 문서화)."
+    "_comment": "D-262: 퀘스트가 active일 때만 대사(dialogue_path)를 열어 플레이어가 직접 선택한다. emit/vanish는 응답의 do절(resolve_branch_outcome)이 대신 수행."
   },
   "waypoint_stone_01": {
     "id": "waypoint_stone_01",
     "kind": "object",
     "scene": "res://scenes/world/QuestObject.tscn",
     "position": [
-      65,
-      -265
+      660,
+      -200
     ],
     "one_shot": false,
     "region_id": "heartland"
@@ -146,12 +148,12 @@
     "kind": "npc",
     "scene": "res://scenes/world/QuestNpc.tscn",
     "position": [
-      -360,
-      140
+      -1000,
+      -220
     ],
     "one_shot": false,
     "region_id": "bridgeport",
-    "sprite": "res://assets/third_party/ninja_adventure/Actor/Character/Inspector/SpriteSheet.png",
+    "sprite": "npc_teo",
     "_comment": "유물 조사단 안내역 - MQ01(브릿지포트 부두, 첫 인상이 가장 중요한 튜토리얼) 위치를 우선해 부두 근처에 배치. MQ06/MQ07에서도 동일 위치의 teo에게 다시 말을 걸어야 해(장면마다 재배치하지 않는 단일 정적 NPC 프로토타입 한계) 그 두 시점에는 약간의 지리적 비약이 있다 - hartland.md 10절 결정 필요 항목(D-115) 참고."
   },
   "meru": {
@@ -159,47 +161,48 @@
     "kind": "npc",
     "scene": "res://scenes/world/QuestNpc.tscn",
     "position": [
-      -40,
-      -150
+      220,
+      -190
     ],
     "one_shot": false,
     "region_id": "heartland",
-    "sprite": "res://assets/third_party/ninja_adventure/Actor/Character/OldWoman/SpriteSheet.png"
+    "sprite": "npc_meru"
   },
   "pinto": {
     "id": "pinto",
+    "_comment": "D-219 등각 투영 후 대장간(BlacksmithNpc1 @ -40,-220)과 45px 까지 붙어 두 상호작용 영역이 겹쳤다 — QuestNpc 가 interact 입력을 set_input_as_handled() 로 먹어 대장간을 열 수 없었다(SmokeBlacksmith 회귀로 발견). 서쪽으로 물려 분리했다. 투영 자체는 옳고 배치가 겹친 것이라 level-designer 확인 대상.",
     "kind": "npc",
     "scene": "res://scenes/world/QuestNpc.tscn",
     "position": [
-      -95,
-      -85
+      -140,
+      -110
     ],
     "one_shot": false,
     "region_id": "heartland",
-    "sprite": "res://assets/third_party/ninja_adventure/Actor/Character/Boy/SpriteSheet.png"
+    "sprite": "npc_pinto"
   },
   "rozel": {
     "id": "rozel",
     "kind": "npc",
     "scene": "res://scenes/world/QuestNpc.tscn",
     "position": [
-      140,
-      -20
+      320,
+      120
     ],
     "one_shot": false,
     "region_id": "heartland",
-    "sprite": "res://assets/third_party/ninja_adventure/Actor/Character/Villager2/SpriteSheet.png"
+    "sprite": "npc_rozel"
   },
   "dami": {
     "id": "dami",
     "kind": "npc",
     "scene": "res://scenes/world/QuestNpc.tscn",
     "position": [
-      230,
-      40
+      380,
+      270
     ],
     "one_shot": false,
     "region_id": "heartland",
-    "sprite": "res://assets/third_party/ninja_adventure/Actor/Character/Child/SpriteSheet.png"
+    "sprite": "npc_dami"
   }
 }

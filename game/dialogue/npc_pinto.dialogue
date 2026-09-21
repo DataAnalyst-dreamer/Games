@@ -1,0 +1,42 @@
+using QuestSystem
+
+~ quest_side_heartland_orefetch_offer
+핀토: 이번엔 진짜/ 제대로 만들어볼 거야. [ID:quest_side_heartland_orefetch_line_01]
+=> END
+
+~ quest_side_heartland_orefetch_active
+핀토: 광석 좀 모았어? [ID:quest_side_heartland_orefetch_active_01]
+=> END
+
+~ quest_side_heartland_orefetch_ready
+핀토: 오, 진짜 가져왔네! [ID:quest_side_heartland_orefetch_ready_01]
+=> END
+
+~ quest_daily_heartland_03_offer
+핀토: 대장간 앞 좀 부탁해. [ID:quest_daily_heartland_03_offer_01]
+=> END
+
+~ quest_daily_heartland_03_active
+핀토: 아직 안 끝났어? [ID:quest_daily_heartland_03_active_01]
+=> END
+
+~ quest_daily_heartland_03_ready
+핀토: 나이스, 고마워! [ID:quest_daily_heartland_03_ready_01]
+=> END
+
+~ pinto_everyday
+if QuestSystem.get_state("quest_daily_heartland_03") == "completed"
+    if visit_count("pinto") % 3 == 0
+        핀토: 역시 믿을 만하다니까. [ID:quest_daily_heartland_03_done_01]
+    elif visit_count("pinto") % 3 == 1
+        핀토: 브람한텐 비밀이다? [ID:quest_daily_heartland_03_done_02]
+    else
+        핀토: 다음에도 부탁해. [ID:quest_daily_heartland_03_done_03]
+else
+    if visit_count("pinto") % 3 == 0
+        핀토: 망치가 손에 익어 가! [ID:npc.pinto.everyday.1]
+    elif visit_count("pinto") % 3 == 1
+        핀토: 오늘도 연습할 거야. [ID:npc.pinto.everyday.2]
+    else
+        핀토: 불똥 튀니 조심해! [ID:npc.pinto.everyday.3]
+=> END

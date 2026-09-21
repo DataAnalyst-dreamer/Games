@@ -5,13 +5,8 @@
 class_name Player
 extends CharacterBody2D
 
-## 4방향 애니메이션 접미사. 8방향 입력은 수평 우선으로 4방향에 매핑한다.
-const DIR_NAMES := {
-	Vector2.DOWN: "down",
-	Vector2.UP: "up",
-	Vector2.LEFT: "left",
-	Vector2.RIGHT: "right",
-}
+## 핀 시트의 액터 id(game/assets/iso/iso_actor_atlas.json 의 키).
+const ACTOR_ID := "fin"
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var state_machine: PlayerStateMachine = $StateMachine
@@ -19,8 +14,11 @@ const DIR_NAMES := {
 @onready var hitbox: Hitbox = $Hitbox
 @onready var weapon_pivot: Node2D = $WeaponPivot
 
-## 바라보는 방향(4방향 중 하나). 공격 히트박스 방향 결정에도 쓴다.
+## 바라보는 방향(8방향 중 하나, D-228). 공격 히트박스 방향 결정에도 쓴다.
 var facing: Vector2 = Vector2.DOWN
+
+## 발밑 그림자 배율. sprite.scale 이 1이 된 뒤(D-232) 크기 단서를 시트 계약이 준다.
+var shadow_scale: float = 1.0
 
 ## 이동 속도(px/s). combat.json 에서 로드.
 var walk_speed: float
@@ -30,6 +28,12 @@ var resources: PlayerResources
 
 ## 사망 처리가 끝나 더 이상 입력을 받지 않는지.
 var is_dead: bool = false
+
+## 대사 진행 중 이동·전투 입력 차단(D-257). `NpcDialogueController`가 대사 시작/종료
+## 시 직접 set/clear한다(이 파일은 가드만 소유) — `get_move_input()` 가드만으로는
+## attack/roll/guard를 못 막아(각 상태 스크립트가 `_unhandled_input`에서 직접
+## `event.is_action_pressed(...)`로 처리) `_unhandled_input()` 최상단에도 얼리리턴을 둔다.
+var dialogue_active: bool = false
 
 ## 무적 프레임 잔여 시간(초). Hurt 상태를 벗어난 뒤에도 계속 줄어들어야 하므로
 ## (상태 전환과 무관하게) Player._process에서 직접 관리한다.
@@ -65,9 +69,13 @@ func _ready() -> void:
 	# 움직이지 못하는 최악의 실패 모드가 조용히 발생했다.
 	walk_speed = float(Data.get_value("combat", "movement.walk_speed_px", 80.0))
 	_base_walk_speed = walk_speed
-	for dir_name: String in DIR_NAMES.values():
-		sprite.sprite_frames.set_animation_speed("walk_" + dir_name, Tuning.ANIM_WALK_FPS)
-		sprite.sprite_frames.set_animation_speed("idle_" + dir_name, Tuning.ANIM_IDLE_FPS)
+	# 등각 8방향 시트를 JSON 계약에서 조립한다(D-228~D-234) - 씬에는 AtlasTexture 를 두지
+	# 않는다. 시트가 없으면 씬 원본이 그대로 남고 경고만 뜬다.
+	ActorSheet.apply(sprite, ACTOR_ID)
+	shadow_scale = ActorSheet.shadow_scale(ACTOR_ID)
+	ActorSheet.set_speeds(sprite, Tuning.ANIM_IDLE_FPS, Tuning.ANIM_WALK_FPS,
+		Tuning.ATTACK_HIT_DURATION_SEC)
+	play_anim("idle")
 	resources = PlayerResources.new(
 		Tuning.PLAYER_MAX_HP,
 		float(Data.get_value("combat", "stamina.max", 100.0)),
@@ -86,12 +94,14 @@ func _ready() -> void:
 ## 그려지므로, 여기서 그리면 전용 노드 없이도 그림자가 스프라이트 아래에 깔린다.
 ## 본체 좌표계에 그리므로 이동할 때마다 다시 그릴 필요가 없다 - _ready()의 queue_redraw()
 ## 한 번이면 충분하다(씬 진입 시의 최초 NOTIFICATION_DRAW를 놓치지 않기 위한 보험).
+## 반지름은 MonsterBase와 같은 규칙으로 sprite.scale 을 곱해 구한다 - 그래야 단위
+## 전환(D-206)처럼 스프라이트 배율이 통째로 바뀔 때 두 곳이 따로 놀지 않는다.
 func _draw() -> void:
-	FootShadow.draw(self)
+	FootShadow.draw(self, shadow_scale)
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if is_dead:
+	if is_dead or dialogue_active:
 		return
 	state_machine.handle_input(event)
 
@@ -288,7 +298,7 @@ func play_attack_swing(hit_index: int, duration: float) -> void:
 		sweep = deg_to_rad(110.0)
 		start_angle = base_angle - sweep
 		end_angle = base_angle + sweep
-	weapon_pivot.position = facing * 8.0
+	weapon_pivot.position = facing * Tuning.WEAPON_PIVOT_OFFSET_PX
 	weapon_pivot.rotation = start_angle
 	weapon_pivot.visible = true
 	# D-127: 이전 타의 tween이 아직 실행 중이면 kill 해서(콤보 2·3타 빠른 입력 시) 같은
@@ -317,36 +327,36 @@ func hide_weapon_overlay() -> void:
 
 ## 8방향 이동 입력(정규화). 스틱 데드존은 project.godot 액션 deadzone 이 처리한다.
 func get_move_input() -> Vector2:
+	if dialogue_active:
+		return Vector2.ZERO
 	var v := Input.get_vector("move_left", "move_right", "move_up", "move_down", Tuning.STICK_DEADZONE)
 	return v
 
 
-## 입력 벡터를 4방향 facing 으로 환산한다. D-121(walk-animation-diagnosis.md §3):
-## FacingCalc.resolve_facing()이 현재 축(수평/수직) 유지 완충(hysteresis)을 적용해,
-## 대각선 45도 부근에서 입력이 미세하게 흔들려도 facing이 프레임마다 토글되지 않는다.
-## D-128: 크기 기반 완충만으로는 실제 키보드 입력(대각선 두 키가 정확히 같은 프레임에
-## 안 눌리는 경우)에서 잔여 흔들림이 남아, 마지막 축 전환 후 최소 유지 시간
-## (Tuning.FACING_AXIS_SWITCH_MIN_INTERVAL_SEC) 동안은 크기 조건을 만족해도 축을
-## 유지하는 시간 기반 디바운스를 더한다.
+## 입력 벡터를 8방향 facing 으로 환산한다(D-228, 등각에서는 4방향이 격자 대각과 45도
+## 어긋난다 - isometric-migration-v1.md §4). 양자화는 **화면 벡터** 기준 45도 균등이다.
+## D-121/D-128 의 두 완충은 그대로 살아 있다: FacingCalc.resolve_facing_8()이 현재 방향
+## ±(22.5 x bias)도 안에서는 방향을 유지하고(크기 완충), 인접 섹터(±45도) 전환은 마지막
+## 전환 후 Tuning.FACING_AXIS_SWITCH_MIN_INTERVAL_SEC 동안 보류한다(시간 디바운스, D-229).
+## 2섹터 이상 차이는 의도한 큰 전환이라 즉시 통과한다 - 4방향 시절 180도 반전을 막지
+## 않았던 것과 같은 규칙이다.
 func set_facing(input_dir: Vector2) -> void:
 	if input_dir == Vector2.ZERO:
 		return
-	var was_horizontal: bool = facing == Vector2.LEFT or facing == Vector2.RIGHT
-	var new_facing: Vector2 = FacingCalc.resolve_facing(
+	var new_facing: Vector2 = FacingCalc.resolve_facing_8(
 		facing, input_dir, Tuning.FACING_AXIS_SWITCH_BIAS,
 		_facing_axis_switch_elapsed, Tuning.FACING_AXIS_SWITCH_MIN_INTERVAL_SEC)
-	var is_horizontal: bool = new_facing == Vector2.LEFT or new_facing == Vector2.RIGHT
-	if is_horizontal != was_horizontal:
+	if FacingCalc.sector_of(new_facing) != FacingCalc.sector_of(facing):
 		_facing_axis_switch_elapsed = 0.0
 	facing = new_facing
 
 
 func facing_name() -> String:
-	return DIR_NAMES.get(facing, "down")
+	return ActorSheet.dir_name(ACTOR_ID, facing)
 
 
 ## "walk" → "walk_down" 식으로 방향 접미사를 붙여 재생. 같은 애니메이션이면 재시작하지 않는다.
 func play_anim(base_name: String) -> void:
-	var anim := "%s_%s" % [base_name, facing_name()]
+	var anim := ActorSheet.anim_name(ACTOR_ID, base_name, facing)
 	if sprite.animation != anim or not sprite.is_playing():
 		sprite.play(anim)

@@ -11,7 +11,7 @@ extends Area2D
 ## 여러 비석을 구분하기 위한 식별자(워프 UI 도입 시 사용, 현재는 로그/디버그용).
 @export var waystone_id: StringName = &""
 
-@onready var _visual: Polygon2D = $Placeholder
+@onready var _visual: CanvasItem = $Placeholder
 
 var is_active: bool = false
 var _player_inside: Player = null

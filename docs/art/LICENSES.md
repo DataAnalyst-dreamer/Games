@@ -10,6 +10,56 @@
 
 내장 이미지 생성 도구로 신규 콘셉트와 걷기 초안을 생성하고, 사용자 승인하에 `tools/prepare_fin_sprites.py`로 후처리했다. 입력 참조는 이 프로젝트에서 생성한 승인 콘셉트이며 CQ 원작 이미지나 립 스프라이트를 사용하지 않았다. `docs/art/preview/fin-cq-*` 및 `game/assets/sprites/characters/fin/fin-walk-v1.*`에 보관. 프롬프트는 `docs/art/fin-cq-*-prompt.txt`, 처리·검증 이력은 `docs/qa/fin-postprocess-2026-09-12.md` 참고. 외부 CC0 팩으로 분류하지 않으며 독점권/상용 법률 검토 완료를 주장하지 않는다. 게임 런타임 교체 전 후보 에셋이다.
 
+### 프로젝트 신규 생성물: 등각 placeholder 애셋 (2026-09-21, D-226)
+
+`tools/art/gen_iso_tiles.py`가 **Pillow로 기초 도형만 그려서** 생성한 2:1 등각 placeholder다.
+외부 이미지·AI 생성물·립 스프라이트를 입력하지 않았고, 색은 `docs/art/art-bible.md` §3 하틀랜드 32색 표를
+스크립트가 직접 파싱해 쓴다 — 외부 팔레트를 복사하지 않았다. 따라서 CC0 팩과 무관한 독립 저작물이며
+저작권은 프로젝트 소유, 크레딧 불필요다.
+
+- 산출물: `game/assets/iso/{ground,walls,props,buildings}/*.png` + 규격 계약 `game/assets/iso/iso_atlas.json`
+  (마름모 지면 3종·흙길·물 / 절벽 블록 1·2단 / 집 A·대장간 / 나무·수풀·바위·울타리 2방향·게시판·우편함·워프 비석·우물·짐 보따리·표식 돌 — 총 20종)
+- 재생성: `python3 tools/art/gen_iso_tiles.py` (시드 고정, 결정적)
+- **폐기**: 비스듬 2D 시절의 `game/assets/quarter/**` 와 `tools/art/gen_quarter_tiles.py` 산출물은
+  D-219(등각 채택)로 폐기해 삭제했다. 생성기 스크립트는 b1~b3 재현용으로 남겨 둔다.
+- 성격: **정식 애셋 전 자리표시자**. `docs/art/brief-quarter-view-gpt-image.md` §2의 같은 파일명·논리 크기로
+  정식 애셋이 나오면 같은 경로에 PNG만 덮어써 교체한다. 최종 게임 아트 승인이 아니다.
+
+### 프로젝트 신규 생성물: 등각 8방향 액터 placeholder 시트 (2026-09-21, D-228~D-234)
+
+`tools/art/gen_iso_actors.py`가 **Pillow로 기초 등각 도형(구·원기둥·상자)만 그려서** 생성한 캐릭터·몬스터
+placeholder 시트다. 위 타일 생성기와 같은 원칙이다 — 외부 이미지·AI 생성물·립 스프라이트를 입력하지 않았고,
+색은 `docs/art/art-bible.md` §3 하틀랜드 32색 표를 스크립트가 직접 파싱해 쓴다(사본 없음). CC0 팩과 무관한
+독립 저작물이며 저작권은 프로젝트 소유, 크레딧 불필요다.
+
+- 산출물: `game/assets/iso/actors/*.png` (핀 + 몬스터 7종 = 8장) + 규격 계약
+  `game/assets/iso/iso_actor_atlas.json`
+- 규격: 셀 96×128 · 발 기준점 (48,112) · 행=방향 · 열=프레임(idle 4 / walk 8 / attack 6) —
+  `tools/art/normalize_ai_sheet.py` 기본값 및 `docs/art/fin-64-production-spec.md`(D-140)와 동일
+- 재생성: `python3 tools/art/gen_iso_actors.py` (난수 없음, 결정적)
+- **교체 대상**: 이 시트들은 `game/assets/third_party/ninja_adventure/` 의 16px 캐릭터·몬스터 스프라이트를
+  본편 플레이어·몬스터 씬에서 **대체**한다. 해당 CC0 팩 자체는 그대로 두고(아이템/무기 등 다른 용도가 남아
+  있다 — 예: 플레이어 무기 오버레이 `Items/Weapons/Sword/Sprite.png`), 액터 시트만 자체 생성물로 바뀐 것이다.
+- 성격: **정식 원화 전 자리표시자**. PixelLab 파이프라인의 정식 핀 8방향 시트가 나오면 같은 경로에 PNG만
+  덮어써 교체한다(행 순서·프레임 열 배치가 같으므로 JSON·코드 변경 없음). 최종 게임 아트 승인이 아니다.
+
+### 프로젝트 신규 생성물: 등각 NPC 대역 placeholder 시트 (2026-09-21, D-228~D-234 NPC 확장)
+
+`tools/art/gen_iso_npcs.py`가 위 액터 생성기와 같은 원칙(Pillow 기초 도형만, 외부 이미지·AI 생성물·립
+스프라이트 미사용, art-bible.md §3 팔레트 직접 파싱)으로 만든 **퀘스트 NPC 6인**(teo·blacksmith·meru·
+pinto·rozel·dami) placeholder 시트다. CC0 팩과 무관한 독립 저작물이며 저작권은 프로젝트 소유, 크레딧
+불필요다.
+
+- 산출물: `game/assets/iso/actors/npc_*.png` (6장, 4방향 s/w/n/e) + 같은 `iso_actor_atlas.json`에
+  actors 항목만 병합(기존 핀·몬스터 8종은 그대로 유지)
+- 규격: 위 액터 생성기와 동일 계약(셀 96×128, 발 기준점 (48,112), 18열) — 단 NPC는 전투하지 않으므로
+  attack 6열은 실제 동작 없이 idle 프레임을 반복해 채운다
+- 재생성: `python3 tools/art/gen_iso_npcs.py` (난수 없음, 결정적, 기존 atlas.json을 읽어 병합)
+- **교체 대상**: `QuestNpc.tscn`(teo/meru/pinto/rozel/dami)과 `BlacksmithNpc.tscn`이 쓰던
+  `game/assets/third_party/ninja_adventure/` 16px 탑다운 캐릭터 시트를 대체한다. 해당 CC0 팩 자체는
+  그대로 두고(다른 용도가 남아 있을 수 있다), NPC 시각만 자체 생성물로 바뀐 것이다.
+- 성격: **정식 원화 전 자리표시자**. 같은 경로에 PNG만 덮어써 교체한다. 최종 게임 아트 승인이 아니다.
+
 ### 외부 팩
 
 정면 실행 시험(2026-09-12): `prototypes/fin-front-test/assets/`는 선택된 신규 생성 정면 B를 사용자 승인된 코드 방식으로 부위 분리·후처리한 시험 에셋이다. `tools/build_fin_front_test.py`, 에셋 `manifest.json`에 재현·출처 기록. 기존 게임이나 외부 팩의 라이선스를 변경하지 않는다.

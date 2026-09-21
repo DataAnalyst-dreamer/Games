@@ -1,6 +1,5 @@
-[gd_scene load_steps=32 format=3]
+[gd_scene load_steps=17 format=3]
 
-[ext_resource type="Texture2D" path="res://assets/third_party/ninja_adventure/Actor/Character/Knight/SpriteSheet.png" id="1_knight"]
 [ext_resource type="Script" path="res://scripts/player/player.gd" id="2_player"]
 [ext_resource type="Script" path="res://scripts/player/state_machine.gd" id="3_state_machine"]
 [ext_resource type="Script" path="res://scripts/player/states/idle.gd" id="4_idle"]
@@ -15,210 +14,14 @@
 [ext_resource type="Script" path="res://scripts/systems/hurtbox.gd" id="10_hurtbox"]
 [ext_resource type="Texture2D" path="res://assets/third_party/ninja_adventure/Items/Weapons/Sword/Sprite.png" id="11_sword"]
 
-[sub_resource type="AtlasTexture" id="at_down_0"]
-atlas = ExtResource("1_knight")
-region = Rect2(0, 0, 16, 16)
-[sub_resource type="AtlasTexture" id="at_down_1"]
-atlas = ExtResource("1_knight")
-region = Rect2(0, 16, 16, 16)
-[sub_resource type="AtlasTexture" id="at_down_2"]
-atlas = ExtResource("1_knight")
-region = Rect2(0, 32, 16, 16)
-[sub_resource type="AtlasTexture" id="at_down_3"]
-atlas = ExtResource("1_knight")
-region = Rect2(0, 48, 16, 16)
-[sub_resource type="AtlasTexture" id="at_left_0"]
-atlas = ExtResource("1_knight")
-region = Rect2(32, 0, 16, 16)
-[sub_resource type="AtlasTexture" id="at_left_1"]
-atlas = ExtResource("1_knight")
-region = Rect2(32, 16, 16, 16)
-[sub_resource type="AtlasTexture" id="at_left_2"]
-atlas = ExtResource("1_knight")
-region = Rect2(32, 32, 16, 16)
-[sub_resource type="AtlasTexture" id="at_left_3"]
-atlas = ExtResource("1_knight")
-region = Rect2(32, 48, 16, 16)
-[sub_resource type="AtlasTexture" id="at_up_0"]
-atlas = ExtResource("1_knight")
-region = Rect2(16, 0, 16, 16)
-[sub_resource type="AtlasTexture" id="at_up_1"]
-atlas = ExtResource("1_knight")
-region = Rect2(16, 16, 16, 16)
-[sub_resource type="AtlasTexture" id="at_up_2"]
-atlas = ExtResource("1_knight")
-region = Rect2(16, 32, 16, 16)
-[sub_resource type="AtlasTexture" id="at_up_3"]
-atlas = ExtResource("1_knight")
-region = Rect2(16, 48, 16, 16)
-[sub_resource type="AtlasTexture" id="at_right_0"]
-atlas = ExtResource("1_knight")
-region = Rect2(48, 0, 16, 16)
-[sub_resource type="AtlasTexture" id="at_right_1"]
-atlas = ExtResource("1_knight")
-region = Rect2(48, 16, 16, 16)
-[sub_resource type="AtlasTexture" id="at_right_2"]
-atlas = ExtResource("1_knight")
-region = Rect2(48, 32, 16, 16)
-[sub_resource type="AtlasTexture" id="at_right_3"]
-atlas = ExtResource("1_knight")
-region = Rect2(48, 48, 16, 16)
-[sub_resource type="AtlasTexture" id="at_attack_0"]
-atlas = ExtResource("1_knight")
-region = Rect2(0, 64, 16, 16)
-[sub_resource type="AtlasTexture" id="at_attack_1"]
-atlas = ExtResource("1_knight")
-region = Rect2(16, 64, 16, 16)
-[sub_resource type="AtlasTexture" id="at_attack_2"]
-atlas = ExtResource("1_knight")
-region = Rect2(32, 64, 16, 16)
-[sub_resource type="AtlasTexture" id="at_attack_3"]
-atlas = ExtResource("1_knight")
-region = Rect2(48, 64, 16, 16)
-
-[sub_resource type="SpriteFrames" id="sprite_frames"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("at_down_0")
-}],
-"loop": true,
-"name": &"idle_down",
-"speed": 4.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("at_up_0")
-}],
-"loop": true,
-"name": &"idle_up",
-"speed": 4.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("at_left_0")
-}],
-"loop": true,
-"name": &"idle_left",
-"speed": 4.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("at_right_0")
-}],
-"loop": true,
-"name": &"idle_right",
-"speed": 4.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("at_down_0")
-}, {
-"duration": 1.0,
-"texture": SubResource("at_down_1")
-}, {
-"duration": 1.0,
-"texture": SubResource("at_down_2")
-}, {
-"duration": 1.0,
-"texture": SubResource("at_down_3")
-}],
-"loop": true,
-"name": &"walk_down",
-"speed": 8.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("at_up_0")
-}, {
-"duration": 1.0,
-"texture": SubResource("at_up_1")
-}, {
-"duration": 1.0,
-"texture": SubResource("at_up_2")
-}, {
-"duration": 1.0,
-"texture": SubResource("at_up_3")
-}],
-"loop": true,
-"name": &"walk_up",
-"speed": 8.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("at_left_0")
-}, {
-"duration": 1.0,
-"texture": SubResource("at_left_1")
-}, {
-"duration": 1.0,
-"texture": SubResource("at_left_2")
-}, {
-"duration": 1.0,
-"texture": SubResource("at_left_3")
-}],
-"loop": true,
-"name": &"walk_left",
-"speed": 8.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("at_right_0")
-}, {
-"duration": 1.0,
-"texture": SubResource("at_right_1")
-}, {
-"duration": 1.0,
-"texture": SubResource("at_right_2")
-}, {
-"duration": 1.0,
-"texture": SubResource("at_right_3")
-}],
-"loop": true,
-"name": &"walk_right",
-"speed": 8.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("at_attack_0")
-}],
-"loop": false,
-"name": &"attack_down",
-"speed": 3.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("at_attack_1")
-}],
-"loop": false,
-"name": &"attack_up",
-"speed": 3.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("at_attack_2")
-}],
-"loop": false,
-"name": &"attack_left",
-"speed": 3.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("at_attack_3")
-}],
-"loop": false,
-"name": &"attack_right",
-"speed": 3.0
-}]
-
-[sub_resource type="RectangleShape2D" id="body_shape"]
-size = Vector2(10, 8)
+[sub_resource type="CircleShape2D" id="body_shape"]
+radius = 16.971
 
 [sub_resource type="RectangleShape2D" id="hurtbox_shape"]
-size = Vector2(10, 8)
+size = Vector2(20, 16)
 
 [sub_resource type="CircleShape2D" id="hitbox_shape"]
-radius = 8.0
+radius = 22.627
 
 [node name="Player" type="CharacterBody2D"]
 collision_layer = 2
@@ -226,13 +29,10 @@ motion_mode = 1
 script = ExtResource("2_player")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-position = Vector2(0, -4)
-sprite_frames = SubResource("sprite_frames")
-animation = &"idle_down"
-autoplay = "idle_down"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("body_shape")
+scale = Vector2(1, 0.5)
 
 [node name="Hurtbox" type="Area2D" parent="."]
 collision_layer = 16
@@ -241,7 +41,7 @@ script = ExtResource("10_hurtbox")
 team = &"player"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
-position = Vector2(0, -4)
+position = Vector2(0, -8)
 shape = SubResource("hurtbox_shape")
 
 [node name="Hitbox" type="Area2D" parent="."]
@@ -251,15 +51,17 @@ script = ExtResource("9_hitbox")
 team = &"player"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
-position = Vector2(0, -4)
+position = Vector2(0, -8)
 shape = SubResource("hitbox_shape")
+scale = Vector2(1, 0.5)
 
 [node name="WeaponPivot" type="Node2D" parent="."]
-position = Vector2(0, -4)
+position = Vector2(0, -48)
 visible = false
 
 [node name="WeaponSprite" type="Sprite2D" parent="WeaponPivot"]
-position = Vector2(0, -8)
+position = Vector2(0, -16)
+scale = Vector2(3, 3)
 texture = ExtResource("11_sword")
 
 [node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]

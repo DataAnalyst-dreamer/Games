@@ -1,0 +1,87 @@
+using QuestSystem
+
+~ quest_main_a1_01_arrival_offer
+테오: 짐부터 챙기자. [ID:quest_main_a1_01_arrival_offer_01]
+테오: 인사는 나중에. [ID:quest_main_a1_01_arrival_offer_02]
+테오: 몸부터 움직이자. [ID:quest_main_a1_01_arrival_offer_03]
+=> END
+
+~ quest_main_a1_01_arrival_active
+테오: 짐 다 챙겼나? [ID:quest_main_a1_01_arrival_active_01]
+=> END
+
+~ quest_main_a1_01_arrival_ready
+테오: 확인했으면 됐다. [ID:quest_main_a1_01_arrival_ready_01]
+=> END
+
+~ quest_main_a1_02_firstlook_offer
+테오: 마을부터 둘러보자. [ID:quest_main_a1_02_firstlook_offer_01]
+테오: 초입에 사람이 있을 거다. [ID:quest_main_a1_02_firstlook_offer_02]
+테오: 인사만 하고 오면 된다. [ID:quest_main_a1_02_firstlook_offer_03]
+=> END
+
+~ quest_main_a1_02_firstlook_active
+테오: 마을 쪽은 살펴봤나? [ID:quest_main_a1_02_firstlook_active_01]
+=> END
+
+~ quest_main_a1_02_firstlook_ready
+테오: 잘했다, 다음으로 가자. [ID:quest_main_a1_02_firstlook_ready_01]
+=> END
+
+~ quest_main_a1_06_echocave_offer
+테오: 난 못 들어간다. [ID:quest_main_a1_06_echocave_offer_01]
+테오: 대신 다녀와 줘. [ID:quest_main_a1_06_echocave_offer_02]
+테오: 스킬도 하나 챙기고. [ID:quest_main_a1_06_echocave_offer_03]
+=> END
+
+~ quest_main_a1_06_echocave_active
+테오: 조심히 다녀와라. [ID:quest_main_a1_06_echocave_active_01]
+=> END
+
+~ quest_main_a1_06_echocave_ready
+테오: 돌아왔군, 수고했다. [ID:quest_main_a1_06_echocave_ready_01]
+=> END
+
+~ quest_main_a1_07_fiveroads_offer
+테오: 다섯 지방 모두에 [ID:quest_main_a1_07_fiveroads_offer_01]
+테오: 성물이 잠들어 있다더군. [ID:quest_main_a1_07_fiveroads_offer_02]
+테오: 결계석 앞에서 보자. [ID:quest_main_a1_07_fiveroads_offer_03]
+=> END
+
+~ quest_main_a1_07_fiveroads_active
+테오: 결계석은 찾았나? [ID:quest_main_a1_07_fiveroads_active_01]
+=> END
+
+~ quest_main_a1_07_fiveroads_ready
+테오: 그럼, 시작해 보자. [ID:quest_main_a1_07_fiveroads_ready_01]
+=> END
+
+~ quest_side_heartland_waypoint_offer
+테오: 저기 보이는 비석 하나쯤은/ 미리 켜두자. [ID:quest_side_heartland_waypoint_line_01]
+테오: 돌아올 때 편해질 거야. [ID:quest_side_heartland_waypoint_line_02]
+=> END
+
+~ quest_side_heartland_waypoint_active
+테오: 비석은 아직인가? [ID:quest_side_heartland_waypoint_active_01]
+=> END
+
+~ quest_side_heartland_waypoint_ready
+테오: 켜졌군, 잘했다. [ID:quest_side_heartland_waypoint_ready_01]
+=> END
+
+~ teo_everyday
+if QuestSystem.get_state("quest_main_a1_06_echocave") == "completed"
+    if visit_count("teo") % 3 == 0
+        테오: 돌아왔군, 한숨 돌려. [ID:npc.teo.after_cave.1]
+    elif visit_count("teo") % 3 == 1
+        테오: 굴에서 본 건 적어 둬. [ID:npc.teo.after_cave.2]
+    else
+        테오: 아는 길도 살펴 가. [ID:npc.teo.after_cave.3]
+else
+    if visit_count("teo") % 3 == 0
+        테오: 짐은 다 챙겼나? [ID:npc.teo.everyday.1]
+    elif visit_count("teo") % 3 == 1
+        테오: 돌아올 길도 봐 둬. [ID:npc.teo.everyday.2]
+    else
+        테오: 서두르지 마, 발밑 봐. [ID:npc.teo.everyday.3]
+=> END

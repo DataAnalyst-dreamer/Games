@@ -1,0 +1,663 @@
+{
+  "assets": {
+    "audio": [
+      {
+        "is_referenced": true,
+        "mime": "audio/x-wav",
+        "path": "assets/audio/sfx/blacksmith_craft_complete.wav",
+        "referenced_by": [],
+        "size": 39266
+      },
+      {
+        "is_referenced": true,
+        "mime": "audio/x-wav",
+        "path": "assets/audio/sfx/blacksmith_enhance_fail.wav",
+        "referenced_by": [],
+        "size": 17010
+      },
+      {
+        "is_referenced": true,
+        "mime": "audio/x-wav",
+        "path": "assets/audio/sfx/blacksmith_enhance_success.wav",
+        "referenced_by": [],
+        "size": 27428
+      },
+      {
+        "is_referenced": true,
+        "mime": "audio/x-wav",
+        "path": "assets/audio/sfx/blacksmith_refine_roll.wav",
+        "referenced_by": [],
+        "size": 12290
+      },
+      {
+        "is_referenced": true,
+        "mime": "audio/x-wav",
+        "path": "assets/audio/sfx/blacksmith_salvage_complete.wav",
+        "referenced_by": [],
+        "size": 22530
+      },
+      {
+        "is_referenced": true,
+        "mime": "audio/x-wav",
+        "path": "assets/audio/sfx/drop_common.wav",
+        "referenced_by": [],
+        "size": 1990
+      },
+      {
+        "is_referenced": true,
+        "mime": "audio/x-wav",
+        "path": "assets/audio/sfx/drop_epic.wav",
+        "referenced_by": [],
+        "size": 11010
+      },
+      {
+        "is_referenced": true,
+        "mime": "audio/x-wav",
+        "path": "assets/audio/sfx/drop_epic_layer.wav",
+        "referenced_by": [],
+        "size": 11748
+      },
+      {
+        "is_referenced": true,
+        "mime": "audio/x-wav",
+        "path": "assets/audio/sfx/drop_legendary.wav",
+        "referenced_by": [],
+        "size": 20050
+      },
+      {
+        "is_referenced": true,
+        "mime": "audio/x-wav",
+        "path": "assets/audio/sfx/drop_rare.wav",
+        "referenced_by": [],
+        "size": 5270
+      },
+      {
+        "is_referenced": true,
+        "mime": "audio/x-wav",
+        "path": "assets/audio/sfx/drop_relic.wav",
+        "referenced_by": [],
+        "size": 31810
+      },
+      {
+        "is_referenced": true,
+        "mime": "audio/x-wav",
+        "path": "assets/audio/sfx/drop_uncommon.wav",
+        "referenced_by": [],
+        "size": 2454
+      },
+      {
+        "is_referenced": true,
+        "mime": "audio/x-wav",
+        "path": "assets/audio/sfx/goblin_whistle.wav",
+        "referenced_by": [],
+        "size": 6628
+      },
+      {
+        "is_referenced": true,
+        "mime": "audio/x-wav",
+        "path": "assets/audio/sfx/just_guard_parry_ting.wav",
+        "referenced_by": [],
+        "size": 13830
+      },
+      {
+        "is_referenced": true,
+        "mime": "audio/x-wav",
+        "path": "assets/audio/sfx/legendary_drop_sparkle.wav",
+        "referenced_by": [],
+        "size": 40128
+      },
+      {
+        "is_referenced": true,
+        "mime": "audio/x-wav",
+        "path": "assets/audio/sfx/mailbox_claim_chime.wav",
+        "referenced_by": [],
+        "size": 15190
+      },
+      {
+        "is_referenced": true,
+        "mime": "audio/x-wav",
+        "path": "assets/audio/sfx/stamina_exhausted_deny.wav",
+        "referenced_by": [],
+        "size": 5050
+      }
+    ],
+    "fonts": [
+      {
+        "is_referenced": false,
+        "mime": "font/ttf",
+        "path": "assets/fonts/galmuri/Galmuri11-Bold.ttf",
+        "referenced_by": [],
+        "size": 2613660
+      },
+      {
+        "is_referenced": false,
+        "mime": "font/ttf",
+        "path": "assets/fonts/galmuri/Galmuri11-Condensed.ttf",
+        "referenced_by": [],
+        "size": 2668536
+      },
+      {
+        "is_referenced": true,
+        "mime": "font/ttf",
+        "path": "assets/fonts/galmuri/Galmuri11.ttf",
+        "referenced_by": [],
+        "size": 5376428
+      },
+      {
+        "is_referenced": false,
+        "mime": "font/ttf",
+        "path": "assets/fonts/galmuri/Galmuri14.ttf",
+        "referenced_by": [],
+        "size": 5636376
+      },
+      {
+        "is_referenced": false,
+        "mime": "font/ttf",
+        "path": "assets/fonts/galmuri/Galmuri7.ttf",
+        "referenced_by": [],
+        "size": 3702440
+      },
+      {
+        "is_referenced": false,
+        "mime": "font/ttf",
+        "path": "assets/fonts/galmuri/Galmuri9.ttf",
+        "referenced_by": [],
+        "size": 4649144
+      }
+    ],
+    "generated": [
+      {
+        "is_referenced": true,
+        "mime": "image/png",
+        "path": "assets/generated/items/item-mushroom-cap-v1.png",
+        "referenced_by": [],
+        "size": 964972
+      },
+      {
+        "is_referenced": true,
+        "mime": "image/png",
+        "path": "assets/generated/items/item-potion-hp-small-v1.png",
+        "referenced_by": [],
+        "size": 998607
+      },
+      {
+        "is_referenced": true,
+        "mime": "image/png",
+        "path": "assets/generated/items/item-rabbit-horn-v1.png",
+        "referenced_by": [],
+        "size": 917657
+      },
+      {
+        "is_referenced": true,
+        "mime": "image/png",
+        "path": "assets/generated/items/item-slime-jelly-v1.png",
+        "referenced_by": [],
+        "size": 1004324
+      }
+    ],
+    "iso": [
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/actors/elite_bunchi_spawn.png",
+        "referenced_by": [],
+        "size": 39363
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/actors/elite_goblin_captain.png",
+        "referenced_by": [],
+        "size": 55494
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/actors/fin.png",
+        "referenced_by": [],
+        "size": 51241
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/actors/goblin_scout.png",
+        "referenced_by": [],
+        "size": 39672
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/actors/horn_rabbit.png",
+        "referenced_by": [],
+        "size": 42864
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/actors/horn_rabbit_big.png",
+        "referenced_by": [],
+        "size": 55803
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/actors/mushroom.png",
+        "referenced_by": [],
+        "size": 17984
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/actors/npc_blacksmith.png",
+        "referenced_by": [],
+        "size": 16138
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/actors/npc_dami.png",
+        "referenced_by": [],
+        "size": 15424
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/actors/npc_meru.png",
+        "referenced_by": [],
+        "size": 15444
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/actors/npc_pinto.png",
+        "referenced_by": [],
+        "size": 15650
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/actors/npc_rozel.png",
+        "referenced_by": [],
+        "size": 15340
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/actors/npc_teo.png",
+        "referenced_by": [],
+        "size": 18186
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/actors/slime.png",
+        "referenced_by": [],
+        "size": 14369
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/buildings/house_a.png",
+        "referenced_by": [],
+        "size": 1288
+      },
+      {
+        "is_referenced": true,
+        "mime": "image/png",
+        "path": "assets/iso/buildings/smithy.png",
+        "referenced_by": [],
+        "size": 1753
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/ground/tile_dirt.png",
+        "referenced_by": [],
+        "size": 379
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/ground/tile_grass_a.png",
+        "referenced_by": [],
+        "size": 409
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/ground/tile_grass_b.png",
+        "referenced_by": [],
+        "size": 394
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/ground/tile_grass_c.png",
+        "referenced_by": [],
+        "size": 388
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/ground/tile_stream.png",
+        "referenced_by": [],
+        "size": 388
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/ground/tile_water.png",
+        "referenced_by": [],
+        "size": 384
+      },
+      {
+        "is_referenced": true,
+        "mime": "application/json",
+        "path": "assets/iso/iso_actor_atlas.json",
+        "referenced_by": [],
+        "size": 3619
+      },
+      {
+        "is_referenced": true,
+        "mime": "application/json",
+        "path": "assets/iso/iso_atlas.json",
+        "referenced_by": [],
+        "size": 6669
+      },
+      {
+        "is_referenced": true,
+        "mime": "image/png",
+        "path": "assets/iso/props/board.png",
+        "referenced_by": [],
+        "size": 792
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/props/bridge.png",
+        "referenced_by": [],
+        "size": 692
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/props/bush.png",
+        "referenced_by": [],
+        "size": 664
+      },
+      {
+        "is_referenced": true,
+        "mime": "image/png",
+        "path": "assets/iso/props/cargo_pile.png",
+        "referenced_by": [],
+        "size": 821
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/props/fence_se.png",
+        "referenced_by": [],
+        "size": 616
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/props/fence_sw.png",
+        "referenced_by": [],
+        "size": 716
+      },
+      {
+        "is_referenced": true,
+        "mime": "image/png",
+        "path": "assets/iso/props/mailbox.png",
+        "referenced_by": [],
+        "size": 770
+      },
+      {
+        "is_referenced": true,
+        "mime": "image/png",
+        "path": "assets/iso/props/marker_stone.png",
+        "referenced_by": [],
+        "size": 703
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/props/rock.png",
+        "referenced_by": [],
+        "size": 535
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/props/signpost.png",
+        "referenced_by": [],
+        "size": 723
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/props/tree_oak.png",
+        "referenced_by": [],
+        "size": 1200
+      },
+      {
+        "is_referenced": true,
+        "mime": "image/png",
+        "path": "assets/iso/props/waystone.png",
+        "referenced_by": [],
+        "size": 942
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/props/well.png",
+        "referenced_by": [],
+        "size": 1077
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/walls/cave_entrance.png",
+        "referenced_by": [],
+        "size": 831
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/walls/cliff_block_32.png",
+        "referenced_by": [],
+        "size": 713
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/walls/cliff_block_64.png",
+        "referenced_by": [],
+        "size": 836
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/iso/walls/cliff_ramp.png",
+        "referenced_by": [],
+        "size": 744
+      }
+    ],
+    "sprites": [
+      {
+        "is_referenced": false,
+        "mime": "application/json",
+        "path": "assets/sprites/characters/fin/fin-walk-v1.json",
+        "referenced_by": [],
+        "size": 2202
+      },
+      {
+        "is_referenced": true,
+        "mime": "image/png",
+        "path": "assets/sprites/characters/fin/fin-walk-v1.png",
+        "referenced_by": [],
+        "size": 51448
+      },
+      {
+        "is_referenced": false,
+        "mime": "application/octet-stream",
+        "path": "assets/sprites/characters/fin/fin-walk-v1.tres",
+        "referenced_by": [],
+        "size": 5357
+      },
+      {
+        "is_referenced": false,
+        "mime": "image/png",
+        "path": "assets/sprites/items/item_icons.png",
+        "referenced_by": [],
+        "size": 6817
+      },
+      {
+        "is_referenced": false,
+        "mime": "application/json",
+        "path": "assets/sprites/items/item_icons_atlas.json",
+        "referenced_by": [],
+        "size": 5936
+      }
+    ],
+    "third_party": [
+      {
+        "creator": "",
+        "license": "| 2026-09-08 | Galmuri v2.40.4 (7/9/11/11-Bold/11-Condensed/14) | Lee Minseo (quiple) | **SIL OFL 1.1** — 동봉 LICENSE.txt | https://github.com/quiple/galmuri | `game/assets/fonts/galmuri/` | Galmuri font by quiple (OFL) |",
+        "license_grade": "A",
+        "pack": "galmuri",
+        "referenced_count": 1,
+        "referenced_files": {
+          "Galmuri11.ttf": []
+        },
+        "root": "assets/fonts/galmuri",
+        "unreferenced_count": 5
+      },
+      {
+        "creator": "",
+        "license": "| 2026-09-08 | Tiny Creatures 1.0 | Clint Bellanger | **CC0** — 동봉 License.txt (Kenney 허가 확장팩) | https://clintbellanger.itch.io/tiny-creatures | `third_party/kenney/tiny_creatures/` | Tiny Creatures by Clint Bellanger (CC0) |",
+        "license_grade": "A",
+        "pack": "kenney",
+        "referenced_count": 0,
+        "referenced_files": {},
+        "root": "assets/third_party/kenney",
+        "unreferenced_count": 717
+      },
+      {
+        "creator": "",
+        "license": "| 2026-09-08 | Ninja Adventure – Asset Pack (전체) | Pixel-boy, AAA | **CC0 1.0** — zip 동봉 LICENSE.txt·README.md 원문 | https://pixel-boy.itch.io/ninja-adventure-asset-pack | `game/assets/third_party/ninja_adventure/` | Ninja Adventure asset pack by Pixel-boy & AAA (CC0) |",
+        "license_grade": "A",
+        "pack": "ninja_adventure",
+        "referenced_count": 68,
+        "referenced_files": {
+          "Audio/Jingles/GameOver.wav": [],
+          "Audio/Jingles/Success2.wav": [],
+          "Audio/Musics/17 - Fight.ogg": [],
+          "Audio/Musics/31 - Sunny.ogg": [],
+          "Audio/Sounds/Alert/Alert.wav": [],
+          "Audio/Sounds/Bonus/PowerUp1.wav": [],
+          "Audio/Sounds/Elemental/Bubble.wav": [],
+          "Audio/Sounds/Elemental/Bubble2.wav": [],
+          "Audio/Sounds/Hit & Impact/Hit1.wav": [],
+          "Audio/Sounds/Hit & Impact/Hit2.wav": [],
+          "Audio/Sounds/Hit & Impact/Hit3.wav": [],
+          "Audio/Sounds/Hit & Impact/Hit6.wav": [],
+          "Audio/Sounds/Hit & Impact/Hit7.wav": [],
+          "Audio/Sounds/Hit & Impact/Impact.wav": [],
+          "Audio/Sounds/Hit & Impact/Impact2.wav": [],
+          "Audio/Sounds/Hit & Impact/Impact3.wav": [],
+          "Audio/Sounds/Hit & Impact/Impact4.wav": [],
+          "Audio/Sounds/Hit & Impact/Impact5.wav": [],
+          "Audio/Sounds/Jump & Bounce/Bounce2.wav": [],
+          "Audio/Sounds/Jump & Bounce/Bounce3.wav": [],
+          "Audio/Sounds/Magic & Skill/Fx.wav": [],
+          "Audio/Sounds/Menu/Accept.wav": [],
+          "Audio/Sounds/Menu/Cancel.wav": [],
+          "Audio/Sounds/Menu/Move1.wav": [],
+          "Audio/Sounds/Whoosh & Slash/Slash.wav": [],
+          "Audio/Sounds/Whoosh & Slash/Slash2.wav": [],
+          "Audio/Sounds/Whoosh & Slash/Slash3.wav": [],
+          "Audio/Sounds/Whoosh & Slash/Slash4.wav": [],
+          "Audio/Sounds/Whoosh & Slash/Slash5.wav": [],
+          "Audio/Sounds/Whoosh & Slash/Whoosh.wav": [],
+          "Audio/Sounds/Whoosh & Slash/Whoosh2.wav": [],
+          "FX/Projectile/Kunai.png": [],
+          "Items/Food/Honey.png": [],
+          "Items/Food/Meat.png": [],
+          "Items/Food/Noodle.png": [],
+          "Items/Food/Nut.png": [],
+          "Items/Food/TeaLeaf.png": [],
+          "Items/Object/Bag.png": [],
+          "Items/Other/Letter2.png": [],
+          "Items/Other/Stamp.png": [],
+          "Items/Potion/LifePot.png": [],
+          "Items/Potion/MilkPot.png": [],
+          "Items/Projectile/Kunai.png": [],
+          "Items/Resource/BarIron.png": [],
+          "Items/Resource/BarPurple.png": [],
+          "Items/Resource/Branch.png": [],
+          "Items/Resource/GemRed.png": [],
+          "Items/Resource/Grass.png": [],
+          "Items/Resource/Rock.png": [],
+          "Items/Resource/Water.png": [],
+          "Items/Resource/feather.png": [],
+          "Items/Treasure/BigTreasureChest.png": [],
+          "Items/Treasure/LittleTreasureChest.png": [],
+          "Items/Weapons/Axe/Sprite.png": [],
+          "Items/Weapons/BigSword/Sprite.png": [],
+          "Items/Weapons/Bone/Sprite.png": [],
+          "Items/Weapons/Hammer/Sprite.png": [],
+          "Items/Weapons/Katana/Sprite.png": [],
+          "Items/Weapons/Lance/Sprite.png": [],
+          "Items/Weapons/Sword/Sprite.png": [],
+          "Ui/Skill Icon/Items & Weapon/Amulet.png": [],
+          "Ui/Skill Icon/Items & Weapon/Armor.png": [],
+          "Ui/Skill Icon/Items & Weapon/Boot.png": [],
+          "Ui/Skill Icon/Items & Weapon/Guard.png": [],
+          "Ui/Skill Icon/Items & Weapon/Helmet.png": [],
+          "Ui/Skill Icon/Items & Weapon/Ring.png": [],
+          "Ui/Theme/Theme Wood/inventory_cell.png": [],
+          "Ui/Theme/Theme Wood/nine_path_panel.png": []
+        },
+        "root": "assets/third_party/ninja_adventure",
+        "unreferenced_count": 2036
+      },
+      {
+        "creator": "",
+        "license": "| 2026-09-08 | Parchment GUI (buttons/labels/panels/slots) | OpenGameArt 기여자 | CC0/OGA-BY 등록 — **페이지에서 표기 재확인 필요** | https://opengameart.org/content/parchment-gui | `third_party/parchment_gui/` | 페이지 표기에 따라 기재 |",
+        "license_grade": "A",
+        "pack": "parchment_gui",
+        "referenced_count": 1,
+        "referenced_files": {
+          "panels.png": []
+        },
+        "root": "assets/third_party/parchment_gui",
+        "unreferenced_count": 3
+      },
+      {
+        "creator": "",
+        "license": "| 2026-09-08 | Tiny Swords (Free Pack) | Pixel Frog | **CC0** — itch 페이지 명시 (zip에 라이선스 파일 없음) | https://pixelfrog-assets.itch.io/tiny-swords | `third_party/tiny_swords/` | Tiny Swords by Pixel Frog (CC0) |",
+        "license_grade": "A",
+        "pack": "tiny_swords",
+        "referenced_count": 0,
+        "referenced_files": {},
+        "root": "assets/third_party/tiny_swords",
+        "unreferenced_count": 428
+      }
+    ]
+  },
+  "metadata": {
+    "assets_by_category": {
+      "audio": 17,
+      "fonts": 6,
+      "generated": 4,
+      "iso": 41,
+      "sprites": 5,
+      "third_party_packs": 5
+    },
+    "total_files": 3327,
+    "total_packs": 5,
+    "version": "1.0"
+  }
+}

@@ -148,6 +148,11 @@ const REQUIRED_SCHEMA := {
 	# quest-system-m2.md §10에서 "형식만 두고 값은 검사하지 않는다"고 했던 부분을 M2-8이
 	# 실제 레벨 배치가 생기면서 채운다).
 	"world_objects": [],
+	# world_layout_hartland.json(D-201, 단계 b2 신설, level-designer 소유) — 마을 입구
+	# 구역의 지면·절벽·장식 배치. 전부 타일 좌표라 타일 규격이 바뀌어도 값이 그대로다.
+	# world_objects와 같은 패턴으로 "테이블 존재"만 등록하고, 실제 좌표가 퀘스트 오브젝트·
+	# 몬스터 스폰을 막지 않는지는 tests/smoke/smoke_quarter_view_b.gd가 검사한다.
+	"world_layout_hartland": [],
 	# exp_curve.csv(M3-1, F1-2 신설) — level 키(문자열)의 동적 딕셔너리라 위 테이블들과
 	# 동일 패턴("테이블 존재"만 여기 등록)으로 두고 필드 단위 검증은 _validate_exp_curve()에
 	# 위임한다. JSON이 아닌 CSV라 로더는 _load_csv()가 별도 담당(§0 "CSV는 별도 파서 필요").
@@ -241,6 +246,7 @@ const RELEASE_FALLBACKS := {
 	"quests": {},
 	"pools": {},
 	"world_objects": {},
+	"world_layout_hartland": {},
 }
 
 ## 테이블 이름(파일명에서 .json 제거) → Dictionary

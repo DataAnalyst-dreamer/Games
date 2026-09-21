@@ -15,8 +15,6 @@ const ANIM_WALK_FPS: float = 8.0
 const ANIM_IDLE_FPS: float = 4.0
 
 # --- 카메라 (테이블 이관 예정 → camera.json / 접근성 설정) ---
-## 프로토타입 16px 아트를 640×360 뷰포트에서 읽기 좋게 하기 위한 정수 줌.
-const CAMERA_ZOOM: float = 2.0
 ## 히트스톱 배율 (접근성). 0 = off. combat.json hitstop.min/max 에 곱한다.
 const HITSTOP_SCALE_DEFAULT: float = 1.0
 
@@ -25,8 +23,10 @@ const HITSTOP_SCALE_DEFAULT: float = 1.0
 const CHUNK_TILES: int = 64
 ## 플레이어 주변 활성 청크 반경 (1 → 3×3).
 const ACTIVE_CHUNK_RADIUS: int = 1
-## 프로토타입 타일 크기(px). 원작 아트는 32px (GDD 9장).
-const TILE_SIZE_PROTOTYPE: int = 16
+## 타일 한 변의 월드 단위. D-206(단계 b1)에서 16→32 전환 — GDD 9장의 32px 규격과
+## 1:1로 맞았다(아트 1px = 월드 1단위). 카메라 zoom 을 2→1 로 함께 낮춰 화면에 보이는
+## 타일 수는 그대로다(계획서 §1 실측: 20.0×11.2 타일 불변).
+const TILE_SIZE_PROTOTYPE: int = 32
 
 # --- 전투: characters.json 이관 예정 (M1-1, docs/specs/combat-tuning-m1.md §0) ---
 ## 레벨1·무기 미장착 기준 임시 공격력. characters.json 확정 전까지 여기에만 존재해야 한다.
@@ -43,7 +43,7 @@ const ATTACK_ANIM_FRAMES: int = 4
 ## 기준점(콤보 타이밍 모델, scripts/systems/combo_state.gd 참고). game-designer 실측 필요.
 const ATTACK_HIT_DURATION_SEC: float = float(ATTACK_ANIM_FRAMES) / ATTACK_ANIM_FPS
 ## 타별 짧은 전진 이동 거리(px, S2-1a "각 타는 짧은 전진 이동 포함"). 제안값.
-const ATTACK_LUNGE_PX: float = 6.0
+const ATTACK_LUNGE_PX: float = 12.0
 
 ## 타별 선딜/후딜 프레임(addendum §5-2, 결정 요청 6 — 미승인, 실제 적용 보류). 실제 캐릭터
 ## 공격 프레임(4~6f)이 나오기 전까지는 검증 불가능한 추정치라 combat.json으로 승격하지
@@ -77,7 +77,7 @@ const QUEST_ARROW_MARGIN_PX: float = 24.0
 # 확인 필요(완료 보고 질문 목록 참고), `_balance_todo` 취급. ---
 ## 미니맵이 보여주는 월드 반경(px). 640x360/줌2.0 기준 화면에 보이는 절반 폭(160px)보다
 ## 약간 좁게 잡아 "바로 근처"만 보이는 레이더에 가깝게 했다.
-const MINIMAP_VIEW_RADIUS_PX: float = 120.0
+const MINIMAP_VIEW_RADIUS_PX: float = 240.0
 ## 미니맵 카메라 위치·SubViewport 렌더·마커 갱신 주기(초). 1/0.15 ≈ 6.7fps — 지시받은
 ## 5~10fps 범위 안.
 const MINIMAP_UPDATE_INTERVAL_SEC: float = 0.15
@@ -93,6 +93,11 @@ const ATTACK_MOVE_INPUT_BLEND_RATIO: float = 0.35
 
 ## 몬스터 머리 위 소형 체력바(D-123)가 마지막 피격 후 노출을 유지하는 시간(초).
 ## 이 시간이 지나면 페이드아웃을 시작해 완전히 숨긴다.
+## 머리 위 표시(HP바·정예 이름표)를 액터 정수리에서 얼마나 띄울지(px, R13).
+## 높이 자체는 시트 계약(iso_actor_atlas.json 의 body_px)이 주므로 여기엔 여백만 둔다 -
+## 예전의 고정 -20/-24/-44 는 16px×2 스프라이트 전제라 96px 몸에서는 배에 붙었다.
+const MONSTER_OVERHEAD_MARGIN_PX: float = 8.0
+
 const MONSTER_HP_BAR_FADE_DELAY_SEC: float = 2.5
 ## 페이드아웃 자체에 걸리는 시간(초, 위 지연 이후).
 const MONSTER_HP_BAR_FADE_DURATION_SEC: float = 0.4
@@ -101,7 +106,7 @@ const MONSTER_HP_BAR_FADE_DURATION_SEC: float = 0.4
 ## docs/specs/monster-attack-anchor.md §4). monsters.json에 attack_vfx_offset_px가 없는
 ## (아직 값을 배정받지 않은) 신규 몬스터의 폴백 계산에만 쓰인다 — 실제 대상 7종은
 ## monsters.json에 종별 확정값을 직접 넣었으므로 이 상수를 거치지 않는다.
-const MONSTER_ATTACK_VFX_MARGIN_PX: float = 2.0
+const MONSTER_ATTACK_VFX_MARGIN_PX: float = 4.0
 
 ## 사망 판정 직후 텔레포트(부활)까지의 순수 UX 지연(초, F8-2). 밸런스와 무관한 연출
 ## 값이라 combat.json이 아닌 여기 둔다 — docs/specs/combat-tuning-m1-addendum.md §7-3
@@ -146,7 +151,7 @@ const DASH_WALL_STUN_SEC: float = 0.5
 ## 발사 트리거 거리)를 이 속도로 왕복 이상 커버할 수 있게 넉넉히 잡았다(사거리 밖으로
 ## 나간 다트가 무한히 날아다니지 않도록 하는 안전장치). game-designer 확인 필요
 ## (완료 보고 질문 목록 참고) — _balance_todo.
-const RANGED_DART_SPEED_PX: float = 220.0
+const RANGED_DART_SPEED_PX: float = 440.0
 const RANGED_DART_LIFETIME_SEC: float = 1.2
 
 ## 호루라기(whistle_cast_sec)·웨이브(wave_cast_sec) 시전 중 표시할 텔레그래프 색상.
@@ -160,7 +165,7 @@ const WHISTLE_CAST_FLASH_COLOR: Color = Color(0.5, 0.7, 1.0)
 ## 이격 거리(px, MonsterAiCalc.pick_non_overlapping_offsets). "겹침 방지"(§1-2) 요구를
 ## 만족하는 최소값 — 몬스터 바디 콜리전 크기(약 10px)보다 넉넉히 크게 잡은 제안값.
 ## game-designer 확인 필요 — _balance_todo.
-const ELITE_SPAWN_MIN_SEPARATION_PX: float = 20.0
+const ELITE_SPAWN_MIN_SEPARATION_PX: float = 40.0
 
 ## 버섯돌이 포자 장판(spore_patch) 지속시간(초). combat-tuning-m1(-addendum) 어디에도
 ## 정의되지 않은 완전 신규 제안값 — game-designer 확인 필요(완료 보고 질문 목록 참고).
@@ -181,9 +186,12 @@ const IN_COMBAT_SAVE_LOCK_SEC: float = 5.0
 # --- 쿼터뷰 이관 단계 (a): 발밑 그림자 (D-204) ---
 ## 발밑 타원 그림자 반지름(px). 16px 아트 기준 고정값 - 파일럿
 ## (prototypes/quarter-view-lab/actor.gd:_draw)의 24px를 4배 확대 좌표계에서
-## 본편 배율로 환산한 값(24 / 4 = 6). 단계 (b)에서 32px 타일로 전환하면 12로
-## 함께 올린다(다른 px 상수와 동일한 ×2 규칙, quarter-view-migration-v1.md §3.2).
-## 순수 연출값이라 combat.json 이관 대상이 아니다.
+## 본편 배율로 환산한 값(24 / 4 = 6). 순수 연출값이라 combat.json 이관 대상이 아니다.
+##
+## **스프라이트 배율 1 기준 반지름**이며 월드 거리 상수가 아니다 - 실제 반지름은 액터의
+## sprite.scale.x 를 곱해 나온다(FootShadow.draw 의 size_scale). D-206 단위 전환에서
+## 스프라이트 배율이 1→2 로 올랐으므로 이 상수까지 2배 하면 그림자만 4배가 된다
+## (실제로 그렇게 만들었다가 (a) 캡처와의 픽셀 비교에서 잡았다). 여기는 건드리지 않는다.
 const FOOT_SHADOW_RADIUS_PX: float = 6.0
 
 ## 그림자를 타원으로 만드는 세로 눌림 배율. 파일럿이 사용자 승인을 받은 값 0.42를
@@ -193,3 +201,24 @@ const FOOT_SHADOW_Y_SCALE: float = 0.42
 
 ## 그림자 색. 검정이 아니라 지면에 살짝 푸른 기가 도는 반투명 - 파일럿과 동일.
 const FOOT_SHADOW_COLOR: Color = Color(0.05, 0.08, 0.09, 0.3)
+
+
+# --- 쿼터뷰 단위 전환(D-206)에서 tuning.gd 로 모은 월드 거리 상수 ---
+## 아래 넷은 원래 각 스크립트에 숫자로 박혀 있었다. 단위 전환 대상인데 tuning.gd 밖에
+## 있으면 다음 전환(단계 c 캐릭터 비율)에서 조용히 누락된다 — CLAUDE.md "임시 상수는
+## tuning.gd 한 파일에만" 규칙대로 옮기면서 ×2 했다. 전부 월드 px.
+
+## 아이템 드랍이 사망 지점 주변에 흩어지는 반경(loot_spawner.gd).
+const LOOT_SCATTER_RADIUS_PX: float = 20.0
+## 데미지 숫자가 피격자 머리 위로 뜨는 높이(hit_feel.gd).
+const DAMAGE_NUMBER_OFFSET_PX: float = 24.0
+## 공격 중 무기 오버레이가 몸에서 앞으로 나가는 거리(player.gd).
+const WEAPON_PIVOT_OFFSET_PX: float = 16.0
+## 공격 히트박스가 facing 방향으로 전진 배치되는 거리(states/attack.gd).
+const ATTACK_HITBOX_OFFSET_PX: float = 20.0
+
+# --- 대사 시스템(⑪-1, D-247) ---
+## 자동 진행(접근성) 지연(초). 타이핑 완료 후 이 시간 뒤 자동으로 다음 줄. 접근성 옵션
+## Settings 필드는 이번 범위 밖(별도 단계)이라 아직 아무 코드도 이 상수를 읽지 않는다 —
+## _balance_todo: game-designer 확인 필요(완료 보고 질문 목록 참고).
+const DIALOGUE_AUTO_ADVANCE_DELAY_SEC: float = 2.5

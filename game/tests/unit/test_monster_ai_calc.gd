@@ -17,9 +17,14 @@ func test_should_leash() -> void:
 	assert_true(AiCalc.should_leash(200.0, 140.0), "leash 거리 밖이면 추적 포기")
 
 
+## D-222(iso-1): dash_speed_px 는 이제 **지면** 속력이다. 화면 속도는 방향에 따라
+## 달라지므로(2:1) 화면 벡터를 그대로 못 박으면 등각 전환을 통과할 수 없다 - 대신
+## "방향은 보존되고 지면 속력이 정확한가"를 검사한다.
 func test_dash_velocity_scales_direction_by_speed() -> void:
 	var v: Vector2 = AiCalc.dash_velocity(Vector2.RIGHT, 200.0)
-	assert_eq(v, Vector2(200.0, 0.0), "뿔토끼 돌진(dash_speed_px=200) 속도 벡터")
+	assert_almost_eq(IsoMath.ground_length(v), 200.0, 0.01, "뿔토끼 돌진의 지면 속력")
+	assert_almost_eq(v.y, 0.0, 0.01, "화면 +x 입력은 화면 +x 로 나간다")
+	assert_gt(v.x, 0.0, "방향 보존")
 
 
 func test_dash_velocity_zero_when_no_direction() -> void:

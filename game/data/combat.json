@@ -6,7 +6,7 @@
     "_comment": "GDD 4.1: 구르기 무적 0.3초. duration/distance는 combat-tuning-m1.md §2 확정. D-43: 거리+시간이 단일 소스이며 movement.roll_speed_px는 폐기 — 평균 속도는 distance_px/duration_sec로 코드에서 계산한다.",
     "iframes_sec": 0.3,
     "duration_sec": 0.45,
-    "distance_px": 48
+    "distance_px": 96
   },
 
   "guard": {
@@ -44,8 +44,8 @@
   },
 
   "movement": {
-    "_comment": "픽셀/초. 프로토타입은 16px 타일(Ninja Adventure) 기준 — 원작 아트(32px 타일) 전환 시 ×2 재환산(combat-tuning-m1.md §1-2). D-43: roll_speed_px는 폐기됨(roll 절 참고).",
-    "walk_speed_px": 80.0
+    "_comment": "픽셀/초. D-206(단계 b1)에서 32px 타일 단위로 ×2 전환 완료(combat-tuning-m1.md §1-2가 예고한 재환산) — 이 절의 px 값은 전부 1타일=32 월드단위 기준이다. D-43: roll_speed_px는 폐기됨(roll 절 참고).",
+    "walk_speed_px": 160.0
   },
 
   "stamina": {
@@ -65,8 +65,8 @@
 
   "knockback": {
     "_comment": "combat-tuning-m1.md §6-2 제안값(D-46: 임시 반영, 거리 유지) + addendum §1 확정: 지속시간은 강도와 무관하게 0.12초 단일값(D-61 예정) — 8px/20px 두 거리 모두 이 시간 동안 Tween 등속 보간. 벽 충돌 시 이동만 즉시 클램프하고 경직 타이머(hurt.stun_sec)는 그대로 흘려보낸다(코드 정책, 별도 키 불필요).",
-    "normal_px": 8,
-    "heavy_px": 20,
+    "normal_px": 16,
+    "heavy_px": 40,
     "duration_sec": 0.12,
     "_balance_todo": ["normal_px", "heavy_px"]
   },
@@ -80,9 +80,9 @@
   "camera_shake": {
     "_comment": "addendum §3-2 제안표(결정 요청 3 — M1 게이트 실측 전 임시 반영, _balance_todo). normal(플레이어 1·2타 적중)은 GDD 4.2 문구 그대로 셰이크 없음을 명시적 0으로 표기. heavy=강공격/3타 피니셔, crit=원소 상성 적중(현재 코드 기준 hit_landed의 is_advantage, 진짜 크리티컬은 M2 LUK 도입 후), hit=몬스터 공격이 플레이어에 적중(GDD 4.2 문구 확장 결정 요청 2, 승인 전까지 임시). 배율은 Tuning.SCREEN_SHAKE_LEVELS를 진폭에만 곱하고 지속시간에는 곱하지 않는다(멀미 방지, §3-3).",
     "normal": { "amplitude_px": 0.0, "duration_sec": 0.0 },
-    "heavy": { "amplitude_px": 6.0, "duration_sec": 0.18 },
-    "crit": { "amplitude_px": 9.0, "duration_sec": 0.22 },
-    "hit": { "amplitude_px": 4.0, "duration_sec": 0.12 },
+    "heavy": { "amplitude_px": 12.0, "duration_sec": 0.18 },
+    "crit": { "amplitude_px": 18.0, "duration_sec": 0.22 },
+    "hit": { "amplitude_px": 8.0, "duration_sec": 0.12 },
     "_balance_todo": ["heavy", "crit", "hit"]
   }
 }

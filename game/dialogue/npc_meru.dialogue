@@ -1,0 +1,49 @@
+using QuestSystem
+
+~ quest_side_heartland_herbrun_offer
+메루: 오늘은 국을/ 좀 특별하게 끓여볼까 해. [ID:quest_side_heartland_herbrun_line_01]
+=> END
+
+~ quest_side_heartland_herbrun_active
+메루: 재료는 아직인 게야? [ID:quest_side_heartland_herbrun_active_01]
+=> END
+
+~ quest_side_heartland_herbrun_ready
+메루: 오, 이거면 되겠구먼. [ID:quest_side_heartland_herbrun_ready_01]
+=> END
+
+~ quest_daily_heartland_02_offer
+메루: 재료가 좀 모자라. [ID:quest_daily_heartland_02_offer_01]
+=> END
+
+~ quest_daily_heartland_02_active
+메루: 아직 덜 모았지? [ID:quest_daily_heartland_02_active_01]
+=> END
+
+~ quest_daily_heartland_02_ready
+메루: 오, 다 구했구먼. [ID:quest_daily_heartland_02_ready_01]
+=> END
+
+~ meru_everyday
+if QuestSystem.get_state("quest_daily_heartland_02") == "completed"
+    if visit_count("meru") % 3 == 0
+        메루: 고마워, 잘 먹을게. [ID:quest_daily_heartland_02_done_01]
+    elif visit_count("meru") % 3 == 1
+        메루: 이 정도면 충분해. [ID:quest_daily_heartland_02_done_02]
+    else
+        메루: 또 필요하면 부를게. [ID:quest_daily_heartland_02_done_03]
+elif QuestSystem.get_state("quest_main_a1_06_echocave") == "completed"
+    if visit_count("meru") % 3 == 0
+        메루: 굴에서 안 다쳤어? [ID:npc.meru.after_cave.1]
+    elif visit_count("meru") % 3 == 1
+        메루: 얘기는 앉아서 해. [ID:npc.meru.after_cave.2]
+    else
+        메루: 또 왔네, 쉬어 가. [ID:npc.meru.after_cave.3]
+else
+    if visit_count("meru") % 3 == 0
+        메루: 앉아, 국 데워줄게. [ID:npc.meru.everyday.1]
+    elif visit_count("meru") % 3 == 1
+        메루: 빈속으로 다니지 마. [ID:npc.meru.everyday.2]
+    else
+        메루: 부츠 흙 털고 와. [ID:npc.meru.everyday.3]
+=> END

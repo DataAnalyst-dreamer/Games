@@ -19,7 +19,9 @@ extends RefCounted
 ##
 ## size_scale: 몬스터 크기별 배율(D-204 "몬스터는 크기별 배율 허용"). 플레이어는 1.0.
 ## 0 이하면 아무것도 그리지 않는다(그림자 없는 액터를 표현할 수 있는 탈출구).
-static func draw(canvas: CanvasItem, size_scale: float = 1.0) -> void:
+## origin: canvas 로컬 좌표계 안에서 그림자를 그릴 위치(기본 원점). BlacksmithNpc처럼
+## 시각 요소(사람)가 판정 원점에서 떨어져 서는 경우에만 쓴다(iso-3 NPC 확장).
+static func draw(canvas: CanvasItem, size_scale: float = 1.0, origin: Vector2 = Vector2.ZERO) -> void:
 	if canvas == null or not is_instance_valid(canvas):
 		return
 	var radius: float = Tuning.FOOT_SHADOW_RADIUS_PX * size_scale
@@ -27,6 +29,6 @@ static func draw(canvas: CanvasItem, size_scale: float = 1.0) -> void:
 		return
 	# 세로만 눌러 원을 타원으로 만든다. 그린 뒤 반드시 변환을 되돌려야 같은 _draw()
 	# 안의 뒤이은 그리기(예: 디버그 도형)가 눌린 좌표계를 물려받지 않는다.
-	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, Tuning.FOOT_SHADOW_Y_SCALE))
+	canvas.draw_set_transform(origin, 0.0, Vector2(1.0, Tuning.FOOT_SHADOW_Y_SCALE))
 	canvas.draw_circle(Vector2.ZERO, radius, Tuning.FOOT_SHADOW_COLOR)
 	canvas.draw_set_transform(Vector2.ZERO)

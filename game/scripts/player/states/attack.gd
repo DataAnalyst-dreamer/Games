@@ -80,7 +80,7 @@ func _start_current_hit() -> void:
 	player.play_attack_swing(hit_index, combo.hit_duration_sec)
 	_play_swing_sfx(hit_index)
 	var lunge_speed: float = Tuning.ATTACK_LUNGE_PX / maxf(combo.hit_duration_sec, 0.01)
-	player.velocity = _lunge_dir * lunge_speed
+	player.velocity = IsoMath.move_velocity(_lunge_dir, lunge_speed)
 	_fire_hitbox(hit_index)
 
 
@@ -123,7 +123,10 @@ func _fire_hitbox(hit_index: int) -> void:
 	hitbox.is_heavy = is_finisher
 	hitbox.element = &""
 	hitbox.source = player
-	hitbox.position = _lunge_dir * 10.0
+	# R4/D-222: 오프셋도 **지면** 거리다 - 화면 벡터에 그냥 곱하면 방향마다 실제
+	# 사거리가 달라진다(동서 1/√2, 남북 √2).
+	hitbox.position = IsoMath.offset_for_ground_distance(
+		_lunge_dir, Tuning.ATTACK_HITBOX_OFFSET_PX)
 	# M4-4(D-168/D-191, §1 HIT 번역): DEX만큼 판정이 넓어진다. 복원은 Hitbox.deactivate()가
 	# 책임지므로 Hurt/Dead 같은 강제 전이로 Attack을 빠져나가도 배율이 남지 않는다.
 	hitbox.apply_scale_mult(float(Progression.get_derived().get("hitbox_scale", 1.0)))

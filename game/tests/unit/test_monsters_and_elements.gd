@@ -90,7 +90,7 @@ func test_slime_stats_match_combat_tuning_m1_spec() -> void:
 	var slime: Dictionary = _data.get_value("monsters", "slime", {})
 	assert_eq(int(slime.get("hp")), 18, "combat-tuning-m1.md §8-2")
 	assert_eq(int(slime.get("atk")), 8, "combat-tuning-m1.md §8-3")
-	assert_almost_eq(float(slime.get("move_speed_px")), 40.0, 0.0001, "combat-tuning-m1.md §8-4")
+	assert_almost_eq(float(slime.get("move_speed_px")), 80.0, 0.0001, "combat-tuning-m1.md §8-4 (40) × D-206 단위 전환 2")
 	assert_almost_eq(float(slime.get("telegraph_sec")), 0.5, 0.0001, "combat-tuning-m1.md §8-4")
 
 
@@ -116,26 +116,31 @@ func test_ai_field_invariant_leash_gt_aggro_gt_melee() -> void:
 		assert_gt(aggro, melee, "%s aggro_range_px > melee_range_px" % monster_id)
 
 
+## 아래 두 함수의 px 기대값은 원문 스펙(addendum §4)의 숫자에 D-206 단위 전환 ×2를
+## 적용한 것이다 — 1타일이 16에서 32 월드단위가 됐을 뿐 타일 기준 거리는 그대로다.
+## 원문 문서는 전환 이전(16 월드단위) 숫자를 그대로 인용하고 있다.
 func test_horn_rabbit_dash_fields_match_addendum() -> void:
 	var entry: Dictionary = _data.get_value("monsters", "horn_rabbit", {})
-	assert_almost_eq(float(entry.get("dash_speed_px")), 200.0, 0.0001)
+	assert_almost_eq(float(entry.get("dash_speed_px")), 400.0, 0.0001)
 	assert_almost_eq(float(entry.get("dash_duration_sec")), 0.3, 0.0001)
-	assert_almost_eq(float(entry.get("aggro_range_px")), 80.0, 0.0001)
-	assert_almost_eq(float(entry.get("melee_range_px")), 16.0, 0.0001)
+	assert_almost_eq(float(entry.get("aggro_range_px")), 160.0, 0.0001)
+	# iso-3 R6(승인): 등각 액터 시트로 몸이 커지며 32 -> 36. addendum 원문이 아니라
+	# 이 재튜닝이 기준이다(monsters.json.horn_rabbit._comment 참고).
+	assert_almost_eq(float(entry.get("melee_range_px")), 36.0, 0.0001)
 	assert_almost_eq(float(entry.get("attack_recovery_sec")), 0.7, 0.0001)
-	assert_almost_eq(float(entry.get("patrol_radius_px")), 96.0, 0.0001)
-	assert_almost_eq(float(entry.get("leash_range_px")), 180.0, 0.0001)
+	assert_almost_eq(float(entry.get("patrol_radius_px")), 192.0, 0.0001)
+	assert_almost_eq(float(entry.get("leash_range_px")), 360.0, 0.0001)
 
 
 func test_mushroom_spore_patch_fields_match_addendum() -> void:
 	var entry: Dictionary = _data.get_value("monsters", "mushroom", {})
 	assert_almost_eq(float(entry.get("atk_tick_per_sec")), 4.0, 0.0001)
-	assert_almost_eq(float(entry.get("aoe_radius_px")), 32.0, 0.0001)
-	assert_almost_eq(float(entry.get("aggro_range_px")), 96.0, 0.0001)
-	assert_almost_eq(float(entry.get("melee_range_px")), 20.0, 0.0001)
+	assert_almost_eq(float(entry.get("aoe_radius_px")), 64.0, 0.0001)
+	assert_almost_eq(float(entry.get("aggro_range_px")), 192.0, 0.0001)
+	assert_almost_eq(float(entry.get("melee_range_px")), 40.0, 0.0001)
 	assert_almost_eq(float(entry.get("attack_recovery_sec")), 1.0, 0.0001)
 	assert_eq(float(entry.get("patrol_radius_px")), 0.0, "버섯돌이는 고정형(순찰 없음)")
-	assert_almost_eq(float(entry.get("leash_range_px")), 120.0, 0.0001)
+	assert_almost_eq(float(entry.get("leash_range_px")), 240.0, 0.0001)
 	assert_gte(float(entry.get("aoe_radius_px")), float(entry.get("melee_range_px")),
 		"aoe_radius_px >= melee_range_px(장판이 트리거 지점보다 넓게 퍼짐)")
 

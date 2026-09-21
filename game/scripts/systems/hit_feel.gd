@@ -147,7 +147,10 @@ static func _apply_knockback(body: Node2D, direction: Vector2, distance_px: floa
 	if body == null or not is_instance_valid(body):
 		return
 	var duration: float = float(Data.get_value("combat", "knockback.duration_sec", 0.12))
-	var target: Vector2 = body.global_position + direction * distance_px
+	# D-222: knockback.*_px 는 지면 거리다. 넉백은 velocity 가 아니라 global_position
+	# Tween 이라 이동 경로의 등각 변환이 여기에만 따로 필요하다.
+	var target: Vector2 = body.global_position \
+		+ IsoMath.offset_for_ground_distance(direction, distance_px)
 	var tween := body.create_tween()
 	tween.tween_property(body, "global_position", target, duration) \
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
@@ -169,5 +172,5 @@ static func spawn_damage_number(at_body: Node2D, damage: int, is_advantage: bool
 		return
 	var number := DamageNumberScene.instantiate()
 	tree.current_scene.add_child(number)
-	number.global_position = at_body.global_position + Vector2(0, -12)
+	number.global_position = at_body.global_position + Vector2(0, -Tuning.DAMAGE_NUMBER_OFFSET_PX)
 	number.setup(damage, is_advantage)

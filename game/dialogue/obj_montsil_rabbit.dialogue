@@ -1,0 +1,10 @@
+~ start
+다미: (몽실이가 코를 씰룩인다) [ID:quest_side_heartland_montsil_encounter]
+- 그냥 놓아준다 [ID:quest_side_heartland_montsil_choice_release]
+    다미: (몽실이가 폴짝 뛰어 사라졌다) [ID:quest_side_heartland_montsil_choice_release_reaction_01]
+    do resolve_branch_outcome("release")
+    => END
+- 붙잡아 본다 [ID:quest_side_heartland_montsil_choice_capture]
+    다미: (몽실이가 놀라 도망쳤다) [ID:quest_side_heartland_montsil_choice_capture_attempt_reaction_01]
+    do resolve_branch_outcome("capture_attempt")
+    => END

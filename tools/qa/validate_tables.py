@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Dict, List
@@ -23,6 +24,8 @@ from typing import Any, Dict, List
 # D-157: 스탯/스킬트리/경험치 곡선(M4-0 v2) 검증은 이 파일이 이미 500줄을 넘어 별도
 # 모듈로 분리했다(validate_stats/validate_skills/validate_exp_curve, 관련 상수·헬퍼 포함).
 # 두 파일은 항상 같이 갱신할 것.
+from validate_dialogue import validate_dialogue
+from validate_layout import validate_layout
 from validate_progression import validate_exp_curve, validate_skills, validate_stats
 
 ITEM_GRADES = ["common", "uncommon", "rare", "epic", "legendary", "relic"]
@@ -554,6 +557,11 @@ def main() -> int:
     report = Report()
     print(f"[validate_tables] data dir = {data_dir}")
 
+    # D-270: Validate asset index (independent module)
+    asset_validation = subprocess.run([sys.executable, str(Path(__file__).with_name('validate_asset_index.py'))], check=False)
+    if asset_validation.returncode != 0:
+        return asset_validation.returncode
+
     items = load_json(data_dir / "items.json", report)
     affixes = load_json(data_dir / "affixes.json", report)
     drop_tables = load_json(data_dir / "drop_tables.json", report)
@@ -582,6 +590,14 @@ def main() -> int:
     pool_ids = validate_pools(pools, monsters, item_ids, report)
     world_object_ids = validate_world_objects(world_objects_raw, report)
     validate_quests(quests, quest_todo_ids, monsters, item_ids, pool_ids, world_object_ids, report)
+    for layout_error in validate_layout(data_dir):
+        report.error(layout_error)
+    # 대사 검사(D-251/D-253): 경고([warn] 접두)는 경고로, 나머지는 오류로 합산.
+    for dialogue_result in validate_dialogue(data_dir.parent.parent):
+        if dialogue_result.startswith("[warn] "):
+            report.warn(dialogue_result[len("[warn] "):])
+        else:
+            report.error(dialogue_result)
 
     print(f"[validate_tables] items={len(item_ids)} affixes={len(entries(affixes))} "
           f"drop_tables={len(drop_table_ids)} monsters={len(entries(monsters))} "

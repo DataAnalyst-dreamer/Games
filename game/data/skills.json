@@ -10,10 +10,10 @@
     "max_level": 5,
     "hitbox": {
       "shape": "arc",
-      "range_px": 65,
-      "width_px": 100
+      "range_px": 130,
+      "width_px": 200
     },
-    "knockback_px": 14,
+    "knockback_px": 28,
     "levels": [
       {
         "level": 1,
@@ -63,10 +63,10 @@
     "max_level": 5,
     "hitbox": {
       "shape": "line",
-      "range_px": 85,
-      "width_px": 20
+      "range_px": 170,
+      "width_px": 40
     },
-    "knockback_px": 6,
+    "knockback_px": 12,
     "levels": [
       {
         "level": 1,
@@ -159,10 +159,10 @@
     "max_level": 5,
     "hitbox": {
       "shape": "line",
-      "range_px": 90,
-      "width_px": 30
+      "range_px": 180,
+      "width_px": 60
     },
-    "knockback_px": 10,
+    "knockback_px": 20,
     "levels": [
       {
         "level": 1,
@@ -374,10 +374,10 @@
     "max_level": 5,
     "hitbox": {
       "shape": "line",
-      "range_px": 110,
-      "width_px": 40
+      "range_px": 220,
+      "width_px": 80
     },
-    "knockback_px": 20,
+    "knockback_px": 40,
     "levels": [
       {
         "level": 1,
@@ -427,10 +427,10 @@
     "max_level": 5,
     "hitbox": {
       "shape": "circle",
-      "range_px": 45,
+      "range_px": 90,
       "width_px": null
     },
-    "knockback_px": 24,
+    "knockback_px": 48,
     "levels": [
       {
         "level": 1,
@@ -587,10 +587,10 @@
     "max_level": 5,
     "hitbox": {
       "shape": "line",
-      "range_px": 90,
-      "width_px": 36
+      "range_px": 180,
+      "width_px": 72
     },
-    "knockback_px": 18,
+    "knockback_px": 36,
     "levels": [
       {
         "level": 1,
@@ -598,7 +598,7 @@
         "cooldown_sec": 6.0,
         "damage_mult": 1.8,
         "self_effect": {
-          "dash_px": 70.0,
+          "dash_px": 140.0,
           "invuln_sec": 0.1
         }
       },
@@ -608,7 +608,7 @@
         "cooldown_sec": 5.7,
         "damage_mult": 2.05,
         "self_effect": {
-          "dash_px": 70.0,
+          "dash_px": 140.0,
           "invuln_sec": 0.1
         }
       },
@@ -618,7 +618,7 @@
         "cooldown_sec": 5.4,
         "damage_mult": 2.3,
         "self_effect": {
-          "dash_px": 70.0,
+          "dash_px": 140.0,
           "invuln_sec": 0.1
         }
       },
@@ -628,7 +628,7 @@
         "cooldown_sec": 5.1,
         "damage_mult": 2.55,
         "self_effect": {
-          "dash_px": 70.0,
+          "dash_px": 140.0,
           "invuln_sec": 0.1
         }
       },
@@ -638,7 +638,7 @@
         "cooldown_sec": 4.8,
         "damage_mult": 2.8,
         "self_effect": {
-          "dash_px": 70.0,
+          "dash_px": 140.0,
           "invuln_sec": 0.1
         }
       }
@@ -822,10 +822,10 @@
     "max_level": 5,
     "hitbox": {
       "shape": "circle",
-      "range_px": 60,
+      "range_px": 120,
       "width_px": null
     },
-    "knockback_px": 32,
+    "knockback_px": 64,
     "levels": [
       {
         "level": 1,
@@ -875,10 +875,10 @@
     "max_level": 5,
     "hitbox": {
       "shape": "line",
-      "range_px": 70,
-      "width_px": 18
+      "range_px": 140,
+      "width_px": 36
     },
-    "knockback_px": 4,
+    "knockback_px": 8,
     "levels": [
       {
         "level": 1,
@@ -928,10 +928,10 @@
     "max_level": 5,
     "hitbox": {
       "shape": "line",
-      "range_px": 100,
-      "width_px": 24
+      "range_px": 200,
+      "width_px": 48
     },
-    "knockback_px": 10,
+    "knockback_px": 20,
     "levels": [
       {
         "level": 1,
@@ -939,7 +939,7 @@
         "cooldown_sec": 4.5,
         "damage_mult": 1.6,
         "self_effect": {
-          "dash_px": 80.0,
+          "dash_px": 160.0,
           "invuln_sec": 0.15
         }
       },
@@ -949,7 +949,7 @@
         "cooldown_sec": 4.3,
         "damage_mult": 1.8,
         "self_effect": {
-          "dash_px": 80.0,
+          "dash_px": 160.0,
           "invuln_sec": 0.15
         }
       },
@@ -959,7 +959,7 @@
         "cooldown_sec": 4.1,
         "damage_mult": 2.0,
         "self_effect": {
-          "dash_px": 80.0,
+          "dash_px": 160.0,
           "invuln_sec": 0.15
         }
       },
@@ -969,7 +969,7 @@
         "cooldown_sec": 3.9,
         "damage_mult": 2.2,
         "self_effect": {
-          "dash_px": 80.0,
+          "dash_px": 160.0,
           "invuln_sec": 0.15
         }
       },
@@ -979,7 +979,7 @@
         "cooldown_sec": 3.7,
         "damage_mult": 2.4,
         "self_effect": {
-          "dash_px": 80.0,
+          "dash_px": 160.0,
           "invuln_sec": 0.15
         }
       }
@@ -1044,10 +1044,10 @@
     "max_level": 5,
     "hitbox": {
       "shape": "arc",
-      "range_px": 60,
-      "width_px": 110
+      "range_px": 120,
+      "width_px": 220
     },
-    "knockback_px": 6,
+    "knockback_px": 12,
     "levels": [
       {
         "level": 1,
@@ -1259,10 +1259,10 @@
     "max_level": 5,
     "hitbox": {
       "shape": "line",
-      "range_px": 95,
-      "width_px": 22
+      "range_px": 190,
+      "width_px": 44
     },
-    "knockback_px": 8,
+    "knockback_px": 16,
     "levels": [
       {
         "level": 1,

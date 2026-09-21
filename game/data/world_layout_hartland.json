@@ -1,0 +1,146 @@
+{
+  "_schema_version": "0.3",
+  "_source_doc": "docs/specs/isometric-migration-v1.md §7 (D-219~D-226, 단계 iso-2) + docs/levels/hartland.md ⑪ (M6-3, D-235~D-238, 필드 전역 등각 지형)",
+  "_comment": "하틀랜드 필드 전역(프로토타입 단일 씬 기준) 배치: 마을 허브(기존, 미변경) → 초원 도로망 → 안개숲 입구(서) → 메아리 굴 입구(북동) → 워프 비석(기존, 장식만 추가) → 바닷가 절벽(남서, 2단+2진입로). 좌표는 전부 **격자 셀 좌표**(한 칸 = Tuning.TILE_SIZE_PROTOTYPE = 32 월드단위, 화면 64×32 마름모)라 투영이 바뀌어도 이 파일은 그대로다. scripts/systems/world.gd 가 읽어 Ground/Elev1/Walls/Props 를 채운다. 애셋 이름은 game/assets/iso/iso_atlas.json 의 키다. 기존 퀘스트 트리거·NPC·비석(data/world_objects.json)과 몬스터 고정 스폰(Main.tscn)을 막지 않도록 전부 IsoMath.screen_to_cell 로 역산해 셀 좌표를 확인하고 최소 1~2셀 이격시켰다(불변은 tests/smoke/smoke_quarter_view_b.gd §1·§8, tools/qa/validate_layout.py 가 검사).",
+
+  "ground": {
+    "_comment": "지면을 채우는 격자 반경(칸). 등각은 같은 칸 수로도 화면을 더 넓게 덮는다. 신규 지형(해안 x-33, 안개숲 x-33, 바다 y20)이 전부 이 반경 안에 든다.",
+    "radius_tiles": 40,
+    "variant_ratio": 0.35
+  },
+
+  "paths": [
+    {"_comment": "마을로 들어가는 진입로. 절벽 틈(격자 x = -1..0)을 지난다. (기존, 미변경)",
+     "rect": [-1, -10, 2, 13]},
+
+    {"_comment": "[M6-3] 진입로 남쪽 끝 -> 초원 교차로(허브) 연결 짧은 구간.",
+     "rect": [-1, 3, 2, 2]},
+
+    {"_comment": "[M6-3] 초원 교차로 -> 브릿지포트 방면(테오/부두) 남서 도로, 가로 구간(가로대). y=5~6 은 HornRabbit2(-10,4) 몬스터 고정 스폰 행(y=4)을 피한 것.",
+     "rect": [-24, 5, 25, 2]},
+    {"_comment": "[M6-3] 위 도로의 세로 구간 — teo(-24,9) 앞 공터까지 남쪽으로 꺾는다.",
+     "rect": [-24, 5, 2, 5]},
+
+    {"_comment": "[M6-3] 해안절벽 직행 램프 진입로(2개 진입 경로 중 하나, D-136~138) — teo 도로에서 이어져 절벽 gap A(x=-25,-24)까지.",
+     "rect": [-25, 9, 2, 5]},
+    {"_comment": "[M6-3] 해안절벽 우회 램프 진입로(2개 진입 경로 중 나머지 하나) — 안개숲 남쪽 가장자리를 돌아 절벽 gap B(x=-31,-30)까지.",
+     "rect": [-31, 9, 2, 5]},
+    {"_comment": "[M6-3] 절벽 밑 해변(placeholder — 전용 모래 타일 없어 tile_dirt 재사용).",
+     "rect": [-33, 14, 18, 3]},
+
+    {"_comment": "[M6-3] 초원 교차로 -> 동쪽(로젤/다미/목초지/몽실이) 도로, 가로 구간.",
+     "rect": [3, -3, 15, 2]},
+    {"_comment": "[M6-3] 위 도로의 세로 구간 — 목초지·몽실이 방면 남쪽으로 꺾는다.",
+     "rect": [16, -3, 2, 10]},
+
+    {"_comment": "[M6-3] 마을 절벽 틈(x=0,1, 기존 진입로와 같은 축) -> 목자 전망대(hilltop_waypoint, 3,-16) 북쪽 능선. 절벽 위 대지(elevated)와 겹치지만 등각에서는 항상 그래온 방식(기존 elevated 도 ground 위에 겹쳐 깔린다) 그대로다.",
+     "rect": [0, -16, 2, 6]},
+    {"_comment": "[M6-3] 메아리 굴 절벽(front_y=-13) 남쪽 접근로 — gap(x=16) 앞까지만, 절벽 칸(x13~15/17~19)과 겹치지 않게 한 칸 남쪽(y=-12)에 둔다.",
+     "rect": [0, -12, 17, 1]},
+
+    {"_comment": "[M6-3] 마을 서쪽(연못·대장간 인접) -> 안개 숲 입구 스퍼.",
+     "rect": [-19, -4, 10, 2]}
+  ],
+
+  "water": [
+    {"_comment": "마을 서쪽 연못. 통행 불가. [M6-3] D-236(물 실제 충돌 부여)으로 처음 물리 콜리전이 생기면서 x=-11 칸이 퀘스트 트리거 heartland_dandelion_village(화면 -280,-180 = 셀 -11,-1)를 막는 게 드러났다(물이 시각효과일 때는 안 걸리던 문제) — 원래 3×3 에서 서쪽 한 칸을 줄여 피한다. world_objects.json 좌표는 옮기지 않는다.",
+     "rect": [-10, -2, 2, 3]},
+
+    {"_comment": "[M6-3] 개울 상류 — 동쪽 도로(x16~17,y-3~6)와는 별개 지점을 가로지른다. tile_stream 은 tile_water 와 같은 ground_solid 계열(통행 불가), 색만 다르다.",
+     "asset": "tile_stream", "rect": [10, -5, 2, 2]},
+    {"_comment": "[M6-3] 개울 하류 — 위 칸과 사이(y=-3,-2)는 다리(props.bridge, 10,-3) 자리로 비워 뒀다.",
+     "asset": "tile_stream", "rect": [10, -1, 2, 3]},
+
+    {"_comment": "[M6-3] 바닷가 절벽 남쪽 바다 — 지도 남쪽 경계를 마감한다(통행 불가).",
+     "rect": [-35, 17, 22, 4]}
+  ],
+
+  "cliffs": [
+    {"_comment": "마을을 두르는 절벽 한 단(고도 1). 격자 행이라 화면에서는 대각선으로 뻗는다. (기존, 미변경)",
+     "x": -9, "front_y": -11, "length": 8, "height": 32},
+    {"x": 2, "front_y": -11, "length": 8, "height": 32},
+
+    {"_comment": "[M6-3] 메아리 굴 입구 절벽 서쪽 토막 — gap(x=16, cave_entrance 소품)까지.",
+     "x": 13, "front_y": -13, "length": 3, "height": 32},
+    {"_comment": "[M6-3] 메아리 굴 입구 절벽 동쪽 토막.",
+     "x": 17, "front_y": -13, "length": 3, "height": 32},
+
+    {"_comment": "[M6-3] 바닷가 절벽(고도 2단, cliff_block_64) 서쪽 토막 — gap B(x=-31,-30, 우회 램프) 앞.",
+     "x": -33, "front_y": 13, "length": 2, "height": 64},
+    {"_comment": "[M6-3] 바닷가 절벽 중앙 토막 — gap B 와 gap A(x=-25,-24, 직행 램프) 사이.",
+     "x": -29, "front_y": 13, "length": 4, "height": 64},
+    {"_comment": "[M6-3] 바닷가 절벽 동쪽 토막 — gap A 앞부터 teo 방면까지.",
+     "x": -23, "front_y": 13, "length": 8, "height": 64}
+  ],
+
+  "elevated": [
+    {"_comment": "절벽 위 대지(고도 1단). Elev1 레이어에 32px 올려 깐다. (기존, 미변경 — 메아리 굴·해안 절벽은 위가 보행용이 아니라 신설하지 않음, D-236)",
+     "rect": [-9, -15, 19, 4]}
+  ],
+
+  "props": [
+    {"_comment": "대장간·게시판·우편함·워프 비석은 Main.tscn 의 상호작용 씬 노드(BlacksmithNpc1/BoardNpc1/MailboxNpc1/Waystone1)가 이미 세우므로 여기서 또 놓으면 그림이 두 개 겹친다 - 배치용 소품은 상호작용이 없는 것만 둔다. (기존, 미변경)",
+     "asset": "house_a", "tile": [-6, -8]},
+    {"asset": "house_a", "tile": [4, -8]},
+    {"asset": "well", "tile": [2, -3]},
+
+    {"asset": "tree_oak", "tile": [-8, -6]},
+    {"asset": "tree_oak", "tile": [-7, 1]},
+    {"asset": "tree_oak", "tile": [6, -5]},
+    {"asset": "tree_oak", "tile": [7, 1]},
+    {"asset": "tree_oak", "tile": [-3, -10]},
+
+    {"asset": "fence_sw", "tile": [-2, -9]},
+    {"asset": "fence_sw", "tile": [-2, -8]},
+    {"asset": "fence_se", "tile": [1, -9]},
+    {"asset": "fence_se", "tile": [2, -9]},
+
+    {"asset": "rock", "tile": [-9, 2]},
+    {"asset": "rock", "tile": [6, 3]},
+    {"asset": "bush", "tile": [-4, -1]},
+    {"asset": "bush", "tile": [2, 2]},
+    {"asset": "bush", "tile": [-8, -3]},
+
+    {"_comment": "[M6-3] 워프 비석(Waystone1, 화면 120,-140 = 셀 -4,-6) 주변 장식 — 2칸 이격, 새 애셋 없이 기존 rock/bush 재사용.",
+     "asset": "rock", "tile": [-6, -4]},
+    {"asset": "bush", "tile": [0, -4]},
+
+    {"_comment": "[M6-3] 초원 산포 장식(개활지 저밀도).",
+     "asset": "rock", "tile": [10, -8]},
+    {"asset": "bush", "tile": [12, -8]},
+    {"asset": "rock", "tile": [-14, 2]},
+    {"asset": "bush", "tile": [-12, 6]},
+    {"asset": "rock", "tile": [6, 9]},
+    {"asset": "bush", "tile": [9, 7]},
+
+    {"_comment": "[M6-3] 이정표(signpost, 순수 장식 — 상호작용 없음). 초원 교차로와 동쪽 도로 갈림길에 하나씩.",
+     "asset": "signpost", "tile": [2, 4]},
+    {"asset": "signpost", "tile": [16, -4]},
+
+    {"_comment": "[M6-3] 개울을 건너는 다리 — water 배열의 tile_stream 두 토막 사이 gap 칸(10,-3).",
+     "asset": "bridge", "tile": [10, -3]},
+
+    {"_comment": "[M6-3] 메아리 굴 입구 — cliffs 배열의 gap(x=16, front_y=-13) 칸에 얹는다. collision_band=0(통과 가능), 양옆 cliff_block 이 실제 벽.",
+     "asset": "cave_entrance", "tile": [16, -13]},
+
+    {"_comment": "[M6-3] 안개 숲 입구(엘드우드 방면, 서쪽) — tree_oak 밀집. R_WEST 스퍼(y=-4~-3)·R_SW 도로(y=5~6, x=-24~-23)는 비워 통로를 확보했다.",
+     "asset": "tree_oak", "tile": [-20, -7]},
+    {"asset": "tree_oak", "tile": [-22, -6]},
+    {"asset": "tree_oak", "tile": [-25, -6]},
+    {"asset": "tree_oak", "tile": [-28, -5]},
+    {"asset": "tree_oak", "tile": [-30, -6]},
+    {"asset": "tree_oak", "tile": [-32, -4]},
+    {"asset": "tree_oak", "tile": [-21, -2]},
+    {"asset": "tree_oak", "tile": [-26, -2]},
+    {"asset": "tree_oak", "tile": [-29, -1]},
+    {"asset": "tree_oak", "tile": [-31, 0]},
+    {"asset": "tree_oak", "tile": [-20, 2]},
+    {"asset": "tree_oak", "tile": [-23, 3]},
+    {"asset": "tree_oak", "tile": [-27, 2]},
+    {"asset": "tree_oak", "tile": [-30, 3]},
+
+    {"_comment": "[M6-3] 바닷가 절벽 계단식 진입로(D-238, cliff_ramp — 통과 가능) — 2개 진입 경로(D-136~138) 각각의 gap 칸에.",
+     "asset": "cliff_ramp", "tile": [-24, 13]},
+    {"asset": "cliff_ramp", "tile": [-31, 13]}
+  ]
+}

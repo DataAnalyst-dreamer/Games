@@ -1,0 +1,24 @@
+using QuestSystem
+
+~ start
+안내인: 잠깐 얘기 좀 할까?
+- 좋아
+	do QuestSystem.accept("quest_main_a1_01_arrival")
+	=> END
+- 나중에
+	=> END
+
+~ layout_check
+안내인: 이 문장은 대사 풍선의 레이아웃 계약을 검증하기 위한 것으로, 패널 폭 안에서 자동으로 줄바꿈되어 세 줄 근처를 채우도록 일부러 길게 적었습니다. 이 정도 분량이면 두 줄을 넘어 세 줄째까지 자연스럽게 이어질 것입니다.
+- 선택지 하나
+	=> END
+- 선택지 둘
+	=> END
+- 선택지 셋
+	=> END
+- 선택지 넷
+	=> END
+
+~ click_check
+안내인: 본문을 클릭하면 다음으로 넘어갑니다.
+=> END

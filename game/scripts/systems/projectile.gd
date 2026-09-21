@@ -40,7 +40,7 @@ func launch(p_direction: Vector2, p_speed_px: float, p_lifetime_sec: float) -> v
 func _physics_process(_delta: float) -> void:
 	if not _launched:
 		return
-	velocity = direction * speed_px
+	velocity = IsoMath.move_velocity(direction, speed_px)
 	move_and_slide()
 	if get_slide_collision_count() > 0:
 		queue_free() # 벽(정적 콜라이더)에 부딪힘 — 회수 없이 소멸.

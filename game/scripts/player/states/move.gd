@@ -28,7 +28,9 @@ func physics_update(_delta: float) -> void:
 		finished.emit(&"Idle", {})
 		return
 	player.set_facing(input_dir)
-	player.velocity = input_dir * player.walk_speed
+	# D-221/D-222: walk_speed 는 **지면** 속력이다. 화면에서는 가로가 세로의 2배로
+	# 빨라 보이는데 등각에서 그게 맞다(같은 지면 거리 = 더 많은 가로 픽셀).
+	player.velocity = IsoMath.move_velocity(input_dir, player.walk_speed)
 	player.move_and_slide()
 	# 방향이 바뀌었을 수 있으니 애니메이션 이름을 갱신한다(같은 이름이면 재시작하지 않음).
 	player.play_anim("walk")

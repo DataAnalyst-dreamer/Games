@@ -164,17 +164,125 @@ func test_player_set_facing_integration_respects_min_interval() -> void:
 	player.set_facing(Vector2(1.0, 0.3)) # 명확한 수평 우세 → RIGHT로 전환.
 	assert_eq(player.facing, Vector2.RIGHT)
 
-	# 물리 프레임 1틱(약 0.016초)만 흐른 뒤 반대 축 우세 입력이 들어와도, 디바운스
-	# 구간(기본 0.1초) 이내이므로 축이 유지돼야 한다.
+	# D-229(8방향): 디바운스가 막는 것은 **인접 섹터(±45도)** 전환이다 - 대각선 두 키가
+	# 같은 프레임에 안 눌려 생기는 바로 그 흔들림. 물리 프레임 1틱(약 0.016초)만 흐른 뒤
+	# 인접 섹터(e -> se) 입력이 들어오면 유지돼야 한다.
 	player._physics_process(1.0 / 60.0)
-	player.set_facing(Vector2(0.3, 1.0))
+	player.set_facing(Vector2(1.0, 1.0))
 	assert_eq(player.facing, Vector2.RIGHT,
-		"Player 통합 경로에서도 디바운스 구간 내 축 전환은 무시되어야 한다")
+		"Player 통합 경로에서도 디바운스 구간 내 인접 섹터 전환은 무시되어야 한다")
 
-	# 디바운스 구간을 확실히 넘길 만큼 물리 프레임을 흘려보내면 전환이 허용돼야 한다.
+	# 반면 2섹터 이상(e -> s, 90도)은 의도한 큰 전환이라 디바운스 구간 안에서도 즉시
+	# 통과한다 - 4방향 시절 180도 반전을 막지 않았던 것과 같은 규칙이다.
+	player.set_facing(Vector2(0.3, 1.0))
+	assert_eq(player.facing, Vector2.DOWN,
+		"2섹터 이상 전환은 디바운스 구간 안에서도 즉시 허용돼야 한다")
+
+	# 디바운스 구간을 넘기면 인접 섹터 전환도 허용된다.
 	for i in range(10):
 		player._physics_process(1.0 / 60.0)
-	player.set_facing(Vector2(0.3, 1.0))
-	# 입력 y성분이 양수(Godot 2D는 아래로 갈수록 y가 커짐)이므로 DOWN이 기대값이다.
-	assert_eq(player.facing, Vector2.DOWN,
-		"디바운스 구간을 넘기면 명확한 축 전환은 여전히 허용돼야 한다")
+	player.set_facing(Vector2(1.0, 1.0))
+	assert_eq(player.facing, FacingCalcScript.sector_vector(7),
+		"디바운스 구간을 넘기면 인접 섹터(se) 전환도 허용돼야 한다")
+
+
+# --- 8방향(D-228~D-230, 단계 iso-3) -----------------------------------------
+#
+# 등각에서 화면의 상하좌우는 격자의 대각선이라 4방향으로는 격자를 따라 걸을 때
+# 스프라이트가 45도 어긋난다. 양자화는 **화면 벡터** 기준 45도 균등 8섹터다.
+
+const SECTORS := {
+	"s": 0, "sw": 1, "w": 2, "nw": 3, "n": 4, "ne": 5, "e": 6, "se": 7,
+}
+
+
+func test_sector_of_maps_eight_screen_directions() -> void:
+	# 화면 좌표계는 y가 아래로 커진다 - s=(0,1)이 0번이다.
+	for pair: Array in [["s", Vector2(0, 1)], ["sw", Vector2(-1, 1)], ["w", Vector2(-1, 0)],
+			["nw", Vector2(-1, -1)], ["n", Vector2(0, -1)], ["ne", Vector2(1, -1)],
+			["e", Vector2(1, 0)], ["se", Vector2(1, 1)]]:
+		assert_eq(FacingCalcScript.sector_of(pair[1]), int(SECTORS[pair[0]]),
+			"%s 섹터" % pair[0])
+
+
+func test_sector_vector_round_trips_and_has_no_float_dust() -> void:
+	for sector in range(8):
+		var vec: Vector2 = FacingCalcScript.sector_vector(sector)
+		assert_eq(FacingCalcScript.sector_of(vec), sector, "섹터 %d 왕복" % sector)
+		assert_almost_eq(vec.length(), 1.0, 0.0001, "섹터 %d 단위벡터" % sector)
+	# 축 방향은 정확히 0/±1 이어야 한다(cos/sin 먼지가 남으면 == 비교가 조용히 깨진다).
+	assert_eq(FacingCalcScript.sector_vector(0), Vector2.DOWN)
+	assert_eq(FacingCalcScript.sector_vector(2), Vector2.LEFT)
+	assert_eq(FacingCalcScript.sector_vector(4), Vector2.UP)
+	assert_eq(FacingCalcScript.sector_vector(6), Vector2.RIGHT)
+
+
+func test_8_hysteresis_keeps_direction_inside_bias_band() -> void:
+	# 완충 폭 = 22.5 x 1.3 = 29.25도. 현재 e(동)에서 25도 벗어난 입력은 유지돼야 한다.
+	var current: Vector2 = Vector2.RIGHT
+	var input := Vector2.RIGHT.rotated(deg_to_rad(25.0))
+	assert_eq(FacingCalcScript.resolve_facing_8(current, input, BIAS), Vector2.RIGHT,
+		"완충 폭 안에서는 방향을 유지해야 한다")
+
+
+func test_8_switches_once_past_bias_band() -> void:
+	var input := Vector2.RIGHT.rotated(deg_to_rad(40.0))
+	assert_eq(FacingCalcScript.resolve_facing_8(Vector2.RIGHT, input, BIAS),
+		FacingCalcScript.sector_vector(SECTORS["se"]),
+		"완충 폭을 넘으면 인접 섹터로 전환해야 한다")
+
+
+func test_8_debounce_blocks_adjacent_sector_only() -> void:
+	# 인접(e -> se)은 보류된다.
+	assert_eq(FacingCalcScript.resolve_facing_8(
+			Vector2.RIGHT, Vector2(1, 1), BIAS, 0.01, 0.1), Vector2.RIGHT,
+		"인접 섹터 전환은 최소 유지 시간 안에서 보류돼야 한다")
+	# 2섹터(e -> s, 90도)는 의도한 큰 전환이라 즉시 통과한다.
+	assert_eq(FacingCalcScript.resolve_facing_8(
+			Vector2.RIGHT, Vector2(0, 1), BIAS, 0.01, 0.1), Vector2.DOWN,
+		"2섹터 이상 전환은 즉시 허용돼야 한다")
+	# 시간이 지나면 인접 전환도 허용된다.
+	assert_eq(FacingCalcScript.resolve_facing_8(
+			Vector2.RIGHT, Vector2(1, 1), BIAS, 0.5, 0.1),
+		FacingCalcScript.sector_vector(SECTORS["se"]),
+		"최소 유지 시간이 지나면 인접 전환도 허용돼야 한다")
+
+
+func test_8_zero_input_keeps_current_facing() -> void:
+	assert_eq(FacingCalcScript.resolve_facing_8(Vector2.UP, Vector2.ZERO, BIAS), Vector2.UP)
+
+
+func test_dir_name_8_rows_match_sheet_contract() -> void:
+	for name_text: String in SECTORS:
+		var vec: Vector2 = FacingCalcScript.sector_vector(int(SECTORS[name_text]))
+		assert_eq(FacingCalcScript.dir_name(vec, 8), name_text)
+
+
+func test_dir_name_4_folds_diagonals_to_horizontal() -> void:
+	# D-230: 대각은 수평으로 접는다 - 측면 프로필이 "옆으로 간다"를 더 잘 읽는다.
+	var expected := {"s": "s", "sw": "w", "w": "w", "nw": "w",
+		"n": "n", "ne": "e", "e": "e", "se": "e"}
+	for name_text: String in SECTORS:
+		var vec: Vector2 = FacingCalcScript.sector_vector(int(SECTORS[name_text]))
+		assert_eq(FacingCalcScript.dir_name(vec, 4), String(expected[name_text]),
+			"%s -> 4방향 폴백" % name_text)
+
+
+func test_diagonal_jitter_does_not_toggle_between_adjacent_sectors() -> void:
+	# D-128 의 원래 문제(대각선 두 키가 같은 프레임에 안 눌림)가 8방향에서도 막히는지.
+	var facing: Vector2 = FacingCalcScript.sector_vector(SECTORS["se"])
+	var elapsed := 0.0
+	for i in range(30):
+		# se 부근에서 e <-> s 쪽으로 미세하게 떨리는 입력.
+		var wobble: float = 8.0 if i % 2 == 0 else -8.0
+		var input: Vector2 = FacingCalcScript.sector_vector(SECTORS["se"]).rotated(
+			deg_to_rad(wobble))
+		var next: Vector2 = FacingCalcScript.resolve_facing_8(
+			facing, input, BIAS, elapsed, 0.1)
+		if FacingCalcScript.sector_of(next) != FacingCalcScript.sector_of(facing):
+			elapsed = 0.0
+		else:
+			elapsed += 1.0 / 60.0
+		facing = next
+	assert_eq(FacingCalcScript.dir_name(facing, 8), "se",
+		"대각 부근 미세 흔들림에 방향이 토글되면 안 된다")

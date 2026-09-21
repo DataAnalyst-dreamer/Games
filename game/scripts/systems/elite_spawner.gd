@@ -28,6 +28,13 @@ const ELITE_SCENES := {
 ## pos_global_tile와 같은 값이다. 그 필드가 data_tables.md §11 정식 스키마 밖의 제안
 ## 필드라(elite-and-farming-m2.md §2-2) 여기서는 "고정 스폰 지점을 임시 상수로 관리"
 ## (M2-3 지시)한다 — 두 값이 어긋나면 game-designer 확인 필요(완료 보고 TODO).
+##
+## D-235(M6-3): 등각 이관(iso-1, D-219~D-222) 때 이 값에 IsoMath 를 경유시키는 걸
+## 빠뜨렸었다 — 격자 셀 좌표는 전부 IsoMath.cell_to_screen() 을 거쳐야 화면 좌표가
+## 되는데(world.gd _place_cliff/_place_prop 참고) 여기만 TILE_SIZE_PROTOTYPE 을 그대로
+## 곱하는 정사각 격자 시절 공식이 남아 있었다. 지금도 지역 전체(384×384 타일) 좌표라
+## 이 프로토타입 단일 씬 화면 밖에 떨어지는 건 그대로지만(청크 스트리밍 전이라 원래
+## 그렇다), 최소한 등각 공식은 일관되게 맞춘다.
 const SPAWN_POS_GLOBAL_TILE := {
 	"elite_goblin_captain": Vector2(296.0, 152.0),
 	"elite_bunchi_spawn": Vector2(24.0, 272.0),
@@ -65,7 +72,7 @@ func _spawn(source_id: String) -> void:
 		return
 	var inst: MonsterBase = scene.instantiate()
 	var tile_pos: Vector2 = SPAWN_POS_GLOBAL_TILE.get(source_id, Vector2.ZERO)
-	inst.global_position = tile_pos * float(Tuning.TILE_SIZE_PROTOTYPE)
+	inst.global_position = IsoMath.cell_to_screen(Vector2i(tile_pos))
 	add_child(inst)
 	_instances[source_id] = inst
 	GameState.elite_respawn_remaining_sec.erase(source_id)

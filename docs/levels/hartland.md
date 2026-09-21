@@ -498,6 +498,116 @@ flowchart LR
 
 ---
 
+## ⑪ 등각 필드 배치 (M6-3, 프로토타입 씬 기준, D-235~D-238)
+
+> **좌표계 주의(⑩절과 동일)**: 이 절도 ②~⑨절의 384×384 타일 6×6 청크 격자가 **아니다**.
+> `game/scenes/main/Main.tscn`(`scripts/systems/world.gd`가 채우는 단일 프로토타입 씬)이
+> 대상이고, 좌표는 `game/data/world_layout_hartland.json`의 **격자 셀 좌표**(한 칸=32
+> 월드단위, 화면 64×32 마름모, `IsoMath.cell_to_screen`으로 변환)다. `world_objects.json`
+> (⑩절, 화면 px)과 `Main.tscn`에 고정 배치된 몬스터 10마리는 `IsoMath.screen_to_cell`로
+> 역산해 같은 셀 격자에 맞춰 확인했다.
+
+### 개략도 (셀 좌표, 마을=원점 근방)
+
+```
+                         y=-17  waypoint_stone_01(3,-17) ★기존(순수 마커, 워프 아님)
+                         y=-16  hilltop_waypoint(3,-16) ★기존 — R_NORTH 도로가 절벽 틈(x0-1)을 타고 올라온다
+                                    │
+                 y=-13  절벽(cliff_block_32, x13~15 / x17~19) + gap(x=16)에 cave_entrance
+                                    │  echo_cave_entrance(16,-11)/puzzle(17,-12) ★기존은 절벽 남쪽 공터에 그대로
+        안개숲 입구(신규)              │
+        x:-19~-33, y:-8~3        마을 허브(x:-9~10, y:-15~-6, 기존 — 미변경)
+        tree_oak 14그루 밀집        ── Waystone1(-4,-6)/BlacksmithNpc1(-8,-6)/MailboxNpc1(-2,-6)/BoardNpc1(2,-6)
+        + R_WEST 스퍼(y-4~-3)로     ── pinto(-7,-1)  rozel(8,-1)
+          통로 확보                       │                    │
+              │                    R_NORTH(x0-1)         R_EAST 도로 → dami(13,2) → pasture(15,4) → montsil(18,6)
+              │ R_SW 도로                                      ╲
+        해안절벽(신규)                                    개울(tile_stream, x10-11) + bridge(10,-3)
+        cliff_block_64(2단), front_y=13
+        gap A(x-25,-24, 직행) / gap B(x-31,-30, 우회) + cliff_ramp 소품 2개 ← 2진입로(D-136~138)
+        해변(tile_dirt) y14-16 + 바다(tile_water) y17-20
+              │
+        teo(-24,9)/cargo_pile(-25,11)/bridgeport_dock(-25,10) ★기존, 좌표 미변경
+```
+
+### 6개 구역 좌표표
+
+| 구역 | 핵심 배치 | 좌표(셀) |
+|---|---|---|
+| 마을 허브 | 기존 그대로(미변경). 워프 비석 2셀 밖에 rock(-6,-4)/bush(0,-4) 장식만 추가 | 절벽·건물·연못 등 기존 문서 §(이전 판) 참고 |
+| 초원 도로망 | `paths` 배열에 흙길(rect) 11개 추가 — 허브(0,3)를 기점으로 SW(teo)·E(로젤~몽실이)·N(전망대/메아리굴)·W(안개숲) 4방향 + 해안 램프 2개 연장. 초원 산포 장식 rock×3/bush×3 | 예: R_EAST 가로 `[3,-3,15,2]`, R_SW 세로 `[-24,5,2,5]` |
+| 안개 숲 입구 | `tree_oak` 14그루(x-19~-33, y-8~3), R_WEST 스퍼(`[-19,-4,10,2]`)로 통로 확보. 안개(포그) 연출은 셰이더 영역이라 이번 범위 밖(제안만) | 나무 예: (-20,-7)~(-30,3) |
+| 메아리 굴 입구 | 절벽 1단 2토막(`x13,len3`/`x17,len3`, front_y=-13) + gap(x=16)에 `cave_entrance` | 절벽 (13~19,-13), 소품 (16,-13) |
+| 워프 비석/결계석 | 기존 Waystone1 유지, 장식만. **두 번째 필드 워프 지점은 이번 범위 밖**(D-238) — 후보지만 기록 | 후보: 목자 전망대 인근 (3,-15) 또는 메아리 굴 앞 (14,-10) — `Waystone.tscn` 인스턴스 추가가 필요해 후속 태스크 |
+| 바닷가 절벽 | `cliff_block_64`(고도 2단) 3토막(front_y=13) + gap A/B + `cliff_ramp` 2개(계단식 진입로) + 해변/바다 | 절벽 (-33~-16,13), 램프 (-24,13)/(-31,13) |
+
+### 시야 랜드마크 체크리스트(이 프로토타입 씬 기준)
+
+| 위치 | 화면에 걸리는 랜드마크 |
+|---|---|
+| 마을 허브 | 워프 비석 + 절벽 틈(북) — 기존 |
+| 초원 도로 위(어디서든) | 다음 흙길 분기 또는 최근접 절벽/숲 실루엣 1개 이상 — 도로망이 5방향으로 뻗어 사각지대 없음 |
+| 안개 숲 진입부 | 밀집 수관(tree_oak) 자체가 근경 랜드마크 — 더 들어가면 지도 가장자리(엘드우드는 범위 밖) |
+| 메아리 굴 앞 공터 | `cave_entrance` 어두운 아치(절벽 gap) |
+| 해안절벽 진입부(teo 부근) | 2단 절벽 실루엣 + 그 뒤로 보이는 바다(tile_water) |
+| 해안절벽 진입부(우회, 안개숲 남쪽) | 같은 절벽선을 서쪽에서 — 안개숲 수관과 절벽이 동시에 보여 원경이 안 빔 |
+
+결과: 위 6구역 전부 최소 1개 근경 랜드마크가 확보됨(Xvfb 캡처 3장으로 육안 확인 — 아래 검증 결과).
+
+### 2개 진입 경로 규칙 적용 (D-136~138)
+
+바닷가 절벽 1곳에 적용했다: **gap A**(x=-25,-24, teo 도로에서 바로 이어지는 직행 램프)와
+**gap B**(x=-31,-30, 안개숲 남쪽 가장자리를 도는 우회 램프). 둘 다 `cliff_ramp`(D-238 신규
+placeholder, 통과 가능·계단식 실루엣)로 표시했다 — 한쪽이 막히거나(향후 이벤트로 봉쇄)
+다른 한쪽으로 항상 해안에 닿을 수 있다. 마을 자체의 절벽 틈(기존, x=0-1)은 단일 진입로
+그대로 유지했다(원래 설계·기존 스모크 불변이라 손대지 않음).
+
+### 결정 기록 (D-235~D-238, 코디네이터 승인)
+
+| ID | 항목 | 결정 |
+|---|---|---|
+| D-235 | `elite_spawner.gd`의 `SPAWN_POS_GLOBAL_TILE`이 `IsoMath`를 거치지 않고 `TILE_SIZE_PROTOTYPE`을 직접 곱하던 iso-1 누락분 | 수정 — `IsoMath.cell_to_screen()` 경유로 통일. `test_elite_spawner.gd`의 기대값도 같이 갱신(8/8 통과 확인) |
+| D-236 | 물/개울(`ground_solid`) 타일이 시각효과일 뿐 실제 충돌이 없던 기존 공백 | `world.gd`에 `_add_ground_solid_collision()` 추가(기존 `_add_diamond_body` 재사용) — 이 수정으로 서쪽 연못이 `heartland_dandelion_village` 트리거(-11,-1)를 막는 게 드러나 연못 rect를 서쪽 1칸 줄여 피함(world_objects.json 좌표는 미변경) |
+| D-237 | 고도 2단 절벽 | `cliff_block_64`(기존 애셋)로 구현, 위를 걷는 Elev2 레이어는 신설하지 않음(경계 벽 용도라 보행 불필요) |
+| D-238 | 계단식 진입로 | 전용 스프라이트가 없어 절벽 gap + `cliff_ramp`(신규, 3단 층 실루엣, 통과 가능) 조합으로 근사 |
+
+### 신규 placeholder 애셋 5종 (`tools/art/gen_iso_tiles_field.py`)
+
+500줄 상한 때문에 공용 프리미티브를 `tools/art/iso_shapes.py`로 분리하고(기존
+`gen_iso_tiles.py`도 이걸 가져다 쓰도록 축소), 신규 생성기가 기존 `iso_atlas.json`에
+항목만 병합한다.
+
+| 이름 | kind | collision_band | 용도 |
+|---|---|---|---|
+| `tile_stream` | ground_solid | 1.0 | 개울(통행 불가), tile_water 와 다른 색조 |
+| `cave_entrance` | prop | 0.0 | 메아리 굴 입구, 절벽 gap 칸에 얹음 |
+| `bridge` | prop | 0.0 | 개울 위 다리 |
+| `signpost` | prop | 0.0 | 순수 장식 이정표(교차로 2곳) |
+| `cliff_ramp` | prop | 0.0 | 해안절벽 gap의 계단식 진입로(D-238) |
+
+### 검증 결과 (M6-3)
+
+- `godot --headless --path game --import`: SCRIPT ERROR 0.
+- GUT 전체: **555/555 통과**(기존과 동일 개수 유지).
+- `SmokeQuarterViewB`(§1~§8 전부 PASS, Walls 176개로 증가 — 신규 절벽·물 콜리전 포함),
+  `SmokeIsoCoords`, `SmokeQuest`, `SmokeQuestLayout`, `SmokeQuestMarkerTracked`,
+  `SmokeQuestMarkersAndLog`, `SmokeQuestTrackerArrow`, `SmokeQuestRewardsUi`,
+  `SmokeMailbox`, `SmokeBlacksmith`, `SmokeBlacksmithUi`: 전부 PASS.
+- `SmokeQuestTriggerOrder`/`SmokeQuestNpcLate`/`SmokeQuestNpcPanel`/`SmokeQuestSaveSlice`/
+  `SmokeQuestUiSave`/`SmokeWardWaystone`는 이번 세션이 건드리지 않은 사전 존재 환경
+  가드(`OS.get_user_data_dir()`가 특정 사전 프로브 샌드박스 경로와 정확히 일치해야
+  실행되는 자기방어 코드, 예: `C:/Users/freer/AppData/Roaming/Games-QA-...`)에 막혀
+  이 워크트리에서는 항상 즉시 종료(exit 1)된다 — 단독 재실행해도 동일해 이번 변경과
+  무관함을 확인했다(어느 파일도 diff 없음).
+- `tools/qa/validate_layout.py`(신규): PASS — 플레이어 시작점(0,0)에서 `world_objects.json`
+  퀘스트 목표 17곳 + 고정 몬스터 스폰 10곳까지 8방향 BFS 도달 확인, 장애물 칸 묻힘 없음.
+  `tools/qa/validate_tables.py`에도 통합해 함께 PASS.
+- Xvfb 캡처 3장: `docs/art/preview/iso-field-village.png`(마을 허브 — 대장간·비석·우편함·
+  게시판·절벽 틈), `-forest.png`(안개 숲 입구 — tree_oak 밀집 + 통로), `-cave.png`(메아리 굴
+  입구 — 절벽 gap의 `cave_entrance` 아치 + 개울 + 이정표, 겸사겸사 버섯돌이 몬스터도 포착).
+
+---
+
 ## 완료 보고
 
 - **청크 수**: 36개 (6×6 청크 격자, 384×384 타일)
@@ -509,3 +619,4 @@ flowchart LR
 - 지역 던전 '민들레 뿌리굴'(뭉치 보스전, 30~40분·3페이즈)은 이번 태스크 범위(메아리 굴 미니 던전)에 포함되지 않아 개요 수준으로만 언급했다 — 별도 레벨 디자인 문서/태스크로 상세화가 필요하다(제안).
 - 다른 4개 지방(엘드우드/프로스트헤임/사마르/이그니스) 및 항구도시 브릿지포트는 각 지역 착수 시점에 동일한 문서 구조(①~⑨)로 별도 작성한다.
 - **M2-8 갱신**: ⑩절(퀘스트 배치)을 추가해 1막 메인 7개·사이드 5개 퀘스트가 참조하는 location 7개·object 5개·npc 5개를 `game/data/world_objects.json`으로 실제 배치했다(`act1_hartland.json`의 `_todo_ids.locations`/`.objects`는 비웠다). 좌표는 아직 청크 격자(②~⑨절)가 아니라 프로토타입 단일 씬(Main.tscn) 기준이다 — LDtk 맵 제작 시 재이식 필요.
+- **M6-3 갱신**: ⑪절(등각 필드 배치)을 추가해 같은 프로토타입 씬에 마을 허브→초원 도로망→안개숲 입구→메아리 굴 입구→워프 비석→바닷가 절벽(2단, 2진입로)을 배치했다. 신규 placeholder 5종(`tile_stream`/`cave_entrance`/`bridge`/`signpost`/`cliff_ramp`)과 `tools/qa/validate_layout.py`(BFS 도달성·묻힘 검사)를 추가했고, 등각 이관(iso-1) 때 빠졌던 `elite_spawner.gd` 좌표 변환과 물/개울의 실제 충돌 부재를 함께 고쳤다(D-235~D-238, 상세는 ⑪절). LDtk 정식 맵 제작 시 이 절의 셀 좌표도 ②~⑨절의 청크 격자로 재이식이 필요하다.

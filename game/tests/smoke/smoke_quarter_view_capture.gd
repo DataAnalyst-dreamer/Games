@@ -11,7 +11,10 @@
 extends Node
 
 ## 캡처 전용 확대 배율(실제 게임 줌 아님).
-const CAPTURE_ZOOM := 6.0
+## D-206 단위 전환 ×2 에 맞춰 3.0 으로 낮췄다(6.0 ÷ 2) — 월드가 2배가 됐으므로
+## 같은 화면을 얻으려면 줌은 절반이어야 한다. 이 캡처가 단계 (a) 결과와 같은 그림이면
+## 단위 전환이 화면을 바꾸지 않았다는 증거가 된다.
+const CAPTURE_ZOOM := 3.0
 
 var _out_dir: String
 var _ok: bool = true
@@ -46,7 +49,7 @@ func _ready() -> void:
 	player.facing = Vector2.DOWN
 	player.play_anim("idle")
 
-	# 16px 아트를 기본 줌(2배)으로 찍으면 겹침 구간도 그림자 타원도 몇 픽셀에 불과해
+	# 16px 아트를 기본 줌으로 찍으면 겹침 구간도 그림자 타원도 몇 픽셀에 불과해
 	# 육안 확인이 불가능하다. 캡처 전용으로만 확대한다 - Main.tscn의 값은 건드리지 않는다.
 	var pcam: Node2D = main.get_node("PlayerCamera") as Node2D
 	if pcam != null:
@@ -57,8 +60,8 @@ func _ready() -> void:
 
 	# 두 액터를 거의 겹치게 두고 세로 순서만 바꾼다(가림이 실제로 일어나는 거리).
 	var anchor := Vector2(0.0, 0.0)
-	await _capture(player, slime, anchor, -10.0, "above")
-	await _capture(player, slime, anchor, 10.0, "below")
+	await _capture(player, slime, anchor, -20.0, "above")
+	await _capture(player, slime, anchor, 20.0, "below")
 
 	print("=== CAPTURE 종료 ===")
 	get_tree().quit(0 if _ok else 1)
@@ -67,7 +70,7 @@ func _ready() -> void:
 ## slime_dy: 플레이어 기준 슬라임의 세로 오프셋. 음수면 슬라임이 위(뒤), 양수면 아래(앞).
 func _capture(player: Player, slime: Node2D, anchor: Vector2, slime_dy: float, tag: String) -> void:
 	player.global_position = anchor
-	slime.global_position = anchor + Vector2(9.0, slime_dy)
+	slime.global_position = anchor + Vector2(18.0, slime_dy)
 	for _i in range(6):
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw

@@ -17,7 +17,7 @@
 ## 결정 필요 항목(D-103 후보) 참고.
 extends Node
 
-const FORMAT_VERSION := 1
+const FORMAT_VERSION := 3
 const SAVE_DIR := "user://saves"
 const SLOT_COUNT := 3
 const KINDS: Array[String] = ["manual", "auto"]
@@ -162,15 +162,72 @@ func load(slot: int, kind: String) -> Dictionary:
 		push_warning("[SaveManager] slot %d(%s) 손상/누락 — 백업(.bak)에서 복구" % [slot, kind])
 
 	var version: int = int(payload.get("version", 0))
+	if version == 1:
+		# D-210(단계 b1): 타일이 16→32 월드단위가 되면서 월드 좌표가 전부 2배가 됐다.
+		# 세이브에 들어 있는 좌표는 플레이어 위치 한 쌍뿐이고(비석은 id 문자열, 나머지
+		# 항목은 좌표와 무관) 지형도 함께 2배가 됐으므로 ×2가 정확히 옳다 — 리셋할
+		# 이유가 없다. 다음 포맷 변경 때는 이 자리에 version == 2 분기를 잇는다.
+		payload = _migrate_v1_to_v2(payload)
+		version = int(payload.get("version", 0))
+	if version == 2:
+		# D-225(iso-1): 등각 전환으로 월드 좌표가 지면 -> 화면 투영으로 바뀌었다.
+		# 세이브에 든 좌표는 여전히 플레이어 위치 한 쌍뿐이라 변환도 한 번이다.
+		payload = _migrate_v2_to_v3(payload)
+		version = int(payload.get("version", 0))
 	if version != FORMAT_VERSION:
-		# M2에는 마이그레이션 규칙이 아직 없다(포맷 버전 1 고정) — 버전이 다르면 안전하게
-		# 거부한다. 실제 마이그레이션 도입 시 이 분기에서 버전별 변환 함수를 태우면 된다
-		# (docs/specs/save-load-m2.md §4 참고).
 		return _finish_load(slot, kind, {"ok": false, "reason": "version_unsupported"})
 
 	_apply_payload(payload)
 	_advance_day_index_if_new_calendar_day(payload) # D-111(M2-7): 실제 달력 날짜 경과 판정.
 	return _finish_load(slot, kind, {"ok": true, "reason": ""})
+
+
+## v1 -> v2: 월드 단위 ×2 전환(D-206/D-210). 플레이어 위치만 2배로 올린다.
+func _migrate_v1_to_v2(payload: Dictionary) -> Dictionary:
+	var state: Dictionary = payload.get("state", {})
+	var player_state: Variant = state.get("player", {})
+	if player_state is Dictionary:
+		var position: Variant = (player_state as Dictionary).get("position", {})
+		if position is Dictionary:
+			var pos: Dictionary = position
+			pos["x"] = float(pos.get("x", 0.0)) * 2.0
+			pos["y"] = float(pos.get("y", 0.0)) * 2.0
+	payload["version"] = 2
+	push_warning("[SaveManager] 세이브 포맷 v1 -> v2 마이그레이션(월드 단위 ×2, D-210)")
+	return payload
+
+
+## v2 -> v3: 지면 좌표를 등각 화면 좌표로 투영한다(D-219/D-225).
+func _migrate_v2_to_v3(payload: Dictionary) -> Dictionary:
+	var state: Dictionary = payload.get("state", {})
+	var player_state: Variant = state.get("player", {})
+	if player_state is Dictionary:
+		var position: Variant = (player_state as Dictionary).get("position", {})
+		if position is Dictionary:
+			var pos: Dictionary = position
+			var screen: Vector2 = IsoMath.to_screen(
+				Vector2(float(pos.get("x", 0.0)), float(pos.get("y", 0.0))))
+			pos["x"] = screen.x
+			pos["y"] = screen.y
+	payload["version"] = 3
+	push_warning("[SaveManager] 세이브 포맷 v2 -> v3 마이그레이션(등각 투영, D-225)")
+	return payload
+
+
+## 로드한 위치가 벽(정적 콜라이더) 안이면 마지막 비석으로 물러난다.
+##
+## 단위 전환 자체는 좌표를 정확히 2배로 옮기지만, 단계 (b2)가 예전에 없던 절벽·건물을
+## 세우기 때문에 옛 세이브의 위치가 새 벽 안일 수 있다. 끼인 채로 살아나는 것보다
+## 비석에서 다시 시작하는 편이 언제나 낫다.
+func _snap_out_of_walls(player: Player) -> void:
+	var space: PhysicsDirectSpaceState2D = player.get_world_2d().direct_space_state
+	var query := PhysicsPointQueryParameters2D.new()
+	query.position = player.global_position
+	query.collision_mask = 1 # 벽/지형 레이어.
+	if space.intersect_point(query, 1).is_empty():
+		return
+	player.global_position = GameState.get_respawn_position()
+	push_warning("[SaveManager] 불러온 위치가 벽 안이라 마지막 비석으로 이동")
 
 
 func _finish_load(slot: int, kind: String, result: Dictionary) -> Dictionary:
@@ -240,6 +297,7 @@ func _apply_payload(payload: Dictionary) -> void:
 	player.global_position = Vector2(
 		float(pos.get("x", player.global_position.x)),
 		float(pos.get("y", player.global_position.y)))
+	_snap_out_of_walls(player)
 
 	var facing: Dictionary = player_dict.get("facing", {})
 	if not facing.is_empty():
