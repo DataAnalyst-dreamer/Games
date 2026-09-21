@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://btlwiyn72jj0h"
+path="res://.godot/imported/npc_teo.dialogue-6fe831d83fb343ec97661f4c13ffe30a.tres"
+
+[deps]
+
+source_file="res://dialogue/npc_teo.dialogue"
+dest_files=["res://.godot/imported/npc_teo.dialogue-6fe831d83fb343ec97661f4c13ffe30a.tres"]
+
+[params]
+
+defaults=true

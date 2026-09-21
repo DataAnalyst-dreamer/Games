@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://cwnb20yw3cblc"
+path="res://.godot/imported/npc_dami.dialogue-b59462966dfbbe437bb781008d0cc92c.tres"
+
+[deps]
+
+source_file="res://dialogue/npc_dami.dialogue"
+dest_files=["res://.godot/imported/npc_dami.dialogue-b59462966dfbbe437bb781008d0cc92c.tres"]
+
+[params]
+
+defaults=true
