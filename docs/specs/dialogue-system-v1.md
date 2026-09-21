@@ -192,6 +192,7 @@ if entry.has("dialogue_path"):
 
 - 패널 `(40,240)` `560×96`, 초상 `64×64`, 이름표, 본문 3줄, 선택지 최대 4개.
 - 입력: `ui_confirm`(확인: `project.godot:205`에 이미 정의됨) = 다음/스킵, `ui_cancel` = 정책 미정(D-241), `ui_up`/`ui_down`(Godot 기본값, 재정의 없음) = 선택지 이동, 좌클릭(D-196 `gui_input` + `MOUSE_BUTTON_LEFT` 패턴, `inventory_menu.gd` 확인) = 선택지 확정.
+- 좌클릭(패널 영역) = 다음/스킵(결함 수정, ⑪-1): `dialogue_balloon.gd`의 `_on_panel_gui_input`이 패널 전체의 클릭을 받아 타이핑 중이면 스킵, 완료 상태면 다음 줄로 진행한다(선택지가 떠 있으면 무시). 본문(`DialogueLabel`)·초상(`ColorRect`)은 `mouse_filter=MOUSE_FILTER_IGNORE`로 두어 그 위 클릭도 패널까지 그대로 내려간다(`docs/ui/dialogue-balloon.md` §1 좌표 안에서는 어디를 클릭해도 동일하게 동작 — `dialogue-balloon.md` §2 표에도 동일하게 반영).
 - `QuestNpcPanel`의 4종 전체화면 UI 상호배타(`is_menu_open`/`is_blacksmith_open`/`is_mailbox_open`/`is_quest_npc_open`, `ui_root.gd:52-134` 확인)에는 넣지 않는다 — `paused` 여부는 D-240/D-248로 미해결.
 
 **`docs/ui/dialogue-balloon.md`와의 상충 (검증 이후 발견, D-255/D-256)**: 이 문서 §7이 "그대로 구현 기준"으로 삼은 그 문서와 두 지점이 충돌한다.

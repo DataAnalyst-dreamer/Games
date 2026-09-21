@@ -132,7 +132,8 @@
 | 자동 진행 ON (접근성) | 설정에서 자동 진행 활성 | 타이핑 완료 후 지정 시간(예: 1.5초 **(제안, 결정 필요 §6-F)**) 뒤 자동으로 다음 줄. 선택지 줄에는 자동 진행 미적용(사용자 결정 필요) |
 | 640×360 이하 폭(웹 축소 창) | 브라우저 창이 정수 배율 미만으로 축소 | Godot `stretch/mode=canvas_items`+`scale_mode=integer`가 레터박스 처리 — 풍선 좌표는 항상 640×360 논리 좌표 기준이라 별도 대응 불필요(사실, `project.godot` 확인) |
 
-## 5. 테마 색 키 재사용 목록 (신규 정의 없음 — `game/ui/theme.tres` 기존 키만 사용)
+## 5. 테마 색 키 재사용 목록 (원칙: 신규 정의 없음 — `game/ui/theme.tres` 기존 키만 사용,
+## 단 아래 `Dialogue/font_sizes/response` 1건은 예외, 표 아래 각주 참고)
 
 | 용도 | 재사용 키 | 비고 |
 |---|---|---|
@@ -143,6 +144,14 @@
 | 선택지 포커스 하이라이트 | `theme.get_stylebox("focus_highlight", "Inventory")` 또는 `theme.get_color("focus", "Inventory")` | 인벤토리 슬롯 포커스와 동일 시각 언어 |
 | 선택지 비활성(조건 미충족으로 회색 처리 필요할 때) | `theme.get_color("disabled", "Inventory")` | 예: 호감도 부족으로 잠긴 선택지 **(제안, 콘텐츠 있을 때만)** |
 | 폰트 크기 2단계 | `HUD/font_sizes/default`(11) / `HUD/font_sizes/large`(15), `Settings.font_size_large` | `hud.gd`/`blacksmith.md` §"폰트 크기 변경"과 동일 패턴: Root에 `theme_override_font_sizes/font_size` 적용 후 하위 상속 |
+
+**각주(⑪-1 결함 수정, 신규 키 1건)**: 선택지 목록이 `(128,296)~(592,344)`(48px, 4개 하드
+상한)에 고정돼 있어 본문 폰트(`HUD/font_sizes/default`=11, 줄당 약 14.7px)를 그대로
+쓰면 4개가 못 들어간다(실측: 11px 그대로면 마지막 버튼이 y=352까지 내려가 8px 초과).
+`Dialogue/font_sizes/response`(9)를 새로 추가해 응답 버튼에만 적용한다 — 위 표의
+"재사용" 원칙에 대한 유일한 예외이며, 큰 글자 접근성 설정은 아직 배선하지 않았다
+(`dialogue_balloon.gd` 완료 보고 TODO, §6 "큰 폰트에서도 3줄이 들어가는지 검증 필요"와
+같은 이유로 응답 목록도 후속 검증 대상).
 
 ## 6. 접근성
 

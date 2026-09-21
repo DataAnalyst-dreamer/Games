@@ -22,7 +22,10 @@ class FakeRabbit extends Node:
 	func resolve_branch_outcome(choice_id: String) -> void:
 		resolved = choice_id
 
-enum Phase { WAIT_LINE, WAIT_RESPONSES, WAIT_END, SKIP_RESPONSES, SKIP_REACTION, SKIP_END, DONE }
+enum Phase {
+	WAIT_LINE, WAIT_RESPONSES, WAIT_END, SKIP_RESPONSES, SKIP_REACTION, SKIP_END,
+	LAYOUT_LINE, LAYOUT_RESPONSES, LAYOUT_END, DONE,
+}
 
 const QUEST_ID := "quest_main_a1_01_arrival"
 
@@ -32,6 +35,11 @@ var _phase: int = Phase.WAIT_LINE
 var _elapsed: float = 0.0
 var _rabbit: FakeRabbit
 var _first_ok: bool = false
+var _second_ok: bool = false
+## 결함 수정(테마 미적용/본문·초상 클릭 삼킴) 회귀 가드. `_smoke_test.dialogue`의
+## `layout_check` title(선택지 4개, 계약 상한)로 dialogue_balloon.gd:121-137의
+## 압축 스타일이 실제로 (128,296)~(592,344) 안에 들어가는지 잰다.
+var _layout_ok: bool = false
 
 
 func _ready() -> void:
@@ -70,6 +78,12 @@ func _process(delta: float) -> void:
 			_process_skip_reaction()
 		Phase.SKIP_END:
 			_process_skip_end()
+		Phase.LAYOUT_LINE:
+			_process_layout_line()
+		Phase.LAYOUT_RESPONSES:
+			_process_layout_responses()
+		Phase.LAYOUT_END:
+			_process_layout_end()
 
 
 func _process_wait_line() -> void:
@@ -151,7 +165,49 @@ func _process_skip_end() -> void:
 	var input_ok: bool = not _player.dialogue_active
 	print("[CHECK] 스킵해도 do resolve_branch_outcome 실행(D-272): %s (실제='%s')" % [str(mutation_ok), _rabbit.resolved])
 	print("[CHECK] 스킵 후 player.dialogue_active 복원(false): %s (실제=%s)" % [str(input_ok), _player.dialogue_active])
-	_finish(_first_ok and mutation_ok and input_ok)
+	_second_ok = mutation_ok and input_ok
+	_start_layout_case()
+
+
+## --- 테마 미적용/클릭 삼킴 결함 수정 회귀 가드: 본문(y248~292) + 선택지 4개(계약
+## 상한, (128,296)~(592,344))가 docs/ui/dialogue-balloon.md §1 좌표 안에 들어가는가 ---
+func _start_layout_case() -> void:
+	print("--- 레이아웃 계약 검증: 본문 3줄 + 선택지 4개 ---")
+	_elapsed = 0.0
+	var res: DialogueResource = load("res://dialogue/_smoke_test.dialogue")
+	_phase = Phase.LAYOUT_LINE
+	_controller.open_dialogue_resource(res, "layout_check")
+
+
+func _process_layout_line() -> void:
+	var balloon: DialogueBalloon = _controller.balloon
+	if balloon.dialogue_label.dialogue_line == null:
+		return
+	balloon.skip_typing()
+	_phase = Phase.LAYOUT_RESPONSES
+
+
+func _process_layout_responses() -> void:
+	var balloon: DialogueBalloon = _controller.balloon
+	if not balloon.responses_menu.visible:
+		return
+	# VBoxContainer는 자식 배치를 다음 프레임으로 미룬다(queue_sort) — 실측 전에 흘려보낸다.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var content_height: float = balloon.dialogue_label.get_content_height()
+	var buttons: Array = balloon.responses_menu.get_menu_items()
+	var last_bottom: float = (buttons[buttons.size() - 1] as Control).get_global_rect().end.y
+	print("[LAYOUT] dialogue_label.get_content_height()=%.2f (기대 <= 44)" % content_height)
+	print("[LAYOUT] 선택지 %d개, 마지막 버튼 global_rect.end.y=%.2f (기대 <= 344)" % [buttons.size(), last_bottom])
+	_layout_ok = content_height <= 44.0 and buttons.size() == 4 and last_bottom <= 344.0
+	balloon.response_chosen.emit(balloon.responses_menu.responses[0])
+	_phase = Phase.LAYOUT_END
+
+
+func _process_layout_end() -> void:
+	if _controller.is_dialogue_open():
+		return
+	_finish(_first_ok and _second_ok and _layout_ok)
 
 
 func _finish(ok: bool) -> void:

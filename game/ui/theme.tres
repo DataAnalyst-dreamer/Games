@@ -133,3 +133,8 @@ SkillTree/colors/trick = Color(0.498039, 0.74902, 0.372549, 1)
 ; 위 Inventory/colors/* 를 그대로 재사용한다(중복 정의 금지) — 여기는 D-90 "+7부터
 ; 실패 가능"이라는 상시 경고 문구를 강조할 색 하나만 추가한다. ---
 Inventory/colors/warning = Color(0.886275, 0.694118, 0.243137, 1)
+
+; --- 대사 풍선 선택지 (⑪-1, docs/ui/dialogue-balloon.md §1/§5). 선택지 목록 영역이
+; 128~592 x 296~344(48px, 하드 상한 4개)로 고정돼 있어 본문 폰트(11px, 줄당 약
+; 14.7px)를 그대로 쓰면 4개가 못 들어간다 — 압축 전용 크기 하나만 여기서 관리한다. ---
+Dialogue/font_sizes/response = 9

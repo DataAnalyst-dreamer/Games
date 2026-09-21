@@ -40,6 +40,7 @@ func _ready() -> void:
 	var root := Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.theme = HUD_THEME # ui_root.gd:29 패턴 — 없으면 테마 상속이 끊겨 엔진 기본 폰트(16px)로 그려진다.
 	add_child(root)
 
 	var panel := PanelContainer.new()
@@ -62,12 +63,18 @@ func _ready() -> void:
 	portrait.position = Vector2(48, 248)
 	portrait.size = Vector2(64, 64)
 	portrait.color = Color(0.5, 0.5, 0.5)
+	# 클릭 삼킴 버그: STOP(기본값)이면 이 위에 겹친 패널의 gui_input이 못 받는다 —
+	# 애드온 dialogue_label.tscn과 같은 취급(이 노드 자체는 입력을 쓰지 않는다).
+	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(portrait)
 
 	dialogue_label = DialogueLabel.new()
 	dialogue_label.position = Vector2(128, 248)
 	dialogue_label.size = Vector2(464, 44)
 	dialogue_label.add_theme_color_override("default_color", HUD_THEME.get_color(&"text_default", &"HUD"))
+	# 위 portrait와 같은 이유 — `DialogueLabel.new()`는 tscn 기본값을 안 물려받고
+	# Control 기본 STOP으로 생성돼 본문 위 클릭이 패널까지 못 내려갔다.
+	dialogue_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	dialogue_label.finished_typing.connect(_on_finished_typing)
 	root.add_child(dialogue_label)
 
@@ -79,7 +86,9 @@ func _ready() -> void:
 	responses_menu.set_script(preload("res://addons/dialogue_manager/dialogue_responses_menu.gd"))
 	responses_menu.position = Vector2(128, 296)
 	responses_menu.size = Vector2(464, 48)
-	responses_menu.add_theme_constant_override("separation", 4)
+	# 4개(계약 상한)가 48px(296~344) 안에 들어가야 해 여백을 두지 않는다(show_responses의
+	# 압축 폰트 크기와 함께 계산, dialogue_balloon.gd:121-137 주석 참고).
+	responses_menu.add_theme_constant_override("separation", 0)
 	responses_menu.next_action = &"ui_confirm"
 	responses_menu.response_selected.connect(func(response: DialogueResponse) -> void:
 		response_chosen.emit(response))
@@ -111,15 +120,23 @@ func show_line(line: DialogueLine) -> void:
 	dialogue_label.type_out()
 
 
+## theme.tres에 Button 스타일이 없어(HUD_THEME은 Panel/Label류만 정의) 응답 버튼이 엔진
+## 기본 StyleBoxFlat(내부 여백 포함)으로 그려지면 4개가 계약 영역(128,296)~(592,344,
+## 48px)에 못 들어간다. StyleBoxEmpty(여백 0)로 바꾸고 포커스만 Inventory의 나무 프레임
+## 하이라이트를 재사용(§5 재사용 목록)한다. 글자 크기는 `Dialogue/font_sizes/response`
+## (theme.tres 한 곳, 도트액션RPG-기획안 UI 규칙 3번 — 화면별 상수를 theme.tres로 통일)로
+## 48px/4행 예산에 맞춘 압축 크기를 쓴다.
 func show_responses(responses: Array) -> void:
 	responses_menu.responses = responses
-	# 기본 Button 테마 높이(~30px)로는 4개까지 (128,296)-(592,344) 영역에 안 들어간다 —
-	# placeholder UI 단계라 폰트를 줄여 우선 겹치지 않게만 맞춘다(pixel-artist/ui-ux-designer
-	# 정식 확정 전 임시. 완료 보고 TODO).
+	var empty_style := StyleBoxEmpty.new()
+	var focus_style: StyleBox = HUD_THEME.get_stylebox(&"focus_highlight", &"Inventory")
+	var response_font_size: int = HUD_THEME.get_font_size(&"response", &"Dialogue")
 	for item: Node in responses_menu.get_children():
 		if item is Button:
-			item.add_theme_font_size_override("font_size", 11)
-			item.custom_minimum_size = Vector2(0, 14)
+			for state in ["normal", "hover", "pressed", "disabled"]:
+				item.add_theme_stylebox_override(state, empty_style)
+			item.add_theme_stylebox_override("focus", focus_style)
+			item.add_theme_font_size_override("font_size", response_font_size)
 	if is_typing():
 		_has_pending_responses = true
 	else:
