@@ -87,6 +87,29 @@ func is_dialogue_open() -> bool:
 	return _dialogue_in_progress
 
 
+## 재생 중인 잡담을 즉시 끝낸다(D-241 `ui_cancel` 전체 스킵과 같은 종료 지점, 공개 API).
+## 두 호출자:
+##   1) `QuestNpcPanel._confirm()` — 패널이 수락/완료로 퀘스트 상태를 바꾼 경우(D-263 연장).
+##      상태가 바뀌면 남아 있던 잡담은 이미 낡은 상태 기준이라("잡담 → 수락 → 다시 옛
+##      잡담") 이어 붙이지 않고 버린다. 다음 interact가 새 title로 다시 연다.
+##   2) 헤드리스 스모크 — 풍선을 넘길 사람이 없으므로 명시적으로 호출한다(게임 로직에
+##      타임아웃 같은 안전장치를 넣지 않는다).
+## `_gen`을 올려 대기 중인 `_play()` 코루틴을 폐기하고(D-259와 같은 수단), `advanced`를
+## 튕겨 그 코루틴이 즉시 깨어나 세대 검사로 빠져나가게 한다.
+## `visible`은 `_process()`를 기다리지 않고 여기서 바로 내린다 — 같은 프레임의 다음
+## 입력이 이미 끝난 대사 풍선에 먹히면 안 된다.
+func skip_all() -> void:
+	if not _dialogue_in_progress:
+		return
+	_gen += 1
+	_dialogue_in_progress = false
+	if is_instance_valid(balloon):
+		balloon.visible = false
+		balloon.advanced.emit(true)
+	if player != null:
+		player.set("dialogue_active", false)
+
+
 ## §4.4 D-254/D-259 공유 게이트. true = 대사 풍선이 이번 ui_confirm/interact/ui_cancel
 ## 입력을 처리해도 된다. false = `QuestNpcPanel`이 열려 있거나(D-254) 방금(1프레임)
 ## 닫혔으므로(D-259) 대사 쪽은 이번 입력을 넘기고 자기 줄을 그대로 둔다.

@@ -34,7 +34,13 @@ func _key(code: Key) -> void:
 		await get_tree().process_frame
 
 
+## interact 1회 = talk + 잡담 풍선 + 패널(같은 프레임, D-260). 헤드리스에는 풍선을
+## 넘겨 줄 사람이 없어 남은 잡담이 계속 `interact`/`ui_confirm`을 먹으므로(풍선이
+## 보이는 동안은 풍선이 입력 우선), 다음 상호작용 전에 플레이어가 잡담을 전체 스킵한
+## 것과 같은 공개 API를 명시적으로 호출한다(D-241 = `NpcDialogueController.skip_all()`).
+## 게임 로직 쪽에는 타임아웃 같은 안전장치를 두지 않는다.
 func _interact(target_id: String) -> void:
+	_ui.npc_dialogue_controller.skip_all()
 	_player.global_position = (_layer.spawned_by_id[target_id] as Node2D).global_position
 	for i in range(4): await get_tree().physics_frame
 	await _key(KEY_E)
@@ -117,14 +123,35 @@ func _run_side(npc_id: String, quest_id: String, objectives_fn: Callable) -> voi
 
 
 ## dami: obj_02 reach heartland_pasture_boundary(실제 플레이어 이동으로 Area2D 통과) ->
-## obj_03 interact object:montsil_rabbit(branch_choice_id="release"가 world_objects.json에
-## 고정돼 있어 상호작용만으로 choose_branch가 함께 처리된다).
+## obj_03 interact object:montsil_rabbit. D-262로 분기 확정이 상호작용 즉시에서 대사
+## 응답의 `do resolve_branch_outcome(...)`으로 옮겨졌으므로(world_objects.json에
+## branch_choice_id가 더 이상 없다) 이 스모크도 선택지를 실제로 골라야 한다 —
+## SmokeDialogueFlow와 같은 관례로 balloon 신호를 직접 튕긴다.
 func _run_montsil_objectives() -> void:
 	const Q := "quest_side_heartland_montsil"
+	_ui.npc_dialogue_controller.skip_all()
 	_player.global_position = (_layer.spawned_by_id["heartland_pasture_boundary"] as Node2D).global_position
 	for i in range(6): await get_tree().physics_frame
 	_check(QuestSystem.get_active_objective_index(Q) == 2, "dami: reach 목표 진행(실제 Area2D 통과)")
 	await _interact("montsil_rabbit")
+	await _choose_response(0) # "그냥 놓아준다" = release
+
+
+## 선택지 대사에서 index번째 응답을 고르고, 이어지는 반응 줄까지 정상 확인으로 넘긴다.
+## 여기서는 skip_all()을 쓰면 안 된다 — 전체 스킵은 DMConstants.ID_END로 점프하므로
+## 반응 줄 뒤의 `do resolve_branch_outcome(...)` 변이가 실행되지 않는다(아래 TODO).
+func _choose_response(index: int) -> void:
+	var balloon: DialogueBalloon = _ui.npc_dialogue_controller.balloon
+	for i in range(120):
+		if balloon.is_typing(): balloon.skip_typing()
+		if balloon.responses_menu.visible: break
+		await get_tree().process_frame
+	balloon.response_chosen.emit(balloon.responses_menu.responses[index])
+	for i in range(120):
+		if balloon.is_typing(): balloon.skip_typing()
+		if not _ui.npc_dialogue_controller.is_dialogue_open(): break
+		balloon.advanced.emit(false) # 반응 줄 확인 -> do절 실행 -> END
+		await get_tree().process_frame
 
 
 func _run_festival_objectives() -> void:

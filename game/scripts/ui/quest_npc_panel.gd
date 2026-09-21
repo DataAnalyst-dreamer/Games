@@ -112,7 +112,12 @@ func _confirm() -> void:
 	var result := {}
 	if state == "available": result = QuestSystem.accept(quest_id)
 	elif state == "complete_ready": result = QuestSystem.advance(quest_id)
-	if result.get("ok", false): close_requested.emit()
+	if result.get("ok", false):
+		# D-263 연장(신규 결정 기록 필요): 패널이 상태를 바꿨으면 뒤에 남은 잡담은 낡은 상태 기준이므로 이어
+		# 붙이지 않고 버린다("잡담 -> 수락 패널 -> 다시 옛 잡담"이 어색). 상태를 바꾸지
+		# 않고 닫을 때(ui_cancel)는 그대로 이어서 재생한다(D-263).
+		get_tree().call_group(&"npc_dialogue_ui", "skip_all")
+		close_requested.emit()
 	else: _refresh()
 
 

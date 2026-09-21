@@ -89,10 +89,15 @@ func _ready() -> void:
 	for i in range(4): await get_tree().physics_frame
 	await _key(KEY_E) # 대화(obj_01 완료) -> obj_02(cargo_pile)로 이동, 패널도 다시 열림.
 	await _key(KEY_ESCAPE)
+	# interact 1회 = talk + 잡담 풍선 + 패널(D-260). 패널을 ESC로 닫으면 풍선이 이어서
+	# 뜨고(D-263) 그 뒤 interact/ui_confirm을 풍선이 먼저 먹으므로, 헤드리스에서는 다음
+	# 상호작용 전에 플레이어가 잡담을 전체 스킵한 것과 같은 공개 API를 명시적으로 부른다.
+	_ui_root.npc_dialogue_controller.skip_all()
 	player.global_position = layer.spawned_by_id["cargo_pile"].global_position
 	for i in range(4): await get_tree().physics_frame
 	await _key(KEY_E) # cargo_pile interact -> complete_ready.
 	_check(QuestSystem.get_state(Q1) == "complete_ready", "MQ01 완료 보고 가능 상태 도달")
+	_ui_root.npc_dialogue_controller.skip_all()
 	player.global_position = layer.spawned_by_id["teo"].global_position
 	for i in range(4): await get_tree().physics_frame
 	await _key(KEY_E)
