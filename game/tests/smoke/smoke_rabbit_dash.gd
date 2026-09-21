@@ -55,7 +55,9 @@ func _process(delta: float) -> void:
 		_last_state = _rabbit.state
 
 	if _rabbit.state == MonsterBase.State.ATTACK and not _saw_dash_speed_ok:
-		var observed: float = _rabbit.velocity.length()
+		# 등각(iso-1, D-221): dash_speed_px는 지면 속력이고 velocity는 화면 벡터(세로 0.5)라
+		# 화면 길이가 아니라 지면 길이로 비교한다 — 돌진 방향에 세로 성분이 있으면 화면 길이는 달라진다.
+		var observed: float = IsoMath.ground_length(_rabbit.velocity)
 		if observed > 1.0:
 			print("  돌진 중 속도 실측=%.1f (기대 dash_speed_px=%.1f)" % [observed, _rabbit.dash_speed_px])
 			if is_equal_approx(observed, _rabbit.dash_speed_px):
