@@ -39,9 +39,9 @@
 ```
 QuestLogTab (Control, script=quest_log_tab.gd, InventoryMenu의 ContentArea 형제)
 └─ (VBoxContainer, 런타임 생성)
-   ├─ SubTabBar (HBoxContainer) — 메인/사이드/의뢰 버튼 3개
+   ├─ SubTabBar (HBoxContainer) — 메인/사이드/의뢰 버튼 3개(클릭 가능, M5-1)
    └─ Body (HBoxContainer)
-      ├─ ScrollContainer > ListBox (VBoxContainer) — 현재 탭의 퀘스트 제목 목록
+      ├─ ScrollContainer > ListBox (VBoxContainer) — 현재 탭의 퀘스트 제목 목록(Button, M5-1: Label→Button, 클릭=선택)
       ├─ EmptyHint (Label, 목록 비었을 때만)
       └─ DetailBox (VBoxContainer)
          ├─ DetailTitle / DetailState (Label)
@@ -57,13 +57,13 @@ QuestLogTab (Control, script=quest_log_tab.gd, InventoryMenu의 ContentArea 형�
 
 ## 3. 입력 흐름 (패드/키마)
 
-| 동작 | 게임패드 | 키보드 | 결과 |
-|---|---|---|---|
-| 진입 | LB/RB로 quest 탭 이동 | Tab 후 방향키, 또는 **J**(바로가기) | quest 탭 표시 + 목록/상세 새로고침 |
-| 탭(메인/사이드/의뢰) 전환 | 왼쪽 스틱/십자키 좌우 | ←/→ | `_change_sub_tab()`, 포커스 인덱스 0으로 리셋 |
-| 목록 이동 | 왼쪽 스틱/십자키 상하 | ↑/↓ | `_move_focus()`, 순환(wrap) |
-| 추적 설정 토글 | A(확인) | Enter/Space(`ui_confirm`) | 포커스 항목이 이미 추적 대상이면 해제, 아니면 그 항목으로 설정(`QuestSystem.set_tracked`) |
-| 닫기 | B/Start(`ui_close`/`menu`) | Esc/Tab | InventoryMenu 공통 처리(UiRoot가 paused 해제) — 이 탭에서 추가로 처리하는 것 없음 |
+| 동작 | 게임패드 | 키보드 | 마우스(M5-1) | 결과 |
+|---|---|---|---|---|
+| 진입 | LB/RB로 quest 탭 이동 | Tab 후 방향키, 또는 **J**(바로가기) | — | quest 탭 표시 + 목록/상세 새로고침 |
+| 탭(메인/사이드/의뢰) 전환 | 왼쪽 스틱/십자키 좌우 | ←/→ | 탭 버튼 클릭 | `_change_sub_tab()`/`_on_sub_tab_pressed()`, 포커스 인덱스 0으로 리셋 |
+| 목록 이동 | 왼쪽 스틱/십자키 상하 | ↑/↓ | 목록 항목 클릭(=선택) | `_move_focus()`/`_on_list_item_pressed()`, 순환(wrap) |
+| 추적 설정 토글 | A(확인) | Enter/Space(`ui_confirm`) | — (클릭은 선택만, 토글은 확인 전용 — 실수 방지) | 포커스 항목이 이미 추적 대상이면 해제, 아니면 그 항목으로 설정(`QuestSystem.set_tracked`) |
+| 닫기 | B/Start(`ui_close`/`menu`) | Esc/Tab | 우클릭 또는 `CloseButton` 클릭(InventoryMenu 공통) | InventoryMenu 공통 처리(UiRoot가 paused 해제) — 이 탭에서 추가로 처리하는 것 없음 |
 
 ## 4. 상태 목록
 

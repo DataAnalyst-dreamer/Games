@@ -49,7 +49,7 @@ const FIELD_LABEL_KEYS := {
 var _series_bar: HBoxContainer
 var _series_buttons: Dictionary = {} # series -> Button
 var _tier_columns: Array[VBoxContainer] = []
-var _node_labels: Dictionary = {} # id -> Label
+var _node_labels: Dictionary = {} # id -> Button (M5-1: 마우스 클릭)
 
 var _detail_title: Label
 var _detail_meta: Label
@@ -79,12 +79,13 @@ func _build_ui() -> void:
 	_series_bar = HBoxContainer.new()
 	_series_bar.add_theme_constant_override("separation", 10)
 	root_vbox.add_child(_series_bar)
-	for series: String in SkillTreeCalc.SERIES:
+	for i in SkillTreeCalc.SERIES.size():
 		var button := Button.new()
 		button.flat = true
 		button.focus_mode = Control.FOCUS_NONE
+		button.pressed.connect(_on_series_pressed.bind(i)) # M5-1(마우스).
 		_series_bar.add_child(button)
-		_series_buttons[series] = button
+		_series_buttons[SkillTreeCalc.SERIES[i]] = button
 
 	var body := HBoxContainer.new()
 	body.add_theme_constant_override("separation", 12)
@@ -119,6 +120,7 @@ func _build_ui() -> void:
 	_detail_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	detail_box.add_child(_detail_hint)
 	_hotbar_bar = HudHotbarBar.new()
+	_hotbar_bar.slot_clicked.connect(_on_hotbar_slot_clicked) # M5-1(마우스).
 	detail_box.add_child(_hotbar_bar)
 
 	_apply_theme_colors()
@@ -187,6 +189,15 @@ func _change_series(delta: int) -> void:
 	_rebuild_tree()
 
 
+## M5-1(마우스): 계열 버튼 클릭 — _change_series()와 동일하게 인덱스 대입 후 같은
+## 갱신 함수를 재사용(InventoryMenu._on_filter_pressed()와 동일 패턴).
+func _on_series_pressed(index: int) -> void:
+	_series_index = index
+	_focus_index = 0
+	_refresh_series_bar()
+	_rebuild_tree()
+
+
 func _move_focus(delta: int) -> void:
 	if _focus_ids.is_empty():
 		return
@@ -217,6 +228,21 @@ func _confirm_learn() -> void:
 	Progression.learn_skill(id)
 
 
+## M5-1(마우스): 노드 클릭 — 이미 포커스된 노드를 다시 클릭(=피드백 요청 "더블클릭 또는
+## 포커스 후 클릭")하면 기존 확정 로직(_confirm_learn)을 그대로 호출하고, 아니면 그
+## 노드로 포커스만 옮긴다(확정 로직 중복 금지 원칙).
+func _on_node_pressed(id: String) -> void:
+	if id == _focused_id():
+		_confirm_learn()
+		return
+	var idx: int = _focus_ids.find(id)
+	if idx < 0:
+		return
+	_focus_index = idx
+	_refresh_node_states()
+	_refresh_detail()
+
+
 func _try_hotbar_register() -> void:
 	var id: String = _focused_id()
 	if id.is_empty():
@@ -225,6 +251,15 @@ func _try_hotbar_register() -> void:
 	if node_type not in ["active", "buff"] or int(_learned.get(id, 0)) <= 0:
 		return
 	if HotbarRegisterInput.try_assign("skill", id):
+		_hotbar_bar.highlight_slot("skill", id)
+
+
+## M5-1(마우스): 핫바 미리보기 칸 클릭 — 어느 슬롯인지는 클릭이 이미 알려주므로
+## 1~9 키 폴링 없이 SkillTreeCalc.assignable_skill_id()로 "지금 등록해도 되는 스킬인지"만
+## 판정한다(_try_hotbar_register()와 동일 가드, 로직은 순수 함수로 이미 옮겨둠).
+func _on_hotbar_slot_clicked(slot: int) -> void:
+	var id: String = SkillTreeCalc.assignable_skill_id(_focused_id(), _skills_table, _learned)
+	if HotbarRegisterInput.assign_now(slot, "skill", id):
 		_hotbar_bar.highlight_slot("skill", id)
 
 
@@ -253,8 +288,13 @@ func _rebuild_tree() -> void:
 	var by_tier: Dictionary = SkillTreeCalc.nodes_by_tier(series, _skills_table)
 	for tier in [1, 2, 3]:
 		for id: Variant in (by_tier.get(tier, []) as Array):
-			var label := Label.new()
-			label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			# M5-1(마우스): Label 대신 Button(flat) — pressed 연결만으로 클릭을 받을 수 있어
+			# gui_input 좌표 파싱보다 코드가 덜 든다. 이름+상태 두 줄은 텍스트 자체에 이미
+			# 개행이 있어(_refresh_node_states 참고) Button에 autowrap이 없어도 문제없다.
+			var label := Button.new()
+			label.flat = true
+			label.focus_mode = Control.FOCUS_NONE
+			label.pressed.connect(_on_node_pressed.bind(String(id)))
 			_tier_columns[tier - 1].add_child(label)
 			_node_labels[String(id)] = label
 	_focus_ids = SkillTreeCalc.focus_order(series, _skills_table)
@@ -268,7 +308,7 @@ func _refresh_node_states() -> void:
 	var disabled_color: Color = theme.get_color(&"disabled", &"Inventory") if theme != null else Color.GRAY
 	var focused_id: String = _focused_id()
 	for id: String in _focus_ids:
-		var label: Label = _node_labels.get(id)
+		var label: Button = _node_labels.get(id)
 		if label == null:
 			continue
 		var state: Dictionary = _node_state(id)

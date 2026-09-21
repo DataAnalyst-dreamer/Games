@@ -366,6 +366,90 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 | D-203 | 파일럿 수치 이식 | 안 함(230px/s·50/85/140ms는 FHD 그림 배경 배율계). combat.json·tuning.gd가 정본 | 이관 스펙 §2 | — |
 | D-204 | 발밑 그림자 | 타원 그림자, 반지름 6px 고정(tuning.gd), 몬스터는 크기별 배율 허용. CharacterBody2D._draw()로 노드 추가 없이 | 이관 스펙 §2 | foot_shadow.gd |
 | D-205 | 쿼터뷰 애셋 GPT 이미지 생성 | 환경 오브젝트·정지 시안은 ChatGPT 이미지 생성(프롬프트 정본 `docs/art/brief-quarter-view-gpt-image.md`), 캐릭터 4방향 모션은 PixelLab 우선. 생성물은 D-138 기록 후 `game/assets/quarter/`에 반입, 후처리는 normalize_ai_sheet.py 최근접 축소+32색 양자화 | 사용자 요청 | LICENSES.md |
+| D-206 | 32px 전환 방식 | **×2 단위 전환**(1타일=32wu, 아트 32px). 대안 `TileMapLayer.scale=0.5`(데이터 변경 0, 영구 "1wu=아트 2px" 암산)는 기각. 완료 기준: 화면 동일 + GUT 그대로 통과. px 값은 1회용 스크립트로 규칙 변환, 무차원 비율·초 단위·px 없는 테이블은 불변. 비율 불변 테스트로 증명 | (b) 계획 §Q7 | tools/qv_scale2.py |
+| D-207 | placeholder 타일 계약 | `game/assets/quarter/quarter_atlas.json`(파일명·크기·발 기준점·접지 띠·충돌 여부)이 코드와 아트의 유일한 계약. GPT 이미지 브리프 §2 표에 파일명 열을 추가해 일치시키고, 정식 애셋은 파일만 교체 | (b) 계획 §Q8 | quarter_atlas.json, brief §2 |
+| D-208 | 몬스터 벽 충돌 | 몬스터도 벽에 막힌다(collision_mask 0→1). 벽에 걸리면 leash 복귀 | (b) 계획 §Q9 | monster_base.gd |
+| D-209 | 스폰존 좌표 | 변환 불필요(`tile_pos * Tuning.TILE_SIZE_PROTOTYPE`) | (b) 계획 §Q10 | — |
+| D-210 | 세이브 마이그레이션 | v1→v2 플레이어 위치 ×2, 로드 후 벽과 겹치면 마지막 비석으로 스냅. (a) 스펙의 "리셋" 규칙 대체 | (b) 계획 §Q11 | save_manager |
+| D-211 | 청크 크기 | CHUNK_TILES 불변(타일 수 기준). 스트리밍 미구현이라 (b) 영향 없음 | (b) 계획 §Q12 | — |
+| D-212 | 캐릭터:타일 비율 | (b)는 1:1 유지(스프라이트 scale 2). 핀 64×96 기준 2×3 타일 전환은 (c)에서 원작 아트와 함께(근접 사거리·통로 폭 재튜닝 동반) | (b) 계획 §Q13 | (c) |
+| D-213 | 생성 PNG | 생성기 산출 PNG를 커밋(Pillow 런타임 의존 없음), LICENSES 자체 제작 등재. (b)는 PR 2개(b1 단위 전환 / b2 타일셋·마을·벽) | (b) 계획 §Q14 | LICENSES.md |
+| D-214 | 소품 충돌 | 게시판·우편함·워프 비석·퀘스트 오브젝트는 충돌 없음(시각+Y-sort, 걸어 들어가 상호작용). 우물·대장간만 접지 띠 충돌. b2 스모크 "배치 무결성" 불변 유지 | b3 계획 §Q15 | quarter_atlas.json |
+| D-215 | 대장간 애셋 경로 | 브리프 §2 계약대로 `buildings/smithy.png`(128×96) | b3 계획 §Q16 | brief §2 |
+| D-216 | 의뢰 게시판 배치 | BoardNpc를 마을 허브에 실제 배치(그동안 인스턴스 없음). 일일 의뢰(F5-2) 도달 경로 개방 | b3 계획 §Q17 | world_layout_hartland.json |
+| D-217 | 대장간 위치 | BlacksmithNpc1 (-140,-200) → (-240,-200). 워프 비석은 D-28로 고정 | b3 계획 §Q18 | Main.tscn |
+| D-218 | 퀘스트 오브젝트 외형 | 기본 marker_stone, cargo_pile만 world_objects.json `sprite`로 명시(데이터 주도) | b3 계획 §Q19 | world_objects.json |
+
+## AG. 쿼터뷰 = 진짜 등각(라그나로크·디아블로 계열)으로 재확정 (2026-09-20, 게이트 5차 후속)
+
+사용자: 2단계 데모 스크린샷을 보고 "쿼터뷰라기보다 탑뷰 아니야?" → 원하는 시점은 **라그나로크·디아블로 계열(2:1 다이메트릭, 45° 마름모 격자)** 로 확정.
+
+| ID | 항목 | 결정 | 출처 | 반영 |
+|---|---|---|---|---|
+| D-219 | 본편 시점 재확정 | **진짜 등각(2:1 다이메트릭, 45° 마름모 격자)**. D-199(비스듬 고정 2D)·D-200(세로 감쇠 없음)은 **폐기**. 파일럿의 "비스듬한 그림" 접근은 탑뷰로 읽힌다는 사용자 판정. b1(32px 단위)·b2 atlas/레이아웃 구조·b3 소품 배선은 등각 이관의 기반으로 유지, 타일 형태·충돌 footprint·애셋은 등각으로 재작업. 상세는 `docs/specs/isometric-migration-v1.md`(M6-0)에서 D-220+로 확정 | 사용자 확정 | GDD 시점 규격, brief 스타일 블록 재개정 |
+| D-220 | 등각 타일 규격 | **64×32 다이아몬드**(DIAMOND_DOWN). 640×360 뷰포트에 약 220셀(현행과 동일 시야), FHD ×3 정수 배율 유지. 128×64는 정수 배율을 깨므로 기각 | 등각 스펙 §2 | project.godot, TileSet |
+| D-221 | 등각 좌표계 | **(A) 화면 공간 물리** + `iso_math.ground(d)=Vector2(d.x, d.y*2)` 지면 거리 헬퍼. 거리 비교 6군데(aggro/melee/leash/whistle·AI·퀘스트 트리거·목표 위치·미니맵·추적 화살표)만 적용, 넉백·히트박스 겹침은 화면 공간 그대로. 이동 입력도 같은 변환(세로 0.5) | 등각 스펙 §3 | iso_math.gd |
+| D-222 | 밸런스 px 해석 | 값 변환 없음 — 타일 단위로 정규화된 px를 **지면 거리**로 재해석(RO·디아블로 표준). 남북 접근 시 화면상 더 붙어야 닿는 체감은 game-designer 사후 확인 | 등각 스펙 §3 | test_unit_scale_invariants |
+| D-223 | 캐릭터 방향 | **8방향**(D-202 폐기). 원화 3→5장(1.67배). iso-1/2는 기존 4방향 스프라이트를 화면 상하좌우에 임시 매핑 | 등각 스펙 §5 | iso-3, PixelLab 파이프라인 |
+| D-224 | 절벽 높이 | 고도별 TileMapLayer(b2의 절벽 3행 구성 대체) | 등각 스펙 §4 | World.tscn |
+| D-225 | 세이브 | v2→v3, 플레이어 위치 1쌍 격자→화면 변환 | 등각 스펙 §6 | save_manager |
+| D-226 | 등각 생성기 | `tools/art/gen_iso_tiles.py` 신규, 기존 gen_quarter_tiles.py 보존. b1 32px 단위·atlas 계약·world.gd 조립·레이아웃 JSON(격자 좌표라 무변환)·소품 배선은 유지, 정사각 PNG는 폐기 | 등각 스펙 §7 | game/assets/iso/ |
+
+## AH. 애셋 생성 전 준비 — 8방향 아트 브리프·iso-3 엔진 계획 승인 (2026-09-21)
+
+| ID | 항목 | 결정 | 출처 | 반영 |
+|---|---|---|---|---|
+| D-227 | elite_bunchi_spawn 외형 | monsters.json(elite_base=slime, 분열)대로 **슬라임 골격 재사용 + 재/잿빛 얼룩 recolor**. GPT 브리프 §3.10의 "그림자 정령 여우"는 오기 → 정정. 정예 2종은 베이스와 동일 캔버스 + 팔레트 + 엔진 스케일 | 아트 브리프 계획 | brief-monsters-iso.md |
+| D-228 | 8방향 양자화 | 화면 45° 균등 8섹터(격자 축 기준은 동서 이동이 섹터 경계라 기각). 섹터 유지 완충 + D-128 시간 디바운스 | iso-3 계획 | facing_calc.gd |
+| D-229 | 8방향 디바운스 범위 | 인접(±45°) 전환만 디바운스, 180° 반전은 즉시(4방향 규칙의 정확한 번역) | iso-3 계획 | facing_calc.gd |
+| D-230 | 8→4 폴백 | 4행 시트(대칭 몬스터 slime·mushroom)는 대각→수평(w/e) 매핑. 시트는 항상 8행(s,sw,w,nw,n,ne,e,se) 또는 4행(s,w,n,e), 런타임 미러 없음 — 미러 3행은 normalize 단계(`--dirs 8`)에서 펼침 | iso-3 계획·아트 브리프 | actor_sheet.gd, normalize_ai_sheet.py |
+| D-231 | 액터 프레임 수 | GDD D-133 정본: idle 4·walk 8·attack 6(·피격 2·사망 3~4). placeholder도 같은 열 수(clips idle [0,4] walk [4,8] attack [12,6]) → 정식 시트 교체 시 JSON 변경 0 | iso-3·아트 브리프 계획 | iso_actor_atlas.json |
+| D-232 | 전투 판정 볼륨 | **지면 평면(발밑) 유지**(RO·디아블로 방식). 스프라이트 3배 확대에도 실루엣 판정 아님. 지면 원 콜리전(R1~R3)·공격 오프셋 지면 단위(R4), melee_range slime 32·rabbit 36·big 40(R5·R6, 피해 불변). 통로 폭 2칸·배치 간격 유지 | iso-3 재튜닝 표 | combat.json, monsters.json, tuning.gd |
+| D-233 | SmokeSpriteAxis | 삭제(16px region 하드코딩, SmokeIsoActors가 흡수) | iso-3 계획 | tests/smoke |
+| D-234 | 검 오버레이 | WeaponPivot 유지(D-127 회귀 가드), 피벗 y −48·배율 조정 | iso-3 계획 | Player.tscn |
+| D-235 | 정예 스포너 등각 좌표 | `SPAWN_POS_GLOBAL_TILE` 원시 곱셈 → `IsoMath.cell_to_screen` 경유(iso-1 누락분 수정) | 필드 지형 계획 | elite_spawner.gd |
+| D-236 | 물/개울 충돌 | ground_solid 종류에 실제 마름모 콜리전 부여(기존엔 시각만). 연못이 퀘스트 트리거를 막지 않게 rect 조정(world_objects 좌표 불변) | 필드 지형 계획 | world.gd, world_layout_hartland.json |
+| D-237 | 고도 2단 표현 | Elev2 레이어 신설 없이 `cliff_block_64` 벽으로. 실제 보행 가능한 2단 대지는 후속 | 필드 지형 계획 | world_layout_hartland.json |
+| D-238 | 계단식 진입로 | `cliff_ramp` placeholder로 근사. 필드 두 번째 워프 지점은 범위 밖(후보 좌표만 hartland.md ⑪) | 필드 지형 계획 | gen_iso_tiles_field.py |
+| D-239 | 레이아웃 검증기 | `tools/qa/validate_layout.py`: 시작점→퀘스트 목표·고정 스폰 BFS 도달성 + 오브젝트 묻힘 검사를 validate_tables.py에 통합. 배치 변경은 이 검사를 통과해야 한다 | 필드 지형 구현 | validate_layout.py |
+
+## AI. M7-0 대사 시스템 스펙 승인 + 애셋 인덱스·스킬 계열명·등각 밸런스 (2026-09-21, 워크플로 3안 심사·반박 검증 결과 채택)
+
+스펙: `docs/specs/dialogue-system-v1.md`(각도 A "애드온 최대 활용" 채택, 심사 23/30 동점 중 접목 용이성으로 선택). 번호는 스펙 §11의 제안 번호를 그대로 쓴다(D-252·D-264 결번).
+
+| ID | 항목 | 결정 | 출처 | 반영 |
+|---|---|---|---|---|
+| D-240 | 대사 중 이동·전투 입력 차단 | 차단. 구현은 D-257 방식 | 스펙 §11 | player.gd |
+| D-241 | 잡담 스킵 | `ui_cancel`로 선택지 없는 잡담만 스킵 허용, 분기 대사는 무효 | 스펙 §11 | dialogue_balloon.gd |
+| D-242 | 완료 후 대사 | 기존 `after_*` 3줄 로테이션 재현(`visit_count` 헬퍼) | 스펙 §11 | npc_dialogue_controller.gd |
+| D-243 | 몽실이 E2E 스모크 | ⑪-1 미포함, GUT 단위 테스트로 대체. 헤드리스 대사 진행 스모크(렌더 없이 get_next_dialogue_line 순회)는 포함 | 스펙 §11 | tests |
+| D-244 | 복수 퀘스트 NPC 우선순위 | 완료 보고 > 수주 가능 > 진행 중 > 잡담 | 스펙 §11 | npc_dialogue_controller.gd |
+| D-245 | QuestNpcPanel 통합 | 보류, 병렬 유지(⑪-3에서 재검토) | 스펙 §11 | — |
+| D-246 | interact 키 | 대사 중 `ui_confirm`과 동일 취급 | 스펙 §11 | dialogue_balloon.gd |
+| D-247 | 자동 진행 지연 | `tuning.gd` 임시 상수(2.5s, `_balance_todo`), Settings 필드는 접근성 옵션 단계에서 | 스펙 §11 | tuning.gd |
+| D-248 | 대사 중 pause | `get_tree().paused` 안 걸음(배경·AI 계속) | 스펙 §11 | — |
+| D-249 | `dialogue_path` 필드 | 몽실이 1건에만 우선 적용, 스키마 일반화는 2막 | 스펙 §11 | world_objects.json |
+| D-250 | 대사 진행 경로 | 대안 A: 컨트롤러가 `get_next_dialogue_line()` 직접 호출(`dialogue_started` 미발생 감수) | 스펙 §11 | npc_dialogue_controller.gd |
+| D-251/D-253 | 대사 참조 무결성 검사 | `tools/qa/validate_dialogue.py` 분리 신설, validate_tables.py에서 호출. D-157은 tools/*.py에도 적용 | 스펙 §11 | validate_dialogue.py |
+| D-254 | 패널·풍선 동시 열림 입력 | `UiRoot.is_quest_npc_open()` 동안 풍선은 입력 소비 안 함 | 스펙 §11 | dialogue_balloon.gd |
+| D-255 | 풍선 범위 예외 | `docs/ui/dialogue-balloon.md` §3-4를 개정해 "브리지 어휘를 통해 퀘스트 상태를 바꾸는 분기 대사"를 예외 카테고리로 허용 | 스펙 §11 | dialogue-balloon.md |
+| D-256 | UiRoot 상호배타 | `is_dialogue_open()` 추가(5종) | 스펙 §11 | ui_root.gd |
+| D-257 | 입력 차단 구현 | `player.dialogue_active` 플래그: `get_move_input()` 가드 + `_unhandled_input()` 최상단 얼리리턴(공격·구르기·가드 차단) | 스펙 §11 | player.gd |
+| D-258 | 수락/완료 UI 부재 8퀘스트 | **QuestNpcPanel.SUPPORTED를 1막 15퀘스트 전부로 확장**(가장 싼 해소안). 실제 플레이로 수락·완료가 불가능하던 게임플레이 블로커라 ⑪-1에 포함 | 스펙 §4.5 | quest_npc_panel.gd |
+| D-259 | 재진입 규칙 | 패널 close 1프레임 입력 유예 + 세대 카운터로 즉시 재시작 | 스펙 §11 | npc_dialogue_controller.gd |
+| D-260 | 잡담 진입 경로 | `call_group("open_npc_dialogue")` 단일 경로 | 스펙 §11 | quest_npc.gd |
+| D-261 | 파일·title 매핑 | giver당 .dialogue 1개, `<quest_id>_<offer|active|ready|done>` / `<npc_id>_everyday` | 스펙 §11 | game/dialogue/*.dialogue |
+| D-262 | 몽실이 분기 타이밍 | `resolve_branch_outcome(choice_id)`로 emit/queue_free를 선택 이후로, 퀘스트 active일 때만 대사 열림 | 스펙 §11 | quest_object.gd |
+| D-263 | 패널+풍선 시각 규칙 | 패널 열림 동안 풍선 `visible=false`, 풍선 레이어는 HUD 위·메뉴 아래. Hud 토스트와 중복 시 풍선 우선 | 스펙 §11 | ui_root.gd |
+| D-265 | 완료 기준 | GUT 단위 테스트 3개 + 헤드리스 대사 진행 스모크를 1차 게이트로. Windows 경로 게이트 스모크 3종의 격리 경로 이식은 별도 과제 | 스펙 §11 | tests |
+| D-266 | 스킬 계열 표시명 확정 | **맞섬(blade)·지킴(guard)·노림(trick)**(세트 A). D-195 placeholder 대체. `ui.skill_tree.series.*` 갱신 | skill-series-names.md | ui_ko.csv |
+| D-267 | 등각 밸런스 사후 확인 | R5/R6 유지(TTK·예고 무영향). horn_rabbit_big(40/160) 불변 가드를 test_unit_scale_invariants에 추가. 원칙 명문화: **사거리·인식·이동은 지면 거리, 겹침 도형은 발밑 footprint 근사(플레이어 공격은 지면 원, 몬스터 접촉·허트박스는 화면 사각형 유지)**. 남북 접근 시 화면상 더 붙는 것은 2:1 등각의 표준 체감으로 수용 | iso-balance-review | test_unit_scale_invariants.gd, 스펙 §2.3 |
+| D-268 | 애셋 인덱스 참조 수집 | 기존 `tools/build/compute_exclude.py`의 스캐너(.gd/.tscn/.tres/project.godot)를 공용 모듈로 빼서 재사용 + atlas JSON(`path` 키)·audio(`file`)·quests 하위 JSON을 추가 규칙으로 | asset-index-v1 §8 | tools/build, tools/qa |
+| D-269 | 애셋 인덱스 형식·범위 | `game/assets/assets.json`: 자체 제작·프로젝트 애셋은 파일 단위, 서드파티 팩은 **팩 단위 + 참조된 파일 목록**만(전체 열거 금지). `.import`·`assets_local/` 제외, checksum 없음, referenced_by 파일 단위. 등급 enum `A|B|C|project`(asset-sources.md에 `project`=자체 제작 추가) | asset-index-v1 §8 | build_asset_index.py |
+| D-270 | 애셋 인덱스 검증 | `tools/qa/validate_asset_index.py` 독립 파일(미참조=경고, 미등록·인덱스 stale=오류), validate_tables.py에서 호출. exclude_filter는 compute_exclude.py가 계속 단일 출처 | asset-index-v1 §8 | validate_asset_index.py |
+| D-271 | 패널 상태 변경 시 잡담 종료 | QuestNpcPanel에서 수락/완료가 **성공**하면 남은 잡담 풍선을 즉시 종료(`NpcDialogueController.skip_all`). 상태 변화 없이 닫으면 풍선이 이어지고 플레이어가 확인으로 넘긴다(D-263 연장). 통합 회귀(패널 닫힌 뒤 풍선이 다음 E를 전부 소비) 수정 | M7 통합 검증 | quest_npc_panel.gd |
+| D-272 | 스킵 의미 | `ui_cancel` 전체 스킵과 skip_all은 **fast-forward**: 텍스트만 건너뛰고 남은 줄의 do/set 변이는 실행, 선택지가 나오면 멈춰 플레이어가 고른다(END 점프 금지 — 몽실이 선택 직후 ESC로 분기 확정이 유실되던 잠재 버그). D-241 의미 갱신 | M7 통합 검증 | npc_dialogue_controller.gd |
+| D-273 | 스킵과 방문 횟수 | 스킵된 잡담은 방문(D-242 visit_count)으로 세지 않는다. HUD 인사말 로그는 D-245대로 ⑪-3까지 유지 | M7 통합 검증 | npc_dialogue_controller.gd |
 
 ## 변경 이력(계속)
 - 2026-09-13 **D-143 후속 플레이 피드백:** 사용자가 샘플의 조작·공간감은 좋으나 공격 모션이 어색하고 타격이 늦다고 평가했다. 같은 독립 샘플의 공격 반응·검 표현을 조정한다. 준비50ms/타격85ms/회수140ms는 이 피드백에 대한 구현 조정안이며 본편 수치의 사용자 확정이 아니다. 이동·맵·배경과 본편/저장은 유지하고, 새 핀 원화·본편 시점 이관 승인은 여전히 별개다. 후속 검증: `docs/qa/quarter-view-attack-feedback-20260913.md`.
@@ -423,3 +507,11 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 - 2026-09-20: M4-4/M4-5 계획 승인 결정 6건(D-190~D-195) 확정.
 - 2026-09-20: 게이트 5차 소감 → 마우스·미니맵·본편 쿼터뷰 이관 3건(D-196~D-198) 확정.
 - 2026-09-20: 쿼터뷰 이관 스펙 Q1~Q6·GPT 이미지 애셋 생성 7건(D-199~D-205) 확정.
+- 2026-09-20: 쿼터뷰 단계 (b) 계획 Q7~Q14 8건(D-206~D-213) 확정.
+- 2026-09-20: 쿼터뷰 b3 소품 계획 Q15~Q19 5건(D-214~D-218) 확정.
+- 2026-09-20: 본편 시점을 진짜 등각(RO·디아블로 계열)으로 재확정(D-219, D-199·D-200 폐기).
+- 2026-09-20: 등각 이관 스펙 결정 7건(D-220~D-226) 확정, iso-1 착수.
+- 2026-09-21: 애셋 생성 전 준비 결정 8건(D-227~D-234) 확정.
+- 2026-09-21: 필드 전역 등각 지형 결정 5건(D-235~D-239) 확정.
+- 2026-09-21: M7-0 대사 시스템 스펙(D-240~D-265)·스킬 계열명(D-266)·등각 밸런스(D-267)·애셋 인덱스(D-268~D-270) 확정.
+- 2026-09-21: M7 통합 검증 결정 3건(D-271~D-273) 확정.

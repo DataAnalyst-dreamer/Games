@@ -80,12 +80,13 @@ func _build_ui() -> void:
 	_sub_tab_bar = HBoxContainer.new()
 	_sub_tab_bar.add_theme_constant_override("separation", 10)
 	root_vbox.add_child(_sub_tab_bar)
-	for sub_tab_id: String in SUB_TABS:
+	for i in SUB_TABS.size():
 		var button := Button.new()
 		button.flat = true
 		button.focus_mode = Control.FOCUS_NONE
+		button.pressed.connect(_on_sub_tab_pressed.bind(i)) # M5-1(마우스).
 		_sub_tab_bar.add_child(button)
-		_sub_tab_buttons[sub_tab_id] = button
+		_sub_tab_buttons[SUB_TABS[i]] = button
 
 	_build_stat_body(root_vbox)
 
@@ -199,6 +200,13 @@ func handle_input(delta: float) -> void:
 
 func _change_sub_tab(delta: int) -> void:
 	_sub_tab_index = wrapi(_sub_tab_index + delta, 0, SUB_TABS.size())
+	_refresh_sub_tab_bar()
+
+
+## M5-1(마우스): 서브탭 버튼 클릭 — InventoryMenu._on_tab_pressed()와 동일 패턴(인덱스를
+## 델타 없이 직접 대입하고 같은 표시 갱신 함수를 재사용).
+func _on_sub_tab_pressed(index: int) -> void:
+	_sub_tab_index = index
 	_refresh_sub_tab_bar()
 
 

@@ -162,3 +162,24 @@ func test_level_detail_rows_passive_stat() -> void:
 func test_level_detail_rows_no_next_arrow_when_maxed() -> void:
 	var rows: Array[Dictionary] = CalcScript.level_detail_rows(_make_detail_table()["maxed1"], 1)
 	assert_eq(rows[0]["next_text"], "", "max_level=1이면 다음 레벨이 없어 화살표도 없음")
+
+
+# --- assignable_skill_id(M5-1 마우스: 핫바 미리보기 칸 클릭) ---
+
+func test_assignable_skill_id_returns_id_for_learned_active() -> void:
+	var table: Dictionary = _make_table()
+	assert_eq(CalcScript.assignable_skill_id("a1", table, {"a1": 1}), "a1")
+
+
+func test_assignable_skill_id_empty_when_not_learned() -> void:
+	var table: Dictionary = _make_table()
+	assert_eq(CalcScript.assignable_skill_id("a1", table, {}), "")
+
+
+func test_assignable_skill_id_empty_for_passive_even_if_learned() -> void:
+	var table: Dictionary = _make_table()
+	assert_eq(CalcScript.assignable_skill_id("a3", table, {"a3": 1}), "")
+
+
+func test_assignable_skill_id_empty_when_no_focus() -> void:
+	assert_eq(CalcScript.assignable_skill_id("", _make_table(), {"a1": 1}), "")

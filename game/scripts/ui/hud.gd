@@ -99,6 +99,9 @@ func _ready() -> void:
 	save_icon.visible = false
 	save_icon.text = tr(&"ui.hud.save_icon")
 
+	for i in hotbar_slots.size(): # M5-1(마우스): 핫바 칸 클릭=사용.
+		hotbar_slots[i].gui_input.connect(_on_hotbar_slot_gui_input.bind(i))
+
 	Events.player_hp_changed.connect(_on_hp_changed)
 	Events.player_stamina_changed.connect(_on_stamina_changed)
 	Events.player_stamina_insufficient.connect(_on_stamina_insufficient)
@@ -484,3 +487,13 @@ func _refresh_quest_line() -> void:
 ## 이 함수 하나만 호출하면 된다.
 func set_quest_line(text: String) -> void:
 	quest_line_label.text = text
+
+
+## M5-1(마우스, 선택): 핫바 칸 클릭=사용. 키보드 1~9와 같은 제약(idle.gd/move.gd)으로
+## Idle/Move 상태에서만 허용 — 메뉴 열림 중엔 `visible`이 false라 자연히 막힌다.
+func _on_hotbar_slot_gui_input(event: InputEvent, slot: int) -> void:
+	if not visible or not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
+		return
+	var current_state: PlayerState = _player.state_machine.current_state if _player != null and _player.state_machine != null else null
+	if current_state != null and current_state.name in [&"Idle", &"Move"]:
+		current_state.try_use_hotbar(slot)
