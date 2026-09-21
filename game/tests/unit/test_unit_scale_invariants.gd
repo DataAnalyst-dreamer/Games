@@ -65,6 +65,14 @@ func test_monster_melee_over_aggro() -> void:
 			float(pair[1]), EPS, "%s 근접 사거리 : 인식 범위" % id)
 
 
+## horn_rabbit_big(iso-3에서 신규 튜닝된 1막 정예, D-267)은 horn_rabbit 계열 비율표
+## 대상이 아니다 — melee_range_px만 32->40으로 재조정된 개체라 위 비율 테스트에 넣으면
+## 오히려 잘못된 불변식을 주장하게 된다. 대신 두 값을 리터럴로 고정해 회귀를 막는다.
+func test_horn_rabbit_big_range_literals_unchanged() -> void:
+	assert_eq(_monster("horn_rabbit_big", "melee_range_px"), 40.0, "horn_rabbit_big 근접 사거리 40px 고정(D-267)")
+	assert_eq(_monster("horn_rabbit_big", "aggro_range_px"), 160.0, "horn_rabbit_big 인식 범위 160px 고정(D-267)")
+
+
 func test_monster_leash_over_aggro() -> void:
 	for pair: Array in [["slime", 140.0 / 64.0], ["horn_rabbit", 180.0 / 80.0],
 			["mushroom", 120.0 / 96.0], ["goblin_scout", 200.0 / 110.0]]:
