@@ -447,6 +447,9 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 | D-268 | 애셋 인덱스 참조 수집 | 기존 `tools/build/compute_exclude.py`의 스캐너(.gd/.tscn/.tres/project.godot)를 공용 모듈로 빼서 재사용 + atlas JSON(`path` 키)·audio(`file`)·quests 하위 JSON을 추가 규칙으로 | asset-index-v1 §8 | tools/build, tools/qa |
 | D-269 | 애셋 인덱스 형식·범위 | `game/assets/assets.json`: 자체 제작·프로젝트 애셋은 파일 단위, 서드파티 팩은 **팩 단위 + 참조된 파일 목록**만(전체 열거 금지). `.import`·`assets_local/` 제외, checksum 없음, referenced_by 파일 단위. 등급 enum `A|B|C|project`(asset-sources.md에 `project`=자체 제작 추가) | asset-index-v1 §8 | build_asset_index.py |
 | D-270 | 애셋 인덱스 검증 | `tools/qa/validate_asset_index.py` 독립 파일(미참조=경고, 미등록·인덱스 stale=오류), validate_tables.py에서 호출. exclude_filter는 compute_exclude.py가 계속 단일 출처 | asset-index-v1 §8 | validate_asset_index.py |
+| D-271 | 패널 상태 변경 시 잡담 종료 | QuestNpcPanel에서 수락/완료가 **성공**하면 남은 잡담 풍선을 즉시 종료(`NpcDialogueController.skip_all`). 상태 변화 없이 닫으면 풍선이 이어지고 플레이어가 확인으로 넘긴다(D-263 연장). 통합 회귀(패널 닫힌 뒤 풍선이 다음 E를 전부 소비) 수정 | M7 통합 검증 | quest_npc_panel.gd |
+| D-272 | 스킵 의미 | `ui_cancel` 전체 스킵과 skip_all은 **fast-forward**: 텍스트만 건너뛰고 남은 줄의 do/set 변이는 실행, 선택지가 나오면 멈춰 플레이어가 고른다(END 점프 금지 — 몽실이 선택 직후 ESC로 분기 확정이 유실되던 잠재 버그). D-241 의미 갱신 | M7 통합 검증 | npc_dialogue_controller.gd |
+| D-273 | 스킵과 방문 횟수 | 스킵된 잡담은 방문(D-242 visit_count)으로 세지 않는다. HUD 인사말 로그는 D-245대로 ⑪-3까지 유지 | M7 통합 검증 | npc_dialogue_controller.gd |
 
 ## 변경 이력(계속)
 - 2026-09-13 **D-143 후속 플레이 피드백:** 사용자가 샘플의 조작·공간감은 좋으나 공격 모션이 어색하고 타격이 늦다고 평가했다. 같은 독립 샘플의 공격 반응·검 표현을 조정한다. 준비50ms/타격85ms/회수140ms는 이 피드백에 대한 구현 조정안이며 본편 수치의 사용자 확정이 아니다. 이동·맵·배경과 본편/저장은 유지하고, 새 핀 원화·본편 시점 이관 승인은 여전히 별개다. 후속 검증: `docs/qa/quarter-view-attack-feedback-20260913.md`.
@@ -511,3 +514,4 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 - 2026-09-21: 애셋 생성 전 준비 결정 8건(D-227~D-234) 확정.
 - 2026-09-21: 필드 전역 등각 지형 결정 5건(D-235~D-239) 확정.
 - 2026-09-21: M7-0 대사 시스템 스펙(D-240~D-265)·스킬 계열명(D-266)·등각 밸런스(D-267)·애셋 인덱스(D-268~D-270) 확정.
+- 2026-09-21: M7 통합 검증 결정 3건(D-271~D-273) 확정.
