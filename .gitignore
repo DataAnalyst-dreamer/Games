@@ -16,3 +16,4 @@ __pycache__/
 *.pyc
 prototypes/quarter-view-lab/ready.json
 /build/
+.xdg/

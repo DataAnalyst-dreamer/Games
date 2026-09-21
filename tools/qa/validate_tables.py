@@ -592,8 +592,12 @@ def main() -> int:
     validate_quests(quests, quest_todo_ids, monsters, item_ids, pool_ids, world_object_ids, report)
     for layout_error in validate_layout(data_dir):
         report.error(layout_error)
-    for dialogue_error in validate_dialogue(data_dir.parent / "dialogue", data_dir, data_dir.parent / "localization"):
-        report.error(dialogue_error)
+    # 대사 검사(D-251/D-253): 경고([warn] 접두)는 경고로, 나머지는 오류로 합산.
+    for dialogue_result in validate_dialogue(data_dir.parent.parent):
+        if dialogue_result.startswith("[warn] "):
+            report.warn(dialogue_result[len("[warn] "):])
+        else:
+            report.error(dialogue_result)
 
     print(f"[validate_tables] items={len(item_ids)} affixes={len(entries(affixes))} "
           f"drop_tables={len(drop_table_ids)} monsters={len(entries(monsters))} "
