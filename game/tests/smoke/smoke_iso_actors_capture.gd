@@ -5,9 +5,10 @@
 ##   --rendering-driver opengl3
 ## 출력: docs/art/preview/iso-3-actors.png
 ##
-## 보는 것: 핀 대역(64×96)과 몬스터 대역이 **건물·나무와 같은 축척으로** 서는가.
-## iso-2 까지는 캐릭터만 16px×2(=32px 높이)라 집 옆에서 인형처럼 작았다 - 그 어긋남이
-## 사라졌는지가 이 한 장의 근거다. 캡처 전용 줌은 쓰지 않는다(실제 게임 화면 그대로).
+## 보는 것: 핀 대역(64×96)·몬스터 대역·NPC 대역(D-228~D-234 NPC 확장)이 **건물·나무와
+## 같은 축척으로** 서는가. iso-2 까지는 캐릭터만 16px×2(=32px 높이)라 집 옆에서 인형처럼
+## 작았다 - 그 어긋남이 사라졌는지가 이 한 장의 근거다. 캡처 전용 줌은 쓰지 않는다(실제
+## 게임 화면 그대로).
 extends Node
 
 ## 플레이어를 놓을 격자 셀. 서쪽 집(world_layout_hartland.props house_a [-6,-8])과
@@ -19,6 +20,10 @@ const POSES := [
 	[Vector2i(1, 2), Vector2(0, -1)],    # 뿔토끼 - 북
 	[Vector2i(-1, 2), Vector2(1, 1)],    # 버섯돌이 - 남동
 ]
+## NPC 하나도 같은 화면에 세운다(HartlandQuestLayer가 원래 배치한 world_objects.json
+## 좌표는 이 VIEW_CELL과 멀어 화면 밖에 놓이므로, 캡처 전용으로 잠깐 끌어온다).
+const NPC_ID := "pinto"
+const NPC_CELL_OFFSET := Vector2i(-2, 1)
 
 
 func _ready() -> void:
@@ -57,7 +62,18 @@ func _ready() -> void:
 			monster._face_towards(pose[1] as Vector2)
 			placed += 1
 			break
-	print("  배치: 핀 1 + 몬스터 %d (셀 %s 기준)" % [placed, VIEW_CELL])
+
+	# NPC 대역(iso-3 확장) 하나도 같은 화면으로 끌어온다 - 원래 world_objects.json 좌표는
+	# VIEW_CELL과 멀어(마을 배치가 다르다) 화면 밖이라 캡처 전용으로만 옮긴다.
+	var quest_layer: Node = main.get_node_or_null("HartlandQuestLayer")
+	var npc_shown := false
+	if quest_layer != null:
+		var npc: Node2D = quest_layer.spawned_by_id.get(NPC_ID) as Node2D
+		if npc != null:
+			npc.global_position = IsoMath.cell_to_screen(VIEW_CELL + NPC_CELL_OFFSET)
+			npc_shown = true
+	print("  배치: 핀 1 + 몬스터 %d + NPC(%s) %s (셀 %s 기준)"
+		% [placed, NPC_ID, "표시" if npc_shown else "누락", VIEW_CELL])
 
 	for _i in range(16):
 		await get_tree().process_frame

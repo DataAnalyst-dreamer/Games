@@ -24,6 +24,11 @@ texture = ExtResource("2_sprite")
 centered = false
 offset = Vector2(-64, -116)
 
+[node name="PersonAnchor" type="Node2D" parent="."]
+position = Vector2(-16, 40)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="PersonAnchor"]
+
 [node name="SolidBand" type="StaticBody2D" parent="."]
 collision_layer = 1
 collision_mask = 0
