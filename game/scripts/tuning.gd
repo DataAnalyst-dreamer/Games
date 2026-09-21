@@ -216,3 +216,9 @@ const DAMAGE_NUMBER_OFFSET_PX: float = 24.0
 const WEAPON_PIVOT_OFFSET_PX: float = 16.0
 ## 공격 히트박스가 facing 방향으로 전진 배치되는 거리(states/attack.gd).
 const ATTACK_HITBOX_OFFSET_PX: float = 20.0
+
+# --- 대사 시스템(⑪-1, D-247) ---
+## 자동 진행(접근성) 지연(초). 타이핑 완료 후 이 시간 뒤 자동으로 다음 줄. 접근성 옵션
+## Settings 필드는 이번 범위 밖(별도 단계)이라 아직 아무 코드도 이 상수를 읽지 않는다 —
+## _balance_todo: game-designer 확인 필요(완료 보고 질문 목록 참고).
+const DIALOGUE_AUTO_ADVANCE_DELAY_SEC: float = 2.5

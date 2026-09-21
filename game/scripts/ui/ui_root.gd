@@ -15,6 +15,11 @@ extends CanvasLayer
 @onready var blacksmith_menu: BlacksmithMenu = $BlacksmithMenu/Root
 @onready var mailbox_popup: MailboxPopup = $MailboxPopup/Root
 var quest_npc_panel: QuestNpcPanel
+var npc_dialogue_controller: NpcDialogueController
+
+## D-259: `close_quest_npc()`가 켜는 1프레임 입력 유예 플래그 — 패널을 닫은 바로 그 입력이
+## (패드에서 interact/ui_confirm이 같은 버튼) 대사 풍선에 곧장 먹히지 않게 한다.
+var quest_npc_just_closed: bool = false
 
 
 func _ready() -> void:
@@ -23,6 +28,10 @@ func _ready() -> void:
 	quest_npc_panel = QuestNpcPanel.new()
 	quest_npc_panel.theme = hud.theme
 	add_child(quest_npc_panel)
+	npc_dialogue_controller = NpcDialogueController.new()
+	npc_dialogue_controller.ui_root = self
+	npc_dialogue_controller.player = get_tree().get_first_node_in_group(&"player")
+	add_child(npc_dialogue_controller)
 	inventory_menu.close_requested.connect(close_menu)
 	blacksmith_menu.close_requested.connect(close_blacksmith)
 	mailbox_popup.close_requested.connect(close_mailbox)
@@ -34,15 +43,15 @@ func _ready() -> void:
 func _unhandled_input(_event: InputEvent) -> void:
 	if Input.is_action_just_pressed(&"menu"):
 		# 대장간/우편함이 이미 열려 있으면 인벤토리 메뉴를 겹쳐 열지 않는다(전체화면 UI는
-		# 한 번에 하나만 — D-91과 같은 원칙의 연장).
-		if is_blacksmith_open() or is_mailbox_open() or is_quest_npc_open():
+		# 한 번에 하나만 — D-91과 같은 원칙의 연장). D-256: 대사 진행 중에도 마찬가지.
+		if is_blacksmith_open() or is_mailbox_open() or is_quest_npc_open() or is_dialogue_open():
 			return
 		toggle_menu()
 	elif Input.is_action_just_pressed(&"quest_log"):
 		# D-153: J 키 = 퀘스트 로그 바로가기(키보드 전용, 패드 미배정). 다른 전체화면
 		# UI가 이미 열려 있으면 무시하고, 메뉴가 닫혀 있으면 열면서 곧장 quest 탭으로,
-		# 이미 열려 있으면(다른 탭이었어도) quest 탭으로만 전환한다.
-		if is_blacksmith_open() or is_mailbox_open() or is_quest_npc_open():
+		# 이미 열려 있으면(다른 탭이었어도) quest 탭으로만 전환한다. D-256: 대사 중도 무시.
+		if is_blacksmith_open() or is_mailbox_open() or is_quest_npc_open() or is_dialogue_open():
 			return
 		if not is_menu_open():
 			open_menu()
@@ -132,3 +141,17 @@ func open_quest_npc(npc_id: StringName) -> void:
 func close_quest_npc() -> void:
 	quest_npc_panel.visible = false
 	_recompute_paused()
+	quest_npc_just_closed = true
+	_clear_quest_npc_just_closed_next_frame()
+
+
+## D-259: 패널을 닫은 프레임에 곧장 재사용되는 같은 버튼(interact/ui_confirm 패드 공유)이
+## 대사 풍선에 먹히지 않도록 1프레임만 유예한다.
+func _clear_quest_npc_just_closed_next_frame() -> void:
+	await get_tree().process_frame
+	quest_npc_just_closed = false
+
+
+## D-256: `is_dialogue_open()`도 이 5종 상호배타 집합에 넣는다(대사 중 menu/quest_log 무시).
+func is_dialogue_open() -> bool:
+	return is_instance_valid(npc_dialogue_controller) and npc_dialogue_controller.is_dialogue_open()

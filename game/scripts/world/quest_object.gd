@@ -27,6 +27,10 @@ const HUD_THEME: Theme = preload("res://ui/theme.tres")
 @export var vanish_on_complete: bool = false
 @export var branch_quest_id: StringName = &""
 @export var branch_choice_id: StringName = &""
+## 대사 분기 경로(D-262). 비어 있으면 기존 branch_choice_id 즉시 확정 경로(하위호환).
+## 값이 있으면 branch_quest_id가 "active"일 때만 이 리소스를 열어 플레이어가 직접
+## 고르게 하고, emit/vanish는 응답의 do절이 resolve_branch_outcome()으로 미룬다.
+@export var dialogue_path: String = ""
 
 ## world_objects.json 의 `sprite` 키로 종류별 외형을 바꾼다(D-218). 비우면 씬 기본값
 ## (marker_stone)을 쓴다 — quest_layout_spawner.gd 가 instantiate() 직후, 즉 @onready
@@ -103,9 +107,28 @@ func interact() -> void:
 	if one_shot and _used and not pending: return
 	for key in active_keys: _emitted_objectives[key] = true
 	_used = true
+	# D-262: dialogue_path가 있으면 emit/분기/vanish를 여기서 하지 않는다 — 대사 응답의
+	# do절(resolve_branch_outcome)이 플레이어 선택 이후로 미뤄서 대신 수행한다. 몽실이가
+	# 선택 전에 사라지거나 퀘스트 수락 전에 분기 플래그가 확정되는 사고를 막는다.
+	if not dialogue_path.is_empty():
+		if QuestSystem.get_state(branch_quest_id) == "active":
+			get_tree().call_group("npc_dialogue_ui", "open_dialogue_resource", load(dialogue_path), "start", self)
+		return
 	Events.object_interacted.emit(object_id)
 	if not branch_quest_id.is_empty() and not branch_choice_id.is_empty():
 		QuestSystem.choose_branch(branch_quest_id, branch_choice_id)
+	if vanish_on_complete:
+		queue_free()
+	elif one_shot:
+		_swap_to_used_visual()
+
+
+## 대사 응답의 do절이 접두어 없이 호출한다(§3.3과 동일한 self-injection 패턴,
+## `NpcDialogueController.open_dialogue_resource(res, title, self)`가 이 인스턴스를
+## extra_game_states로 주입해 준다). D-262: emit/분기/vanish를 여기 한 곳에 모은다.
+func resolve_branch_outcome(choice_id: String) -> void:
+	QuestSystem.choose_branch(branch_quest_id, choice_id)
+	Events.object_interacted.emit(object_id)
 	if vanish_on_complete:
 		queue_free()
 	elif one_shot:

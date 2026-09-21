@@ -1,0 +1,9 @@
+using QuestSystem
+
+~ start
+안내인: 잠깐 얘기 좀 할까?
+- 좋아
+	do QuestSystem.accept("quest_main_a1_01_arrival")
+	=> END
+- 나중에
+	=> END

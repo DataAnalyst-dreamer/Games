@@ -128,9 +128,9 @@
     "one_shot": true,
     "vanish_on_complete": true,
     "branch_quest_id": "quest_side_heartland_montsil",
-    "branch_choice_id": "release",
+    "dialogue_path": "res://dialogue/obj_montsil_rabbit.dialogue",
     "region_id": "heartland",
-    "_comment": "상호작용 즉시 queue_free (D-94: 선택 UI 없음 → 첫 상호작용=release 고정, 문서화)."
+    "_comment": "D-262: 퀘스트가 active일 때만 대사(dialogue_path)를 열어 플레이어가 직접 선택한다. emit/vanish는 응답의 do절(resolve_branch_outcome)이 대신 수행."
   },
   "waypoint_stone_01": {
     "id": "waypoint_stone_01",

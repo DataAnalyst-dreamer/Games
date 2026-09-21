@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/dialogue_balloon.gd" id="1_dialogue_balloon_script"]
+
+[node name="DialogueBalloon" type="CanvasLayer"]
+layer = 5
+script = ExtResource("1_dialogue_balloon_script")

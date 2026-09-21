@@ -1,0 +1,8 @@
+~ start
+다미: (몽실이가 코를 씰룩이며 이쪽을 보고 있다) [ID:quest_side_heartland_montsil_encounter]
+- 그냥 놓아준다 [ID:quest_side_heartland_montsil_choice_release]
+	do resolve_branch_outcome("release")
+	=> END
+- 붙잡아 본다 [ID:quest_side_heartland_montsil_choice_capture]
+	do resolve_branch_outcome("capture_attempt")
+	=> END

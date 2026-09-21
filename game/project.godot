@@ -261,6 +261,7 @@ ui_compare_lock={
 [internationalization]
 
 locale/translations=PackedStringArray("res://localization/ui_ko.ko.translation", "res://localization/quest_ko.ko.translation")
+locale/translations_pot_files=PackedStringArray("res://dialogue/_smoke_test.dialogue", "res://dialogue/obj_montsil_rabbit.dialogue")
 
 [rendering]
 

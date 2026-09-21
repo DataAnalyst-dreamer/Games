@@ -73,6 +73,8 @@ func _spawn_one(object_id: String, entry: Dictionary) -> void:
 		instance.set("branch_quest_id", StringName(String(entry["branch_quest_id"])))
 	if entry.has("branch_choice_id"):
 		instance.set("branch_choice_id", StringName(String(entry["branch_choice_id"])))
+	if entry.has("dialogue_path"):
+		instance.set("dialogue_path", String(entry["dialogue_path"]))
 	# D-218: 퀘스트 오브젝트도 종류별 외형을 데이터로 고른다(기본값은 씬의 marker_stone).
 	if kind == "object" and entry.has("sprite"):
 		var sprite_path: String = String(entry["sprite"])

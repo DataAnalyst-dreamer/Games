@@ -72,6 +72,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not get_tree().paused and _player_inside != null and event.is_action_pressed("interact") and not event.is_echo():
 		get_viewport().set_input_as_handled()
 		talk()
+		get_tree().call_group("npc_dialogue_ui", "open_npc_dialogue", npc_id) # D-260
 		get_tree().call_group("quest_npc_ui", "open_quest_npc", npc_id)
 
 

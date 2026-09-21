@@ -23,6 +23,7 @@ from typing import Any, Dict, List
 # D-157: 스탯/스킬트리/경험치 곡선(M4-0 v2) 검증은 이 파일이 이미 500줄을 넘어 별도
 # 모듈로 분리했다(validate_stats/validate_skills/validate_exp_curve, 관련 상수·헬퍼 포함).
 # 두 파일은 항상 같이 갱신할 것.
+from validate_dialogue import validate_dialogue
 from validate_layout import validate_layout
 from validate_progression import validate_exp_curve, validate_skills, validate_stats
 
@@ -585,6 +586,8 @@ def main() -> int:
     validate_quests(quests, quest_todo_ids, monsters, item_ids, pool_ids, world_object_ids, report)
     for layout_error in validate_layout(data_dir):
         report.error(layout_error)
+    for dialogue_error in validate_dialogue(data_dir.parent / "dialogue", data_dir, data_dir.parent / "localization"):
+        report.error(dialogue_error)
 
     print(f"[validate_tables] items={len(item_ids)} affixes={len(entries(affixes))} "
           f"drop_tables={len(drop_table_ids)} monsters={len(entries(monsters))} "

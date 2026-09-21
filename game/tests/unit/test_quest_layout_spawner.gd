@@ -127,7 +127,7 @@ func test_spawner_instantiates_all_entries_with_correct_kind_and_position() -> v
 	assert_true(bool(montsil.one_shot))
 	assert_true(bool(montsil.vanish_on_complete))
 	assert_eq(String(montsil.branch_quest_id), "quest_side_heartland_montsil")
-	assert_eq(String(montsil.branch_choice_id), "release")
+	assert_eq(String(montsil.dialogue_path), "res://dialogue/obj_montsil_rabbit.dialogue")
 
 	var teo: Node = spawner.spawned_by_id.get("teo")
 	assert_not_null(teo, "teo NPC가 스폰되어야 한다")

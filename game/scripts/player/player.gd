@@ -29,6 +29,12 @@ var resources: PlayerResources
 ## 사망 처리가 끝나 더 이상 입력을 받지 않는지.
 var is_dead: bool = false
 
+## 대사 진행 중 이동·전투 입력 차단(D-257). `NpcDialogueController`가 대사 시작/종료
+## 시 직접 set/clear한다(이 파일은 가드만 소유) — `get_move_input()` 가드만으로는
+## attack/roll/guard를 못 막아(각 상태 스크립트가 `_unhandled_input`에서 직접
+## `event.is_action_pressed(...)`로 처리) `_unhandled_input()` 최상단에도 얼리리턴을 둔다.
+var dialogue_active: bool = false
+
 ## 무적 프레임 잔여 시간(초). Hurt 상태를 벗어난 뒤에도 계속 줄어들어야 하므로
 ## (상태 전환과 무관하게) Player._process에서 직접 관리한다.
 var _iframe_remaining: float = 0.0
@@ -95,7 +101,7 @@ func _draw() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if is_dead:
+	if is_dead or dialogue_active:
 		return
 	state_machine.handle_input(event)
 
@@ -321,6 +327,8 @@ func hide_weapon_overlay() -> void:
 
 ## 8방향 이동 입력(정규화). 스틱 데드존은 project.godot 액션 deadzone 이 처리한다.
 func get_move_input() -> Vector2:
+	if dialogue_active:
+		return Vector2.ZERO
 	var v := Input.get_vector("move_left", "move_right", "move_up", "move_down", Tuning.STICK_DEADZONE)
 	return v
 

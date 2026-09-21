@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://c5etnpbcowdjh"
+path="res://.godot/imported/obj_montsil_rabbit.dialogue-17b0b6a73312111dcd7c875c17f64538.tres"
+
+[deps]
+
+source_file="res://dialogue/obj_montsil_rabbit.dialogue"
+dest_files=["res://.godot/imported/obj_montsil_rabbit.dialogue-17b0b6a73312111dcd7c875c17f64538.tres"]
+
+[params]
+
+defaults=true
