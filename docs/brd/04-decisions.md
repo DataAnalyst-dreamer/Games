@@ -451,6 +451,18 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 | D-272 | 스킵 의미 | `ui_cancel` 전체 스킵과 skip_all은 **fast-forward**: 텍스트만 건너뛰고 남은 줄의 do/set 변이는 실행, 선택지가 나오면 멈춰 플레이어가 고른다(END 점프 금지 — 몽실이 선택 직후 ESC로 분기 확정이 유실되던 잠재 버그). D-241 의미 갱신 | M7 통합 검증 | npc_dialogue_controller.gd |
 | D-273 | 스킵과 방문 횟수 | 스킵된 잡담은 방문(D-242 visit_count)으로 세지 않는다. HUD 인사말 로그는 D-245대로 ⑪-3까지 유지 | M7 통합 검증 | npc_dialogue_controller.gd |
 
+## AJ. M8 계획 승인 — 대사 연출·설정 탭·스모크 격리·두 번째 비석 (2026-09-26)
+
+M7(#40) 머지 후 게이트 6차 전에 처리할 정리 항목. 4개 워크스트림을 워크트리로 병렬 진행(계획 → 심사 → 구현 → 독립 검증).
+
+| ID | 항목 | 결정 | 출처 | 반영 |
+|---|---|---|---|---|
+| D-274 | HUD NPC 인사말 로그 제거 | 풍선(D-240)이 인사말을 대체하므로 HUD 좌하단 NPC 인사말 로그(`hud.gd` `_on_npc_talked`/`_next_npc_greeting`, `test_npc_greeting.gd`)를 **제거**한다. 보상 토스트·퀘스트 진행 토스트는 유지. D-245·D-273의 "⑪-3까지 유지" 종료 | 디렉터(⑪-3) | hud.gd, 테스트 |
+| D-275 | 패널 성공 시 선택지도 닫힘 | QuestNpcPanel 수락/완료 **성공** 시 풍선에 선택지가 떠 있어도 함께 닫는다(`skip_all` 확장: 선택지 대기 중이면 응답 없이 종료, `dialogue_active` 복원). D-271 연장 | 디렉터(⑪-3) | npc_dialogue_controller.gd |
+| D-276 | 설정 탭 + 대사 옵션 | InventoryMenu 5번째 탭 "설정"(`ui.inv.tab.settings`)에 기존 Settings 필드 전부와 신규 `dialogue_auto_advance: bool=false`, `dialogue_text_speed: float=1.0`(1.0/2.0/0.0=즉시)을 노출. 값 변경 즉시 저장 + `Events.settings_changed`. 풍선은 has()/get() 가드로 읽기만(A/B 인터페이스 우선, D-181) | 디렉터(접근성) | settings.gd, settings_tab.gd, settings_ui_calc.gd |
+| D-277 | 스모크 격리 규칙 | Windows 경로 하드코딩 게이트(`C:/Users/...`) 9종을 **인자·환경변수 기반**으로 바꾼다: `--expected-user-dir=<path>` 또는 `ISLELAND_QA_USER_DIR`과 `OS.get_user_data_dir()` 대조, 둘 다 없으면 quit(1)(격리 없이 돌면 안 되는 테스트임을 유지). 공용 헬퍼 `tests/smoke/_qa_isolation.gd`, 런처 `tools/qa/run_smoke_isolated.sh`·`run_all_smokes.sh`. 캡처 계열은 헤드리스에서 [SKIP] quit(0) | 디렉터(QA) | 스모크 9종, tools/qa/ |
+| D-278 | 두 번째 워프 비석 | 메아리 굴 앞 격자 **(14,-10)**에 "메아리 굴 비석"(`waystone_echocave`, `ui.waystone.echocave`). 6번 퀘스트 목적지라 진행 가치가 큼. 활성 비석 목록 간 이동 UI, 세이브 라운드트립, 배치 간격 64px(SmokeQuarterViewB §8) 준수 | 디렉터(레벨) | waystone.gd, Main.tscn 또는 world_layout_hartland.json |
+
 ## 변경 이력(계속)
 - 2026-09-13 **D-143 후속 플레이 피드백:** 사용자가 샘플의 조작·공간감은 좋으나 공격 모션이 어색하고 타격이 늦다고 평가했다. 같은 독립 샘플의 공격 반응·검 표현을 조정한다. 준비50ms/타격85ms/회수140ms는 이 피드백에 대한 구현 조정안이며 본편 수치의 사용자 확정이 아니다. 이동·맵·배경과 본편/저장은 유지하고, 새 핀 원화·본편 시점 이관 승인은 여전히 별개다. 후속 검증: `docs/qa/quarter-view-attack-feedback-20260913.md`.
 - 2026-09-13 **D-143 — 쿼터뷰 비교 샘플 제작 승인:** 사용자 “너의 추천대로 해보자”에 따라 기존 본편·저장을 보존하고 별도 2D 고정 쿼터뷰 마을 입구/이동/기본 공격/슬라임/가림 샘플을 제작한다. FHD·승인 핀 외형/몸체64×96 목표를 유지한다. 새 핀 방향별 완성 모션 확보와 시점 시험의 성공은 별개다. 본편 전체 이관·3D·회전 카메라·정확한 등각 타일 구조를 확정한 것은 아니다. 범위: `docs/plans/quarter-view-pilot-20260913.md`.
@@ -515,3 +527,4 @@ BRD 작성 과정에서 드러난 미결정 사항을 **추천안 기준으로 �
 - 2026-09-21: 필드 전역 등각 지형 결정 5건(D-235~D-239) 확정.
 - 2026-09-21: M7-0 대사 시스템 스펙(D-240~D-265)·스킬 계열명(D-266)·등각 밸런스(D-267)·애셋 인덱스(D-268~D-270) 확정.
 - 2026-09-21: M7 통합 검증 결정 3건(D-271~D-273) 확정.
+- 2026-09-26: M8 계획 승인 결정 5건(D-274~D-278) 확정.
